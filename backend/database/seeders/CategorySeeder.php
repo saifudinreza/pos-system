@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Category;
 use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
@@ -12,6 +12,21 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        $categories = [
+            'Makanan',
+            'Minuman',
+            'Snack',
+            'Rokok',
+            'Kebutuhan Rumah',
+        ];
+        // ↑ List kategori — slug otomatis digenerate dari boot() di Model Category
+        // Contoh: "Makanan" → slug "makanan", "Kebutuhan Rumah" → "kebutuhan-rumah"
+
+        foreach ($categories as $name) {
+            Category::create([
+                'name' => $name,
+                'is_active' => true,
+            ]);
+        }
     }
 }
