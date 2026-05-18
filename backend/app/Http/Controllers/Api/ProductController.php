@@ -29,7 +29,7 @@ class ProductController extends Controller
         // ----- SEARCH -----
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%')
-            ->orWhere('sku', 'like', '%' . $request->search . '%');
+                ->orWhere('sku', 'like', '%' . $request->search . '%');
             // ↑ Cari berdasarkan nama atau SKU
             // filled() = cek apakah parameter ada DAN tidak kosong
         }
@@ -45,7 +45,7 @@ class ProductController extends Controller
             // ↑ filter_var() convert string "true"/"false" ke boolean
             // Karena query string selalu string, bukan boolean
         }
-        
+
         // ----- FILTER STOK MENIPIS -----
         if ($request->filled('low_stock')) {
             $query->whereColumn('stock', '<=', 'stock_alert');
@@ -162,7 +162,7 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
 
-        if (! $product){
+        if (! $product) {
             return response()->json([
                 'message' => 'Produk tidak ditemukan.',
             ], 404);
@@ -185,9 +185,9 @@ class ProductController extends Controller
         ]);
 
         // ----- HANDLE UPLOAD GAMBAR BARU -----
-        if($request->hasFile('image')) {
+        if ($request->hasFile('image')) {
             // hapus gambar lama kalau ada
-            if($product->image) {
+            if ($product->image) {
                 Storage::disk('public')->delete($product->image);
                 // ↑ Hapus file lama dari storage supaya tidak numpuk
             }
@@ -235,7 +235,7 @@ class ProductController extends Controller
         if ($product->image) {
             Storage::disk('public')->delete($product->image);
         }
-        
+
         $product->delete();
 
         Cache::forget('products_all');
@@ -258,12 +258,12 @@ class ProductController extends Controller
             'price'       => $product->price,
             'stock'       => $product->stock,
             'stock_alert' => $product->stock_alert,
-            'is_low_stock'=> $product->isLowStock(),
+            'is_low_stock' => $product->isLowStock(),
             // ↑ Helper dari Model — true kalau stok sudah mepet
             'is_active'   => $product->is_active,
             'image_url'   => $product->image
-                                ? asset('storage/' . $product->image)
-                                : null,
+                ? asset('storage/' . $product->image)
+                : null,
             // ↑ Convert path relatif ke URL lengkap
             // Contoh: "products/abc.jpg" → "http://localhost:8000/storage/products/abc.jpg"
             'category'    => $product->relationLoaded('category') ? [
