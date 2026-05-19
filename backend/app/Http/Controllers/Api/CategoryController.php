@@ -47,13 +47,13 @@ class CategoryController extends Controller
     public function show(int $id): JsonResponse
     {
         $category = Category::withCount('products')
-                            ->with(['products' => function ($query) {
-                                $query->where('is_active', true)->take(10);
-                                // ↑ Ambil 10 produk aktif saja sebagai preview
-                                // Tidak perlu semua produk di response ini
-                            }])
-                            ->find($id);
-                        
+            ->with(['products' => function ($query) {
+                $query->where('is_active', true)->take(10);
+                // ↑ Ambil 10 produk aktif saja sebagai preview
+                // Tidak perlu semua produk di response ini
+            }])
+            ->find($id);
+
         if (! $category) {
             return response()->json([
                 'message' => 'Kategori tidak ditemukan.',
@@ -86,7 +86,7 @@ class CategoryController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:categories, name'],
+            'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
             // ↑ unique:categories,name = nama kategori tidak boleh sama
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -107,7 +107,7 @@ class CategoryController extends Controller
     // PUT /api/categories/{id}
     // Role: admin only
     // =============================================================
-    
+
     public function update(Request $request, int $id): JsonResponse
     {
         $category = Category::find($id);
@@ -118,7 +118,7 @@ class CategoryController extends Controller
             ], 404);
         }
 
-        $validated = $request->validate ([
+        $validated = $request->validate([
             'name' => [
                 'sometimes',
                 'string',
@@ -137,7 +137,7 @@ class CategoryController extends Controller
 
         $category->update($validated);
 
-        return respones()->json([
+        return response()->json([
             'message' => 'Kategori berhasil diupdate.',
             'data' => $this->formatCategory($category->fresh()),
         ], 200);
@@ -153,7 +153,7 @@ class CategoryController extends Controller
     {
         $category = Category::find($id);
 
-        if(! $category) {
+        if (! $category) {
             return response()->json([
                 'message' => 'Kategori tidak ditemukan.',
             ], 404);
@@ -167,11 +167,11 @@ class CategoryController extends Controller
                 // ↑ Kasih tau ada berapa produk yang masih pakai kategori ini
             ], 422);
         }
-        
+
         $category->delete();
 
         return response()->json([
-            'message' => 'Kategori berhasil dihapus,'.
+            'message' => 'Kategori berhasil dihapus.',
         ], 200);
     }
 

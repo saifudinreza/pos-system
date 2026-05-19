@@ -32,7 +32,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make($validated['phone'] ?? null),
+            'password' => Hash::make($validated['password']),
             'role' => 'user',
             // ↑ Register publik hanya bisa jadi role 'user'
             // Admin dan kasir dibuat manual oleh admin via UserController
