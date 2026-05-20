@@ -1,0 +1,10 @@
+$kind: http-request
+url: GET {{base_url}}/users/2
+method: GET
+headers:
+  Accept: application/json
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

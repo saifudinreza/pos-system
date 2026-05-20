@@ -1,0 +1,35 @@
+$kind: http-request
+url: "{{base_url}}/products/{{product_id}}"
+method: PUT
+headers:
+  Accept: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"UI Kit Premium - Updated\",\r
+
+    \    \"price\": 175000\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Status code sesuai\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      pm.test(\"Response success true\", function () {\r
+
+      \    var jsonData = pm.response.json();\r
+
+      \    pm.expect(jsonData.success).to.eql(true);\r
+
+      });"
+    language: text/javascript
+order: 4000

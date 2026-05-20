@@ -1,0 +1,15 @@
+owner: "50951096"
+team: "12300381"
+lastUpdatedBy: "50951096"
+lastRevision: 1777810054000
+name: API Blog Local
+color: 120
+values:
+  - key: base_url
+    value: ""
+    enabled: true
+  - key: token
+    value: ""
+    enabled: true
+createdAt: 2026-04-06T15:20:08.000Z
+updatedAt: 2026-05-03T12:07:34.000Z

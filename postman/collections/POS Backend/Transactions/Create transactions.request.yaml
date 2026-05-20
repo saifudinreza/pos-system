@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{base_url}}/transactions"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: json
+  content: "{\r\n    \"order_id\": 2\r\n}"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000

@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{base_url}}/categories?search=makanan&is_active=true"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  search: makanan
+  is_active: "true"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 2000

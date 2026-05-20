@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{base_url}}/comments/1"
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000
