@@ -1,4 +1,0 @@
-$kind: http-request
-url: "{{base_url}}/posts/1"
-method: GET
-order: 3000
