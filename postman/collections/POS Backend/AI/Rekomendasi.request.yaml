@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{base_url}}/ai/recommend"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"query\": \"produk apa yang cocok dijual bareng Indomie Goreng?\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

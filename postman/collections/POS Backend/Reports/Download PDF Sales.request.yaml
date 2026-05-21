@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{base_url}}/reports/sales/download?format=pdf&date_from=2026-01-01&date_to=2026-05-31"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  format: pdf
+  date_from: 2026-01-01
+  date_to: 2026-05-31
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 5000

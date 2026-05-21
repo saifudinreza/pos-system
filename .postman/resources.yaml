@@ -1,0 +1,22 @@
+workspace:
+  id: 53b01e50-fc6e-4be3-801d-ab63eade4bb4
+localResources:
+  collections:
+    - ../postman/collections/POS Backend
+    - ../postman/collections/Marketplace API
+    - ../postman/collections/CRUD
+    - ../postman/collections/API Blog
+  environments:
+    - ../postman/environments/API Blog Local.environment.yaml
+    - ../postman/environments/Local.environment.yaml
+    - ../postman/environments/POS Local.environment.yaml
+cloudResources:
+  collections:
+    ../postman/collections/POS Backend: 50951096-6500d068-073c-48b9-b6f4-dfa45c811afd
+    ../postman/collections/Marketplace API: 50951096-c62500f1-51e5-47a3-9dd9-9945ee6751be
+    ../postman/collections/CRUD: 50951096-1dc99239-d5a7-4960-ae7c-1cf576a2644f
+    ../postman/collections/API Blog: 50951096-a425d005-e6cf-44f1-8c3c-d87e4dd4c99f
+  environments:
+    ../postman/environments/API Blog Local.environment.yaml: 50951096-17f5eddb-d69b-4275-9a3e-fcd20008fcd5
+    ../postman/environments/Local.environment.yaml: 50951096-0c083114-df85-5aee-b1f7-5b3316305af6
+    ../postman/environments/POS Local.environment.yaml: 50951096-177c5da0-1314-44ea-ad03-9c544ba426fa
