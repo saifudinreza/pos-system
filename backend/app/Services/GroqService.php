@@ -46,7 +46,6 @@ class GroqService
                 'text'        => $data['choices'][0]['message']['content'] ?? 'Tidak ada response dari AI.',
                 'tokens_used' => $data['usage']['total_tokens'] ?? 0,
             ];
-
         } catch (\Exception $e) {
             Log::error('GroqService error: ' . $e->getMessage());
             throw $e;
@@ -77,6 +76,14 @@ Kalau data tidak cukup untuk menjawab, katakan dengan jujur.";
 Tugasmu adalah menganalisis data stok dan memberikan prediksi serta rekomendasi restok.
 Jawab dalam Bahasa Indonesia yang mudah dipahami oleh pemilik toko.
 Berikan estimasi kapan stok habis berdasarkan rata-rata penjualan harian.
+Berikan rekomendasi yang konkret dan actionable.
+
+ATURAN PENTING:
+- Kalau rata_per_hari kurang dari 1, artinya penjualan masih sangat sedikit
+  dan estimasi hari tidak perlu disebutkan karena tidak relevan
+- Fokus analisis pada produk yang statusnya MENIPIS
+- Kalau semua produk masih Normal dan data penjualan sedikit,
+  sampaikan bahwa stok masih aman dan sarankan tunggu data lebih banyak
 
 Data stok dan histori penjualan:
 {$dataJson}

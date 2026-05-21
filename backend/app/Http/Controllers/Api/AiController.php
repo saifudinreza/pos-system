@@ -53,7 +53,7 @@ class AiController extends Controller
             ->whereMonth('created_at', now()->month)
             ->count();
 
-        // Data yang dikirim ke Gemini
+        // Data yang dikirim ke Groq
         $salesData = [
             'bulan'           => now()->format('F Y'),
             'total_revenue'   => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
@@ -218,7 +218,7 @@ class AiController extends Controller
     // LOGS — riwayat query AI
     // GET /api/ai/logs
     // =============================================================
-    public function logs(Request $request): JsonResponse
+    public function logs(): JsonResponse
     {
         $logs = AiQueryLog::with('user')
             ->latest()
