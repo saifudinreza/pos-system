@@ -1,8 +1,0 @@
-$kind: http-request
-name: http://127.0.0.1:8000/api/products
-url: http://127.0.0.1:8000/api/products?min_price=900&in_stock=1
-method: GET
-queryParams:
-  min_price: "900"
-  in_stock: "1"
-order: 7000
