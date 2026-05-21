@@ -368,6 +368,10 @@ pos-backend/
 
 ---
 
+## 📐 ERD
+
+![ERD](docs/ERD.png)
+
 ## 🔒 Keamanan
 
 - Token-based authentication dengan Laravel Sanctum

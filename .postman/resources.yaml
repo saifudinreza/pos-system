@@ -1,5 +1,6 @@
 workspace:
   id: 53b01e50-fc6e-4be3-801d-ab63eade4bb4
+
 localResources:
   collections:
     - ../postman/collections/POS Backend
@@ -10,6 +11,12 @@ localResources:
     - ../postman/environments/API Blog Local.environment.yaml
     - ../postman/environments/Local.environment.yaml
     - ../postman/environments/POS Local.environment.yaml
+  specs:
+    - ..\postman\specs\ POS Backend API Documentation\POS Backend API
+      Documentation.json
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
 cloudResources:
   collections:
     ../postman/collections/POS Backend: 50951096-6500d068-073c-48b9-b6f4-dfa45c811afd
