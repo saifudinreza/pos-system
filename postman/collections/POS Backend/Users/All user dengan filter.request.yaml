@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{base_url}}/users?role=kasir&search=kasir"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  role: kasir
+  search: kasir
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 2000

@@ -1,0 +1,22 @@
+$kind: http-request
+name: Create order
+url: "{{base_url}}/orders"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"items\": [\r
+
+    \        { \"product_id\": 1, \"quantity\": 2 }\r
+
+    \    ]\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 5000

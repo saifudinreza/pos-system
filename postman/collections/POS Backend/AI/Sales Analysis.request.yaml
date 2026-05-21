@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{base_url}}/ai/query"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"query\": \"produk apa yang paling laku bulan ini?\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000

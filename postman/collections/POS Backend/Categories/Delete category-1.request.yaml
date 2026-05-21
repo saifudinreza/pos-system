@@ -1,0 +1,5 @@
+$kind: http-request
+name: Delete category
+url: ""
+method: GET
+order: 6000

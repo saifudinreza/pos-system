@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{base_url}}/reports/sales?period=monthly&year=2026"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  period: monthly
+  year: "2026"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 2000

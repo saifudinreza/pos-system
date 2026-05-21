@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{base_url}}/users/2"
+method: PUT
+headers:
+  Accept: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"Kasir Utama\",\r
+
+    \    \"role\": \"kasir\"\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4000

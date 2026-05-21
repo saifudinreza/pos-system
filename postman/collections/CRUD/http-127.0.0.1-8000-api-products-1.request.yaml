@@ -1,0 +1,23 @@
+$kind: http-request
+name: http://127.0.0.1:8000/api/products
+url: http://127.0.0.1:8000/api/products?min_price=900&in_stock=1
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  min_price: "900"
+  in_stock: "1"
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"reza\",\r
+
+    \    \"description\": null,\r
+
+    \    \"price\": 1000,\r
+
+    \    \"stock\": 10\r
+
+    }"
+order: 2000

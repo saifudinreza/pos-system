@@ -1,0 +1,69 @@
+$kind: http-request
+description: |-
+  ## Get Category by ID
+
+  Retrieves a single category resource identified by its unique ID.
+
+  ### Endpoint
+
+  `GET {{base_url}}/categories/{id}`
+
+  **Path Parameter:**  
+  | Parameter | Type | Description |  
+  |-----------|------|-------------|  
+  | `id` | integer | The unique identifier of the category to retrieve. In this request, `1` is used as the category ID. |
+
+  ### Authentication
+
+  This endpoint requires a **Bearer Token**. The token must be included in the `Authorization` header:
+
+  ```
+  Authorization: Bearer {{token}}
+
+   ```
+
+  ### Request Headers
+
+  | Key | Value | Description |
+  | --- | --- | --- |
+  | `Accept` | `application/json` | Specifies that the response should be returned in JSON format. |
+
+  ### Expected Response
+
+  **Status:** `200 OK`
+
+  Returns a category object with fields such as:
+
+  ``` json
+  {
+    "id": 1,
+    "name": "Category Name",
+    "is_active": true,
+    ...
+  }
+
+   ```
+
+  | Field | Type | Description |
+  | --- | --- | --- |
+  | `id` | integer | Unique identifier of the category. |
+  | `name` | string | Name of the category. |
+  | `is_active` | boolean | Indicates whether the category is currently active. |
+url: "{{base_url}}/categories"
+method: POST
+headers:
+  Accept: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"Frozen Food\",\r
+
+    \    \"is_active\": true\r
+
+    }"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

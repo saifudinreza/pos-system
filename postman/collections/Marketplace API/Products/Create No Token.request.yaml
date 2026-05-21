@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{base_url}}/products"
+method: POST
+headers:
+  Accept: appilcation/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"name\": \"Produk Tanpa Token\",\r
+
+    \    \"price\": 50000\r
+
+    }"
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"Status code sesuai\", function () {\r
+
+      \    pm.response.to.have.status(401);\r
+
+      });"
+    language: text/javascript
+order: 5000
