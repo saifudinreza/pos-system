@@ -1,0 +1,630 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": " POS Backend API Documentation",
+    "version": "1.0.0",
+    "description": ""
+  },
+  "servers": [
+    {
+      "url": "{{base_url}}"
+    },
+    {
+      "url": ""
+    },
+    {
+      "url": "GET {{base_url}}"
+    }
+  ],
+  "paths": {
+    "/register": {
+      "post": {
+        "summary": "Register",
+        "responses": {},
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  },
+                  "password_confirmation": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "Test User",
+                "email": "admin@gmail.com",
+                "password": "admin123",
+                "password_confirmation": "admin123"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "summary": "Login",
+        "responses": {},
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "email": "admin@gmail.com",
+                "password": "admin123"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "Me",
+        "responses": {},
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/logout": {
+      "post": {
+        "summary": "Logout",
+        "responses": {},
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/products": {
+      "post": {
+        "summary": "Create Product",
+        "responses": {},
+        "tags": [
+          "Products"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "All Products",
+        "responses": {},
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/products/1": {
+      "put": {
+        "summary": "Update Product",
+        "responses": {},
+        "tags": [
+          "Products"
+        ]
+      }
+    },
+    "/categories": {
+      "get": {
+        "summary": "All Categories",
+        "responses": {},
+        "tags": [
+          "Categories"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create category",
+        "responses": {},
+        "tags": [
+          "Categories"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "## Get Category by ID\n\nRetrieves a single category resource identified by its unique ID.\n\n### Endpoint\n\n`GET {{base_url}}/categories/{id}`\n\n**Path Parameter:**  \n| Parameter | Type | Description |  \n|-----------|------|-------------|  \n| `id` | integer | The unique identifier of the category to retrieve. In this request, `1` is used as the category ID. |\n\n### Authentication\n\nThis endpoint requires a **Bearer Token**. The token must be included in the `Authorization` header:\n\n```\nAuthorization: Bearer {{token}}\n\n ```\n\n### Request Headers\n\n| Key | Value | Description |\n| --- | --- | --- |\n| `Accept` | `application/json` | Specifies that the response should be returned in JSON format. |\n\n### Expected Response\n\n**Status:** `200 OK`\n\nReturns a category object with fields such as:\n\n``` json\n{\n  \"id\": 1,\n  \"name\": \"Category Name\",\n  \"is_active\": true,\n  ...\n}\n\n ```\n\n| Field | Type | Description |\n| --- | --- | --- |\n| `id` | integer | Unique identifier of the category. |\n| `name` | string | Name of the category. |\n| `is_active` | boolean | Indicates whether the category is currently active. |",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "is_active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "name": "Frozen Food",
+                "is_active": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "summary": "All orders",
+        "responses": {},
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create order",
+        "responses": {},
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "product_id": {
+                          "type": "integer"
+                        },
+                        "quantity": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "items": [
+                  {
+                    "product_id": 1,
+                    "quantity": 2
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/my/history": {
+      "get": {
+        "summary": "My order for cust",
+        "responses": {},
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/orders/1": {
+      "get": {
+        "summary": "Detail order",
+        "responses": {},
+        "tags": [
+          "Orders"
+        ]
+      }
+    },
+    "/orders/1/status": {
+      "put": {
+        "summary": "Update status order",
+        "responses": {},
+        "tags": [
+          "Orders"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "cancelled"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "ganti status ke paid",
+        "responses": {},
+        "tags": [
+          "Orders"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "paid"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "post": {
+        "summary": "Create transactions",
+        "responses": {},
+        "tags": [
+          "Transactions"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "order_id": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "order_id": 2
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/sales": {
+      "get": {
+        "summary": "Sales Report",
+        "responses": {},
+        "tags": [
+          "Reports"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/stock": {
+      "get": {
+        "summary": "Stock Report",
+        "responses": {},
+        "tags": [
+          "Reports"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/reports/sales/download": {
+      "get": {
+        "summary": "Download PDF Sales",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "pdf"
+          },
+          {
+            "name": "date_from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "date_to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-05-31"
+          }
+        ],
+        "responses": {},
+        "tags": [
+          "Reports"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/ai/query": {
+      "post": {
+        "summary": "Sales Analysis",
+        "responses": {},
+        "tags": [
+          "AI"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "query": "produk apa yang paling laku bulan ini?"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/predict-stock": {
+      "post": {
+        "summary": "Prediksi Stok",
+        "responses": {},
+        "tags": [
+          "AI"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "query": "produk mana yang stoknya mau habis?"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/recommend": {
+      "post": {
+        "summary": "Rekomendasi",
+        "responses": {},
+        "tags": [
+          "AI"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "query": "produk apa yang cocok dijual bareng Indomie Goreng?"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/logs": {
+      "get": {
+        "summary": "AI Logs",
+        "responses": {},
+        "tags": [
+          "AI"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "summary": "All Users",
+        "responses": {},
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/users/2": {
+      "get": {
+        "summary": "Detail user",
+        "responses": {},
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update user",
+        "responses": {},
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "Kasir Utama",
+                "role": "kasir"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/2/toggle": {
+      "patch": {
+        "summary": "Toggle active user",
+        "responses": {},
+        "tags": [
+          "Users"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ]
+}

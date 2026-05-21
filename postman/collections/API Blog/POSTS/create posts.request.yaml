@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{base_url}}/posts"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"title\": \"Belajar Laravel API\",\r
+
+    \    \"body\": \"Ini adalah isi artikel tentang Laravel API...\",\r
+
+    \    \"status\": \"published\",\r
+
+    \    \"tags\": [1]\r
+
+    }\r\n"
+auth:
+  type: noauth
+order: 1000
