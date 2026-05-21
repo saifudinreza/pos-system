@@ -1,8 +1,0 @@
-$kind: http-request
-name: ganti status ke paid
-url: "{{base_url}}/orders/1/status"
-method: PATCH
-body:
-  type: json
-  content: "{\r\n    \"status\": \"paid\"\r\n}"
-order: 198975295592038

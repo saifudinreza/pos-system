@@ -1,7 +1,0 @@
-$kind: http-request
-description: 'Generated from cURL: curl -X DELETE "{{base_url}}/categories/{{category_id}}" -H "Authorization: Bearer {{token}}"'
-url: "{{base_url}}/categories/{{category_id}}"
-method: DELETE
-headers:
-  Authorization: Bearer {{token}}
-order: 4000
