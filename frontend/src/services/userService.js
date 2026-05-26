@@ -38,6 +38,12 @@ const userService = {
     return data.data ?? data;
   },
 
+  // --- BUAT USER BARU (admin only) ---
+  create: async (payload) => {
+    const { data } = await api.post("/users", payload);
+    return data;
+  },
+
   // --- UPDATE DATA USER ---
   // Bisa update: name, email, role, phone, password (opsional)
   // Jika password kosong, backend tidak mengubah password

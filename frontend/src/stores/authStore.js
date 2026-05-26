@@ -27,7 +27,8 @@ const useAuthStore = create((set, get) => ({
   // ============================================================
 
   // Data user yang sedang login. null = belum login
-  user: authService.getStoredUser(),
+  // Selalu mulai null agar SSR dan client render sama (tidak hydration mismatch)
+  user: null,
 
   // Apakah sedang ada request (login/logout/fetchMe)
   // Digunakan untuk tampilkan spinner loading
@@ -106,6 +107,12 @@ const useAuthStore = create((set, get) => ({
     }
   },
 
+  // --- HYDRATE DARI LOCALSTORAGE (dipanggil sekali di client setelah mount) ---
+  hydrateFromStorage: () => {
+    const user = authService.getStoredUser();
+    if (user) set({ user });
+  },
+
   // --- UPDATE STATE USER LOKAL ---
   // Digunakan setelah update profil — supaya nama/data di navbar ikut berubah
   // tanpa perlu fetch ulang dari server
@@ -122,7 +129,29 @@ const useAuthStore = create((set, get) => ({
   hasRole:  (role) => get().user?.role === role,
 
   // Role admin atau kasir (keduanya bisa akses dashboard)
-  isStaff:  () => ["admin", "kasir"].includes(get().user?.role),
+  isStaff: () => ["admin", "kasir"].includes(get().user?.role),
+
+  // Developer email — selalu punya akses enterprise penuh
+  isDeveloper: () => get().user?.email === "donojomi@gmail.com",
+
+  // Cek apakah user bisa akses AI sidebar
+  // Admin role ATAU developer email ATAU subscription pro/enterprise
+  canAccessAI: () => {
+    const user = get().user;
+    if (!user) return false;
+    if (user.email === "donojomi@gmail.com") return true;
+    if (user.role === "admin") return true;
+    const plan = user.subscription_plan ?? "free";
+    return plan === "pro" || plan === "enterprise";
+  },
+
+  // Dapatkan subscription plan efektif (developer selalu enterprise)
+  getEffectivePlan: () => {
+    const user = get().user;
+    if (!user) return "free";
+    if (user.email === "donojomi@gmail.com") return "enterprise";
+    return user.subscription_plan ?? "free";
+  },
 }));
 
 export default useAuthStore;

@@ -1,18 +1,9 @@
-/* ============================================================
-   Import font dari Google Fonts
-   - Space Grotesk  : heading bold & modern (kayak font poster)
-   - JetBrains Mono : monospace untuk angka & kode (kayak font terminal)
-   ============================================================ */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   CSS Variables — "kamus warna" yang bisa dipanggil di mana saja
-   Analogi: seperti palet cat di studio → satu tempat, dipakai semua kanvas
-   ============================================================ */
 :root {
   --background: #FFFBEB;
   --foreground: #0A0A0A;
@@ -21,19 +12,32 @@
   --brand-cream:  #FFFBEB;
 }
 
+/* ============================================================
+   Base Styles
+   ============================================================ */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-grotesk {
   font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* ============================================================
-   Custom Utilities — kelas Tailwind tambahan buatan sendiri
+   Custom Utilities
    ============================================================ */
 @layer utilities {
 
-  /* neo-hover: efek tombol "ditekan" saat hover/click
-     Analogi: seperti tombol fisik keyboard yang bergerak naik-turun */
+  /* neo-hover: tombol "ditekan" saat hover/click */
   .neo-hover {
     transition: transform 0.1s ease, box-shadow 0.1s ease;
   }
@@ -46,24 +50,251 @@ body {
     box-shadow: 0px 0px 0px #0A0A0A;
   }
 
-  /* neo-card: kartu dengan efek bayangan tegas khas neobrutalist */
+  /* neo-card */
   .neo-card {
-    border: 3px solid #0A0A0A;
+    border: 2px solid #0A0A0A;
     box-shadow: 4px 4px 0px #0A0A0A;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
+    background: white;
   }
   .neo-card:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px #0A0A0A;
+    transform: translate(-1px, -1px);
+    box-shadow: 5px 5px 0px #0A0A0A;
   }
 
-  /* text-balance: teks lebih rata secara visual (bukan hanya justify) */
-  .text-balance {
-    text-wrap: balance;
+  /* neo-btn */
+  .neo-btn {
+    border: 2px solid #0A0A0A;
+    box-shadow: 3px 3px 0px #0A0A0A;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .neo-btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px #0A0A0A;
+  }
+  .neo-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px #0A0A0A;
   }
 
-  /* scrollbar-thin: scrollbar tipis & rapi */
-  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+  /* text-balance */
+  .text-balance { text-wrap: balance; }
+
+  /* scrollbar */
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; height: 4px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: #F5F5F0; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: #0A0A0A; border-radius: 2px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #0A0A0A; }
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  /* page-fade: fade-in animation for page transitions */
+  .page-fade {
+    animation: pageFadeIn 0.25s ease-out both;
+  }
+
+  /* slide-up: slide up + fade in for cards */
+  .slide-up {
+    animation: slideUp 0.3s ease-out both;
+  }
+
+  /* stagger: delay for nth children */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+}
+
+/* ============================================================
+   Hero Section
+   ============================================================ */
+.hero-section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 64px;
+  padding: 128px 56px 80px;
+  max-width: 1480px;
+  margin: 0 auto;
+  align-items: center;
+}
+
+.hero-stage {
+  position: relative;
+  height: 680px;
+}
+
+.hero-dot {
+  width: 8px;
+  height: 8px;
+  background: #00C27C;
+  border: 1.5px solid #0A0A0A;
+  border-radius: 50%;
+  display: inline-block;
+  animation: neo-pulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.hero-dot-red {
+  width: 8px;
+  height: 8px;
+  background: #FF3B3B;
+  border-radius: 50%;
+  display: inline-block;
+  animation: neo-pulse 1s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.hero-strike {
+  position: relative;
+  display: inline-block;
+}
+.hero-strike::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  top: 55%;
+  height: 8px;
+  background: #FF3B3B;
+  border: 2px solid #0A0A0A;
+  transform: rotate(-2deg);
+  display: block;
+}
+
+.hero-ping {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #FFE500;
+  border: 2px solid #0A0A0A;
+  border-radius: 50%;
+}
+.hero-ping::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px solid #0A0A0A;
+  border-radius: 50%;
+  animation: ringout 1.6s ease-out infinite;
+  opacity: 0;
+}
+
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(#0A0A0A 1px, transparent 1px),
+    linear-gradient(90deg, #0A0A0A 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 0.04;
+}
+
+/* ============================================================
+   Keyframe Animations
+   ============================================================ */
+@keyframes neo-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.4); opacity: .6; }
+}
+
+@keyframes wob {
+  0%, 100% { transform: rotate(0); }
+  25%       { transform: rotate(-8deg); }
+  75%       { transform: rotate(8deg); }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+@keyframes ringout {
+  0%   { transform: scale(.6); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* Skeleton loading shimmer */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0eb 25%, #e8e8e0 50%, #f0f0eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================================
+   Responsive Hero
+   ============================================================ */
+@media (max-width: 1200px) {
+  .hero-section-grid {
+    padding: 128px 32px 60px;
+    gap: 40px;
+  }
+  .hero-stage { height: 580px; }
+}
+
+@media (max-width: 900px) {
+  .hero-section-grid {
+    grid-template-columns: 1fr;
+    padding: 100px 24px 60px;
+  }
+  .hero-stage { display: none; }
+}
+
+/* ============================================================
+   Dashboard specific
+   ============================================================ */
+/* Recharts custom styles */
+.recharts-cartesian-axis-tick-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  border: 2px solid #0A0A0A !important;
+  border-radius: 0 !important;
+  box-shadow: 3px 3px 0 #0A0A0A !important;
+}
+
+/* Custom checkbox */
+input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #0A0A0A;
+  background: white;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+input[type="checkbox"]:checked {
+  background: #FFE500;
+}
+input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  top: -2px;
+  left: 1px;
+  font-size: 13px;
+  font-weight: 900;
+  color: #0A0A0A;
 }

@@ -14,12 +14,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import { getErrorMessage } from "@/lib/utils";
 
 export default function LoginPage() {
-  const router  = useRouter();
   const { login, isLoading } = useAuthStore();
 
   const [form, setForm]   = useState({ email: "", password: "" });
@@ -35,7 +33,7 @@ export default function LoginPage() {
     setError("");
     try {
       await login(form);
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err) {
       setError(getErrorMessage(err));
     }

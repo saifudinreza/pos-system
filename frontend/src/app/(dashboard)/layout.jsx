@@ -1,70 +1,78 @@
 "use client";
 
-// ============================================================
-// Dashboard Layout — Bingkai semua halaman dalam area dashboard
-//
-// Analogi: seperti "denah kantor" — setiap halaman dashboard
-// punya ruangan yang sama: sidebar di kiri, navbar di atas,
-// konten utama di tengah, dan AI assistant di kanan.
-//
-// Relasi:
-//   Layout → Sidebar (navigasi kiri)
-//   Layout → Navbar  (header atas)
-//   Layout → AISidebar (panel AI kanan, bisa dibuka/tutup)
-//   Layout → children (konten halaman saat ini: dashboard, products, dll)
-//
-// Note: 'use client' diperlukan karena layout ini mengelola
-// state sidebar (buka/tutup) menggunakan useState
-// ============================================================
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar    from "@/components/layout/Sidebar";
 import Navbar     from "@/components/layout/Navbar";
 import AISidebar  from "@/components/layout/AISidebar";
+import useAuthStore from "@/stores/authStore";
 
 export default function DashboardLayout({ children }) {
-  // State sidebar kiri — buka/tutup di mobile
-  const [sidebarOpen, setSidebarOpen]   = useState(false);
-  // State panel AI — buka/tutup di semua layar
-  const [aiPanelOpen, setAiPanelOpen]   = useState(false);
+  const hydrateFromStorage = useAuthStore((s) => s.hydrateFromStorage);
+  const canAccessAI        = useAuthStore((s) => s.canAccessAI);
+  const isDeveloper        = useAuthStore((s) => s.isDeveloper);
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
+  const [mounted,     setMounted]     = useState(false);
+
+  useEffect(() => {
+    hydrateFromStorage();
+    setMounted(true);
+  }, [hydrateFromStorage]);
+
+  // canAccessAI() and isDeveloper() are functions — call them after mounted
+  const showAI = mounted && canAccessAI();
+  const isDev  = mounted && isDeveloper();
 
   return (
-    // Bingkai utama: flex row — sidebar | konten | ai-panel
     <div className="flex h-screen bg-brand-gray overflow-hidden">
 
-      {/* === SIDEBAR KIRI === */}
+      {/* ── Sidebar kiri ── */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* === KOLOM TENGAH: Navbar + Konten === */}
+      {/* ── Kolom tengah: Navbar + konten ── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-
-        {/* Navbar atas */}
         <Navbar onMenuToggle={() => setSidebarOpen(true)} />
 
-        {/* Area konten utama — scrollable */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 scrollbar-thin">
           {children}
         </main>
       </div>
 
-      {/* === AI SIDEBAR KANAN (toggle) ===
-          Tombol buka/tutup AI — floating button di pojok */}
-      <button
-        onClick={() => setAiPanelOpen(true)}
-        className={`
-          fixed bottom-6 right-6 z-20
-          w-12 h-12 bg-brand-black text-brand-yellow border-2 border-brand-black
-          font-black text-lg flex items-center justify-center
-          hover:bg-gray-800 transition-colors
-          ${aiPanelOpen ? "xl:hidden" : ""}
-        `}
-        style={{ boxShadow: "3px 3px 0 #FFE500" }}
-        title="Buka AI Assistant"
-      >
-        🤖
-      </button>
+      {/* ── AI Sidebar kanan ──
+          Visible di lg (1024px+) sebagai panel tetap.
+          Di bawah lg → floating button + slide-over.
+          Syarat tampil: role admin OR developer email OR plan pro/enterprise.
+      ── */}
+      {showAI && (
+        <>
+          {/* Floating toggle — hanya muncul di < lg */}
+          <button
+            onClick={() => setAiPanelOpen((v) => !v)}
+            className="
+              fixed bottom-5 right-5 z-30 w-12 h-12
+              bg-brand-black text-brand-yellow border-2 border-brand-black
+              font-black text-lg flex items-center justify-center
+              transition-all duration-150 hover:bg-gray-900 active:scale-95
+              lg:hidden
+            "
+            style={{ boxShadow: "3px 3px 0 #FFE500" }}
+            aria-label="Buka AI Assistant"
+          >
+            {aiPanelOpen ? "✕" : "🤖"}
+          </button>
 
-      <AISidebar isOpen={aiPanelOpen} onClose={() => setAiPanelOpen(false)} />
+          {/* Desktop: selalu visible (lg+) */}
+          <div className="hidden lg:flex lg:flex-col lg:w-72 lg:shrink-0">
+            <AISidebar isOpen={true} onClose={() => {}} alwaysVisible isDev={isDev} />
+          </div>
+
+          {/* Mobile / tablet: slide-over */}
+          <div className="lg:hidden">
+            <AISidebar isOpen={aiPanelOpen} onClose={() => setAiPanelOpen(false)} isDev={isDev} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

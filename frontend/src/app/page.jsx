@@ -28,6 +28,8 @@ export default function HomePage() {
     // <main> sebagai elemen semantik halaman utama
     // bg-brand-cream: background krem hangat khas KasirAI
     <main className="min-h-screen bg-brand-cream">
+      {/* Grid background pattern — tipis, seperti di referensi */}
+      <div className="bg-grid" aria-hidden="true" />
 
       {/* 1. Navbar sticky — selalu terlihat di atas saat scroll */}
       <LandingNavbar />

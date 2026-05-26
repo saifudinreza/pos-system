@@ -1,17 +1,34 @@
 "use client";
 
-// Register Page — Halaman pendaftaran akun baru
-// Analogi: seperti "formulir keanggotaan" — isi data diri,
-// langsung aktif dan dapat kartu member (token)
-
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import { getErrorMessage } from "@/lib/utils";
 
+// Field HARUS di luar RegisterPage — kalau di dalam, tiap keystroke React
+// buat instance baru → input di-remount → focus hilang setiap ketik
+const Field = ({ name, label, type = "text", placeholder, value, onChange, error }) => (
+  <div className="flex flex-col gap-1.5">
+    <label className="text-sm font-bold">
+      {label} {name !== "phone" && <span className="text-red-500">*</span>}
+    </label>
+    <input
+      name={name} type={type} required={name !== "phone"}
+      value={value} onChange={onChange}
+      placeholder={placeholder}
+      className={`w-full px-3 py-2.5 text-sm border-2 outline-none transition-colors
+        ${error ? "border-red-500" : "border-brand-black focus:border-brand-yellow"}`}
+      style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+    />
+    {error && (
+      <p className="text-xs text-red-500 font-semibold">
+        {Array.isArray(error) ? error[0] : error}
+      </p>
+    )}
+  </div>
+);
+
 export default function RegisterPage() {
-  const router   = useRouter();
   const { register, isLoading } = useAuthStore();
 
   const [form, setForm]     = useState({ name: "", email: "", phone: "", password: "", password_confirmation: "" });
@@ -26,7 +43,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setErrors({});
 
-    // Validasi konfirmasi password di frontend sebelum kirim ke server
     if (form.password !== form.password_confirmation) {
       setErrors({ password_confirmation: "Password tidak cocok" });
       return;
@@ -34,29 +50,13 @@ export default function RegisterPage() {
 
     try {
       await register(form);
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } catch (err) {
-      // Error validasi Laravel datang dalam format { errors: { field: ["msg"] } }
       const data = err.response?.data;
       if (data?.errors) setErrors(data.errors);
       else setErrors({ _global: getErrorMessage(err) });
     }
   };
-
-  const Field = ({ name, label, type = "text", placeholder }) => (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-bold">{label} {name !== "phone" && <span className="text-red-500">*</span>}</label>
-      <input
-        name={name} type={type} required={name !== "phone"}
-        value={form[name]} onChange={handleChange}
-        placeholder={placeholder}
-        className={`w-full px-3 py-2.5 text-sm border-2 outline-none transition-colors
-          ${errors[name] ? "border-red-500" : "border-brand-black focus:border-brand-yellow"}`}
-        style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-      />
-      {errors[name] && <p className="text-xs text-red-500 font-semibold">{Array.isArray(errors[name]) ? errors[name][0] : errors[name]}</p>}
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4 py-8">
@@ -80,11 +80,11 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Field name="name"     label="Nama Lengkap" placeholder="Budi Santoso" />
-            <Field name="email"    label="Email"        type="email" placeholder="budi@email.com" />
-            <Field name="phone"    label="No. HP (opsional)" placeholder="08xxxxxxxxxx" />
-            <Field name="password" label="Password"     type="password" placeholder="min. 8 karakter" />
-            <Field name="password_confirmation" label="Konfirmasi Password" type="password" placeholder="ulangi password" />
+            <Field name="name"     label="Nama Lengkap"           placeholder="Budi Santoso"    value={form.name}                  onChange={handleChange} error={errors.name} />
+            <Field name="email"    label="Email"       type="email" placeholder="budi@email.com" value={form.email}                onChange={handleChange} error={errors.email} />
+            <Field name="phone"    label="No. HP (opsional)"       placeholder="08xxxxxxxxxx"    value={form.phone}                 onChange={handleChange} error={errors.phone} />
+            <Field name="password" label="Password"   type="password" placeholder="min. 8 karakter" value={form.password}         onChange={handleChange} error={errors.password} />
+            <Field name="password_confirmation" label="Konfirmasi Password" type="password" placeholder="ulangi password" value={form.password_confirmation} onChange={handleChange} error={errors.password_confirmation} />
 
             <button
               type="submit" disabled={isLoading}

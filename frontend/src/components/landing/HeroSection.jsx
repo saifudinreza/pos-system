@@ -1,254 +1,552 @@
 "use client";
 
-// ============================================================
-// HeroSection — Area paling depan, bagian paling penting di landing page
-//
-// Analogi: Ini seperti etalase depan toko paling mewah di mall.
-// Dalam 5 detik pertama, pengunjung harus langsung paham:
-//   1. Ini toko apa? (headline)
-//   2. Apa manfaatnya buat saya? (subheadline)
-//   3. Apa yang harus saya lakukan? (tombol CTA)
-//   4. Apakah bisa dipercaya? (trust badges)
-//
-// Relasi: Hero → membutuhkan DashboardMockup (ilustrasi UI di sebelah kanan)
-// ============================================================
-
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
-// --- Komponen MockupDashboard ---
-// Analogi: Foto produk di toko online — menunjukkan tampilan asli aplikasi
-// sebelum pengguna mencoba sendiri
-const DashboardMockup = () => (
-  <div
-    className="relative w-full max-w-lg mx-auto"
-    style={{ perspective: "1000px" }}
-  >
-    {/* Bingkai utama mockup — seperti layar laptop/tablet */}
-    <div
-      className="relative bg-white border-3 border-brand-black overflow-hidden"
-      style={{ boxShadow: "8px 8px 0 #0A0A0A", borderRadius: "2px" }}
-    >
-      {/* === BAR ATAS (header aplikasi) === */}
-      <div className="flex items-center gap-2 px-4 py-3 bg-brand-black">
-        {/* Dot merah/kuning/hijau — seperti tombol window di MacOS */}
-        <div className="w-3 h-3 rounded-full bg-red-400" />
-        <div className="w-3 h-3 rounded-full bg-brand-yellow" />
-        <div className="w-3 h-3 rounded-full bg-green-400" />
-        <span className="ml-2 text-white text-xs font-mono opacity-60">KasirAI — Kasir</span>
-      </div>
+// ======================================================
+// BarChart — Bar animasi yang tumbuh dari bawah saat mount
+// ======================================================
+const BarChart = () => {
+  const [animated, setAnimated] = useState(false);
+  const bars = [
+    { day: "SEN", pct: 55 },
+    { day: "SEL", pct: 42 },
+    { day: "RAB", pct: 72 },
+    { day: "KAM", pct: 48 },
+    { day: "JUM", pct: 88, isTop: true },
+    { day: "SAB", pct: 62 },
+    { day: "MIN", pct: 50 },
+  ];
 
-      {/* === KONTEN DASHBOARD === */}
-      <div className="p-4 bg-[#F8F8F3]">
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 400);
+    return () => clearTimeout(t);
+  }, []);
 
-        {/* Baris atas: Ringkasan penjualan hari ini */}
-        <div className="grid grid-cols-3 gap-2 mb-3">
-          {[
-            { label: "Penjualan Hari Ini", value: "Rp 4,2jt", color: "bg-brand-yellow" },
-            { label: "Transaksi",          value: "28",        color: "bg-white" },
-            { label: "Produk Terjual",     value: "112",       color: "bg-white" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className={`${stat.color} border-2 border-brand-black p-2`}
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-            >
-              <p className="text-[9px] font-bold text-brand-black/60 uppercase tracking-wide">
-                {stat.label}
-              </p>
-              <p className="text-sm font-black text-brand-black font-mono">{stat.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Area Kasir — grid produk di kiri, keranjang di kanan */}
-        <div className="grid grid-cols-5 gap-2">
-          {/* Produk grid — seperti rak pajangan di toko */}
-          <div className="col-span-3 space-y-2">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-brand-black/50">
-              Produk
-            </p>
-            <div className="grid grid-cols-2 gap-1.5">
-              {[
-                { name: "Es Teh Manis",     price: "5k",  emoji: "🧋" },
-                { name: "Nasi Goreng",       price: "25k", emoji: "🍳" },
-                { name: "Ayam Geprek",       price: "20k", emoji: "🍗" },
-                { name: "Jus Jeruk",         price: "12k", emoji: "🍊" },
-                { name: "Mie Goreng",        price: "18k", emoji: "🍜" },
-                { name: "Teh Botol",         price: "5k",  emoji: "🫖" },
-              ].map((p) => (
-                <div
-                  key={p.name}
-                  className="bg-white border-2 border-brand-black p-1.5 cursor-pointer hover:bg-brand-yellow transition-colors"
-                  style={{ boxShadow: "1px 1px 0 #0A0A0A" }}
-                >
-                  <div className="text-base">{p.emoji}</div>
-                  <p className="text-[8px] font-bold text-brand-black leading-tight">{p.name}</p>
-                  <p className="text-[9px] font-black text-brand-black font-mono">Rp {p.price}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Panel keranjang/order di kanan — seperti bon belanja */}
-          <div
-            className="col-span-2 bg-white border-2 border-brand-black p-2 flex flex-col"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-          >
-            <p className="text-[9px] font-black uppercase tracking-widest mb-2 border-b-2 border-brand-black pb-1">
-              Order #042
-            </p>
-            {/* Item di keranjang */}
-            {[
-              { name: "Es Teh Manis", qty: 2, total: "10k" },
-              { name: "Nasi Goreng",  qty: 1, total: "25k" },
-              { name: "Ayam Geprek",  qty: 1, total: "20k" },
-            ].map((item) => (
-              <div key={item.name} className="flex justify-between text-[8px] font-semibold py-0.5">
-                <span className="text-brand-black/80">{item.qty}x {item.name}</span>
-                <span className="font-mono font-black">Rp {item.total}</span>
-              </div>
-            ))}
-            {/* Total */}
-            <div className="mt-auto pt-2 border-t-2 border-brand-black">
-              <div className="flex justify-between text-[9px] font-black">
-                <span>TOTAL</span>
-                <span className="font-mono">Rp 55k</span>
-              </div>
-              {/* Tombol bayar */}
-              <div
-                className="mt-1.5 bg-brand-yellow border-2 border-brand-black text-center py-1 text-[9px] font-black"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-              >
-                BAYAR SEKARANG
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Chat Bubble — fitur unggulan */}
-        <div
-          className="mt-3 bg-brand-black text-white p-2 flex items-start gap-2"
-          style={{ borderRadius: "2px" }}
-        >
-          <span className="text-brand-yellow font-black text-xs">AI</span>
-          <p className="text-[9px] leading-relaxed opacity-90">
-            "Penjualan hari ini naik 15% dari kemarin. Produk terlaris: Nasi Goreng (12 porsi). Stok Es Teh Manis tinggal 8 cup — perlu restock?"
-          </p>
-        </div>
-      </div>
-    </div>
-
-    {/* Elemen dekoratif mengambang di luar mockup */}
-    {/* Analogi: seperti post-it yang ditempel di samping laptop */}
-    <div
-      className="absolute -top-4 -right-4 bg-brand-yellow border-2 border-brand-black px-3 py-1.5 font-black text-xs animate-float"
-      style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
-    >
-      +15% Penjualan
-    </div>
-    <div
-      className="absolute -bottom-4 -left-4 bg-white border-2 border-brand-black px-3 py-1.5 font-black text-xs"
-      style={{ boxShadow: "3px 3px 0 #0A0A0A", animationDelay: "1.5s" }}
-    >
-      ✓ AI siap membantu
-    </div>
-  </div>
-);
-
-// --- Komponen TrustBadge ---
-// Tanda kepercayaan kecil — seperti sertifikat yang dipajang di dinding toko
-const TrustBadge = ({ icon, text }) => (
-  <div className="flex items-center gap-2 text-sm font-semibold text-brand-black/70">
-    <span className="text-brand-black font-black">{icon}</span>
-    {text}
-  </div>
-);
-
-export default function HeroSection() {
   return (
-    // Section hero: padding atas besar karena ada navbar fixed di atas
-    <section className="pt-32 pb-20 px-4 sm:px-6 max-w-6xl mx-auto">
-      <div className="grid lg:grid-cols-2 gap-12 items-center">
-
-        {/* === KOLOM KIRI: Teks & CTA === */}
-        <div className="flex flex-col gap-6">
-
-          {/* Badge "New" — penanda fitur terbaru, seperti label "Baru" di produk */}
-          <div className="inline-flex items-center w-fit">
-            <div
-              className="flex items-center gap-2 bg-brand-yellow border-2 border-brand-black px-3 py-1"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-            >
-              <span className="font-mono font-black text-xs tracking-wider">✦ BARU</span>
-              <span className="text-xs font-bold">AI Assistant Terintegrasi</span>
+    <div style={{
+      position: "relative", height: "170px",
+      border: "2px solid #0A0A0A", background: "#fff",
+      padding: "14px 12px 28px",
+      display: "flex", alignItems: "flex-end",
+      justifyContent: "space-between", gap: "10px",
+    }}>
+      {bars.map((bar, i) => (
+        <div key={bar.day} style={{
+          flex: 1, display: "flex", flexDirection: "column",
+          alignItems: "center", height: "100%", justifyContent: "flex-end",
+          position: "relative", zIndex: 1,
+        }}>
+          {bar.isTop && (
+            <div style={{
+              position: "absolute", top: "-14px", left: "50%",
+              transform: "translateX(-50%) rotate(-4deg)",
+              background: "#FF3B3B", color: "#fff",
+              border: "2px solid #0A0A0A",
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontWeight: 800, fontSize: "9px",
+              padding: "2px 6px", letterSpacing: ".06em",
+              whiteSpace: "nowrap", boxShadow: "2px 2px 0 #0A0A0A",
+              opacity: animated ? 1 : 0,
+              transition: "opacity 0.3s 0.9s",
+            }}>
+              TERLARIS
             </div>
+          )}
+          <div style={{
+            width: "100%",
+            background: bar.isTop ? "#FFE500" : "#0A0A0A",
+            border: "2px solid #0A0A0A",
+            transformOrigin: "bottom",
+            transform: animated ? `scaleY(${bar.pct / 100})` : "scaleY(0)",
+            transition: `transform 0.9s cubic-bezier(.2,.9,.3,1.2) ${0.1 + i * 0.08}s`,
+            height: "100%",
+          }} />
+          <div style={{
+            position: "absolute", bottom: "-22px",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "10px", fontWeight: 700, letterSpacing: ".04em",
+          }}>
+            {bar.day}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ======================================================
+// AIChat — Animasi percakapan user → bot step by step
+// ======================================================
+const AIChat = () => {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    if (step >= 2) return;
+    const delay = step === 0 ? 1200 : 2000;
+    const t = setTimeout(() => setStep((s) => s + 1), delay);
+    return () => clearTimeout(t);
+  }, [step]);
+
+  return (
+    <div style={{
+      padding: "14px", minHeight: "120px",
+      display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px",
+    }}>
+      {step >= 1 && (
+        <div style={{
+          alignSelf: "flex-end", padding: "8px 12px",
+          background: "#FFE500", color: "#0A0A0A",
+          border: "2px solid #FFE500", maxWidth: "88%", lineHeight: 1.4,
+        }}>
+          Produk apa paling laku minggu ini?
+        </div>
+      )}
+      {step >= 2 && (
+        <div style={{
+          alignSelf: "flex-start", padding: "8px 12px",
+          background: "transparent", color: "#fff",
+          border: "2px solid #fff", maxWidth: "88%", lineHeight: 1.4,
+        }}>
+          <b style={{ color: "#FFE500" }}>Nasi Goreng Spesial</b> — 312 porsi,
+          Rp 4,7jt. Bundle dengan Es Teh → +23% margin.
+          <span style={{
+            display: "inline-block", width: "8px", height: "14px",
+            background: "#FFE500", verticalAlign: "-2px", marginLeft: "2px",
+            animation: "blink 1s steps(2) infinite",
+          }} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ======================================================
+// OrderTicker — Pesanan masuk berganti tiap 2 detik
+// ======================================================
+const OrderTicker = () => {
+  const orders = [
+    { inv: "#3829", time: "2 mnt",   amt: "Rp 45.000", pay: "QRIS",     payBg: "#00C27C", payFg: "#fff" },
+    { inv: "#3830", time: "barusan", amt: "Rp 25.000", pay: "Cash",     payBg: "#FFE500", payFg: "#0A0A0A" },
+    { inv: "#3831", time: "5 mnt",   amt: "Rp 78.000", pay: "Transfer", payBg: "#0066FF", payFg: "#fff" },
+  ];
+  const [idx, setIdx] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % orders.length), 2200);
+    return () => clearInterval(t);
+  }, []);
+
+  const o = orders[idx];
+  return (
+    <div style={{
+      padding: "8px 12px", height: "80px", overflow: "hidden",
+      display: "flex", alignItems: "center",
+    }}>
+      <div style={{
+        width: "100%", display: "flex", alignItems: "center",
+        justifyContent: "space-between", gap: "6px",
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: "11px", fontWeight: 600,
+      }}>
+        <span style={{ fontWeight: 700 }}>{o.inv}</span>
+        <span style={{ color: "#9CA3AF", fontSize: "10px" }}>{o.time}</span>
+        <span style={{ fontWeight: 700 }}>{o.amt}</span>
+        <span style={{
+          fontSize: "9px", padding: "1px 5px",
+          border: "1.5px solid #0A0A0A",
+          background: o.payBg, color: o.payFg,
+          fontWeight: 700, letterSpacing: ".04em",
+        }}>
+          {o.pay}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+// ======================================================
+// HeroSection — Hero utama landing page
+// ======================================================
+export default function HeroSection() {
+  const [stampVisible, setStampVisible] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setStampVisible(true), 1600);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <section style={{ position: "relative", zIndex: 1 }}>
+      <div className="hero-section-grid">
+
+        {/* ============ LEFT: Copy ============ */}
+        <div style={{ display: "flex", flexDirection: "column" }}>
+
+          {/* Eyebrow — chip status dengan dot hijau berkedip */}
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: "10px",
+            background: "#fff", border: "2.5px solid #0A0A0A",
+            padding: "8px 14px", boxShadow: "3px 3px 0 #0A0A0A",
+            fontFamily: "'JetBrains Mono', monospace", fontSize: "12px",
+            fontWeight: 500, letterSpacing: ".04em", textTransform: "uppercase",
+            width: "fit-content", marginBottom: "24px",
+          }}>
+            <span className="hero-dot" />
+            POS + AI ASSISTANT · GROQ LLAMA 3.3
           </div>
 
-          {/* Headline utama — pesan paling penting, harus besar & jelas */}
-          <h1 className="text-5xl sm:text-6xl font-black text-brand-black leading-[1.05] tracking-tight font-grotesk">
-            Kasir Pintar,
+          {/* H1 — judul besar dengan highlight & strikethrough */}
+          <h1 style={{
+            fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800,
+            fontSize: "clamp(42px, 5.4vw, 82px)", lineHeight: 0.95,
+            letterSpacing: "-.035em", marginBottom: "24px",
+          }}>
+            Kasir yang<br />
+            <span style={{
+              background: "#FFE500", padding: "2px 10px",
+              display: "inline-block",
+              boxShadow: "6px 6px 0 #0A0A0A",
+              border: "2.5px solid #0A0A0A",
+              transform: "rotate(-1.2deg)",
+              margin: "8px 0",
+            }}>
+              ngerti bisnis
+            </span>
             <br />
-            <span
-              className="bg-brand-yellow px-2 inline-block"
-              style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
-            >
-              Bisnis
-            </span>{" "}
-            Makin
-            <br />
-            Lancar.
+            kamu, bukan cuma<br />
+            <span className="hero-strike">catat angka.</span>
           </h1>
 
-          {/* Sub-headline — penjelasan singkat, satu paragraf cukup */}
-          <p className="text-lg text-brand-black/70 font-medium leading-relaxed max-w-md">
-            Kelola penjualan, stok, dan laporan dalam satu platform.
-            Dilengkapi <strong className="text-brand-black">AI Assistant</strong> yang siap menjawab
-            pertanyaan bisnis Anda kapan saja.
+          {/* Sub-headline */}
+          <p style={{
+            maxWidth: "520px", fontSize: "18px", lineHeight: 1.55,
+            color: "#222", marginBottom: "36px",
+          }}>
+            Kelola penjualan, stok, dan laporan di satu layar. Tanya AI Assistant
+            langsung dalam Bahasa Indonesia —{" "}
+            <b>"produk apa yang paling laku bulan ini?"</b>{" "}
+            — dan dapat jawaban dalam hitungan detik.
           </p>
 
-          {/* Tombol CTA — dua pilihan: primer (kuning) dan sekunder (outline) */}
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/register"
-              className="px-6 py-3 bg-brand-yellow border-2 border-brand-black font-bold text-base neo-hover inline-block"
-              style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
-            >
-              Coba Gratis 14 Hari →
+          {/* CTA Buttons */}
+          <div style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
+            <Link href="/register" className="neo-hover" style={{
+              fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: "16px",
+              padding: "16px 24px", border: "2.5px solid #0A0A0A",
+              background: "#FFE500", boxShadow: "5px 5px 0 #0A0A0A",
+              textDecoration: "none", color: "#0A0A0A", display: "inline-block",
+            }}>
+              Mulai Jualan Sekarang →
             </Link>
-            <a
-              href="#cara-kerja"
-              className="px-6 py-3 bg-white border-2 border-brand-black font-bold text-base neo-hover inline-block"
-              style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
-            >
-              Lihat Demo
+            <a href="#cara-kerja" className="neo-hover" style={{
+              fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: "16px",
+              padding: "16px 24px", border: "2.5px solid #0A0A0A",
+              background: "#fff", boxShadow: "5px 5px 0 #0A0A0A",
+              textDecoration: "none", color: "#0A0A0A", display: "inline-block",
+            }}>
+              Lihat Demo Kasir
             </a>
           </div>
 
-          {/* Trust badges — alasan percaya: tanpa kartu kredit, dll */}
-          <div className="flex flex-wrap gap-4 pt-2">
-            <TrustBadge icon="✓" text="Tanpa kartu kredit" />
-            <TrustBadge icon="✓" text="Setup 5 menit" />
-            <TrustBadge icon="✓" text="Batalkan kapan saja" />
-          </div>
-
-          {/* Statistik singkat — "social proof" angka */}
-          <div className="flex gap-8 pt-2 border-t-2 border-brand-black/10">
+          {/* Proof Stats — angka dengan divider vertikal */}
+          <div style={{ display: "flex", gap: "28px", marginTop: "48px", alignItems: "center", flexWrap: "wrap" }}>
             {[
-              { num: "2.000+", label: "Bisnis aktif" },
-              { num: "500rb+", label: "Transaksi/hari" },
-              { num: "4.9★",  label: "Rating pengguna" },
-            ].map((s) => (
-              <div key={s.label}>
-                <p className="text-2xl font-black text-brand-black font-mono">{s.num}</p>
-                <p className="text-xs font-semibold text-brand-black/60 uppercase tracking-wide">{s.label}</p>
-              </div>
-            ))}
+              { num: "11%",      label: "Pajak otomatis" },
+              null,
+              { num: "5+",       label: "Metode Bayar" },
+              null,
+              { num: "PDF·XLSX", label: "Export Laporan" },
+              null,
+              { num: "24/7",     label: "AI Insight" },
+            ].map((item, i) =>
+              item === null ? (
+                <div key={`d${i}`} style={{ width: "2.5px", height: "36px", background: "#0A0A0A", flexShrink: 0 }} />
+              ) : (
+                <div key={item.label} style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                  <div style={{
+                    fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800,
+                    fontSize: "clamp(16px, 1.8vw, 26px)", letterSpacing: "-.02em",
+                  }}>
+                    {item.num}
+                  </div>
+                  <div style={{
+                    fontSize: "11px", fontWeight: 600,
+                    textTransform: "uppercase", letterSpacing: ".06em", color: "#555",
+                  }}>
+                    {item.label}
+                  </div>
+                </div>
+              )
+            )}
           </div>
         </div>
 
-        {/* === KOLOM KANAN: Mockup dashboard === */}
-        <div className="relative">
-          <DashboardMockup />
+        {/* ============ RIGHT: Stage — collage animasi ============ */}
+        <div className="hero-stage">
+
+          {/* Dekorasi geometris */}
+          <div style={{
+            position: "absolute", width: "140px", height: "140px",
+            background: "#FF7AB6", border: "2.5px solid #0A0A0A",
+            top: 0, right: "8%", transform: "rotate(10deg)",
+            boxShadow: "6px 6px 0 #0A0A0A",
+          }} />
+          <div style={{
+            position: "absolute", width: "80px", height: "80px",
+            background: "#0066FF", border: "2.5px solid #0A0A0A",
+            bottom: "40px", right: 0, borderRadius: "50%",
+            boxShadow: "5px 5px 0 #0A0A0A",
+          }} />
+          <div style={{
+            position: "absolute", width: "60px", height: "60px",
+            background: "#8B5CF6", border: "2.5px solid #0A0A0A",
+            top: "48%", left: "-10px", transform: "rotate(-12deg)",
+            boxShadow: "5px 5px 0 #0A0A0A",
+          }} />
+
+          {/* Ping dots dengan animasi ring */}
+          <div className="hero-ping" style={{ top: "38%", left: "32%" }} />
+          <div className="hero-ping" style={{ top: "18%", right: "36%" }} />
+
+          {/* ---- Dashboard Window (rotasi -1.5deg) ---- */}
+          <div style={{
+            position: "absolute", top: "30px", left: "40px", width: "460px",
+            background: "#fff", border: "2.5px solid #0A0A0A",
+            boxShadow: "10px 10px 0 #0A0A0A",
+            transform: "rotate(-1.5deg)",
+          }}>
+            {/* Titlebar macOS style */}
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "10px 14px", background: "#0A0A0A", color: "#fff",
+              borderBottom: "2.5px solid #0A0A0A",
+            }}>
+              <div style={{ display: "flex", gap: "6px" }}>
+                {["#FF3B3B", "#FFE500", "#00C27C"].map((c, i) => (
+                  <span key={i} style={{
+                    width: "11px", height: "11px", borderRadius: "50%",
+                    border: "1.5px solid #fff", background: c, display: "block",
+                  }} />
+                ))}
+              </div>
+              <div style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
+                background: "#222", border: "1.5px solid #555",
+                padding: "3px 10px", color: "#ccc",
+              }}>
+                kasirai.id/dashboard
+              </div>
+              <div style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
+                color: "#FFE500", fontWeight: 700, letterSpacing: ".06em",
+              }}>
+                ● LIVE
+              </div>
+            </div>
+
+            {/* Dashboard Body */}
+            <div style={{ padding: "18px" }}>
+              <div style={{
+                display: "flex", alignItems: "baseline",
+                justifyContent: "space-between", marginBottom: "14px",
+              }}>
+                <div style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontWeight: 800, fontSize: "16px", letterSpacing: "-.02em",
+                }}>
+                  Penjualan Minggu Ini
+                  <span style={{
+                    display: "block",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px", fontWeight: 500, color: "#666",
+                    textTransform: "uppercase", letterSpacing: ".06em", marginTop: "2px",
+                  }}>
+                    Senin 18 – Minggu 24 Mei
+                  </span>
+                </div>
+                <div style={{
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
+                  fontWeight: 700, background: "#00C27C", color: "#fff",
+                  padding: "3px 8px", border: "1.5px solid #0A0A0A",
+                  display: "inline-flex", alignItems: "center", gap: "4px",
+                }}>
+                  ↑ REALTIME
+                </div>
+              </div>
+
+              {/* Stat Strip */}
+              <div style={{
+                display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+                gap: "8px", marginBottom: "16px",
+              }}>
+                {[
+                  { label: "Revenue", val: "Rp 4,7jt", trend: "↑ 18%", bg: "#FFE500" },
+                  { label: "Order",   val: "312",       trend: "↑ 12%", bg: "#FFFBEB" },
+                  { label: "AOV",     val: "Rp 15k",    trend: "→ stabil", bg: "#F5F5F5", trendColor: "#0066FF" },
+                ].map((s) => (
+                  <div key={s.label} style={{ border: "2px solid #0A0A0A", padding: "8px 10px", background: s.bg }}>
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: "9px",
+                      fontWeight: 700, textTransform: "uppercase",
+                      letterSpacing: ".06em", color: "#333",
+                    }}>
+                      {s.label}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800,
+                      fontSize: "18px", letterSpacing: "-.02em", marginTop: "2px",
+                    }}>
+                      {s.val}
+                    </div>
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
+                      fontWeight: 700, color: s.trendColor || "#00C27C", marginTop: "2px",
+                    }}>
+                      {s.trend}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <BarChart />
+            </div>
+          </div>
+
+          {/* ---- LUNAS Stamp (muncul setelah 1.6 detik) ---- */}
+          <div style={{
+            position: "absolute", top: "60px", right: "18%",
+            width: "120px", height: "120px",
+            display: "grid", placeItems: "center",
+            background: "#00C27C", color: "#fff",
+            border: "3px solid #0A0A0A", borderRadius: "50%",
+            boxShadow: "6px 6px 0 #0A0A0A",
+            transform: `rotate(-12deg) scale(${stampVisible ? 1 : 0})`,
+            transition: "transform 0.55s cubic-bezier(.2,1.6,.3,1)",
+            textAlign: "center",
+          }}>
+            <div>
+              <div style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 800, fontSize: "24px", letterSpacing: ".02em",
+              }}>
+                LUNAS
+              </div>
+              <div style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "9px", fontWeight: 700, letterSpacing: ".1em", marginTop: "2px",
+              }}>
+                PAID · QRIS
+              </div>
+            </div>
+          </div>
+
+          {/* ---- Order Ticker (rotasi 4deg) ---- */}
+          <div style={{
+            position: "absolute", right: "-30px", top: "240px", width: "230px",
+            background: "#fff", border: "2.5px solid #0A0A0A",
+            boxShadow: "5px 5px 0 #0A0A0A",
+            transform: "rotate(4deg)", overflow: "hidden",
+          }}>
+            <div style={{
+              background: "#0A0A0A", color: "#FFE500", padding: "6px 10px",
+              fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
+              fontWeight: 700, letterSpacing: ".06em",
+              display: "flex", alignItems: "center", gap: "6px",
+            }}>
+              <span className="hero-dot-red" />
+              ORDER MASUK
+            </div>
+            <OrderTicker />
+          </div>
+
+          {/* ---- Stock Alert (rotasi -3deg) ---- */}
+          <div style={{
+            position: "absolute", bottom: "120px", right: "-10px", width: "200px",
+            background: "#FF6B00", color: "#fff",
+            border: "2.5px solid #0A0A0A", boxShadow: "5px 5px 0 #0A0A0A",
+            padding: "10px 12px", transform: "rotate(-3deg)",
+            display: "flex", alignItems: "center", gap: "10px",
+          }}>
+            <div style={{
+              width: "34px", height: "34px", minWidth: "34px",
+              background: "#fff", color: "#FF6B00",
+              border: "2px solid #0A0A0A",
+              display: "grid", placeItems: "center",
+              fontFamily: "'Space Grotesk', sans-serif",
+              fontWeight: 800, fontSize: "18px",
+              animation: "wob 1.4s ease-in-out infinite",
+            }}>
+              !
+            </div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: "13px", lineHeight: 1.2 }}>
+              Stok Menipis
+              <span style={{
+                display: "block",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "10px", fontWeight: 500, opacity: 0.9, marginTop: "2px",
+              }}>
+                Es Kopi Susu · sisa 8
+              </span>
+            </div>
+          </div>
+
+          {/* ---- AI Chat Panel (rotasi 2.2deg, shadow kuning) ---- */}
+          <div style={{
+            position: "absolute", bottom: "18px", left: 0, width: "340px",
+            background: "#0A0A0A", color: "#fff",
+            border: "2.5px solid #0A0A0A",
+            boxShadow: "8px 8px 0 #FFE500, 8px 8px 0 2.5px #0A0A0A",
+            transform: "rotate(2.2deg)",
+          }}>
+            {/* Header panel */}
+            <div style={{
+              padding: "10px 14px", borderBottom: "2px solid #333",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+            }}>
+              <div style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
+                fontWeight: 700, letterSpacing: ".08em",
+                textTransform: "uppercase", color: "#FFE500",
+              }}>
+                <span style={{
+                  width: "8px", height: "8px", background: "#00C27C",
+                  borderRadius: "50%", boxShadow: "0 0 8px #00C27C",
+                  display: "inline-block",
+                }} />
+                AI Assistant
+              </div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "9px", color: "#888" }}>
+                Groq · LLaMA 3.3
+              </div>
+            </div>
+
+            <AIChat />
+
+            {/* Footer dengan input prompt */}
+            <div style={{
+              padding: "8px 12px", borderTop: "2px solid #333",
+              display: "flex", alignItems: "center", gap: "8px",
+              background: "#1a1a1a",
+            }}>
+              <div style={{
+                flex: 1, fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "11px", color: "#777",
+                border: "1.5px solid #444", padding: "4px 8px", background: "#0a0a0a",
+              }}>
+                Tanya apa saja tentang bisnismu...
+              </div>
+              <div style={{
+                background: "#FFE500", color: "#0A0A0A",
+                border: "1.5px solid #FFE500", padding: "4px 8px",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 800, fontSize: "10px", cursor: "pointer",
+              }}>
+                KIRIM →
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

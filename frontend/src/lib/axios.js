@@ -59,9 +59,11 @@ api.interceptors.response.use(
     if (typeof window !== "undefined") {
       if (error.response?.status === 401) {
         // 401 = Unauthorized: token tidak valid atau sudah expired
-        // Analogi: kunci rumah sudah diganti, harus minta kunci baru (login ulang)
+        // Hapus SEMUA penyimpanan token (localStorage + cookie) agar middleware
+        // tidak redirect loop antara /login ↔ /dashboard
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
         window.location.href = "/login";
       }
 
