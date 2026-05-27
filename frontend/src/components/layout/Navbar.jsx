@@ -12,6 +12,8 @@ const PAGE_TITLES = {
   "/reports":      "Laporan",
   "/users":        "Pengguna",
   "/kasir":        "Kasir",
+  "/profile":      "Profil & Langganan",
+  "/upgrade":      "Upgrade Plan",
 };
 
 const PLAN_BADGE = {

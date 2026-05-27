@@ -3,8 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import useAiStore from "@/stores/aiStore";
 
+const PROVIDER_LABEL = {
+  groq:        { text: "Groq",        cls: "bg-brand-yellow text-brand-black" },
+  openrouter:  { text: "OpenRouter",  cls: "bg-purple-100 text-purple-700" },
+};
+
 const MessageBubble = ({ msg }) => {
   const isUser = msg.role === "user";
+  const provider = !isUser && msg.provider ? PROVIDER_LABEL[msg.provider] : null;
   return (
     <div className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
       <div
@@ -20,9 +26,16 @@ const MessageBubble = ({ msg }) => {
       >
         {msg.content}
       </div>
-      {msg.tokens_used && (
-        <span className="text-[9px] text-brand-black/25 font-mono">{msg.tokens_used} tokens</span>
-      )}
+      <div className="flex items-center gap-2">
+        {provider && (
+          <span className={`text-[8px] font-black px-1.5 py-0.5 font-mono border border-brand-black/20 ${provider.cls}`}>
+            {provider.text}
+          </span>
+        )}
+        {msg.tokens_used && (
+          <span className="text-[9px] text-brand-black/25 font-mono">{msg.tokens_used} tokens</span>
+        )}
+      </div>
     </div>
   );
 };
@@ -38,6 +51,11 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
   const [input, setInput] = useState("");
   const bottomRef         = useRef(null);
   const { messages, isLoading, sendQuery, clearMessages } = useAiStore();
+
+  // Ambil provider dari pesan AI terakhir
+  const lastAiMsg   = [...messages].reverse().find((m) => m.role === "assistant" && m.provider);
+  const activeProvider = lastAiMsg?.provider ?? "groq";
+  const isOpenRouter   = activeProvider === "openrouter";
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -78,13 +96,20 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
             </span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-[10px] text-white/40 font-mono">Powered by Groq LLaMA 3.3</p>
-              {isDev && (
-                <span className="text-[8px] bg-brand-yellow text-brand-black font-black px-1.5 py-0.5 font-mono">
-                  DEV
-                </span>
-              )}
-            </div>
+            <p className="text-[10px] text-white/40 font-mono">
+              {isOpenRouter ? "Fallback: OpenRouter LLaMA 3.1" : "Powered by Groq LLaMA 3.3"}
+            </p>
+            {isOpenRouter && (
+              <span className="text-[8px] bg-purple-400 text-white font-black px-1.5 py-0.5 font-mono animate-pulse">
+                FALLBACK
+              </span>
+            )}
+            {isDev && !isOpenRouter && (
+              <span className="text-[8px] bg-brand-yellow text-brand-black font-black px-1.5 py-0.5 font-mono">
+                DEV
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex gap-2 items-center">
           <button

@@ -117,12 +117,23 @@ class ProductController extends Controller
     // =============================================================
     public function store(Request $request): JsonResponse
     {
+        // ----- CEK LIMIT PAKET -----
+        $plan   = $request->user()->subscription_plan ?? 'free';
+        $limits = ['free' => 5, 'pro' => 30, 'enterprise' => null];
+        $limit  = $limits[$plan] ?? 5;
+
+        if ($limit !== null && Product::count() >= $limit) {
+            return response()->json([
+                'message' => "Paket " . strtoupper($plan) . " hanya bisa menyimpan {$limit} produk. Upgrade untuk menambah lebih banyak.",
+                'limit_reached' => true,
+            ], 422);
+        }
+
         $validated = $request->validate([
             'category_id'  => ['required', 'exists:categories,id'],
             // ↑ exists:categories,id = cek apakah category_id ada di tabel categories
             'name'         => ['required', 'string', 'max:255'],
-            'sku'          => ['required', 'string', 'unique:products,sku'],
-            // ↑ unique:products,sku = SKU tidak boleh sama dengan produk lain
+            'sku'          => ['required', 'string', \Illuminate\Validation\Rule::unique('products', 'sku')->where('tenant_id', $request->user()->tenant_id)],
             'description'  => ['nullable', 'string'],
             'price'        => ['required', 'numeric', 'min:0'],
             'stock'        => ['required', 'integer', 'min:0'],
@@ -140,7 +151,9 @@ class ProductController extends Controller
             $validated['image'] = $path;
         }
 
-        $product = Product::create($validated);
+        $product = Product::create(array_merge($validated, [
+            'tenant_id' => $request->user()->tenant_id,
+        ]));
 
         // Hapus cache list produk karena ada produk baru
         Cache::forget('products_all');
@@ -173,9 +186,7 @@ class ProductController extends Controller
             // ↑ 'sometimes' = validasi hanya dijalankan kalau field ini dikirim
             // Jadi bisa update sebagian field saja
             'name'         => ['sometimes', 'string', 'max:255'],
-            'sku'          => ['sometimes', 'string', 'unique:products,sku,' . $id],
-            // ↑ unique tapi ignore ID produk ini sendiri
-            // Supaya bisa save tanpa ganti SKU
+            'sku'          => ['sometimes', 'string', \Illuminate\Validation\Rule::unique('products', 'sku')->where('tenant_id', $product->tenant_id)->ignore($id)],
             'description'  => ['nullable', 'string'],
             'price'        => ['sometimes', 'numeric', 'min:0'],
             'stock'        => ['sometimes', 'integer', 'min:0'],

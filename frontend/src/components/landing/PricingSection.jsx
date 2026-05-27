@@ -20,49 +20,50 @@ import Link from "next/link";
 // Data paket harga — tiap objek = satu paket
 const PLANS = [
   {
-    name:        "Starter",
-    // Harga per skenario billing
-    price:       { monthly: 199000, yearly: 149000 },
+    name:        "Free",
+    price:       { monthly: 0, yearly: 0 },
     description: "Pas untuk toko kecil & warung yang baru mulai digital.",
-    // Highlight plan ini atau tidak
     highlighted: false,
     features:    [
       "1 outlet / toko",
-      "Produk tidak terbatas",
+      "Maks. 3 kategori produk",
+      "Maks. 5 produk",
+      "Maks. 10 transaksi/bulan",
+      "Kasir & manajemen pesanan",
       "Laporan harian & bulanan",
-      "Support via email",
-      "AI Assistant (10 pertanyaan/hari)",
     ],
-    // Fitur yang TIDAK tersedia di plan ini
-    missing:     ["Multi-outlet", "AI tak terbatas", "Laporan kustom"],
+    missing:     ["AI Assistant", "Laporan kustom & export", "Transaksi tak terbatas"],
     cta:         "Mulai Gratis",
-    ctaHref:     "/register?plan=starter",
+    ctaHref:     "/register?plan=free",
   },
   {
     name:        "Pro",
-    price:       { monthly: 399000, yearly: 299000 },
+    price:       { monthly: 250000, yearly: 200000 },
     description: "Untuk bisnis berkembang yang butuh fitur lengkap.",
-    highlighted: true,   // Paket yang direkomendasikan — lebih ditonjolkan
+    highlighted: true,
     features:    [
       "Hingga 5 outlet",
-      "Produk tidak terbatas",
-      "Laporan kustom & export",
-      "Support via WhatsApp & email",
+      "Maks. 10 kategori produk",
+      "Maks. 30 produk",
+      "Transaksi tak terbatas",
+      "Laporan kustom & export (PDF/Excel)",
       "AI Assistant tak terbatas",
       "Integrasi QRIS & e-wallet",
-      "Manajemen karyawan & absen",
+      "Support via WhatsApp & email",
     ],
     missing:     [],
-    cta:         "Coba Pro Gratis",
+    cta:         "Upgrade ke Pro",
     ctaHref:     "/register?plan=pro",
   },
   {
     name:        "Enterprise",
-    price:       { monthly: null, yearly: null },   // null = harga custom
-    description: "Solusi khusus untuk chain restoran, minimarket, atau franchise.",
+    price:       { monthly: 799000, yearly: 649000 },
+    description: "Solusi lengkap untuk chain restoran, minimarket, atau franchise.",
     highlighted: false,
     features:    [
       "Outlet tidak terbatas",
+      "Kategori & produk tidak terbatas",
+      "Transaksi tidak terbatas",
       "API & integrasi kustom",
       "Dedicated account manager",
       "SLA & uptime guarantee",
@@ -70,8 +71,8 @@ const PLANS = [
       "Laporan & dashboard kustom",
     ],
     missing:     [],
-    cta:         "Hubungi Sales",
-    ctaHref:     "/contact",
+    cta:         "Upgrade ke Enterprise",
+    ctaHref:     "/register?plan=enterprise",
   },
 ];
 
@@ -82,14 +83,14 @@ const formatRupiah = (num) =>
 
 // --- PricingCard: satu kartu paket harga ---
 const PricingCard = ({ plan, billing }) => {
-  // Ambil harga sesuai siklus billing yang dipilih (bulanan/tahunan)
   const price = billing === "monthly" ? plan.price.monthly : plan.price.yearly;
+  const isFree = price === 0 && plan.price.monthly === 0;
 
   return (
     <div
-      className={`relative flex flex-col border-3 border-brand-black p-6 transition-all duration-150
+      className={`relative flex flex-col h-full border-3 border-brand-black p-6 transition-all duration-150
         ${plan.highlighted
-          ? "bg-brand-yellow -translate-y-2"   // Plan recommended: kuning & lebih tinggi
+          ? "bg-brand-yellow"
           : "bg-white hover:-translate-y-1 hover:-translate-x-1"
         }
       `}
@@ -117,24 +118,29 @@ const PricingCard = ({ plan, billing }) => {
 
       {/* Harga — angka besar yang langsung terlihat */}
       <div className="mb-6">
-        {price ? (
+        {price === null ? (
+          <span className="text-3xl font-black text-brand-black font-mono">
+            Harga Kustom
+          </span>
+        ) : isFree ? (
+          <>
+            <span className="text-4xl font-black text-brand-black font-mono">GRATIS</span>
+            <div className="mt-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 inline-block border border-green-300">
+              Selamanya, tanpa kartu kredit
+            </div>
+          </>
+        ) : (
           <>
             <span className="text-4xl font-black text-brand-black font-mono">
               {formatRupiah(price)}
             </span>
             <span className="text-sm font-semibold text-brand-black/60">/bulan</span>
-            {/* Tampilkan penghematan kalau billing tahunan */}
             {billing === "yearly" && (
               <div className="mt-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 inline-block">
                 Hemat {formatRupiah(plan.price.monthly - price)}/bln
               </div>
             )}
           </>
-        ) : (
-          // Enterprise: harga custom
-          <span className="text-3xl font-black text-brand-black font-mono">
-            Harga Kustom
-          </span>
         )}
       </div>
 
@@ -230,7 +236,7 @@ export default function PricingSection() {
         </div>
 
         {/* === GRID PAKET HARGA === */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {PLANS.map((plan) => (
             <PricingCard key={plan.name} plan={plan} billing={billing} />
           ))}

@@ -46,7 +46,7 @@ export default function ReportsPage() {
   const fetchStock = async () => {
     setLoading(true);
     try {
-      setStock((await reportService.getStock()).data ?? []);
+      setStock((await reportService.getStock()).data?.products ?? []);
       setDenied(false);
     } catch (err) {
       if (err.response?.status === 403) setDenied(true);
@@ -63,15 +63,18 @@ export default function ReportsPage() {
       const res = tab === "sales"
         ? await reportService.downloadSales({ period, year, format })
         : await reportService.downloadStock({ format });
-      triggerFileDownload(res, `laporan-${tab}-${Date.now()}.${format}`);
+      // "excel" dari backend sebenarnya adalah .xlsx — map ke ekstensi yang benar
+      const ext = format === "excel" ? "xlsx" : format;
+      triggerFileDownload(res, `laporan-${tab}-${Date.now()}.${ext}`);
     } catch { alert("Gagal mengunduh laporan"); }
   };
 
+  // Kolom tabel penjualan — field harus sesuai nama field dari backend chart_data
+  // Backend mengembalikan: { label, total_revenue, total_transactions }
   const salesColumns = [
-    { key: "label",   label: "Periode" },
-    { key: "revenue", label: "Pendapatan", render: (v) => <span className="font-mono font-bold">{formatCurrency(v)}</span> },
-    { key: "orders",  label: "Order",      render: (v) => <span className="font-mono">{v ?? 0}</span> },
-    { key: "items",   label: "Item",       render: (v) => <span className="font-mono">{v ?? 0}</span> },
+    { key: "label",              label: "Periode" },
+    { key: "total_revenue",      label: "Pendapatan",   render: (v) => <span className="font-mono font-bold">{formatCurrency(v)}</span> },
+    { key: "total_transactions", label: "Transaksi",    render: (v) => <span className="font-mono">{v ?? 0}</span> },
   ];
 
   const stockColumns = [
@@ -79,12 +82,16 @@ export default function ReportsPage() {
     { key: "sku",          label: "SKU",       render: (v) => <span className="font-mono text-xs text-brand-black/60">{v}</span> },
     { key: "stock",        label: "Stok",      render: (v, r) => <span className={`font-mono font-black ${r.is_low_stock ? "text-red-600" : "text-green-700"}`}>{v}</span> },
     { key: "stock_alert",  label: "Min. Stok", render: (v) => <span className="font-mono text-brand-black/50">{v}</span> },
-    { key: "price",        label: "Nilai Stok", render: (v, r) => <span className="font-mono font-bold">{formatCurrency((r.stock ?? 0) * (v ?? 0))}</span> },
+    { key: "stock_value",  label: "Nilai Stok", render: (v) => <span className="font-mono font-bold">{formatCurrency(v ?? 0)}</span> },
     { key: "is_low_stock", label: "Status",    render: (v) => <span className={`text-xs font-black ${v ? "text-red-600" : "text-green-600"}`}>{v ? "⚠️ Rendah" : "✓ Aman"}</span> },
   ];
 
-  const chartData = sales?.data ?? [];
-  const topData   = (sales?.top_products ?? []).slice(0, 10).map((p) => ({ name: p.name?.split(" ")[0] ?? p.name, qty: p.total_qty ?? 0 }));
+  // Backend mengembalikan chart_data (bukan "data"), dan field qty bernama total_quantity
+  const chartData = sales?.chart_data ?? [];
+  const topData   = (sales?.top_products ?? []).slice(0, 10).map((p) => ({
+    name: p.name?.split(" ")[0] ?? p.name,
+    qty:  p.total_quantity ?? 0,  // backend field: total_quantity
+  }));
 
   if (denied) return (
     <div className="flex flex-col items-center justify-center h-64 gap-4">
@@ -163,13 +170,13 @@ export default function ReportsPage() {
             )}
           </div>
 
-          {/* Summary cards */}
+          {/* Summary cards — field dari backend: total_revenue, total_orders, avg_transaction */}
           {sales?.summary && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard label="Total Pendapatan" value={formatCurrency(sales.summary.total_revenue)} icon="💰" color="yellow" />
-              <StatCard label="Total Order"       value={sales.summary.total_orders ?? 0}             icon="🧾" />
-              <StatCard label="Item Terjual"      value={sales.summary.total_items ?? 0}              icon="📦" />
-              <StatCard label="Rata-rata Order"   value={formatCurrency(sales.summary.avg_order ?? 0)} icon="📊" />
+              <StatCard label="Total Pendapatan"  value={formatCurrency(sales.summary.total_revenue ?? 0)}    icon="💰" color="yellow" />
+              <StatCard label="Total Order"        value={sales.summary.total_orders ?? 0}                     icon="🧾" />
+              <StatCard label="Transaksi"          value={sales.summary.total_transactions ?? 0}               icon="📦" />
+              <StatCard label="Rata-rata Transaksi" value={formatCurrency(sales.summary.avg_transaction ?? 0)} icon="📊" />
             </div>
           )}
 
@@ -186,7 +193,7 @@ export default function ReportsPage() {
                     <XAxis dataKey="label" tick={{ fontSize: 10, fontFamily: "JetBrains Mono, monospace" }} axisLine={{ stroke: "#0A0A0A", strokeWidth: 2 }} tickLine={false} />
                     <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}jt` : v >= 1000 ? `${(v/1000).toFixed(0)}rb` : v} />
                     <Tooltip content={<ChartTooltip currency />} />
-                    <Line type="monotone" dataKey="revenue" stroke="#FFE500" strokeWidth={3} dot={{ r: 4, fill: "#FFE500", stroke: "#0A0A0A", strokeWidth: 2 }} />
+                    <Line type="monotone" dataKey="total_revenue" stroke="#FFE500" strokeWidth={3} dot={{ r: 4, fill: "#FFE500", stroke: "#0A0A0A", strokeWidth: 2 }} />
                   </LineChart>
                 </ResponsiveContainer>
               </div>

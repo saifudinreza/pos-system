@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import { getErrorMessage } from "@/lib/utils";
 
@@ -28,10 +29,12 @@ const Field = ({ name, label, type = "text", placeholder, value, onChange, error
   </div>
 );
 
-export default function RegisterPage() {
+function RegisterForm() {
   const { register, isLoading } = useAuthStore();
+  const searchParams = useSearchParams();
+  const plan = searchParams.get("plan") ?? "free"; // free | pro | enterprise
 
-  const [form, setForm]     = useState({ name: "", email: "", phone: "", password: "", password_confirmation: "" });
+  const [form, setForm]     = useState({ name: "", email: "", phone: "", store_name: "", password: "", password_confirmation: "" });
   const [errors, setErrors] = useState({});
 
   const handleChange = (e) => {
@@ -50,13 +53,20 @@ export default function RegisterPage() {
 
     try {
       await register(form);
-      window.location.href = "/dashboard";
+      // Pro/enterprise → langsung ke halaman upgrade setelah daftar
+      if (plan === "pro" || plan === "enterprise") {
+        window.location.href = `/upgrade?plan=${plan}&cycle=monthly`;
+      } else {
+        window.location.href = "/dashboard";
+      }
     } catch (err) {
       const data = err.response?.data;
       if (data?.errors) setErrors(data.errors);
       else setErrors({ _global: getErrorMessage(err) });
     }
   };
+
+  const planLabel = { free: "Free Trial", pro: "Pro", enterprise: "Enterprise" }[plan] ?? "Free";
 
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4 py-8">
@@ -71,7 +81,13 @@ export default function RegisterPage() {
 
         <div className="bg-white border-3 border-brand-black p-8" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
           <h1 className="font-black text-2xl font-grotesk mb-1">Daftar Akun</h1>
-          <p className="text-sm text-brand-black/50 font-medium mb-6">Mulai coba gratis 14 hari</p>
+          <div className="flex items-center gap-2 mb-6">
+            <p className="text-sm text-brand-black/50 font-medium">Paket yang dipilih:</p>
+            <span className={`text-xs font-black px-2 py-0.5 border-2 border-brand-black ${plan === "pro" ? "bg-brand-yellow" : "bg-white"}`}
+              style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>
+              {planLabel}
+            </span>
+          </div>
 
           {errors._global && (
             <div className="mb-4 px-4 py-3 bg-red-50 border-2 border-red-400 text-red-700 text-sm font-semibold">
@@ -80,9 +96,10 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <Field name="name"     label="Nama Lengkap"           placeholder="Budi Santoso"    value={form.name}                  onChange={handleChange} error={errors.name} />
-            <Field name="email"    label="Email"       type="email" placeholder="budi@email.com" value={form.email}                onChange={handleChange} error={errors.email} />
-            <Field name="phone"    label="No. HP (opsional)"       placeholder="08xxxxxxxxxx"    value={form.phone}                 onChange={handleChange} error={errors.phone} />
+            <Field name="name"       label="Nama Lengkap"           placeholder="Budi Santoso"        value={form.name}       onChange={handleChange} error={errors.name} />
+            <Field name="store_name" label="Nama Toko (opsional)"  placeholder="Toko Budi Jaya"      value={form.store_name} onChange={handleChange} error={errors.store_name} />
+            <Field name="email"      label="Email"       type="email" placeholder="budi@email.com"   value={form.email}      onChange={handleChange} error={errors.email} />
+            <Field name="phone"      label="No. HP (opsional)"       placeholder="08xxxxxxxxxx"       value={form.phone}      onChange={handleChange} error={errors.phone} />
             <Field name="password" label="Password"   type="password" placeholder="min. 8 karakter" value={form.password}         onChange={handleChange} error={errors.password} />
             <Field name="password_confirmation" label="Konfirmasi Password" type="password" placeholder="ulangi password" value={form.password_confirmation} onChange={handleChange} error={errors.password_confirmation} />
 
@@ -109,4 +126,8 @@ export default function RegisterPage() {
       </div>
     </div>
   );
+}
+
+export default function RegisterPage() {
+  return <Suspense><RegisterForm /></Suspense>;
 }

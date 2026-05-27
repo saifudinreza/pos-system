@@ -70,7 +70,10 @@ const productService = {
       const form = new FormData();
       Object.entries(payload).forEach(([key, val]) => {
         if (val !== null && val !== undefined) {
-          form.append(key, val);
+          // PENTING: boolean harus dikonversi ke "1"/"0" di FormData
+          // Laravel validation `boolean` menolak string "true"/"false"
+          // tapi menerima "1"/"0" — karena FormData selalu kirim string
+          form.append(key, typeof val === "boolean" ? (val ? "1" : "0") : val);
         }
       });
       body = form;
@@ -100,7 +103,8 @@ const productService = {
       form.append("_method", "PUT");
       Object.entries(payload).forEach(([key, val]) => {
         if (val !== null && val !== undefined) {
-          form.append(key, val);
+          // Sama seperti create: boolean → "1"/"0" agar Laravel validation lolos
+          form.append(key, typeof val === "boolean" ? (val ? "1" : "0") : val);
         }
       });
       body = form;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Banknote, Receipt, Package, Tag, AlertTriangle, TrendingUp, MonitorCheck, Plus } from "lucide-react";
 import StatCard          from "@/components/dashboard/StatCard";
 import SalesChart        from "@/components/dashboard/SalesChart";
 import TopProductsChart  from "@/components/dashboard/TopProductsChart";
@@ -40,7 +41,9 @@ export default function DashboardPage() {
           setTopProds(tp.slice(0, 5).map((p) => ({ name: p.name?.split(" ")[0] ?? p.name, qty: p.total_qty ?? p.quantity ?? 0 })));
         }
         if (stockRes.status  === "fulfilled") {
-          setStock((stockRes.value?.data ?? []).filter((p) => p.is_low_stock));
+          // stockRes.value.data adalah { products, summary } — ambil .products dulu
+          const stockProducts = stockRes.value?.data?.products ?? stockRes.value?.data ?? [];
+          setStock(stockProducts.filter((p) => p.is_low_stock));
         }
         if (ordersRes.status === "fulfilled") setOrders(ordersRes.value?.data ?? []);
       } finally {
@@ -70,13 +73,13 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="flex gap-2 flex-wrap">
           <Link href="/products">
-            <NeoButton size="sm" variant="primary">+ Produk</NeoButton>
+            <NeoButton size="sm" variant="primary"><Plus size={14} className="inline mr-1" />Produk</NeoButton>
           </Link>
           <Link href="/reports">
-            <NeoButton size="sm" variant="secondary">📈 Laporan</NeoButton>
+            <NeoButton size="sm" variant="secondary"><TrendingUp size={14} className="inline mr-1" />Laporan</NeoButton>
           </Link>
           <Link href="/kasir">
-            <NeoButton size="sm" variant="dark">🖥️ Kasir</NeoButton>
+            <NeoButton size="sm" variant="dark"><MonitorCheck size={14} className="inline mr-1" />Kasir</NeoButton>
           </Link>
         </div>
       </div>
@@ -88,7 +91,7 @@ export default function DashboardPage() {
           style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
         >
           <div className="flex items-center gap-3">
-            <span className="text-xl" style={{ animation: "wob 1.4s ease-in-out infinite" }}>⚠️</span>
+            <AlertTriangle size={20} className="text-brand-black shrink-0" style={{ animation: "wob 1.4s ease-in-out infinite" }} />
             <div>
               <p className="font-black text-brand-black text-sm">
                 {stock.length} produk hampir habis stok!
@@ -103,37 +106,37 @@ export default function DashboardPage() {
       )}
 
       {/* ── 4 Stat Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="slide-up stagger-1">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-stretch">
+        <div className="slide-up stagger-1 h-full">
           <StatCard
             label="Pendapatan Bulan Ini"
             value={loading ? "—" : formatCurrency(sales?.total_revenue ?? 0)}
-            icon="💰" color="yellow"
+            icon={<Banknote size={22} strokeWidth={2.5} />} color="yellow"
             trend={sales?.revenue_trend ?? undefined}
           />
         </div>
-        <div className="slide-up stagger-2">
+        <div className="slide-up stagger-2 h-full">
           <StatCard
             label="Order Hari Ini"
             value={loading ? "—" : (sales?.total_orders ?? 0)}
-            icon="🧾" color="white"
+            icon={<Receipt size={22} strokeWidth={2.5} />} color="white"
             sub="transaksi"
           />
         </div>
-        <div className="slide-up stagger-3">
+        <div className="slide-up stagger-3 h-full">
           <StatCard
             label="Stok Hampir Habis"
             value={loading ? "—" : stock.length}
-            icon="📦"
+            icon={<Package size={22} strokeWidth={2.5} />}
             color={stock.length > 0 ? "yellow" : "white"}
             sub={stock.length > 0 ? "perlu restock" : "semua aman"}
           />
         </div>
-        <div className="slide-up stagger-4">
+        <div className="slide-up stagger-4 h-full">
           <StatCard
             label="Item Terjual"
             value={loading ? "—" : (sales?.total_items ?? 0)}
-            icon="🏷️" color="white"
+            icon={<Tag size={22} strokeWidth={2.5} />} color="white"
             sub="hari ini"
           />
         </div>

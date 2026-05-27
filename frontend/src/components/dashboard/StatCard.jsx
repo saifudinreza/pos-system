@@ -12,11 +12,11 @@ export default function StatCard({ label, value, sub, icon, color = "yellow", tr
   };
 
   return (
-    <NeoCard className={`${COLORS[color]} flex flex-col gap-3`}>
+    <NeoCard className={`${COLORS[color]} flex flex-col gap-3 h-full`}>
       {/* Baris atas: label + ikon */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-black uppercase tracking-widest opacity-60 font-mono">{label}</p>
-        {icon && <span className="text-2xl">{icon}</span>}
+        {icon && <span className="text-2xl leading-none">{icon}</span>}
       </div>
 
       {/* Angka utama */}

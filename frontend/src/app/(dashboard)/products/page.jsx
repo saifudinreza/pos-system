@@ -64,7 +64,8 @@ export default function ProductsPage() {
         }
       : EMPTY_FORM
     );
-    setPreview(data?.image ? getImageUrl(data.image) : null);
+    // image_url sudah full URL dari backend — tidak perlu getImageUrl()
+    setPreview(data?.image_url ?? null);
     setModal({ open: true, data });
     setFormError("");
   };
@@ -122,8 +123,8 @@ export default function ProductsPage() {
       key: "name", label: "Produk",
       render: (val, row) => (
         <div className="flex items-center gap-3">
-          {row.image
-            ? <img src={getImageUrl(row.image)} alt={val} className="w-9 h-9 object-cover border-2 border-brand-black/20 shrink-0" />
+          {row.image_url
+            ? <img src={row.image_url} alt={val} className="w-9 h-9 object-cover border-2 border-brand-black/20 shrink-0" />
             : <div className="w-9 h-9 bg-brand-gray border-2 border-brand-black/10 shrink-0 flex items-center justify-center text-xs text-brand-black/30">📦</div>
           }
           <div>
@@ -281,7 +282,7 @@ export default function ProductsPage() {
               )}
               <label className="cursor-pointer flex-1">
                 <div className="border-2 border-dashed border-brand-black px-4 py-3 text-center text-sm text-brand-black/50 hover:border-brand-yellow hover:text-brand-black transition-colors">
-                  {form.image ? form.image.name : (modal.data?.image ? "Ganti foto..." : "Klik untuk pilih foto...")}
+                  {form.image ? form.image.name : (modal.data?.image_url ? "Ganti foto..." : "Klik untuk pilih foto...")}
                 </div>
                 <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
               </label>

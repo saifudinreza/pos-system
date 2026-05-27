@@ -10,7 +10,7 @@ import NeoModal  from "@/components/ui/NeoModal";
 import useAuthStore from "@/stores/authStore";
 import { formatCurrency, formatDateTime, getOrderStatusConfig, getErrorMessage } from "@/lib/utils";
 
-function OrderDetailModal({ order, onClose, onVoid }) {
+function OrderDetailModal({ order, onClose, onVoid, onMarkPaid }) {
   if (!order) return null;
   const status = getOrderStatusConfig(order.status);
   return (
@@ -49,7 +49,7 @@ function OrderDetailModal({ order, onClose, onVoid }) {
               <tbody className="divide-y divide-brand-black/10">
                 {(order.items ?? order.order_items ?? []).map((item, i) => (
                   <tr key={i} className="hover:bg-brand-yellow/5">
-                    <td className="px-3 py-2 font-medium text-sm">{item.product?.name ?? item.name}</td>
+                    <td className="px-3 py-2 font-medium text-sm">{item.product_name ?? item.product?.name ?? item.name ?? "-"}</td>
                     <td className="px-3 py-2 text-center font-mono text-sm">{item.quantity}</td>
                     <td className="px-3 py-2 text-right font-mono text-xs">{formatCurrency(item.price ?? item.unit_price)}</td>
                     <td className="px-3 py-2 text-right font-black font-mono text-sm">{formatCurrency((item.price ?? item.unit_price) * item.quantity)}</td>
@@ -91,9 +91,15 @@ function OrderDetailModal({ order, onClose, onVoid }) {
         {order.status !== "cancelled" && order.status !== "void" && (
           <div className="flex gap-3 justify-end pt-2 border-t border-brand-black/10">
             {order.status === "pending" && (
-              <NeoButton variant="danger" size="sm" onClick={() => onVoid(order.id, "cancelled")}>
-                Batalkan Order
-              </NeoButton>
+              <>
+                {/* Tandai Lunas: berguna untuk bayar tunai atau testing tanpa ngrok */}
+                <NeoButton variant="primary" size="sm" onClick={() => onMarkPaid(order.id)}>
+                  ✓ Tandai Lunas
+                </NeoButton>
+                <NeoButton variant="danger" size="sm" onClick={() => onVoid(order.id, "cancelled")}>
+                  Batalkan Order
+                </NeoButton>
+              </>
             )}
             {order.status === "paid" && (
               <NeoButton variant="danger" size="sm" onClick={() => onVoid(order.id, "void")}>
@@ -121,6 +127,14 @@ export default function OrdersPage() {
       setDetailOrder(data.data ?? data);
     } catch { alert("Gagal memuat detail order"); }
     finally { setLoadingDetail(false); }
+  };
+
+  const handleMarkPaid = async (id) => {
+    if (!confirm("Tandai order ini sebagai LUNAS? (Bayar Tunai / Manual)")) return;
+    try {
+      await updateStatus(id, "paid");
+      setDetailOrder(null);
+    } catch (err) { alert(getErrorMessage(err)); }
   };
 
   const handleVoid = async (id, status) => {
@@ -209,7 +223,7 @@ export default function OrdersPage() {
         </div>
       )}
 
-      <OrderDetailModal order={detailOrder} onClose={() => setDetailOrder(null)} onVoid={handleVoid} />
+      <OrderDetailModal order={detailOrder} onClose={() => setDetailOrder(null)} onVoid={handleVoid} onMarkPaid={handleMarkPaid} />
     </div>
   );
 }

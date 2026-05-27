@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Transaction;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -22,8 +23,13 @@ class TransactionController extends Controller
         Config::$isProduction = config('services.midtrans.is_production');
         Config::$isSanitized  = true;
         Config::$is3ds        = true;
-        // ↑ isSanitized = Midtrans otomatis bersihkan input berbahaya
-        // is3ds = aktifkan 3D Secure untuk kartu kredit (lebih aman)
+
+        // Override notification URL — dipakai saat development dengan ngrok
+        // Di production, hapus MIDTRANS_NOTIFICATION_URL dari .env agar pakai URL dari dashboard
+        $notifUrl = config('services.midtrans.notification_url');
+        if ($notifUrl) {
+            Config::$overrideNotifUrl = $notifUrl;
+        }
     }
 
     // =============================================================
@@ -290,6 +296,9 @@ class TransactionController extends Controller
                 if ($status === 'settlement') {
                     $transaction->order->update(['status' => 'paid']);
                     Log::info('Order ' . $transaction->order->order_number . ' berhasil dibayar.');
+                    // Kirim struk digital ke WhatsApp customer (kalau ada nomor HP)
+                    $order = $transaction->order->load('items.product');
+                    app(WhatsAppService::class)->sendReceipt($order);
                 }
 
                 // Kalau gagal/expire, kembalikan stok dan cancel order

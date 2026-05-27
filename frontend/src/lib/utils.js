@@ -91,9 +91,10 @@ export function getTransactionStatusConfig(status) {
 // --- ROLE USER → LABEL ---
 export function getRoleLabel(role) {
   const map = {
-    admin: "Admin",
-    kasir: "Kasir",
-    user:  "Pelanggan",
+    admin:     "Admin",
+    kasir:     "Kasir",
+    user:      "Pelanggan",
+    developer: "Developer",
   };
   return map[role] ?? role;
 }

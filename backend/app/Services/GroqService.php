@@ -2,56 +2,158 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class GroqService
 {
-    private string $apiKey;
-    private string $model;
-    private string $baseUrl = 'https://api.groq.com/openai/v1/chat/completions';
+    private const GROQ_RATE_LIMIT_KEY = 'groq_rate_limited';
+    private const GROQ_RATE_LIMIT_TTL = 65; // detik — sedikit lebih dari reset window Groq (60s)
+
+    private string $groqKey;
+    private string $groqModel;
+    private string $groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
+
+    private string $orKey;
+    private string $orModel;
+    private string $orUrl;
 
     public function __construct()
     {
-        $this->apiKey = config('services.groq.api_key');
-        $this->model  = config('services.groq.model', 'llama-3.3-70b-versatile');
+        $this->groqKey   = config('services.groq.api_key');
+        $this->groqModel = config('services.groq.model', 'llama-3.3-70b-versatile');
+
+        $this->orKey   = config('services.openrouter.api_key');
+        $this->orModel = config('services.openrouter.model', 'meta-llama/llama-3.1-8b-instruct:free');
+        $this->orUrl   = config('services.openrouter.base_url', 'https://openrouter.ai/api/v1/chat/completions');
     }
 
+    // ============================================================
+    // ask() — kirim ke Groq dulu, auto-fallback ke OpenRouter
+    //          jika Groq rate-limited (429). Setelah TTL habis
+    //          (65 detik), otomatis kembali ke Groq.
+    // ============================================================
     public function ask(string $systemPrompt, string $userQuery): array
     {
-        try {
-            $response = Http::timeout(30)
-                ->withToken($this->apiKey)
-                ->post($this->baseUrl, [
-                    'model'       => $this->model,
-                    'messages'    => [
-                        ['role' => 'system', 'content' => $systemPrompt],
-                        ['role' => 'user',   'content' => $userQuery],
-                    ],
-                    'max_tokens'  => 1024,
-                    'temperature' => 0.7,
-                ]);
+        $groqRateLimited = Cache::get(self::GROQ_RATE_LIMIT_KEY, false);
 
-            if (! $response->successful()) {
-                Log::error('Groq API error', [
-                    'status' => $response->status(),
-                    'body'   => $response->body(),
-                ]);
-                throw new \Exception('Groq API gagal: ' . $response->body());
+        if (! $groqRateLimited) {
+            try {
+                return $this->callGroq($systemPrompt, $userQuery);
+            } catch (\Exception $e) {
+                // Kalau 429 (rate limit) → tandai dan langsung coba OpenRouter
+                if ($this->isRateLimitError($e)) {
+                    Log::warning('Groq rate limit hit — switching to OpenRouter for ' . self::GROQ_RATE_LIMIT_TTL . 's');
+                    Cache::put(self::GROQ_RATE_LIMIT_KEY, true, self::GROQ_RATE_LIMIT_TTL);
+                    return $this->callOpenRouter($systemPrompt, $userQuery);
+                }
+                throw $e;
             }
-
-            $data = $response->json();
-
-            return [
-                'text'        => $data['choices'][0]['message']['content'] ?? 'Tidak ada response dari AI.',
-                'tokens_used' => $data['usage']['total_tokens'] ?? 0,
-            ];
-        } catch (\Exception $e) {
-            Log::error('GroqService error: ' . $e->getMessage());
-            throw $e;
         }
+
+        // Groq sedang rate-limited → pakai OpenRouter
+        Log::info('Groq masih rate-limited, menggunakan OpenRouter');
+        return $this->callOpenRouter($systemPrompt, $userQuery);
     }
 
+    // ============================================================
+    // Provider info — untuk ditampilkan di frontend
+    // ============================================================
+    public function getActiveProvider(): string
+    {
+        return Cache::get(self::GROQ_RATE_LIMIT_KEY, false) ? 'openrouter' : 'groq';
+    }
+
+    public function getActiveModel(): string
+    {
+        return Cache::get(self::GROQ_RATE_LIMIT_KEY, false) ? $this->orModel : $this->groqModel;
+    }
+
+    // ============================================================
+    // PRIVATE — call Groq
+    // ============================================================
+    private function callGroq(string $systemPrompt, string $userQuery): array
+    {
+        $response = Http::timeout(30)
+            ->withToken($this->groqKey)
+            ->post($this->groqUrl, [
+                'model'       => $this->groqModel,
+                'messages'    => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user',   'content' => $userQuery],
+                ],
+                'max_tokens'  => 1024,
+                'temperature' => 0.7,
+            ]);
+
+        if (! $response->successful()) {
+            Log::error('Groq API error', ['status' => $response->status(), 'body' => $response->body()]);
+            throw new \Exception('groq_error:' . $response->status() . ':' . $response->body());
+        }
+
+        $data = $response->json();
+
+        return [
+            'text'        => $data['choices'][0]['message']['content'] ?? 'Tidak ada response dari AI.',
+            'tokens_used' => $data['usage']['total_tokens'] ?? 0,
+            'provider'    => 'groq',
+            'model'       => $this->groqModel,
+        ];
+    }
+
+    // ============================================================
+    // PRIVATE — call OpenRouter
+    // ============================================================
+    private function callOpenRouter(string $systemPrompt, string $userQuery): array
+    {
+        if (empty($this->orKey)) {
+            throw new \Exception('OpenRouter API key belum dikonfigurasi.');
+        }
+
+        $response = Http::timeout(30)
+            ->withToken($this->orKey)
+            ->withHeaders([
+                'HTTP-Referer' => config('app.url', 'http://localhost'),
+                'X-Title'      => config('app.name', 'KasirAI'),
+            ])
+            ->post($this->orUrl, [
+                'model'       => $this->orModel,
+                'messages'    => [
+                    ['role' => 'system', 'content' => $systemPrompt],
+                    ['role' => 'user',   'content' => $userQuery],
+                ],
+                'max_tokens'  => 1024,
+                'temperature' => 0.7,
+            ]);
+
+        if (! $response->successful()) {
+            Log::error('OpenRouter API error', ['status' => $response->status(), 'body' => $response->body()]);
+            throw new \Exception('OpenRouter gagal: ' . $response->body());
+        }
+
+        $data = $response->json();
+
+        return [
+            'text'        => $data['choices'][0]['message']['content'] ?? 'Tidak ada response dari AI.',
+            'tokens_used' => $data['usage']['total_tokens'] ?? 0,
+            'provider'    => 'openrouter',
+            'model'       => $this->orModel,
+        ];
+    }
+
+    // ============================================================
+    // PRIVATE — deteksi apakah error adalah rate limit
+    // ============================================================
+    private function isRateLimitError(\Exception $e): bool
+    {
+        $msg = $e->getMessage();
+        return str_contains($msg, 'groq_error:429') || str_contains($msg, 'rate_limit_exceeded');
+    }
+
+    // ============================================================
+    // PROMPT BUILDERS (tidak berubah)
+    // ============================================================
     public function buildSalesPrompt(array $salesData, string $userQuery): string
     {
         $dataJson = json_encode($salesData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);

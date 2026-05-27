@@ -33,7 +33,9 @@ const reportService = {
   //   { summary: { total_revenue, total_orders, total_items }, data: [...] }
   getSales: async (params = {}) => {
     const { data } = await api.get(`/reports/sales${buildQueryString(params)}`);
-    return data;
+    // Backend membungkus response di dalam { message, data: { ... } }
+    // Kita unwrap .data supaya pemanggil langsung dapat isinya
+    return data.data;
   },
 
   // --- LAPORAN STOK ---
@@ -72,8 +74,23 @@ const reportService = {
 // --- Helper: trigger download file di browser ---
 // Analogi: kasir menyerahkan struk cetak ke tangan pelanggan
 // Dipanggil setelah downloadSales() atau downloadStock() berhasil
-export function triggerFileDownload(response, filename) {
-  const url = window.URL.createObjectURL(new Blob([response.data]));
+//
+// Prioritas nama file:
+//   1. Content-Disposition header dari backend (paling akurat, sudah include ekstensi)
+//   2. fallbackFilename yang diberikan pemanggil
+export function triggerFileDownload(response, fallbackFilename) {
+  // Coba ambil nama file dari header Content-Disposition
+  // Contoh header: attachment; filename="laporan-penjualan-2026-01-01.xlsx"
+  const disposition = response.headers?.["content-disposition"] ?? "";
+  const match = disposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+  const filename = match
+    ? match[1].replace(/['"]/g, "")   // hapus tanda kutip kalau ada
+    : fallbackFilename;
+
+  // Ambil MIME type dari response untuk Blob supaya file terbuka dengan benar
+  const mimeType = response.headers?.["content-type"] ?? "application/octet-stream";
+
+  const url = window.URL.createObjectURL(new Blob([response.data], { type: mimeType }));
   const link = document.createElement("a");
   link.href = url;
   link.setAttribute("download", filename);

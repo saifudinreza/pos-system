@@ -131,25 +131,20 @@ const useAuthStore = create((set, get) => ({
   // Role admin atau kasir (keduanya bisa akses dashboard)
   isStaff: () => ["admin", "kasir"].includes(get().user?.role),
 
-  // Developer email — selalu punya akses enterprise penuh
-  isDeveloper: () => get().user?.email === "donojomi@gmail.com",
+  isDeveloper: () => get().user?.role === "developer",
 
-  // Cek apakah user bisa akses AI sidebar
-  // Admin role ATAU developer email ATAU subscription pro/enterprise
   canAccessAI: () => {
     const user = get().user;
     if (!user) return false;
-    if (user.email === "donojomi@gmail.com") return true;
-    if (user.role === "admin") return true;
+    if (user.role === "developer" || user.role === "admin") return true;
     const plan = user.subscription_plan ?? "free";
     return plan === "pro" || plan === "enterprise";
   },
 
-  // Dapatkan subscription plan efektif (developer selalu enterprise)
   getEffectivePlan: () => {
     const user = get().user;
     if (!user) return "free";
-    if (user.email === "donojomi@gmail.com") return "enterprise";
+    if (user.role === "developer") return "enterprise";
     return user.subscription_plan ?? "free";
   },
 }));

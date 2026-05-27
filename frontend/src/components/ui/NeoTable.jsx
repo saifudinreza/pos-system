@@ -2,6 +2,7 @@
 // Analogi: seperti buku kas di meja kasir — baris-kolom rapi dengan header tegas
 
 export default function NeoTable({ columns, data, isLoading, emptyText = "Tidak ada data" }) {
+  const rows = Array.isArray(data) ? data : [];
   return (
     <div className="border-2 border-brand-black overflow-hidden" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
       <div className="overflow-x-auto">
@@ -30,7 +31,7 @@ export default function NeoTable({ columns, data, isLoading, emptyText = "Tidak 
                   <p className="mt-2 text-sm font-semibold text-brand-black/50">Memuat data...</p>
                 </td>
               </tr>
-            ) : data.length === 0 ? (
+            ) : rows.length === 0 ? (
               // Empty state
               <tr>
                 <td colSpan={columns.length} className="text-center py-12 text-brand-black/40 font-semibold">
@@ -39,7 +40,7 @@ export default function NeoTable({ columns, data, isLoading, emptyText = "Tidak 
               </tr>
             ) : (
               // Data rows
-              data.map((row, i) => (
+              rows.map((row, i) => (
                 <tr
                   key={row.id ?? i}
                   className={`border-b border-brand-black/10 hover:bg-brand-yellow/10 transition-colors ${i % 2 === 0 ? "bg-white" : "bg-brand-gray/50"}`}

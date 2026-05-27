@@ -9,14 +9,16 @@ import NeoButton from "@/components/ui/NeoButton";
 import NeoModal  from "@/components/ui/NeoModal";
 import NeoInput  from "@/components/ui/NeoInput";
 import { formatDateTime, getRoleLabel, getErrorMessage } from "@/lib/utils";
+import { ShieldOff } from "lucide-react";
 
-const EMPTY_FORM = { name: "", email: "", password: "", phone: "", role: "kasir", is_active: true };
-const ROLE_COLOR = { admin: "black", kasir: "yellow", user: "gray" };
+const EMPTY_FORM = { name: "", email: "", password: "", password_confirmation: "", phone: "", role: "kasir", is_active: true };
+const ROLE_COLOR = { admin: "black", kasir: "yellow", user: "gray", developer: "red" };
 
 export default function UsersPage() {
   const [users,     setUsers]     = useState([]);
   const [meta,      setMeta]      = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [denied,    setDenied]    = useState(false);
   const [search,    setSearch]    = useState("");
   const [filters,   setFilters]   = useState({ page: 1, per_page: 10 });
   const [modal,     setModal]     = useState({ open: false, data: null });
@@ -31,6 +33,8 @@ export default function UsersPage() {
       const data = await userService.getAll({ ...filters, search: debouncedSearch });
       setUsers(data.data ?? []);
       setMeta(data.meta ?? null);
+    } catch (err) {
+      if (err.response?.status === 403) setDenied(true);
     } finally { setIsLoading(false); }
   };
 
@@ -38,7 +42,7 @@ export default function UsersPage() {
 
   const openModal = (data = null) => {
     setForm(data
-      ? { name: data.name, email: data.email, password: "", phone: data.phone ?? "", role: data.role, is_active: data.is_active }
+      ? { name: data.name, email: data.email, password: "", password_confirmation: "", phone: data.phone ?? "", role: data.role, is_active: data.is_active }
       : EMPTY_FORM
     );
     setModal({ open: true, data });
@@ -51,7 +55,10 @@ export default function UsersPage() {
     setFormError("");
     try {
       const payload = { ...form };
-      if (!payload.password) delete payload.password;
+      if (!payload.password) {
+        delete payload.password;
+        delete payload.password_confirmation;
+      }
       if (modal.data) await userService.update(modal.data.id, payload);
       else            await userService.create(payload);
       setModal({ open: false, data: null });
@@ -95,6 +102,19 @@ export default function UsersPage() {
     },
   ];
 
+  if (denied) return (
+    <div className="flex flex-col items-center justify-center py-24 gap-4 page-fade">
+      <div className="w-20 h-20 bg-red-100 border-2 border-brand-black flex items-center justify-center"
+        style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+        <ShieldOff size={36} className="text-red-500" strokeWidth={2} />
+      </div>
+      <h2 className="text-2xl font-black font-grotesk">Akses Ditolak</h2>
+      <p className="text-sm text-brand-black/50 text-center max-w-xs">
+        Halaman ini hanya bisa diakses oleh <span className="font-bold text-brand-black">Developer</span>.
+      </p>
+    </div>
+  );
+
   return (
     <div className="space-y-5 max-w-5xl page-fade">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -122,6 +142,7 @@ export default function UsersPage() {
           <option value="admin">Admin</option>
           <option value="kasir">Kasir</option>
           <option value="user">Pelanggan</option>
+          <option value="developer">Developer</option>
         </select>
         <select
           onChange={(e) => setFilters((p) => ({ ...p, is_active: e.target.value, page: 1 }))}
@@ -180,6 +201,13 @@ export default function UsersPage() {
             id="u-password" type="password" required={!modal.data} value={form.password}
             onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))} placeholder="Min. 8 karakter" />
 
+          {form.password && (
+            <NeoInput label="Konfirmasi Password *"
+              id="u-password-confirm" type="password" required value={form.password_confirmation}
+              onChange={(e) => setForm((p) => ({ ...p, password_confirmation: e.target.value }))}
+              placeholder="Ulangi password baru" />
+          )}
+
           <div className="flex flex-col gap-1">
             <label className="text-sm font-bold">Role *</label>
             <select
@@ -191,6 +219,7 @@ export default function UsersPage() {
               <option value="kasir">Kasir</option>
               <option value="admin">Admin</option>
               <option value="user">Pelanggan</option>
+              <option value="developer">Developer</option>
             </select>
           </div>
 

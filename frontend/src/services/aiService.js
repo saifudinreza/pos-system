@@ -35,7 +35,7 @@ const aiService = {
   // @returns {{ message, response: string, tokens_used: number }}
   query: async (query) => {
     const { data } = await api.post("/ai/query", { query });
-    return data;
+    return data.data;
   },
 
   // --- PREDIKSI STOK ---
@@ -46,7 +46,7 @@ const aiService = {
   // @returns {{ message, response: string, tokens_used: number }}
   predictStock: async (query) => {
     const { data } = await api.post("/ai/predict-stock", { query });
-    return data;
+    return data.data;
   },
 
   // --- REKOMENDASI PRODUK / STRATEGI ---
@@ -57,7 +57,7 @@ const aiService = {
   // @returns {{ message, response: string, tokens_used: number }}
   recommend: async (query) => {
     const { data } = await api.post("/ai/recommend", { query });
-    return data;
+    return data.data;
   },
 
   // --- LOG RIWAYAT QUERY AI ---

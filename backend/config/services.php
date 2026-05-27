@@ -40,10 +40,23 @@ return [
         'model'   => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
     ],
 
+    'openrouter' => [
+        'api_key' => env('OPENROUTER_API_KEY'),
+        'model'   => env('OPENROUTER_MODEL', 'meta-llama/llama-3.1-8b-instruct:free'),
+        'base_url' => 'https://openrouter.ai/api/v1/chat/completions',
+    ],
+
+    // Fonnte WA Gateway — untuk kirim struk digital ke WhatsApp customer
+    // Daftar di fonnte.com, scan QR dengan WA kamu, copy token ke .env
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN', ''),
+    ],
+
     'midtrans' => [
-        'server_key'    => env('MIDTRANS_SERVER_KEY'),
-        'client_key'    => env('MIDTRANS_CLIENT_KEY'),
-        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
+        'server_key'        => env('MIDTRANS_SERVER_KEY'),
+        'client_key'        => env('MIDTRANS_CLIENT_KEY'),
+        'is_production'     => env('MIDTRANS_IS_PRODUCTION', false),
+        'notification_url'  => env('MIDTRANS_NOTIFICATION_URL'),
     ],
 
 ];

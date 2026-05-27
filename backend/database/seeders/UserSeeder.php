@@ -8,42 +8,18 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-
-        // ===== ADMIN =====
+        // Hanya satu akun: developer (sistem, tanpa tenant)
+        // Password: developer123
         User::create([
-            'name' => 'Admin POS',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('admin123'),
-            // ↑ Hash::make() karena di model kita pakai cast 'hashed'
-            // tapi untuk seeder lebih aman eksplisit pakai Hash::make()
-            'role' => 'admin',
-            'phone' => '081234567890',
-            'is_active' => true,
-        ]);
-
-        // =====KASIR =====
-        User::create([
-            'name' => 'Kasir 1',
-            'email' => 'Kasir1@gmail.com',
-            'password' => Hash::make('kasir123'),
-            'role'      => 'kasir',
-            'phone'     => '081234567891',
-            'is_active' => true,
-        ]);
-
-        // ===== USER / CUSTOMER =====
-        User::create([
-            'name' => 'Customer 1',
-            'email' => 'customer@gmail.com',
-            'password' => Hash::make('customer123'),
-            'role'      => 'user',
-            'phone'     => '081234567892',
-            'is_active' => true,
+            'tenant_id'  => null,
+            'name'       => 'Saifudin Reza',
+            'email'      => 'donojomi@gmail.com',
+            'password'   => Hash::make('developer123'),
+            'role'       => 'developer',
+            'phone'      => null,
+            'is_active'  => true,
         ]);
     }
 }

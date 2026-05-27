@@ -88,6 +88,8 @@ const useAiStore = create((set, get) => ({
         timestamp:   new Date().toISOString(),
         type:        "sales_analysis",
         tokens_used: data.tokens_used,
+        provider:    data.provider,
+        model:       data.model,
       };
 
       set((state) => ({
@@ -144,6 +146,8 @@ const useAiStore = create((set, get) => ({
         timestamp:   new Date().toISOString(),
         type:        "stock_prediction",
         tokens_used: data.tokens_used,
+        provider:    data.provider,
+        model:       data.model,
       };
       set((state) => ({
         messages:        [...state.messages, aiMessage],
@@ -193,6 +197,8 @@ const useAiStore = create((set, get) => ({
         timestamp:   new Date().toISOString(),
         type:        "recommendation",
         tokens_used: data.tokens_used,
+        provider:    data.provider,
+        model:       data.model,
       };
       set((state) => ({
         messages:        [...state.messages, aiMessage],

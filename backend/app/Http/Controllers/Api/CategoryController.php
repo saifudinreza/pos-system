@@ -85,13 +85,28 @@ class CategoryController extends Controller
     // =============================================================
     public function store(Request $request): JsonResponse
     {
+        // ----- CEK LIMIT PAKET -----
+        $plan   = $request->user()->subscription_plan ?? 'free';
+        $limits = ['free' => 3, 'pro' => 10, 'enterprise' => null];
+        $limit  = $limits[$plan] ?? 3;
+
+        if ($limit !== null && Category::count() >= $limit) {
+            return response()->json([
+                'message' => "Paket " . strtoupper($plan) . " hanya bisa menyimpan {$limit} kategori. Upgrade untuk menambah lebih banyak.",
+                'limit_reached' => true,
+            ], 422);
+        }
+
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
-            // ↑ unique:categories,name = nama kategori tidak boleh sama
+            'name'      => ['required', 'string', 'max:255',
+                \Illuminate\Validation\Rule::unique('categories', 'name')->where('tenant_id', $request->user()->tenant_id),
+            ],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        $category = Category::create($validated);
+        $category = Category::create(array_merge($validated, [
+            'tenant_id' => $request->user()->tenant_id,
+        ]));
         // ↑ Slug otomatis digenerate dari boot() di Model Category
         // Tidak perlu kirim slug dari frontend
 
@@ -119,12 +134,8 @@ class CategoryController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => [
-                'sometimes',
-                'string',
-                'max:255',
-                'unique:categories,name,' . $id,
-                // ↑ Ignore ID kategori ini sendiri saat cek unique
+            'name'      => ['sometimes', 'string', 'max:255',
+                \Illuminate\Validation\Rule::unique('categories', 'name')->where('tenant_id', $category->tenant_id)->ignore($id),
             ],
             'is_active' => ['nullable', 'boolean'],
         ]);

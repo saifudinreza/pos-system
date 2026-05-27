@@ -63,7 +63,7 @@ export default function OrderDetailPage() {
           {order.items?.map((item) => (
             <div key={item.id} className="px-5 py-3 flex justify-between items-center">
               <div>
-                <p className="font-bold text-sm">{item.product?.name ?? "-"}</p>
+                <p className="font-bold text-sm">{item.product_name ?? item.product?.name ?? "-"}</p>
                 <p className="text-xs text-brand-black/50 font-mono">{formatCurrency(item.price)} × {item.quantity}</p>
               </div>
               <span className="font-black font-mono">{formatCurrency(item.subtotal)}</span>

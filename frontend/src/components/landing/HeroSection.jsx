@@ -122,18 +122,49 @@ const AIChat = () => {
 };
 
 // ======================================================
-// OrderTicker — Pesanan masuk berganti tiap 2 detik
+// StampRays — 16 sinar berputar di sekitar stamp LUNAS
+// ======================================================
+const StampRays = ({ visible }) => (
+  <div style={{
+    position: "absolute",
+    inset: "-12px",
+    pointerEvents: "none",
+    opacity: visible ? 1 : 0,
+    transition: "opacity 0.3s",
+    animation: visible ? "rayspin 6s linear infinite" : "none",
+  }}>
+    {Array.from({ length: 16 }, (_, i) => (
+      <div key={i} style={{
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+        width: "2.5px",
+        height: "14px",
+        background: "#0A0A0A",
+        transformOrigin: "50% -10px",
+        transform: `rotate(${i * 22.5}deg)`,
+      }} />
+    ))}
+  </div>
+);
+
+// ======================================================
+// OrderTicker — Pesanan masuk berganti tiap 2 detik dengan slide
 // ======================================================
 const OrderTicker = () => {
   const orders = [
-    { inv: "#3829", time: "2 mnt",   amt: "Rp 45.000", pay: "QRIS",     payBg: "#00C27C", payFg: "#fff" },
+    { inv: "#3829", time: "2 mnt",   amt: "Rp 45.000", pay: "QRIS",     payBg: "#0066FF", payFg: "#fff" },
     { inv: "#3830", time: "barusan", amt: "Rp 25.000", pay: "Cash",     payBg: "#FFE500", payFg: "#0A0A0A" },
-    { inv: "#3831", time: "5 mnt",   amt: "Rp 78.000", pay: "Transfer", payBg: "#0066FF", payFg: "#fff" },
+    { inv: "#3831", time: "5 mnt",   amt: "Rp 78.000", pay: "Transfer", payBg: "#00C27C", payFg: "#fff" },
   ];
   const [idx, setIdx] = useState(0);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % orders.length), 2200);
+    const t = setInterval(() => {
+      setIdx((i) => (i + 1) % orders.length);
+      setTick((k) => k + 1);
+    }, 2200);
     return () => clearInterval(t);
   }, []);
 
@@ -143,11 +174,12 @@ const OrderTicker = () => {
       padding: "8px 12px", height: "80px", overflow: "hidden",
       display: "flex", alignItems: "center",
     }}>
-      <div style={{
+      <div key={tick} style={{
         width: "100%", display: "flex", alignItems: "center",
         justifyContent: "space-between", gap: "6px",
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: "11px", fontWeight: 600,
+        animation: "tickerSlide 0.45s cubic-bezier(.2,.9,.3,1.2) both",
       }}>
         <span style={{ fontWeight: 700 }}>{o.inv}</span>
         <span style={{ color: "#9CA3AF", fontSize: "10px" }}>{o.time}</span>
@@ -424,8 +456,10 @@ export default function HeroSection() {
             transform: `rotate(-12deg) scale(${stampVisible ? 1 : 0})`,
             transition: "transform 0.55s cubic-bezier(.2,1.6,.3,1)",
             textAlign: "center",
+            overflow: "visible",
           }}>
-            <div>
+            <StampRays visible={stampVisible} />
+            <div style={{ position: "relative", zIndex: 1 }}>
               <div style={{
                 fontFamily: "'Space Grotesk', sans-serif",
                 fontWeight: 800, fontSize: "24px", letterSpacing: ".02em",

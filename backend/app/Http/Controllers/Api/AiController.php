@@ -75,11 +75,13 @@ class AiController extends Controller
         ]);
 
         return response()->json([
-            'message'     => 'AI berhasil menganalisis data penjualan.',
-            'data'        => [
+            'message' => 'AI berhasil menganalisis data penjualan.',
+            'data'    => [
                 'query'       => $validated['query'],
                 'response'    => $result['text'],
                 'tokens_used' => $result['tokens_used'],
+                'provider'    => $result['provider'],
+                'model'       => $result['model'],
             ],
         ], 200);
     }
@@ -141,6 +143,8 @@ class AiController extends Controller
                 'query'       => $validated['query'],
                 'response'    => $result['text'],
                 'tokens_used' => $result['tokens_used'],
+                'provider'    => $result['provider'],
+                'model'       => $result['model'],
             ],
         ], 200);
     }
@@ -210,6 +214,8 @@ class AiController extends Controller
                 'query'       => $validated['query'],
                 'response'    => $result['text'],
                 'tokens_used' => $result['tokens_used'],
+                'provider'    => $result['provider'],
+                'model'       => $result['model'],
             ],
         ], 200);
     }

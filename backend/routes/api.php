@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AiController;
+use App\Http\Controllers\Api\SubscriptionController;
 
 // =============================================================
 // PUBLIC ROUTES — tidak perlu login
@@ -29,6 +30,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // ----- AUTH -----
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+
+    // ----- SUBSCRIPTION -----
+    Route::get('/subscription',          [SubscriptionController::class, 'status']);
+    Route::post('/subscription/initiate', [SubscriptionController::class, 'initiate']);
     // ↑ /me = ambil data user yang sedang login
 
 
@@ -58,59 +64,63 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // =============================================================
-    // KASIR ROUTES — hanya kasir & admin yang bisa akses
+    // KASIR ROUTES — kasir, admin & developer bisa akses
     // =============================================================
-    Route::middleware('role:admin,kasir')->group(function () {
-        // ↑ Kasir dan admin bisa akses semua route di sini
-
+    Route::middleware('role:admin,kasir,developer')->group(function () {
         Route::get('/orders',                    [OrderController::class, 'index']);
-        // ↑ Lihat semua order (kasir butuh ini untuk proses transaksi)
-
         Route::patch('/orders/{id}/status',      [OrderController::class, 'updateStatus']);
-        // ↑ Update status order: pending → paid / cancelled
-
         Route::get('/transactions',              [TransactionController::class, 'index']);
-        // ↑ Lihat semua transaksi
     });
 
 
     // =============================================================
-    // ADMIN ONLY ROUTES — hanya admin yang bisa akses
+    // ADMIN + KASIR + DEVELOPER — CRUD produk & kategori (dengan limit per plan)
     // =============================================================
-    Route::middleware('role:admin')->group(function () {
-        // ↑ Kalau bukan admin → return 403 Forbidden
-
+    Route::middleware('role:admin,kasir,developer')->group(function () {
         // ----- PRODUCTS CRUD -----
         Route::post('/products',           [ProductController::class, 'store']);
         Route::put('/products/{id}',       [ProductController::class, 'update']);
         Route::delete('/products/{id}',    [ProductController::class, 'destroy']);
-        // ↑ Hanya admin yang bisa tambah, edit, hapus produk
 
         // ----- CATEGORIES CRUD -----
         Route::post('/categories',         [CategoryController::class, 'store']);
         Route::put('/categories/{id}',     [CategoryController::class, 'update']);
         Route::delete('/categories/{id}',  [CategoryController::class, 'destroy']);
 
-        // ----- USER MANAGEMENT -----
-        Route::get('/users',               [UserController::class, 'index']);
-        Route::get('/users/{id}',          [UserController::class, 'show']);
-        Route::put('/users/{id}',          [UserController::class, 'update']);
-        Route::patch('/users/{id}/toggle', [UserController::class, 'toggleActive']);
-        // ↑ Toggle aktif/nonaktif user tanpa hapus data
+    });
 
+    // =============================================================
+    // ADMIN + DEVELOPER — laporan & AI logs
+    // =============================================================
+    Route::middleware('role:admin,developer')->group(function () {
         // ----- REPORTS -----
         Route::get('/reports/sales',           [ReportController::class, 'sales']);
         Route::get('/reports/stock',           [ReportController::class, 'stock']);
         Route::get('/reports/sales/download',  [ReportController::class, 'downloadSales']);
         Route::get('/reports/stock/download',  [ReportController::class, 'downloadStock']);
-        // ↑ Download = return file PDF atau Excel (fitur tambahan)
 
-        // ----- AI ASSISTANT -----
-        Route::post('/ai/query',           [AiController::class, 'query']);
-        Route::post('/ai/predict-stock',   [AiController::class, 'predictStock']);
-        Route::post('/ai/recommend',       [AiController::class, 'recommend']);
-        Route::get('/ai/logs',             [AiController::class, 'logs']);
-        // ↑ Logs = riwayat semua pertanyaan AI + token yang dipakai
+        // ----- AI LOGS -----
+        Route::get('/ai/logs', [AiController::class, 'logs']);
+    });
+
+
+    // =============================================================
+    // DEVELOPER ONLY ROUTES — hanya developer yang bisa akses
+    // =============================================================
+    Route::middleware('role:developer')->group(function () {
+        // ----- USER MANAGEMENT -----
+        Route::get('/users',               [UserController::class, 'index']);
+        Route::post('/users',              [UserController::class, 'store']);
+        Route::get('/users/{id}',          [UserController::class, 'show']);
+        Route::put('/users/{id}',          [UserController::class, 'update']);
+        Route::patch('/users/{id}/toggle', [UserController::class, 'toggleActive']);
+    });
+
+    // ----- AI ASSISTANT (admin & developer saja — pro/enterprise subscribers) -----
+    Route::middleware('role:admin,developer')->group(function () {
+        Route::post('/ai/query',         [AiController::class, 'query']);
+        Route::post('/ai/predict-stock', [AiController::class, 'predictStock']);
+        Route::post('/ai/recommend',     [AiController::class, 'recommend']);
     });
 });
 
@@ -118,7 +128,8 @@ Route::middleware('auth:sanctum')->group(function () {
 // =============================================================
 // WEBHOOK — dipanggil Midtrans dari server mereka
 // =============================================================
-Route::post('/webhook/midtrans', [TransactionController::class, 'webhook']);
+Route::post('/webhook/midtrans',              [TransactionController::class,  'webhook']);
+Route::post('/webhook/midtrans-subscription', [SubscriptionController::class, 'webhook']);
 // ↑ PENTING: route ini di LUAR middleware auth:sanctum
 // Karena yang manggil adalah server Midtrans, bukan user kita
 // Midtrans tidak punya token Sanctum kita

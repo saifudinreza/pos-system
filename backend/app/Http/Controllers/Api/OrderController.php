@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -130,13 +131,28 @@ class OrderController extends Controller
     {
         $validated = $request->validate([
             'items'                => ['required', 'array', 'min:1'],
-            // ↑ items wajib ada dan minimal 1 produk
             'items.*.product_id'   => ['required', 'exists:products,id'],
-            // ↑ items.*.product_id = validasi tiap element array items
-            // exists:products,id = product_id harus ada di tabel products
             'items.*.quantity'     => ['required', 'integer', 'min:1'],
             'notes'                => ['nullable', 'string', 'max:500'],
+            'customer_phone'       => ['nullable', 'string', 'max:20'],
+            // ↑ Nomor HP customer untuk kirim struk WA, boleh kosong
         ]);
+
+        // ----- CEK LIMIT TRANSAKSI BULANAN (FREE PLAN) -----
+        $user = $request->user();
+        $plan = $user->subscription_plan ?? 'free';
+        if ($plan === 'free') {
+            $monthlyCount = Order::where('user_id', $user->id)
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
+            if ($monthlyCount >= 10) {
+                return response()->json([
+                    'message' => 'Paket FREE hanya bisa membuat 10 transaksi per bulan. Upgrade ke Pro untuk transaksi tak terbatas.',
+                    'limit_reached' => true,
+                ], 422);
+            }
+        }
 
         // ===== JALANKAN DALAM DATABASE TRANSACTION =====
         // ↑ DB::transaction() = semua query di dalamnya harus sukses semua
@@ -191,14 +207,15 @@ class OrderController extends Controller
 
             // ----- BUAT ORDER -----
             $order = Order::create([
-                'user_id'      => $request->user()->id,
-                'order_number' => Order::generateOrderNumber(),
-                // ↑ Static method dari Model: "ORD-20250517-0001"
-                'status'       => 'pending',
-                'subtotal'     => $subtotal,
-                'tax'          => $tax,
-                'total'        => $total,
-                'notes'        => $validated['notes'] ?? null,
+                'tenant_id'      => $request->user()->tenant_id,
+                'user_id'        => $request->user()->id,
+                'order_number'   => Order::generateOrderNumber(),
+                'status'         => 'pending',
+                'subtotal'       => $subtotal,
+                'tax'            => $tax,
+                'total'          => $total,
+                'notes'          => $validated['notes'] ?? null,
+                'customer_phone' => $validated['customer_phone'] ?? null,
             ]);
 
             // ----- SIMPAN ITEMS -----
@@ -251,9 +268,16 @@ class OrderController extends Controller
             $order->update(['status' => $validated['status']]);
         }
 
+        $order = $order->fresh()->load(['user', 'items.product', 'transaction']);
+
+        // Kirim struk WA kalau order baru di-set paid secara manual (kasir tandai lunas)
+        if ($validated['status'] === 'paid') {
+            app(WhatsAppService::class)->sendReceipt($order);
+        }
+
         return response()->json([
             'message' => 'Status order berhasil diupdate.',
-            'data'    => $this->formatOrder($order->fresh()->load(['user', 'items.product', 'transaction'])),
+            'data'    => $this->formatOrder($order),
         ], 200);
     }
 
@@ -269,8 +293,9 @@ class OrderController extends Controller
             'subtotal'     => $order->subtotal,
             'tax'          => $order->tax,
             'total'        => $order->total,
-            'notes'        => $order->notes,
-            'user'         => $order->relationLoaded('user') ? [
+            'notes'          => $order->notes,
+            'customer_phone' => $order->customer_phone,
+            'user'           => $order->relationLoaded('user') ? [
                 'id'   => $order->user->id,
                 'name' => $order->user->name,
             ] : null,

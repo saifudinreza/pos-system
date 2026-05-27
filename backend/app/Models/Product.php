@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,6 +11,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'tenant_id',
         'category_id',
         'name',
         'sku',
@@ -25,27 +27,32 @@ class Product extends Model
     {
         return [
             'price'       => 'decimal:2',
-            // ↑ Selalu return 2 angka di belakang koma, contoh: 15000.00
             'is_active'   => 'boolean',
             'stock'       => 'integer',
             'stock_alert' => 'integer',
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantScope());
+    }
+
     // ===== RELASI =====
+
+    public function tenant(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
 
     public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Category::class);
-        // ↑ Produk ini milik satu kategori
-        // Akses: $product->category->name
     }
 
     public function orderItems(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(OrderItem::class);
-        // ↑ Produk ini pernah masuk ke order_items mana saja
-        // Akses: $product->orderItems (untuk laporan produk terlaris)
     }
 
     // ===== HELPER =====
@@ -53,13 +60,10 @@ class Product extends Model
     public function isLowStock(): bool
     {
         return $this->stock <= $this->stock_alert;
-        // ↑ Cek apakah stok sudah di bawah batas alert
-        // Dipakai AI untuk prediksi dan alert restok
     }
 
-    public function decreaseStock(int $quantity): void{
+    public function decreaseStock(int $quantity): void
+    {
         $this->decrement('stock', $quantity);
-        // ↑ Kurangi stok saat transaksi sukses
-        // decrement() langsung update ke DB, aman untuk concurrent request
     }
 }
