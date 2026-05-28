@@ -1,5 +1,8 @@
 // NeoButton — Tombol utama neobrutalist
 // Analogi: seperti stempel tegas — border jelas, shadow offset, "ditekan" saat klik
+// React.memo: cegah re-render kalau props tidak berubah (dipakai di banyak tempat sekaligus)
+
+import { memo } from "react";
 
 const VARIANTS = {
   primary:   "bg-brand-yellow text-brand-black border-brand-black hover:bg-yellow-300",
@@ -15,7 +18,7 @@ const SIZES = {
   lg: "px-6 py-3 text-base",
 };
 
-export default function NeoButton({
+const NeoButton = memo(function NeoButton({
   children, variant = "primary", size = "md",
   className = "", disabled = false, type = "button",
   onClick, ...props
@@ -37,4 +40,6 @@ export default function NeoButton({
       {children}
     </button>
   );
-}
+});
+
+export default NeoButton;

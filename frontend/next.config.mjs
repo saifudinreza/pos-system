@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    // Izinkan Next.js memuat gambar dari server backend Laravel
-    // Analogi: seperti mendaftarkan "toko rekanan" yang boleh kirim barang ke sini
-    // Backend menyimpan gambar produk di: http://localhost:8000/storage/products/
+    // Izinkan Next.js <Image> memuat gambar dari backend Laravel
+    // Backend menyimpan gambar di: http://localhost:8000/storage/products/
     remotePatterns: [
       {
         protocol: "http",
@@ -19,6 +18,12 @@ const nextConfig = {
       },
     ],
   },
+
+  // Compress respons HTML/CSS/JS → loading lebih cepat
+  compress: true,
+
+  // Matikan x-powered-by header (keamanan + sedikit lebih cepat)
+  poweredByHeader: false,
 };
 
 export default nextConfig;

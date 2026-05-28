@@ -1,6 +1,20 @@
 "use client";
 
-// Categories Page — Manajemen kategori produk
+// ============================================================
+// CategoriesPage — CRUD kategori produk
+//
+// Kategori dipakai untuk:
+//   1. Filter di halaman kasir (tab horizontal)
+//   2. Pengelompokan produk di tabel produk
+//
+// Alur data:
+//   GET    /api/categories      → tampilkan tabel
+//   POST   /api/categories      → tambah kategori baru
+//   PUT    /api/categories/{id} → edit kategori
+//   DELETE /api/categories/{id} → hapus (gagal kalau ada produk terkait)
+//
+// Slug di-generate otomatis dari nama di backend (CategorySeeder/Model boot)
+// ============================================================
 import { useState, useEffect } from "react";
 import categoryService from "@/services/categoryService";
 import NeoButton from "@/components/ui/NeoButton";

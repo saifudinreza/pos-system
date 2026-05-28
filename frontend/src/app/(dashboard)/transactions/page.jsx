@@ -1,6 +1,17 @@
 "use client";
 
-// Transactions Page — Daftar transaksi pembayaran (GET /api/transactions)
+// ============================================================
+// TransactionsPage — Riwayat transaksi pembayaran
+//
+// Menampilkan semua transaksi dari payment gateway (Midtrans).
+// Berbeda dengan Orders (yang fokus ke pesanan), halaman ini
+// fokus ke status pembayaran: settlement, pending, expire, dll.
+//
+// Alur data:
+//   GET /api/transactions → transactionService.getAll() → render tabel
+//
+// Filter tersedia: status pembayaran + rentang tanggal
+// ============================================================
 import { useState, useEffect } from "react";
 import transactionService from "@/services/transactionService";
 import NeoTable from "@/components/ui/NeoTable";

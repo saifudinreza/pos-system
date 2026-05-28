@@ -27,7 +27,7 @@ export default function NeoTable({ columns, data, isLoading, emptyText = "Tidak 
               // Loading state
               <tr>
                 <td colSpan={columns.length} className="text-center py-12">
-                  <div className="inline-block w-8 h-8 border-3 border-brand-black border-t-brand-yellow rounded-full animate-spin" />
+                  <div className="inline-block w-8 h-8 border-2 border-brand-black border-t-brand-yellow rounded-full animate-spin" />
                   <p className="mt-2 text-sm font-semibold text-brand-black/50">Memuat data...</p>
                 </td>
               </tr>

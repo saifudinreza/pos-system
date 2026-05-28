@@ -1,5 +1,8 @@
 // NeoBadge — Label status kecil neobrutalist
 // Analogi: seperti stiker warna di rak toko — tiap warna punya arti (merah=habis, hijau=tersedia)
+// React.memo: dipakai di setiap baris tabel, memo mencegah re-render yang tidak perlu
+
+import { memo } from "react";
 
 const COLORS = {
   yellow:  "bg-brand-yellow text-brand-black border-brand-black",
@@ -11,7 +14,7 @@ const COLORS = {
   orange:  "bg-orange-100 text-orange-700 border-orange-500",
 };
 
-export default function NeoBadge({ children, color = "yellow", className = "" }) {
+const NeoBadge = memo(function NeoBadge({ children, color = "yellow", className = "" }) {
   return (
     <span
       className={`
@@ -24,4 +27,6 @@ export default function NeoBadge({ children, color = "yellow", className = "" })
       {children}
     </span>
   );
-}
+});
+
+export default NeoBadge;

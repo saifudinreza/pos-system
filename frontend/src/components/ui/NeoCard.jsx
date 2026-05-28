@@ -1,7 +1,10 @@
 // NeoCard — Kartu konten neobrutalist
 // Analogi: seperti kartu pos — berbatas tebal, bayangan tegas, bersih
+// React.memo: kartu dipakai di banyak komponen, memo cegah re-render sia-sia
 
-export default function NeoCard({ children, className = "", onClick, noPad = false }) {
+import { memo } from "react";
+
+const NeoCard = memo(function NeoCard({ children, className = "", onClick, noPad = false }) {
   return (
     <div
       onClick={onClick}
@@ -16,4 +19,6 @@ export default function NeoCard({ children, className = "", onClick, noPad = fal
       {children}
     </div>
   );
-}
+});
+
+export default NeoCard;
