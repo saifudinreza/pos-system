@@ -48,6 +48,28 @@ class ReportController extends Controller
             ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->count();
 
+        $totalItems = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', 'paid')
+            ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->sum('order_items.quantity');
+
+        $totalCustomers = Order::where('status', 'paid')
+            ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->distinct('user_id')
+            ->count('user_id');
+
+        $paymentBreakdown = Transaction::where('status', 'settlement')
+            ->whereBetween('paid_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->selectRaw('COALESCE(payment_method, "other") as method, COUNT(*) as total_count, SUM(amount) as total_amount')
+            ->groupBy('method')
+            ->get()
+            ->map(fn($t) => [
+                'method' => $t->method,
+                'count'  => (int) $t->total_count,
+                'total'  => (float) $t->total_amount,
+            ])
+            ->values();
+
         // ===== CHART DATA — penjualan per periode =====
         if ($period === 'monthly') {
             $year      = $request->get('year', now()->year);
@@ -124,10 +146,13 @@ class ReportController extends Controller
                     'total_revenue'      => $summary->total_revenue ?? 0,
                     'avg_transaction'    => round($summary->avg_transaction ?? 0, 2),
                     'total_orders'       => $totalOrders,
+                    'total_items'        => (int) $totalItems,
+                    'total_customers'    => $totalCustomers,
                 ],
                 'chart_data'          => $chartData,
                 'top_products'        => $topProducts,
                 'recent_transactions' => $recentTransactions,
+                'payment_breakdown'   => $paymentBreakdown,
             ],
         ], 200);
     }

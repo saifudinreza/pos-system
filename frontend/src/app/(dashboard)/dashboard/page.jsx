@@ -2,50 +2,75 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Banknote, Receipt, Package, Tag, AlertTriangle, TrendingUp, MonitorCheck, Plus } from "lucide-react";
-import StatCard          from "@/components/dashboard/StatCard";
-import SalesChart        from "@/components/dashboard/SalesChart";
-import TopProductsChart  from "@/components/dashboard/TopProductsChart";
-import NeoCard           from "@/components/ui/NeoCard";
-import NeoButton         from "@/components/ui/NeoButton";
-import NeoBadge          from "@/components/ui/NeoBadge";
-import reportService     from "@/services/reportService";
-import orderService      from "@/services/orderService";
+import {
+  Banknote, Receipt, Package, Users,
+  AlertTriangle, TrendingUp, MonitorCheck, Plus, CreditCard,
+} from "lucide-react";
+import StatCard             from "@/components/dashboard/StatCard";
+import SalesChart           from "@/components/dashboard/SalesChart";
+import TopProductsChart     from "@/components/dashboard/TopProductsChart";
+import PaymentMethodChart   from "@/components/dashboard/PaymentMethodChart";
+import NeoCard              from "@/components/ui/NeoCard";
+import NeoButton            from "@/components/ui/NeoButton";
+import NeoBadge             from "@/components/ui/NeoBadge";
+import reportService        from "@/services/reportService";
+import orderService         from "@/services/orderService";
 import { formatCurrency, formatDateTime, getOrderStatusConfig } from "@/lib/utils";
 
 export default function DashboardPage() {
-  const [sales,    setSales]    = useState(null);
-  const [weekly,   setWeekly]   = useState([]);
-  const [topProds, setTopProds] = useState([]);
-  const [stock,    setStock]    = useState([]);
-  const [orders,   setOrders]   = useState([]);
-  const [loading,  setLoading]  = useState(true);
+  const [summary,          setSummary]          = useState(null);
+  const [weekly,           setWeekly]           = useState([]);
+  const [topProds,         setTopProds]         = useState([]);
+  const [paymentBreakdown, setPaymentBreakdown] = useState([]);
+  const [stock,            setStock]            = useState([]);
+  const [orders,           setOrders]           = useState([]);
+  const [todayOrders,      setTodayOrders]      = useState(0);
+  const [loading,          setLoading]          = useState(true);
 
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [salesRes, weeklyRes, stockRes, ordersRes] = await Promise.allSettled([
+        const [salesRes, stockRes, ordersRes] = await Promise.allSettled([
           reportService.getSales({ period: "daily" }),
-          reportService.getSales({ period: "weekly" }),
           reportService.getStock(),
           orderService.getAll({ per_page: 10, sort: "created_at", order: "desc" }),
         ]);
 
-        if (salesRes.status  === "fulfilled") setSales(salesRes.value?.summary ?? salesRes.value);
-        if (weeklyRes.status === "fulfilled") {
-          const wData = weeklyRes.value?.data ?? [];
-          setWeekly(wData);
-          // extract top products if available
-          const tp = weeklyRes.value?.top_products ?? [];
-          setTopProds(tp.slice(0, 5).map((p) => ({ name: p.name?.split(" ")[0] ?? p.name, qty: p.total_qty ?? p.quantity ?? 0 })));
+        if (salesRes.status === "fulfilled") {
+          const d = salesRes.value;
+          setSummary(d?.summary ?? null);
+
+          const chartData = d?.chart_data ?? [];
+          // Ambil 7 hari terakhir dari data bulan ini
+          setWeekly(chartData.slice(-7));
+
+          // Hitung order hari ini dari chart data
+          const todayStr = new Date().toISOString().split("T")[0];
+          const todayEntry = chartData.find((c) => c.period === todayStr);
+          setTodayOrders(todayEntry?.total_transactions ?? 0);
+
+          // Top 5 produk (fix key: total_quantity bukan total_qty)
+          const tp = d?.top_products ?? [];
+          setTopProds(
+            tp.slice(0, 5).map((p) => ({
+              name: p.name ?? "",
+              qty:  p.total_quantity ?? 0,
+            }))
+          );
+
+          // Breakdown metode pembayaran untuk donut chart
+          setPaymentBreakdown(d?.payment_breakdown ?? []);
         }
-        if (stockRes.status  === "fulfilled") {
-          // stockRes.value.data adalah { products, summary } — ambil .products dulu
+
+        if (stockRes.status === "fulfilled") {
           const stockProducts = stockRes.value?.data?.products ?? stockRes.value?.data ?? [];
           setStock(stockProducts.filter((p) => p.is_low_stock));
         }
-        if (ordersRes.status === "fulfilled") setOrders(ordersRes.value?.data ?? []);
+
+        if (ordersRes.status === "fulfilled") {
+          setOrders(ordersRes.value?.data ?? []);
+        }
       } finally {
         setLoading(false);
       }
@@ -57,9 +82,7 @@ export default function DashboardPage() {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
-  const SkeletonBar = () => (
-    <div className="h-8 skeleton w-full" />
-  );
+  const SkeletonBar = () => <div className="h-8 skeleton w-full" />;
 
   return (
     <div className="space-y-6 page-fade">
@@ -70,16 +93,21 @@ export default function DashboardPage() {
           <h2 className="text-2xl sm:text-3xl font-black text-brand-black font-grotesk">Dashboard</h2>
           <p className="text-sm text-brand-black/50 font-medium mt-0.5 capitalize">{today}</p>
         </div>
-        {/* Quick Actions */}
         <div className="flex gap-2 flex-wrap">
           <Link href="/products">
-            <NeoButton size="sm" variant="primary"><Plus size={14} className="inline mr-1" />Produk</NeoButton>
+            <NeoButton size="sm" variant="primary">
+              <Plus size={14} className="inline mr-1" />Produk
+            </NeoButton>
           </Link>
           <Link href="/reports">
-            <NeoButton size="sm" variant="secondary"><TrendingUp size={14} className="inline mr-1" />Laporan</NeoButton>
+            <NeoButton size="sm" variant="secondary">
+              <TrendingUp size={14} className="inline mr-1" />Laporan
+            </NeoButton>
           </Link>
           <Link href="/kasir">
-            <NeoButton size="sm" variant="dark"><MonitorCheck size={14} className="inline mr-1" />Kasir</NeoButton>
+            <NeoButton size="sm" variant="dark">
+              <MonitorCheck size={14} className="inline mr-1" />Kasir
+            </NeoButton>
           </Link>
         </div>
       </div>
@@ -91,12 +119,18 @@ export default function DashboardPage() {
           style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
         >
           <div className="flex items-center gap-3">
-            <AlertTriangle size={20} className="text-brand-black shrink-0" style={{ animation: "wob 1.4s ease-in-out infinite" }} />
+            <AlertTriangle
+              size={20}
+              className="text-brand-black shrink-0"
+              style={{ animation: "wob 1.4s ease-in-out infinite" }}
+            />
             <div>
               <p className="font-black text-brand-black text-sm">
                 {stock.length} produk hampir habis stok!
               </p>
-              <p className="text-xs text-brand-black/60">Segera lakukan restock untuk menghindari kehabisan produk.</p>
+              <p className="text-xs text-brand-black/60">
+                Segera lakukan restock untuk menghindari kehabisan produk.
+              </p>
             </div>
           </div>
           <Link href="/products?low_stock=true">
@@ -105,94 +139,120 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── 4 Stat Cards ── */}
+      {/* ── 4 Stat Cards (sesuai PRD: Revenue/Orders/Stok/Customer) ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-stretch">
+        {/* Card 1: Revenue Bulan Ini — kuning */}
         <div className="slide-up stagger-1 h-full">
           <StatCard
             label="Pendapatan Bulan Ini"
-            value={loading ? "—" : formatCurrency(sales?.total_revenue ?? 0)}
-            icon={<Banknote size={22} strokeWidth={2.5} />} color="yellow"
-            trend={sales?.revenue_trend ?? undefined}
+            value={loading ? "—" : formatCurrency(summary?.total_revenue ?? 0)}
+            icon={<Banknote size={22} strokeWidth={2.5} />}
+            color="yellow"
+            trend={summary?.revenue_trend ?? undefined}
           />
         </div>
+
+        {/* Card 2: Order Hari Ini — hitam */}
         <div className="slide-up stagger-2 h-full">
           <StatCard
             label="Order Hari Ini"
-            value={loading ? "—" : (sales?.total_orders ?? 0)}
-            icon={<Receipt size={22} strokeWidth={2.5} />} color="white"
+            value={loading ? "—" : todayOrders}
+            icon={<Receipt size={22} strokeWidth={2.5} />}
+            color="black"
             sub="transaksi"
           />
         </div>
+
+        {/* Card 3: Stok Kritis — oranye (atau putih kalau aman) */}
         <div className="slide-up stagger-3 h-full">
           <StatCard
             label="Stok Hampir Habis"
             value={loading ? "—" : stock.length}
             icon={<Package size={22} strokeWidth={2.5} />}
-            color={stock.length > 0 ? "yellow" : "white"}
+            color={stock.length > 0 ? "orange" : "white"}
             sub={stock.length > 0 ? "perlu restock" : "semua aman"}
           />
         </div>
+
+        {/* Card 4: Total Customer (pembeli unik bulan ini) — hijau */}
         <div className="slide-up stagger-4 h-full">
           <StatCard
-            label="Item Terjual"
-            value={loading ? "—" : (sales?.total_items ?? 0)}
-            icon={<Tag size={22} strokeWidth={2.5} />} color="white"
-            sub="hari ini"
+            label="Total Customer"
+            value={loading ? "—" : (summary?.total_customers ?? 0)}
+            icon={<Users size={22} strokeWidth={2.5} />}
+            color="green"
+            sub="pembeli bulan ini"
           />
         </div>
       </div>
 
-      {/* ── Charts Row ── */}
-      <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+      {/* ── 3 Charts Row (sesuai PRD: Line + Bar + Donut) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5">
 
-        {/* Sales Line Chart */}
+        {/* Chart 1: Penjualan 7 Hari (Line) */}
         <NeoCard noPad className="slide-up stagger-1">
-          <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between">
-            <div>
-              <h3 className="font-black text-sm sm:text-base font-grotesk">Penjualan 7 Hari</h3>
-              <p className="text-xs text-brand-black/40">Tren pendapatan mingguan</p>
-            </div>
+          <div className="px-5 py-4 border-b-2 border-brand-black">
+            <h3 className="font-black text-sm font-grotesk">Penjualan 7 Hari</h3>
+            <p className="text-xs text-brand-black/40">Tren pendapatan mingguan</p>
           </div>
           <div className="px-3 py-4">
             {loading
-              ? <div className="h-[220px] flex items-center justify-center"><div className="skeleton h-full w-full" /></div>
+              ? <div className="h-[220px] skeleton" />
               : <SalesChart data={weekly} />
             }
           </div>
         </NeoCard>
 
-        {/* Top Products Bar Chart */}
+        {/* Chart 2: Top 5 Produk Terlaris (Bar) */}
         <NeoCard noPad className="slide-up stagger-2">
-          <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between">
-            <div>
-              <h3 className="font-black text-sm sm:text-base font-grotesk">Top 5 Produk</h3>
-              <p className="text-xs text-brand-black/40">Paling banyak terjual</p>
-            </div>
+          <div className="px-5 py-4 border-b-2 border-brand-black">
+            <h3 className="font-black text-sm font-grotesk">Top 5 Produk</h3>
+            <p className="text-xs text-brand-black/40">Terlaris bulan ini</p>
           </div>
           <div className="px-3 py-4">
             {loading
-              ? <div className="h-[220px] flex items-center justify-center"><div className="skeleton h-full w-full" /></div>
+              ? <div className="h-[220px] skeleton" />
               : <TopProductsChart data={topProds} />
+            }
+          </div>
+        </NeoCard>
+
+        {/* Chart 3: Metode Pembayaran (Donut) */}
+        <NeoCard noPad className="slide-up stagger-3">
+          <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between">
+            <div>
+              <h3 className="font-black text-sm font-grotesk">Metode Bayar</h3>
+              <p className="text-xs text-brand-black/40">QRIS · Tunai · Transfer</p>
+            </div>
+            <CreditCard size={16} className="text-brand-black/30" />
+          </div>
+          <div className="px-3 py-4">
+            {loading
+              ? <div className="h-[220px] skeleton" />
+              : <PaymentMethodChart data={paymentBreakdown} />
             }
           </div>
         </NeoCard>
       </div>
 
-      {/* ── Bottom Row: Recent Orders + Low Stock ── */}
+      {/* ── Bottom Row: Recent Transactions + Low Stock ── */}
       <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
 
-        {/* Recent Transactions Table */}
+        {/* Tabel Transaksi Terbaru */}
         <NeoCard noPad className="slide-up stagger-1">
           <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between">
             <h3 className="font-black text-sm sm:text-base font-grotesk">Transaksi Terbaru</h3>
-            <Link href="/orders" className="text-xs font-bold text-brand-black/50 hover:text-brand-black underline underline-offset-2">
+            <Link
+              href="/orders"
+              className="text-xs font-bold text-brand-black/50 hover:text-brand-black underline underline-offset-2"
+            >
               Lihat semua →
             </Link>
           </div>
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-5 space-y-3">
-                {[1,2,3].map((i) => <SkeletonBar key={i} />)}
+                {[1, 2, 3].map((i) => <SkeletonBar key={i} />)}
               </div>
             ) : orders.length === 0 ? (
               <div className="py-10 text-center text-sm text-brand-black/40">Belum ada order</div>
@@ -200,10 +260,18 @@ export default function DashboardPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b-2 border-brand-black bg-brand-cream">
-                    <th className="px-4 py-2.5 text-left text-xs font-black text-brand-black/60 uppercase tracking-wider">No. Order</th>
-                    <th className="px-4 py-2.5 text-left text-xs font-black text-brand-black/60 uppercase tracking-wider hidden sm:table-cell">Waktu</th>
-                    <th className="px-4 py-2.5 text-left text-xs font-black text-brand-black/60 uppercase tracking-wider">Status</th>
-                    <th className="px-4 py-2.5 text-right text-xs font-black text-brand-black/60 uppercase tracking-wider">Total</th>
+                    <th className="px-4 py-2.5 text-left text-xs font-black text-brand-black/60 uppercase tracking-wider">
+                      No. Order
+                    </th>
+                    <th className="px-4 py-2.5 text-left text-xs font-black text-brand-black/60 uppercase tracking-wider hidden sm:table-cell">
+                      Waktu
+                    </th>
+                    <th className="px-4 py-2.5 text-left text-xs font-black text-brand-black/60 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-4 py-2.5 text-right text-xs font-black text-brand-black/60 uppercase tracking-wider">
+                      Total
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-brand-black/10">
@@ -212,7 +280,10 @@ export default function DashboardPage() {
                     return (
                       <tr key={order.id} className="hover:bg-brand-yellow/10 transition-colors">
                         <td className="px-4 py-3">
-                          <Link href={`/orders/${order.id}`} className="font-bold text-brand-black hover:underline underline-offset-2 font-mono text-xs">
+                          <Link
+                            href={`/orders/${order.id}`}
+                            className="font-bold text-brand-black hover:underline underline-offset-2 font-mono text-xs"
+                          >
                             {order.order_number}
                           </Link>
                         </td>
@@ -221,7 +292,10 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-4 py-3">
                           <NeoBadge
-                            color={order.status === "paid" ? "green" : order.status === "cancelled" ? "red" : "yellow"}
+                            color={
+                              order.status === "paid"      ? "green"  :
+                              order.status === "cancelled" ? "red"    : "yellow"
+                            }
                           >
                             {status.label}
                           </NeoBadge>
@@ -238,18 +312,21 @@ export default function DashboardPage() {
           </div>
         </NeoCard>
 
-        {/* Low Stock Products */}
+        {/* Stok Hampir Habis */}
         <NeoCard noPad className="slide-up stagger-2">
           <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between">
             <h3 className="font-black text-sm sm:text-base font-grotesk">Stok Hampir Habis</h3>
-            <Link href="/products?low_stock=true" className="text-xs font-bold text-brand-black/50 hover:text-brand-black underline underline-offset-2">
+            <Link
+              href="/products?low_stock=true"
+              className="text-xs font-bold text-brand-black/50 hover:text-brand-black underline underline-offset-2"
+            >
               Lihat semua →
             </Link>
           </div>
           <div className="divide-y divide-brand-black/10">
             {loading ? (
               <div className="p-5 space-y-3">
-                {[1,2,3].map((i) => <SkeletonBar key={i} />)}
+                {[1, 2, 3].map((i) => <SkeletonBar key={i} />)}
               </div>
             ) : stock.length === 0 ? (
               <div className="py-10 text-center text-sm text-green-600 font-semibold">
@@ -257,13 +334,21 @@ export default function DashboardPage() {
               </div>
             ) : (
               stock.slice(0, 8).map((p) => (
-                <div key={p.id} className="px-5 py-3 flex items-center justify-between hover:bg-brand-yellow/10 transition-colors">
+                <div
+                  key={p.id}
+                  className="px-5 py-3 flex items-center justify-between hover:bg-brand-yellow/10 transition-colors"
+                >
                   <div className="min-w-0">
                     <p className="font-bold text-sm text-brand-black truncate">{p.name}</p>
                     <p className="text-xs text-brand-black/40 font-mono">SKU: {p.sku}</p>
                   </div>
                   <div className="text-right shrink-0 ml-3">
-                    <p className={`font-black text-sm font-mono ${p.stock === 0 ? "text-red-600" : p.stock <= 5 ? "text-red-500" : "text-orange-500"}`}>
+                    <p
+                      className={`font-black text-sm font-mono ${
+                        p.stock === 0 ? "text-red-600" :
+                        p.stock <= 5  ? "text-red-500" : "text-orange-500"
+                      }`}
+                    >
                       {p.stock} sisa
                     </p>
                     <p className="text-[10px] text-brand-black/40">min. {p.stock_alert}</p>
@@ -274,6 +359,39 @@ export default function DashboardPage() {
           </div>
         </NeoCard>
       </div>
+
+      {/* ── Quick Actions ── */}
+      <NeoCard className="slide-up">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="font-black text-sm font-grotesk">Aksi Cepat</p>
+            <p className="text-xs text-brand-black/40 mt-0.5">Pintasan ke fitur utama</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/products/new">
+              <NeoButton size="sm" variant="primary">
+                <Plus size={14} />Tambah Produk
+              </NeoButton>
+            </Link>
+            <Link href="/reports">
+              <NeoButton size="sm" variant="secondary">
+                <TrendingUp size={14} />Lihat Laporan
+              </NeoButton>
+            </Link>
+            <Link href="/kasir">
+              <NeoButton size="sm" variant="dark">
+                <MonitorCheck size={14} />Buka Kasir
+              </NeoButton>
+            </Link>
+            <Link href="/users">
+              <NeoButton size="sm" variant="ghost">
+                <Users size={14} />Kelola User
+              </NeoButton>
+            </Link>
+          </div>
+        </div>
+      </NeoCard>
+
     </div>
   );
 }

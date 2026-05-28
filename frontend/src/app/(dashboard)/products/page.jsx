@@ -1,20 +1,5 @@
 "use client";
 
-// ============================================================
-// Products Page — Daftar & manajemen produk
-//
-// Analogi: Ini seperti "buku katalog gudang" —
-// bisa lihat semua produk, cari berdasarkan nama/SKU,
-// tambah produk baru, edit yang ada, atau hapus yang tidak terpakai.
-//
-// Alur CRUD produk:
-//   Tambah: klik "+ Tambah" → isi form → POST /api/products
-//   Edit:   klik "Edit" di baris → form terisi data lama → PUT /api/products/{id}
-//   Hapus:  klik "Hapus" → confirm → DELETE /api/products/{id}
-//
-// Produk dengan gambar dikirim sebagai multipart/form-data (lihat productService.js)
-// ============================================================
-
 import { useState, useEffect } from "react";
 import { useProducts }    from "@/hooks/useProducts";
 import { useDebounce }    from "@/hooks/useDebounce";
@@ -27,12 +12,23 @@ import NeoModal   from "@/components/ui/NeoModal";
 import NeoInput   from "@/components/ui/NeoInput";
 import { formatCurrency, getImageUrl, getErrorMessage } from "@/lib/utils";
 
-// --- State awal form produk ---
 const EMPTY_FORM = {
   name: "", sku: "", description: "",
   price: "", stock: "", stock_alert: "5",
   category_id: "", is_active: true, image: null,
 };
+
+function generateSku(name) {
+  const suffix = Math.floor(100 + Math.random() * 900);
+  const parts = name.trim().split(/\s+/).filter(Boolean).map((w) => w.slice(0, 3).toUpperCase());
+  return parts.length ? parts.join("-") + "-" + suffix : "SKU-" + suffix;
+}
+
+function StockBadge({ stock, stockAlert }) {
+  if (stock === 0)                          return <NeoBadge color="red">Habis</NeoBadge>;
+  if (stock > 0 && stock <= stockAlert)     return <NeoBadge color="orange">Menipis</NeoBadge>;
+  return <NeoBadge color="green">Normal</NeoBadge>;
+}
 
 export default function ProductsPage() {
   const [search, setSearch]         = useState("");
@@ -41,19 +37,18 @@ export default function ProductsPage() {
   const { products, meta, isLoading, updateFilters, goToPage, deleteProduct, refetch: refreshProducts } =
     useProducts({ search: debouncedSearch });
 
-  const [categories, setCategories] = useState([]);
-  const [modal,      setModal]      = useState({ open: false, data: null });
-  const [form,       setForm]       = useState(EMPTY_FORM);
-  const [preview,    setPreview]    = useState(null);
-  const [saving,     setSaving]     = useState(false);
-  const [formError,  setFormError]  = useState("");
+  const [categories,  setCategories] = useState([]);
+  const [modal,       setModal]      = useState({ open: false, data: null });
+  const [form,        setForm]       = useState(EMPTY_FORM);
+  const [preview,     setPreview]    = useState(null);
+  const [saving,      setSaving]     = useState(false);
+  const [formError,   setFormError]  = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
 
-  // Ambil semua kategori untuk dropdown di form
   useEffect(() => {
     categoryService.getAll({ is_active: true }).then(setCategories).catch(() => {});
   }, []);
 
-  // Buka modal — jika edit, isi form dengan data produk yang ada
   const openModal = (data = null) => {
     setForm(data
       ? {
@@ -64,7 +59,6 @@ export default function ProductsPage() {
         }
       : EMPTY_FORM
     );
-    // image_url sudah full URL dari backend — tidak perlu getImageUrl()
     setPreview(data?.image_url ?? null);
     setModal({ open: true, data });
     setFormError("");
@@ -75,7 +69,6 @@ export default function ProductsPage() {
     setPreview(null);
   };
 
-  // Handle pilih gambar — tampilkan preview sebelum upload
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -86,7 +79,11 @@ export default function ProductsPage() {
   const handleFieldChange = (field) => (e) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
 
-  // Simpan produk — buat baru atau update yang ada
+  const handleAutoSku = () => {
+    if (!form.name.trim()) return;
+    setForm((p) => ({ ...p, sku: generateSku(p.name) }));
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -97,8 +94,6 @@ export default function ProductsPage() {
         price: Number(form.price),
         stock: Number(form.stock),
         stock_alert: Number(form.stock_alert),
-        // Jangan kirim field image jika tidak ada file baru
-        ...(form.image ? { image: form.image } : {}),
       };
       if (!form.image) delete payload.image;
 
@@ -116,6 +111,32 @@ export default function ProductsPage() {
     if (!confirm(`Hapus produk "${name}"?`)) return;
     try { await deleteProduct(id); }
     catch (err) { alert(getErrorMessage(err)); }
+  };
+
+  const handleToggleStatus = async (row) => {
+    try {
+      await productService.update(row.id, {
+        name: row.name,
+        sku: row.sku,
+        price: row.price,
+        stock: row.stock,
+        stock_alert: row.stock_alert,
+        category_id: row.category_id ?? row.category?.id ?? "",
+        is_active: !row.is_active,
+      });
+      refreshProducts();
+    } catch (err) {
+      alert(getErrorMessage(err));
+    }
+  };
+
+  const handleStockFilter = (type) => {
+    setActiveFilter(type);
+    if (type === "low") {
+      updateFilters({ low_stock: "true", page: 1 });
+    } else {
+      updateFilters({ low_stock: undefined, page: 1 });
+    }
   };
 
   const columns = [
@@ -139,12 +160,31 @@ export default function ProductsPage() {
     {
       key: "stock", label: "Stok",
       render: (v, row) => (
-        <span className={`font-mono font-black ${row.is_low_stock ? "text-red-600" : "text-green-700"}`}>
-          {v} {row.is_low_stock && "⚠️"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="font-mono font-black">{v}</span>
+          <StockBadge stock={Number(v)} stockAlert={Number(row.stock_alert ?? 5)} />
+        </div>
       ),
     },
-    { key: "is_active", label: "Status", render: (v) => <NeoBadge color={v ? "green" : "gray"}>{v ? "Aktif" : "Nonaktif"}</NeoBadge> },
+    {
+      key: "is_active", label: "Status",
+      render: (v, row) => (
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => handleToggleStatus(row)}
+            className={`relative w-10 h-5 border-2 border-brand-black transition-colors shrink-0 ${v ? "bg-brand-yellow" : "bg-brand-gray"}`}
+            style={{ boxShadow: "1px 1px 0 #0A0A0A" }}
+            title={v ? "Nonaktifkan" : "Aktifkan"}
+          >
+            <span
+              className={`absolute top-[1px] w-3.5 h-3.5 border-2 border-brand-black bg-white transition-all ${v ? "left-[18px]" : "left-[1px]"}`}
+            />
+          </button>
+          <NeoBadge color={v ? "green" : "gray"}>{v ? "Aktif" : "Nonaktif"}</NeoBadge>
+        </div>
+      ),
+    },
     {
       key: "id", label: "Aksi",
       render: (id, row) => (
@@ -186,6 +226,23 @@ export default function ProductsPage() {
         </select>
       </div>
 
+      <div className="flex gap-2">
+        <button
+          onClick={() => handleStockFilter("all")}
+          className={`px-3 py-1.5 text-sm font-bold border-2 border-brand-black transition-colors ${activeFilter === "all" ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"}`}
+          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+        >
+          Semua
+        </button>
+        <button
+          onClick={() => handleStockFilter("low")}
+          className={`px-3 py-1.5 text-sm font-bold border-2 border-brand-black transition-colors ${activeFilter === "low" ? "bg-orange-300" : "bg-white hover:bg-orange-100"}`}
+          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+        >
+          Stok Rendah
+        </button>
+      </div>
+
       <NeoTable columns={columns} data={products} isLoading={isLoading} emptyText="Belum ada produk" />
 
       {meta && meta.last_page > 1 && (
@@ -198,10 +255,6 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* ============================================================
-          Modal Tambah / Edit Produk
-          Analogi: "formulir pendaftaran produk" — buka saat tambah atau edit
-          ============================================================ */}
       <NeoModal
         isOpen={modal.open}
         onClose={closeModal}
@@ -221,17 +274,35 @@ export default function ProductsPage() {
             <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border-2 border-red-300">{formError}</p>
           )}
 
-          {/* Baris 1: Nama + SKU */}
           <div className="grid grid-cols-2 gap-3">
             <NeoInput label="Nama Produk *" id="prod-name" required
               value={form.name} onChange={handleFieldChange("name")}
               placeholder="Contoh: Es Teh Manis" />
-            <NeoInput label="SKU *" id="prod-sku" required
-              value={form.sku} onChange={handleFieldChange("sku")}
-              placeholder="Contoh: ETM-001" />
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-bold text-brand-black">SKU *</label>
+              <div className="flex gap-2">
+                <input
+                  id="prod-sku"
+                  required
+                  value={form.sku}
+                  onChange={handleFieldChange("sku")}
+                  placeholder="Contoh: ETM-001"
+                  className="flex-1 px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
+                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                />
+                <button
+                  type="button"
+                  onClick={handleAutoSku}
+                  className="px-3 py-2 text-xs font-bold border-2 border-brand-black bg-brand-yellow hover:bg-brand-yellow/70 shrink-0"
+                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                  title="Generate SKU dari nama produk"
+                >
+                  Auto
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Baris 2: Harga + Stok + Min. Stok */}
           <div className="grid grid-cols-3 gap-3">
             <NeoInput label="Harga (Rp) *" id="prod-price" type="number" required min="0"
               value={form.price} onChange={handleFieldChange("price")}
@@ -244,7 +315,6 @@ export default function ProductsPage() {
               placeholder="5" />
           </div>
 
-          {/* Kategori */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-bold text-brand-black">Kategori</label>
             <select
@@ -258,7 +328,6 @@ export default function ProductsPage() {
             </select>
           </div>
 
-          {/* Deskripsi */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-bold text-brand-black">Deskripsi</label>
             <textarea
@@ -271,11 +340,9 @@ export default function ProductsPage() {
             />
           </div>
 
-          {/* Gambar produk */}
           <div className="flex flex-col gap-2">
             <label className="text-sm font-bold text-brand-black">Foto Produk</label>
             <div className="flex items-center gap-4">
-              {/* Preview gambar */}
               {preview && (
                 <img src={preview} alt="preview"
                   className="w-16 h-16 object-cover border-2 border-brand-black shrink-0" />
@@ -289,12 +356,11 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          {/* Status aktif */}
           <label className="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" checked={form.is_active}
               onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))}
               className="w-4 h-4 border-2 border-brand-black" />
-            <span className="text-sm font-bold">Produk aktif (tampil di kasir & katalog)</span>
+            <span className="text-sm font-bold">Produk aktif (tampil di kasir &amp; katalog)</span>
           </label>
         </form>
       </NeoModal>

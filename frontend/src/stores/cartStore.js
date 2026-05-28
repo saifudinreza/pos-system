@@ -22,9 +22,7 @@
 
 import { create } from "zustand";
 
-// Tarif PPN Indonesia — 11%
-// Disimpan sebagai konstanta agar mudah diubah kalau tarif berubah
-const TAX_RATE = 0.11;
+const TAX_RATE = 0;
 
 const useCartStore = create((set, get) => ({
   // ============================================================

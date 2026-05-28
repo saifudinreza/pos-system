@@ -62,6 +62,214 @@ const EMPTY_PROD = {
   category_id: "", is_active: true, image: null
 };
 
+// ── CashPaymentModal — Input nominal tunai + hitung kembalian ──────────────
+function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
+  const [cashInput, setCashInput] = useState("");
+  const cash    = parseFloat(cashInput) || 0;
+  const change  = cash - total;
+  const enough  = cash >= total;
+
+  const QUICK = [...new Set([total, Math.ceil(total / 5000) * 5000, 50000, 100000, 200000, 500000])]
+    .filter((v) => v >= total)
+    .slice(0, 6);
+
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
+      <div className="bg-white border-2 border-brand-black w-full max-w-sm" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        <div className="px-5 py-4 bg-brand-yellow border-b-2 border-brand-black">
+          <h3 className="font-black text-lg font-grotesk">💵 Bayar Tunai</h3>
+        </div>
+        <div className="p-5 space-y-4">
+          <div className="flex justify-between items-center py-2 border-2 border-brand-black px-3 bg-brand-cream">
+            <span className="font-bold text-sm">Total Bayar</span>
+            <span className="font-black text-xl font-mono">{formatCurrency(total)}</span>
+          </div>
+          <div>
+            <label className="text-sm font-bold block mb-1">Uang Diterima (Rp)</label>
+            <input
+              type="number"
+              value={cashInput}
+              onChange={(e) => setCashInput(e.target.value)}
+              placeholder="0"
+              className="w-full px-3 py-3 text-2xl font-black font-mono border-2 border-brand-black outline-none focus:border-brand-yellow text-right"
+              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              autoFocus
+            />
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {QUICK.map((amt) => (
+              <button key={amt} onClick={() => setCashInput(String(amt))}
+                className="py-1.5 text-xs font-bold border-2 border-brand-black hover:bg-brand-yellow transition-colors"
+                style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>
+                {formatCurrency(amt)}
+              </button>
+            ))}
+          </div>
+          {cash > 0 && (
+            <div className={`flex justify-between text-base font-black p-3 border-2 ${enough ? "bg-green-50 border-green-400" : "bg-red-50 border-red-400"}`}>
+              <span>KEMBALIAN</span>
+              <span className={`font-mono ${enough ? "text-green-700" : "text-red-600"}`}>
+                {enough ? formatCurrency(change) : "Kurang " + formatCurrency(-change)}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream">
+          <button onClick={onClose}
+            className="flex-1 py-2.5 font-bold text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            Batal
+          </button>
+          <button onClick={() => enough && onConfirm(cash)} disabled={!enough}
+            className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ boxShadow: enough ? "2px 2px 0 #0A0A0A" : "none" }}>
+            Proses Bayar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── ReceiptModal — Struk setelah pembayaran sukses ────────────────────────
+function ReceiptModal({ isOpen, data, onClose }) {
+  const [sending, setSending] = useState(false);
+  if (!isOpen || !data) return null;
+
+  const buildWhatsAppText = () => {
+    const S = "================================";
+    const L = "--------------------------------";
+    let t = `${S}\n        POS SYSTEM\n${S}\n`;
+    t += `Order  : ${data.order_number}\nKasir  : ${data.kasir}\nTgl    : ${data.date}\n\n${L}\n`;
+    data.items.forEach((i) => {
+      t += `${i.name}\n  ${i.quantity} x ${formatCurrency(i.price).padEnd(14)} ${formatCurrency(i.price * i.quantity)}\n`;
+    });
+    t += `${L}\nSubtotal           ${formatCurrency(data.subtotal)}\n${L}\nTOTAL              ${formatCurrency(data.total)}\n${L}\n`;
+    t += `Bayar (${data.payment_method}) ${formatCurrency(data.cash)}\n`;
+    if (data.change > 0) t += `Kembalian          ${formatCurrency(data.change)}\n`;
+    t += `${S}\n  Terima kasih! 😊\n${S}`;
+    return t;
+  };
+
+  const handlePrint = () => {
+    const w = window.open("", "_blank", "width=420,height=700");
+    const fmt = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
+    w.document.write(`<html><head><title>Struk ${data.order_number}</title>
+      <style>body{font-family:monospace;font-size:12px;width:280px;padding:10px;margin:0 auto}
+      .c{text-align:center}.b{font-weight:bold}.sep{border-top:1px dashed #000;margin:6px 0}
+      .row{display:flex;justify-content:space-between}</style></head><body>
+      <div class="c b" style="font-size:15px">POS SYSTEM</div>
+      <div class="sep"></div>
+      <div class="row"><span>Order</span><span>${data.order_number}</span></div>
+      <div class="row"><span>Kasir</span><span>${data.kasir}</span></div>
+      <div class="row"><span>Tgl</span><span>${data.date}</span></div>
+      <div class="sep"></div>
+      ${data.items.map((i) => `<div class="b">${i.name}</div><div class="row"><span style="padding-left:8px">${i.quantity} x ${fmt(i.price)}</span><span>${fmt(i.price * i.quantity)}</span></div>`).join("")}
+      <div class="sep"></div>
+      <div class="row"><span>Subtotal</span><span>${fmt(data.subtotal)}</span></div>
+      <div class="sep"></div>
+      <div class="row b"><span>TOTAL</span><span>${fmt(data.total)}</span></div>
+      <div class="sep"></div>
+      <div class="row"><span>Bayar (${data.payment_method})</span><span>${fmt(data.cash)}</span></div>
+      ${data.change > 0 ? `<div class="row"><span>Kembalian</span><span class="b">${fmt(data.change)}</span></div>` : ""}
+      <div class="sep"></div>
+      <div class="c">Terima kasih sudah berbelanja! 😊</div>
+      <script>window.onload=function(){window.print();window.close()}</script>
+      </body></html>`);
+    w.document.close();
+  };
+
+  const handleWhatsApp = async () => {
+    const phone = (data.customer_phone ?? "").replace(/\D/g, "");
+    if (!phone) return alert("Nomor HP customer belum diisi di kolom No. HP.");
+
+    setSending(true);
+    try {
+      const res = await fetch("/api/send-whatsapp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target: phone, message: buildWhatsAppText() }),
+      });
+      const json = await res.json();
+      if (json.status) {
+        alert("Struk berhasil dikirim ke WhatsApp customer!");
+      } else {
+        alert("Gagal kirim: " + (json.reason ?? "Cek token Fonnte di server."));
+      }
+    } catch (err) {
+      alert("Gagal kirim WhatsApp: " + err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
+      <div className="bg-white border-2 border-brand-black w-full max-w-sm flex flex-col max-h-[92vh]"
+        style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        {/* Header */}
+        <div className="px-5 py-4 bg-green-400 border-b-2 border-brand-black text-center shrink-0">
+          <div className="text-4xl mb-1">✅</div>
+          <h3 className="font-black text-xl font-grotesk">PEMBAYARAN SUKSES</h3>
+        </div>
+        {/* Struk */}
+        <div className="flex-1 overflow-y-auto p-5 font-mono text-sm space-y-1 scrollbar-thin">
+          <div className="text-center border-b-2 border-dashed border-brand-black/30 pb-3 mb-3">
+            <p className="font-black text-base">POS SYSTEM</p>
+          </div>
+          <div className="flex justify-between text-xs"><span>Order</span><span className="font-bold">{data.order_number}</span></div>
+          <div className="flex justify-between text-xs"><span>Kasir</span><span>{data.kasir}</span></div>
+          <div className="flex justify-between text-xs"><span>Tgl</span><span>{data.date}</span></div>
+          <div className="border-t border-dashed border-brand-black/30 my-2" />
+          {data.items.map((item, i) => (
+            <div key={i}>
+              <p className="text-xs font-bold truncate">{item.name}</p>
+              <div className="flex justify-between text-xs text-brand-black/60 pl-2">
+                <span>{item.quantity} × {formatCurrency(item.price)}</span>
+                <span className="font-bold">{formatCurrency(item.price * item.quantity)}</span>
+              </div>
+            </div>
+          ))}
+          <div className="border-t border-dashed border-brand-black/30 my-2" />
+          <div className="flex justify-between text-xs"><span>Subtotal</span><span>{formatCurrency(data.subtotal)}</span></div>
+          <div className="border-t-2 border-brand-black mt-2 pt-2">
+            <div className="flex justify-between font-black text-base"><span>TOTAL</span><span>{formatCurrency(data.total)}</span></div>
+          </div>
+          <div className="border-t border-dashed border-brand-black/30 my-2" />
+          <div className="flex justify-between text-xs"><span>Bayar ({data.payment_method})</span><span>{formatCurrency(data.cash)}</span></div>
+          {data.change > 0 && (
+            <div className="flex justify-between text-xs font-black text-green-700">
+              <span>Kembalian</span><span>{formatCurrency(data.change)}</span>
+            </div>
+          )}
+          <div className="text-center mt-4 text-xs text-brand-black/40">Terima kasih sudah berbelanja! 😊</div>
+        </div>
+        {/* Actions */}
+        <div className="p-4 border-t-2 border-brand-black space-y-2 bg-brand-cream shrink-0">
+          <div className="flex gap-2">
+            <button onClick={handlePrint}
+              className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
+              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              🖨️ Print Struk
+            </button>
+            <button onClick={handleWhatsApp} disabled={sending}
+              className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-green-400 hover:bg-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              {sending ? "Mengirim..." : "WhatsApp"}
+            </button>
+          </div>
+          <button onClick={onClose}
+            className="w-full py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            ✕ Transaksi Baru
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
   const [list,       setList]      = useState([]);     // daftar produk
   const [loading,    setLoading]   = useState(false);
@@ -419,6 +627,9 @@ export default function KasirPage() {
   const [customerPhone, setCustomerPhone] = useState("");   // nomor HP customer untuk struk WA
   const [cartVisible,  setCartVisible] = useState(false);   // tampilkan keranjang di mobile
   const [prodPanel,    setProdPanel]   = useState(false);   // tampilkan panel kelola produk
+  const [cashModal,    setCashModal]   = useState(false);   // modal bayar tunai
+  const [receiptData,  setReceiptData] = useState(null);    // data struk setelah bayar
+  const [receiptOpen,  setReceiptOpen] = useState(false);   // tampilkan struk
 
   // useDebounce: tunda request pencarian sampai 400ms setelah user berhenti ketik
   // Tanpa ini, setiap keystroke langsung kirim request API (spam)
@@ -466,47 +677,71 @@ export default function KasirPage() {
   // getOrderPayload() mengubah items keranjang ke format backend:
   //   [{ product_id: 1, quantity: 2 }, { product_id: 3, quantity: 1 }]
   // ============================================================
-  const handleCheckout = async () => {
+  // Buat objek data struk dari order + pilihan bayar
+  const buildReceipt = (orderRes, cashAmount, paymentMethod) => ({
+    order_number:   orderRes.data?.order_number ?? orderRes.order?.order_number ?? "-",
+    kasir:          user?.name ?? "Kasir",
+    date:           new Date().toLocaleString("id-ID"),
+    items:          [...items],
+    subtotal:       getSubtotal(),
+    tax:            getTax(),
+    total:          getTotal(),
+    cash:           cashAmount,
+    change:         Math.max(0, cashAmount - getTotal()),
+    payment_method: paymentMethod,
+    customer_phone: customerPhone,
+  });
+
+  const showReceipt = (data) => {
+    setReceiptData(data);
+    setReceiptOpen(true);
+    clearCart();
+    setNotes("");
+    setCustomerPhone("");
+    setCartVisible(false);
+  };
+
+  // Checkout tunai: buat order → langsung tampilkan struk (tidak perlu transaksi Midtrans)
+  const handleCashCheckout = async (cashAmount) => {
+    setCashModal(false);
+    setPaying(true);
+    try {
+      const orderRes = await orderService.create({
+        items: getOrderPayload(),
+        notes,
+        ...(customerPhone ? { customer_phone: customerPhone } : {}),
+      });
+      showReceipt(buildReceipt(orderRes, cashAmount, "Tunai"));
+    } catch (err) {
+      alert(err.response?.data?.message ?? "Gagal checkout. Coba lagi.");
+    } finally { setPaying(false); }
+  };
+
+  // Checkout digital: buat order → buat transaksi → buka Midtrans Snap
+  const handleDigitalCheckout = async () => {
     if (items.length === 0) return alert("Keranjang masih kosong!");
     setPaying(true);
     try {
-      // Step 1: Buat order
       const orderRes  = await orderService.create({
         items: getOrderPayload(),
         notes,
-        // Kirim nomor HP kalau diisi — backend akan kirim struk WA setelah lunas
         ...(customerPhone ? { customer_phone: customerPhone } : {}),
       });
-      const orderId   = orderRes.data?.id;
-
-      // Step 2: Buat transaksi (sekaligus buat Midtrans order di backend)
+      const orderId   = orderRes.data?.id ?? orderRes.order?.id;
       const txRes     = await transactionService.create({ order_id: orderId });
-      // snap_token bisa di level root atau di dalam data — handle keduanya
       const snapToken = txRes.snap_token ?? txRes.data?.snap_token;
 
       if (snapToken && window.snap) {
-        // Step 3: Buka popup Midtrans Snap
-        // window.snap tersedia karena Script Midtrans dimuat di kasir/layout.jsx
         window.snap.pay(snapToken, {
-          onSuccess:  () => {
-            // Pembayaran berhasil → bersihkan keranjang dan form
-            clearCart(); setNotes(""); setCustomerPhone(""); setCartVisible(false);
-            alert("Pembayaran berhasil! 🎉");
-          },
-          onPending:  () => alert("Menunggu pembayaran..."),
-          onError:    () => alert("Pembayaran gagal. Coba lagi."),
-          onClose:    () => {},  // user tutup popup tanpa bayar → tidak ada aksi
+          onSuccess: () => showReceipt(buildReceipt(orderRes, getTotal(), "QRIS")),
+          onPending: () => alert("Menunggu pembayaran..."),
+          onError:   () => alert("Pembayaran gagal. Coba lagi."),
+          onClose:   () => {},
         });
       } else if (snapToken) {
-        // Midtrans tersedia tapi window.snap belum load
-        alert(`Snap Token: ${snapToken}`);
+        showReceipt(buildReceipt(orderRes, getTotal(), "Digital"));
       } else {
-        // Tidak ada snap_token → bayar tunai (cash)
-        clearCart();
-        setNotes("");
-        setCustomerPhone("");
-        setCartVisible(false);
-        alert(`✓ Order #${orderRes.order?.order_number} berhasil dibuat (Bayar Tunai)`);
+        showReceipt(buildReceipt(orderRes, getTotal(), "Tunai"));
       }
     } catch (err) {
       alert(err.response?.data?.message ?? "Gagal checkout. Coba lagi.");
@@ -541,11 +776,11 @@ export default function KasirPage() {
             {/* Tombol kelola produk — hanya di sm+ (tersembunyi di mobile kecil) */}
             <button
               onClick={() => setProdPanel(true)}
-              className="px-3 py-2 border-2 border-brand-black font-black text-sm bg-white hover:bg-brand-yellow transition-colors hidden sm:flex items-center gap-1.5"
+              className="px-3 py-2 border-2 border-brand-black font-black text-sm bg-white hover:bg-brand-yellow transition-colors hidden sm:flex items-center"
               style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
               title="Kelola Produk"
             >
-              📦 Produk
+              Produk
             </button>
             {/* Tombol toggle keranjang — HANYA di mobile (lg:hidden) */}
             <button
@@ -553,7 +788,7 @@ export default function KasirPage() {
               className="lg:hidden relative px-3 py-2 bg-brand-yellow border-2 border-brand-black font-black text-sm"
               style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
             >
-              🛒
+              Keranjang
               {/* Badge jumlah item — hanya tampil kalau ada item */}
               {totalItems > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-black text-white text-[10px] font-black flex items-center justify-center border border-brand-black">
@@ -605,7 +840,6 @@ export default function KasirPage() {
               {products.map((p) => <ProductCard key={p.id} product={p} onAdd={addItem} />)}
               {products.length === 0 && (
                 <div className="col-span-full text-center py-16 text-brand-black/40 font-semibold">
-                  <p className="text-3xl mb-2">🔍</p>
                   <p>Produk tidak ditemukan</p>
                 </div>
               )}
@@ -663,7 +897,6 @@ export default function KasirPage() {
           {items.length === 0 ? (
             // State kosong: panduan untuk kasir
             <div className="h-full flex flex-col items-center justify-center text-brand-black/25 text-center gap-3 py-12">
-              <span className="text-4xl">🛒</span>
               <p className="text-xs font-semibold">Klik produk untuk tambahkan<br />ke keranjang</p>
             </div>
           ) : (
@@ -687,13 +920,12 @@ export default function KasirPage() {
           {/* Nomor HP customer untuk struk WhatsApp */}
           <div className="flex items-center gap-2 border-2 border-brand-black bg-white"
             style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>
-            <span className="pl-2.5 text-sm shrink-0">📱</span>
             <input
               type="tel"
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
               placeholder="No. HP customer (struk WA)"
-              className="flex-1 text-xs py-2 pr-2.5 outline-none bg-transparent"
+              className="flex-1 text-xs py-2 px-2.5 outline-none bg-transparent"
             />
             {customerPhone && (
               <button onClick={() => setCustomerPhone("")}
@@ -713,35 +945,52 @@ export default function KasirPage() {
 
           {/* Ringkasan harga */}
           <div className="space-y-1.5 text-sm">
-            {/* Subtotal: total sebelum pajak */}
-            <div className="flex justify-between font-semibold text-brand-black/70">
-              <span>Subtotal</span>
-              <span className="font-mono">{formatCurrency(getSubtotal())}</span>
-            </div>
-            {/* PPN 11% */}
-            <div className="flex justify-between text-xs font-semibold text-brand-black/50">
-              <span>PPN 11%</span>
-              <span className="font-mono">{formatCurrency(getTax())}</span>
-            </div>
-            {/* Total = subtotal + pajak */}
             <div className="flex justify-between font-black text-base border-t-2 border-brand-black pt-2">
               <span>TOTAL</span>
               <span className="font-mono">{formatCurrency(getTotal())}</span>
             </div>
           </div>
 
-          {/* Tombol bayar — disabled kalau keranjang kosong atau sedang proses */}
-          <button
-            onClick={handleCheckout}
-            disabled={items.length === 0 || paying}
-            className="w-full py-3 bg-brand-yellow border-2 border-brand-black font-black text-base disabled:opacity-40 hover:bg-yellow-300 active:translate-y-0.5 transition-all"
-            style={{ boxShadow: items.length === 0 ? "none" : "3px 3px 0 #0A0A0A" }}
-          >
-            {paying ? "⏳ Memproses..." : `💳 BAYAR — ${formatCurrency(getTotal())}`}
-          </button>
+          {/* Dua tombol bayar: TUNAI dan DIGITAL (PRD: split button) */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => { if (items.length > 0) setCashModal(true); }}
+              disabled={items.length === 0 || paying}
+              className="flex-1 py-3 bg-white border-2 border-brand-black font-black text-sm disabled:opacity-40 hover:bg-gray-50 active:translate-y-0.5 transition-all"
+              style={{ boxShadow: items.length > 0 ? "2px 2px 0 #0A0A0A" : "none" }}
+            >
+              TUNAI
+            </button>
+            <button
+              onClick={handleDigitalCheckout}
+              disabled={items.length === 0 || paying}
+              className="flex-1 py-3 bg-brand-yellow border-2 border-brand-black font-black text-sm disabled:opacity-40 hover:bg-yellow-300 active:translate-y-0.5 transition-all"
+              style={{ boxShadow: items.length > 0 ? "3px 3px 0 #0A0A0A" : "none" }}
+            >
+              {paying ? "Memproses..." : "DIGITAL"}
+            </button>
+          </div>
+          <p className="text-[10px] font-mono text-brand-black/30 text-center">
+            Total: {formatCurrency(getTotal())}
+          </p>
         </div>
       </div>
     </div>
+
+    {/* Modal bayar tunai */}
+    <CashPaymentModal
+      isOpen={cashModal}
+      onClose={() => setCashModal(false)}
+      total={getTotal()}
+      onConfirm={handleCashCheckout}
+    />
+
+    {/* Modal struk setelah sukses */}
+    <ReceiptModal
+      isOpen={receiptOpen}
+      data={receiptData}
+      onClose={() => setReceiptOpen(false)}
+    />
 
     {/* Panel kelola produk — di-render di luar flex layout agar bisa fixed overlay */}
     <QuickProductPanel

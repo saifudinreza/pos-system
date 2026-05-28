@@ -9,6 +9,7 @@ export default function StatCard({ label, value, sub, icon, color = "yellow", tr
     black:  "bg-brand-black text-white",
     white:  "bg-white",
     green:  "bg-green-100",
+    orange: "bg-orange-100",
   };
 
   return (
@@ -20,7 +21,7 @@ export default function StatCard({ label, value, sub, icon, color = "yellow", tr
       </div>
 
       {/* Angka utama */}
-      <p className="text-3xl font-black font-mono leading-none">{value}</p>
+      <p className="text-xl sm:text-2xl font-black font-mono leading-tight break-words overflow-hidden">{value}</p>
 
       {/* Sub-info + tren */}
       {(sub || trend) && (
