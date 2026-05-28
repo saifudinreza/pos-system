@@ -35,14 +35,14 @@
 //   - KasirPage → window.snap (Midtrans Snap SDK untuk popup pembayaran)
 // ============================================================
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import productService     from "@/services/productService";
 import categoryService    from "@/services/categoryService";
 import orderService       from "@/services/orderService";
 import transactionService from "@/services/transactionService";
 import useCartStore       from "@/stores/cartStore";
 import useAuthStore       from "@/stores/authStore";
-import { formatCurrency, getImageUrl, getErrorMessage } from "@/lib/utils";
+import { formatCurrency, getErrorMessage } from "@/lib/utils";
 import { useDebounce }    from "@/hooks/useDebounce";
 
 // ============================================================
@@ -138,17 +138,39 @@ function ReceiptModal({ isOpen, data, onClose }) {
   if (!isOpen || !data) return null;
 
   const buildWhatsAppText = () => {
-    const S = "================================";
-    const L = "--------------------------------";
-    let t = `${S}\n        POS SYSTEM\n${S}\n`;
-    t += `Order  : ${data.order_number}\nKasir  : ${data.kasir}\nTgl    : ${data.date}\n\n${L}\n`;
+    const LINE = "━━━━━━━━━━━━━━━━━━━━━━━━━";
+    let t = "";
+
+    t += `*KASIR AI*\n`;
+    t += `_Struk Pembayaran Digital_\n`;
+    t += `${LINE}\n\n`;
+
+    t += ` *Detail Pesanan*\n`;
+    t += ` No. Order  : *${data.order_number}*\n`;
+    t += ` Kasir       : ${data.kasir}\n`;
+    t += ` Tanggal    : ${data.date}\n\n`;
+
+    t += `${LINE}\n`;
+    t += ` *Item Pesanan*\n`;
+    t += `${LINE}\n`;
     data.items.forEach((i) => {
-      t += `${i.name}\n  ${i.quantity} x ${formatCurrency(i.price).padEnd(14)} ${formatCurrency(i.price * i.quantity)}\n`;
+      t += `▸ *${i.name}*\n`;
+      t += `   ${i.quantity} pcs × ${formatCurrency(i.price)} = *${formatCurrency(i.price * i.quantity)}*\n`;
     });
-    t += `${L}\nSubtotal           ${formatCurrency(data.subtotal)}\n${L}\nTOTAL              ${formatCurrency(data.total)}\n${L}\n`;
-    t += `Bayar (${data.payment_method}) ${formatCurrency(data.cash)}\n`;
-    if (data.change > 0) t += `Kembalian          ${formatCurrency(data.change)}\n`;
-    t += `${S}\n  Terima kasih! 😊\n${S}`;
+    t += `${LINE}\n\n`;
+
+    t += ` Subtotal       : ${formatCurrency(data.subtotal)}\n`;
+    t += `${LINE}\n`;
+    t += ` *TOTAL           : ${formatCurrency(data.total)}*\n`;
+    t += `${LINE}\n\n`;
+
+    t += ` Bayar (${data.payment_method}) : ${formatCurrency(data.cash)}\n`;
+    if (data.change > 0) t += ` Kembalian        : *${formatCurrency(data.change)}*\n`;
+
+    t += `\n${LINE}\n`;
+    t += `*Terima kasih sudah berbelanja!*\n`;
+    t += `Sampai jumpa lagi & selamat menikmati! 👋✨`;
+
     return t;
   };
 
@@ -701,7 +723,7 @@ export default function KasirPage() {
     setCartVisible(false);
   };
 
-  // Checkout tunai: buat order → langsung tampilkan struk (tidak perlu transaksi Midtrans)
+  // Checkout tunai: buat order → tandai paid → tampilkan struk
   const handleCashCheckout = async (cashAmount) => {
     setCashModal(false);
     setPaying(true);
@@ -711,6 +733,8 @@ export default function KasirPage() {
         notes,
         ...(customerPhone ? { customer_phone: customerPhone } : {}),
       });
+      const orderId = orderRes.data?.id ?? orderRes.order?.id ?? orderRes.id;
+      if (orderId) await orderService.updateStatus(orderId, "paid");
       showReceipt(buildReceipt(orderRes, cashAmount, "Tunai"));
     } catch (err) {
       alert(err.response?.data?.message ?? "Gagal checkout. Coba lagi.");
