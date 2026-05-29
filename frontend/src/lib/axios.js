@@ -51,8 +51,15 @@ api.interceptors.request.use(
 // langsung diteruskan, surat masalah (error) ditangani lebih dulu
 // ============================================================
 api.interceptors.response.use(
-  // Respons sukses (2xx): langsung teruskan tanpa perubahan
-  (response) => response,
+  // Respons sukses (2xx): paksa semua URL gambar ke HTTPS
+  // Ini fix Mixed Content error — backend Railway generate http:// tapi Vercel pakai https://
+  (response) => {
+    if (response.data && typeof response.data === "object") {
+      const fixed = JSON.stringify(response.data).replace(/http:\/\//g, "https://");
+      response.data = JSON.parse(fixed);
+    }
+    return response;
+  },
 
   // Respons error: periksa jenis errornya
   (error) => {
