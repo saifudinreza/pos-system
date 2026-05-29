@@ -1,41 +1,30 @@
-FROM php:8.4-fpm-alpine
+FROM php:8.4-apache
 
-# ─── System dependencies ───────────────────────────────────────────────────
-RUN apk add --no-cache \
-    git curl unzip nginx supervisor \
-    libpng-dev libzip-dev libxml2-dev \
-    oniguruma-dev freetype-dev libjpeg-turbo-dev
+RUN apt-get update && apt-get install -y \
+    git curl libpng-dev libonig-dev \
+    libxml2-dev zip unzip \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# ─── PHP extensions ────────────────────────────────────────────────────────
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install -j$(nproc) \
-    pdo_mysql mbstring exif pcntl bcmath gd zip opcache
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# ─── Composer ──────────────────────────────────────────────────────────────
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# ─── Working directory ─────────────────────────────────────────────────────
 WORKDIR /var/www/html
 
-# ─── Copy & install dependencies ───────────────────────────────────────────
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --no-interaction
-
 COPY . .
-RUN composer dump-autoload --optimize --no-dev
 
-# ─── Permissions ───────────────────────────────────────────────────────────
-RUN mkdir -p storage/logs storage/framework/{cache,sessions,views} bootstrap/cache \
- && chown -R www-data:www-data storage bootstrap/cache \
- && chmod -R 775 storage bootstrap/cache
+RUN composer install --optimize-autoloader --no-dev --no-scripts
 
-# ─── Config files ──────────────────────────────────────────────────────────
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY docker/entrypoint.sh /entrypoint.sh
+RUN chown -R www-data:www-data /var/www/html/storage
+RUN chown -R www-data:www-data /var/www/html/bootstrap/cache
+
+RUN a2enmod rewrite
+
+COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Copy entrypoint dan beri izin eksekusi
+COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8080
+EXPOSE 80
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Jalankan entrypoint bukan langsung apache
+CMD ["/entrypoint.sh"]
