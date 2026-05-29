@@ -13,13 +13,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
+        // CORS: izinkan request cross-origin dari frontend (Vercel → Railway)
+        // HandleCors membaca config dari config/cors.php
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
-            // ↑ Daftarkan alias 'role' supaya bisa dipakai di routes
-            // Penggunaan: ->middleware('role:admin')
-    ]);
+        ]);
 
-})
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();
