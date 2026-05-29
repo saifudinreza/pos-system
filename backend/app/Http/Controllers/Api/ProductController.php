@@ -273,10 +273,10 @@ class ProductController extends Controller
             // ↑ Helper dari Model — true kalau stok sudah mepet
             'is_active'   => $product->is_active,
             'image_url'   => $product->image
-                ? asset('storage/' . $product->image)
+                ? secure_asset('storage/' . $product->image)
                 : null,
-            // ↑ Convert path relatif ke URL lengkap
-            // Contoh: "products/abc.jpg" → "http://localhost:8000/storage/products/abc.jpg"
+            // ↑ secure_asset() selalu generate https:// URL
+            // Penting untuk production (Railway) agar tidak kena Mixed Content error
             'category'    => $product->relationLoaded('category') ? [
                 'id'   => $product->category->id,
                 'name' => $product->category->name,
