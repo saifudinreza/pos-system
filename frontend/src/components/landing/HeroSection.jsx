@@ -225,7 +225,7 @@ export default function HeroSection() {
             width: "fit-content", marginBottom: "24px",
           }}>
             <span className="hero-dot" />
-            POS + AI ASSISTANT · GROQ LLAMA 3.3
+            POS + AI ASSISTANT
           </div>
 
           {/* H1 — judul besar dengan highlight & strikethrough */}

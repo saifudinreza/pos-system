@@ -96,7 +96,7 @@ export default function HowItWorksSection() {
             </p>
 
             <div
-              className="bg-brand-black text-white p-5 border-3 border-brand-black"
+              className="bg-brand-black text-white p-5 border-2 border-brand-black"
               style={{ boxShadow: "4px 4px 0 #FFE500" }}
             >
               <p className="font-black text-lg mb-1">Butuh bantuan setup?</p>
@@ -104,7 +104,9 @@ export default function HowItWorksSection() {
                 Tim support kami siap membantu via WhatsApp & email, 7 hari seminggu.
               </p>
               <a
-                href="#"
+                href="https://wa.me/6281294508057?text=Halo%20KasirAI%2C%20saya%20butuh%20bantuan%20setup%20aplikasi."
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block mt-3 text-brand-yellow text-sm font-black underline underline-offset-2"
               >
                 Hubungi support →

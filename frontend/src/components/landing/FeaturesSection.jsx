@@ -87,9 +87,7 @@ const FeatureCard = ({ Icon, title, description, tag, tagColor, iconBg, iconColo
       {description}
     </p>
 
-    <p className="text-xs font-black text-brand-black underline underline-offset-2 opacity-0 group-hover:opacity-100 transition-opacity">
-      Pelajari lebih lanjut →
-    </p>
+    
   </div>
 );
 
