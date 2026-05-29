@@ -13,8 +13,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
+        // Trust semua proxy (Railway, Vercel, Cloudflare, dll)
+        // Tanpa ini Laravel tidak tau request datang via HTTPS reverse proxy
+        // sehingga asset() generate URL http:// → Mixed Content error di browser
+        $middleware->trustProxies(at: '*');
+
         // CORS: izinkan request cross-origin dari frontend (Vercel → Railway)
-        // HandleCors membaca config dari config/cors.php
         $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
 
         $middleware->alias([
