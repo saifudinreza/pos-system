@@ -1,12 +1,13 @@
 #!/bin/bash
+set -e
 
-# Buat file .env dari environment variables Railway
+# Buat .env dari environment variables Railway
 cat > /var/www/html/.env << EOF
 APP_NAME="${APP_NAME:-POS System}"
 APP_ENV="${APP_ENV:-production}"
 APP_KEY="${APP_KEY}"
 APP_DEBUG="${APP_DEBUG:-false}"
-APP_URL="${APP_URL}"
+APP_URL="${APP_URL:-http://localhost}"
 
 DB_CONNECTION=mysql
 DB_HOST="${DB_HOST}"
@@ -27,12 +28,21 @@ GROQ_API_KEY="${GROQ_API_KEY}"
 GROQ_MODEL="${GROQ_MODEL:-llama-3.3-70b-versatile}"
 EOF
 
-# Cache config Laravel
+echo "✅ .env created"
+
+# Cache config dan routes
 php artisan config:cache
 php artisan route:cache
 
 # Jalankan migration
-php artisan migrate --force 2>&1 || true
+php artisan migrate --force 2>&1 || echo "Migration warning (non-fatal)"
 
-# Start Apache
-apache2-foreground
+echo "✅ Laravel ready"
+
+# Start PHP-FPM di background
+php-fpm -D
+
+echo "✅ PHP-FPM started"
+
+# Start Nginx di foreground
+nginx -g "daemon off;"
