@@ -60,6 +60,21 @@ return [
             'report' => false,
         ],
 
+        // Cloudflare R2 — S3-compatible storage gratis
+        // Gambar produk disimpan di sini agar tidak hilang saat Railway redeploy
+        'r2' => [
+            'driver'                  => 's3',
+            'key'                     => env('R2_ACCESS_KEY_ID'),
+            'secret'                  => env('R2_SECRET_ACCESS_KEY'),
+            'region'                  => 'auto',
+            'bucket'                  => env('R2_BUCKET'),
+            'endpoint'                => env('R2_ENDPOINT'),    // https://<account_id>.r2.cloudflarestorage.com
+            'url'                     => env('R2_PUBLIC_URL'),  // https://pub-xxx.r2.dev atau custom domain
+            'use_path_style_endpoint' => true,
+            'visibility'              => 'public',
+            'throw'                   => false,
+        ],
+
     ],
 
     /*

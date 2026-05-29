@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
+// Disk yang dipakai untuk upload gambar produk.
+// Kalau R2 dikonfigurasi → pakai R2 (persistent, cloud).
+// Kalau tidak → fallback ke 'public' (local, hilang saat redeploy).
+define('PRODUCT_DISK', env('R2_ACCESS_KEY_ID') ? 'r2' : 'public');
+
 class ProductController extends Controller
 {
     // =============================================================
@@ -145,7 +150,7 @@ class ProductController extends Controller
 
         // ----- HANDLE UPLOAD GAMBAR -----
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('products', 'public');
+            $path = $request->file('image')->store('imgs', PRODUCT_DISK);
             // ↑ Simpan ke storage/app/public/products/
             // Akses via URL: /storage/products/namafile.jpg
             $validated['image'] = $path;
@@ -199,7 +204,7 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             // hapus gambar lama kalau ada
             if ($product->image) {
-                Storage::disk('public')->delete($product->image);
+                Storage::disk(PRODUCT_DISK)->delete($product->image);
                 // ↑ Hapus file lama dari storage supaya tidak numpuk
             }
             $validated['image'] = $request->file('image')->store('products', 'public');
@@ -244,7 +249,7 @@ class ProductController extends Controller
 
         // Hapus gambar kalau ada
         if ($product->image) {
-            Storage::disk('public')->delete($product->image);
+            Storage::disk(PRODUCT_DISK)->delete($product->image);
         }
 
         $product->delete();
@@ -273,10 +278,11 @@ class ProductController extends Controller
             // ↑ Helper dari Model — true kalau stok sudah mepet
             'is_active'   => $product->is_active,
             'image_url'   => $product->image
-                ? secure_asset('storage/' . $product->image)
+                ? Storage::disk(PRODUCT_DISK)->url($product->image)
                 : null,
-            // ↑ secure_asset() selalu generate https:// URL
-            // Penting untuk production (Railway) agar tidak kena Mixed Content error
+            // ↑ Pakai Storage::url() agar URL diambil dari disk yang aktif:
+            // - R2: URL publik Cloudflare (https://pub-xxx.r2.dev/products/file.jpg)
+            // - public: URL lokal (http://localhost:8000/storage/products/file.jpg)
             'category'    => $product->relationLoaded('category') ? [
                 'id'   => $product->category->id,
                 'name' => $product->category->name,
