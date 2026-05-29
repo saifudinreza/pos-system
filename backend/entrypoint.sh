@@ -44,5 +44,13 @@ php-fpm -D
 
 echo "✅ PHP-FPM started"
 
+# Ganti PORT untuk Nginx sesuai Railway
+export PORT="${PORT:-80}"
+
+# Update nginx config dengan PORT yang benar
+sed -i "s/listen 80/listen $PORT/g" /etc/nginx/sites-available/default
+
+echo "✅ Starting Nginx on port $PORT"
+
 # Start Nginx di foreground
 nginx -g "daemon off;"
