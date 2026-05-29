@@ -16,15 +16,16 @@ RUN composer install --optimize-autoloader --no-dev --no-scripts
 RUN chown -R www-data:www-data /var/www/html/storage
 RUN chown -R www-data:www-data /var/www/html/bootstrap/cache
 
-RUN a2enmod rewrite
+# Fix Apache MPM conflict
+RUN a2dismod mpm_event || true \
+    && a2dismod mpm_worker || true \
+    && a2enmod mpm_prefork \
+    && a2enmod rewrite
 
 COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
-
-# Copy entrypoint dan beri izin eksekusi
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
 
-# Jalankan entrypoint bukan langsung apache
 CMD ["/entrypoint.sh"]

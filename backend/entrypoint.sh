@@ -32,7 +32,7 @@ php artisan config:cache
 php artisan route:cache
 
 # Jalankan migration
-php artisan migrate --force
+php artisan migrate --force 2>&1 || true
 
 # Start Apache
 apache2-foreground
