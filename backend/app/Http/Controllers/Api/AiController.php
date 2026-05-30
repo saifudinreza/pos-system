@@ -12,6 +12,7 @@ use App\Services\GroqService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AiController extends Controller
 {
@@ -63,7 +64,13 @@ class AiController extends Controller
 
         // Build prompt dan kirim ke Groq
         $systemPrompt = $this->groq->buildSalesPrompt($salesData, $validated['query']);
-        $result       = $this->groq->ask($systemPrompt, $validated['query']);
+
+        try {
+            $result = $this->groq->ask($systemPrompt, $validated['query']);
+        } catch (\Exception $e) {
+            Log::error('AI query error', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'AI sedang tidak tersedia. Coba beberapa saat lagi.'], 503);
+        }
 
         // Simpan log ke database
         AiQueryLog::create([
@@ -127,7 +134,13 @@ class AiController extends Controller
         ];
 
         $systemPrompt = $this->groq->buildStockPrompt($stockData, $validated['query']);
-        $result       = $this->groq->ask($systemPrompt, $validated['query']);
+
+        try {
+            $result = $this->groq->ask($systemPrompt, $validated['query']);
+        } catch (\Exception $e) {
+            Log::error('AI predict-stock error', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'AI sedang tidak tersedia. Coba beberapa saat lagi.'], 503);
+        }
 
         AiQueryLog::create([
             'user_id'     => $request->user()->id,
@@ -198,7 +211,12 @@ class AiController extends Controller
             $transactionData,
             $validated['query']
         );
-        $result = $this->groq->ask($systemPrompt, $validated['query']);
+        try {
+            $result = $this->groq->ask($systemPrompt, $validated['query']);
+        } catch (\Exception $e) {
+            Log::error('AI recommend error', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'AI sedang tidak tersedia. Coba beberapa saat lagi.'], 503);
+        }
 
         AiQueryLog::create([
             'user_id'     => $request->user()->id,

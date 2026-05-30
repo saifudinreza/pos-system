@@ -15,9 +15,9 @@ class GroqService
     private string $groqModel;
     private string $groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
-    private string $orKey;
-    private string $orModel;
-    private string $orUrl;
+    private ?string $orKey;
+    private ?string $orModel;
+    private ?string $orUrl;
 
     public function __construct()
     {
