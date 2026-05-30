@@ -150,9 +150,7 @@ class ProductController extends Controller
 
         // ----- HANDLE UPLOAD GAMBAR -----
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('imgs', PRODUCT_DISK);
-            // ↑ Simpan ke storage/app/public/products/
-            // Akses via URL: /storage/products/namafile.jpg
+            $path = $request->file('image')->store('products', PRODUCT_DISK);
             $validated['image'] = $path;
         }
 
@@ -207,7 +205,7 @@ class ProductController extends Controller
                 Storage::disk(PRODUCT_DISK)->delete($product->image);
                 // ↑ Hapus file lama dari storage supaya tidak numpuk
             }
-            $validated['image'] = $request->file('image')->store('products', 'public');
+            $validated['image'] = $request->file('image')->store('products', PRODUCT_DISK);
         }
 
         $product->update($validated);
