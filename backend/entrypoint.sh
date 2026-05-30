@@ -63,7 +63,9 @@ rm -rf /var/www/html/public/storage
 ln -sf /var/www/html/storage/app/public /var/www/html/public/storage
 echo "✅ Storage symlink created: public/storage → storage/app/public"
 
-# Cache config dan routes
+# Clear cache lama lalu cache ulang
+php artisan config:clear
+php artisan route:clear
 php artisan config:cache
 php artisan route:cache
 echo "✅ Config & routes cached"

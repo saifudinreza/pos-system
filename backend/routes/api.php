@@ -16,20 +16,6 @@ use App\Http\Controllers\Api\SubscriptionController;
 // =============================================================
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login',    [AuthController::class, 'login']);
-
-// DEBUG SEMENTARA — hapus setelah gambar beres
-Route::get('/debug-storage', function () {
-    $r2Key = env('R2_ACCESS_KEY_ID');
-    $disk  = $r2Key ? 'r2' : 'public';
-    return response()->json([
-        'r2_key_set'    => !empty($r2Key),
-        'r2_bucket'     => env('R2_BUCKET'),
-        'r2_endpoint'   => env('R2_ENDPOINT'),
-        'r2_public_url' => env('R2_PUBLIC_URL'),
-        'active_disk'   => $disk,
-        'app_url'       => env('APP_URL'),
-    ]);
-});
 // ↑ Dua endpoint ini bebas diakses siapa saja tanpa token
 
 
