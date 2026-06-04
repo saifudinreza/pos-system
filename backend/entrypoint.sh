@@ -81,9 +81,36 @@ echo "✅ Laravel ready"
 php-fpm -D
 echo "✅ PHP-FPM started"
 
-# Ganti PORT untuk Nginx sesuai Railway
+# Tulis nginx config langsung (hindari masalah cache/template)
 export PORT="${PORT:-80}"
-envsubst '${PORT}' < /etc/nginx/sites-available/default.template > /etc/nginx/sites-available/default
+cat > /etc/nginx/sites-available/default << NGINXEOF
+server {
+    listen $PORT;
+    server_name _;
+    root /var/www/html/public;
+    index index.php index.html;
+
+    client_max_body_size 10M;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+NGINXEOF
 echo "✅ Starting Nginx on port $PORT"
 
 # Validate Nginx config sebelum start
