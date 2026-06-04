@@ -113,8 +113,11 @@ server {
 NGINXEOF
 echo "✅ Starting Nginx on port $PORT"
 
-# Validate Nginx config sebelum start
-nginx -t
+# Pastikan symlink sites-enabled ada
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
+# Validate Nginx config (tampilkan ke stdout supaya Railway bisa tangkap)
+nginx -t 2>&1
 
 # Start Nginx di foreground
-nginx -g "daemon off;"
+exec nginx -g "daemon off;"
