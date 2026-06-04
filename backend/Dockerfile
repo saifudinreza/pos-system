@@ -3,7 +3,7 @@ FROM php:8.4-fpm
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev \
-    libxml2-dev libzip-dev zip unzip nginx \
+    libxml2-dev libzip-dev zip unzip nginx gettext-base \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -25,7 +25,7 @@ RUN chown -R www-data:www-data /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
 # Copy Nginx config
-COPY docker/nginx.conf /etc/nginx/sites-available/default
+COPY docker/nginx.conf /etc/nginx/sites-available/default.template
 
 # Copy entrypoint
 COPY entrypoint.sh /entrypoint.sh

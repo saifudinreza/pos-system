@@ -83,8 +83,11 @@ echo "✅ PHP-FPM started"
 
 # Ganti PORT untuk Nginx sesuai Railway
 export PORT="${PORT:-80}"
-sed -i "s/listen 80/listen $PORT/g" /etc/nginx/sites-available/default
+envsubst '${PORT}' < /etc/nginx/sites-available/default.template > /etc/nginx/sites-available/default
 echo "✅ Starting Nginx on port $PORT"
+
+# Validate Nginx config sebelum start
+nginx -t
 
 # Start Nginx di foreground
 nginx -g "daemon off;"
