@@ -103,7 +103,7 @@ export default function ProfilePage() {
   const canEditStore = role === "admin" || role === "developer";
 
   return (
-    <div className="space-y-6 max-w-3xl page-fade">
+    <div className="space-y-6 page-fade">
       <div>
         <h2 className="text-2xl sm:text-3xl font-black font-grotesk">Profil & Langganan</h2>
         <p className="text-sm text-brand-black/50">Kelola informasi akun dan paket langganan Anda.</p>

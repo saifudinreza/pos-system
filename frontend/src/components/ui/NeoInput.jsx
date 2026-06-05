@@ -19,7 +19,7 @@ export default function NeoInput({
         required={required}
         className={`
           w-full px-3 py-2.5 text-sm font-medium bg-white
-          border-2 outline-none transition-colors
+          border-2 rounded-md outline-none transition-colors
           placeholder:text-brand-black/30
           ${error
             ? "border-red-500 focus:border-red-600"

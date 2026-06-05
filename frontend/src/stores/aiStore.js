@@ -28,7 +28,7 @@ import aiService from "@/services/aiService";
 // Analogi: seperti satu baris percakapan di WhatsApp
 // { id, role: "user"|"assistant", content, timestamp, type?, tokens_used? }
 
-const useAiStore = create((set, get) => ({
+const useAiStore = create((set) => ({
   // ============================================================
   // STATE
   // ============================================================
@@ -52,16 +52,25 @@ const useAiStore = create((set, get) => ({
   error: null,
 
   // Jumlah total token yang terpakai dalam sesi ini
-  // Berguna untuk monitoring biaya API Groq
   totalTokensUsed: 0,
+
+  // Kuota harian
+  dailyUsage: { used: 0, remaining: 10, limit: 10 },
+  limitReached: false,
 
   // ============================================================
   // ACTIONS
   // ============================================================
 
+  // --- FETCH KUOTA HARIAN ---
+  fetchUsage: async () => {
+    try {
+      const data = await aiService.getUsageToday();
+      set({ dailyUsage: data, limitReached: data.remaining === 0 });
+    } catch {}
+  },
+
   // --- KIRIM PERTANYAAN KE AI (sales analysis) ---
-  // Tipe query paling umum: analisis penjualan, tren, comparatif, dll
-  // Analogi: kirim pertanyaan ke konsultan → tunggu jawaban
   sendQuery: async (query) => {
     const userMessage = {
       id:        `user-${Date.now()}`,
@@ -70,7 +79,6 @@ const useAiStore = create((set, get) => ({
       timestamp: new Date().toISOString(),
     };
 
-    // Tampilkan pesan user dulu (sebelum menunggu respons AI)
     set((state) => ({
       messages:  [...state.messages, userMessage],
       isLoading: true,
@@ -80,7 +88,6 @@ const useAiStore = create((set, get) => ({
     try {
       const data = await aiService.query(query);
 
-      // Tambahkan respons AI ke chat
       const aiMessage = {
         id:          `ai-${Date.now()}`,
         role:        "assistant",
@@ -96,13 +103,19 @@ const useAiStore = create((set, get) => ({
         messages:        [...state.messages, aiMessage],
         isLoading:       false,
         totalTokensUsed: state.totalTokensUsed + (data.tokens_used ?? 0),
+        dailyUsage: {
+          ...state.dailyUsage,
+          used:      state.dailyUsage.used + 1,
+          remaining: Math.max(0, state.dailyUsage.remaining - 1),
+        },
+        limitReached: state.dailyUsage.remaining <= 1,
       }));
 
       return data;
     } catch (err) {
-      const errorMsg = err.response?.data?.message ?? "AI tidak bisa menjawab saat ini. Coba lagi.";
+      const isLimit   = err.response?.data?.limit_reached === true;
+      const errorMsg  = err.response?.data?.message ?? "AI tidak bisa menjawab saat ini. Coba lagi.";
 
-      // Tambahkan pesan error sebagai respons AI (bukan popup)
       set((state) => ({
         messages: [
           ...state.messages,
@@ -114,8 +127,9 @@ const useAiStore = create((set, get) => ({
             isError:   true,
           },
         ],
-        isLoading: false,
-        error:     errorMsg,
+        isLoading:    false,
+        error:        errorMsg,
+        limitReached: isLimit ? true : state.limitReached,
       }));
       throw err;
     }
@@ -225,7 +239,6 @@ const useAiStore = create((set, get) => ({
   },
 
   // --- HAPUS SEMUA PESAN (mulai sesi baru) ---
-  // Analogi: mulai percakapan baru — hapus riwayat chat sebelumnya
   clearMessages: () =>
     set({
       messages: [
@@ -239,6 +252,8 @@ const useAiStore = create((set, get) => ({
       error:           null,
       totalTokensUsed: 0,
     }),
+    // note: limitReached dan dailyUsage sengaja tidak di-reset di sini
+    // karena limit adalah per-hari, bukan per-sesi
 
   // --- BERSIHKAN ERROR ---
   clearError: () => set({ error: null }),

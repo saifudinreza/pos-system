@@ -114,13 +114,30 @@ export default function DashboardLayout({ children }) {
             style={{ boxShadow: "3px 3px 0 #FFE500" }}
             aria-label="Buka AI Assistant"
           >
-            {/* Icon berubah sesuai state: tanda X kalau sedang buka */}
-            {aiPanelOpen ? "✕" : "🤖"}
+            {aiPanelOpen ? (
+              <span className="text-base leading-none">✕</span>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-6 h-6 text-brand-yellow"
+              >
+                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l4.93-1.37A9.953 9.953 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" />
+                <circle cx="8.5"  cy="12" r="1" fill="currentColor" stroke="none" />
+                <circle cx="12"   cy="12" r="1" fill="currentColor" stroke="none" />
+                <circle cx="15.5" cy="12" r="1" fill="currentColor" stroke="none" />
+              </svg>
+            )}
           </button>
 
           {/* Desktop: panel AI selalu visible, ada di samping konten
               hidden lg:flex = sembunyikan di mobile, tampilkan di desktop */}
-          <div className="hidden lg:flex lg:flex-col lg:w-72 lg:shrink-0">
+          <div className="hidden lg:flex lg:flex-col lg:w-96 lg:shrink-0">
             {/* alwaysVisible=true: panel tidak punya overlay/slide behavior */}
             <AISidebar isOpen={true} onClose={() => {}} alwaysVisible isDev={isDev} />
           </div>

@@ -189,7 +189,7 @@ export default function ReportsPage() {
   );
 
   return (
-    <div className="space-y-5 max-w-5xl page-fade">
+    <div className="space-y-5 page-fade">
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between flex-wrap gap-3">

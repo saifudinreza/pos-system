@@ -70,12 +70,12 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // SHOW — detail satu transaksi
+    // SHOW — detail satu transaksi (include order items)
     // GET /api/transactions/{id}
     // =============================================================
     public function show(Request $request, int $id): JsonResponse
     {
-        $transaction = Transaction::with('order.user')->find($id);
+        $transaction = Transaction::with('order.user', 'order.items.product')->find($id);
 
         if (! $transaction) {
             return response()->json([
@@ -230,6 +230,45 @@ class TransactionController extends Controller
     }
 
     // =============================================================
+    // CANCEL — batalkan transaksi pending secara manual
+    // PATCH /api/transactions/{id}/cancel
+    // Role: admin & kasir
+    // =============================================================
+    public function cancelTransaction(int $id): JsonResponse
+    {
+        $transaction = Transaction::with('order.items.product')->find($id);
+
+        if (! $transaction) {
+            return response()->json(['message' => 'Transaksi tidak ditemukan.'], 404);
+        }
+
+        if ($transaction->status !== 'pending') {
+            return response()->json([
+                'message' => 'Hanya transaksi berstatus "menunggu" yang bisa dibatalkan.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($transaction) {
+            $transaction->update(['status' => 'cancel']);
+
+            if ($transaction->order) {
+                // Kembalikan stok setiap item
+                foreach ($transaction->order->items as $item) {
+                    $item->product->increment('stock', $item->quantity);
+                }
+                $transaction->order->update(['status' => 'cancelled']);
+            }
+        });
+
+        $transaction->load('order.user');
+
+        return response()->json([
+            'message' => 'Transaksi berhasil dibatalkan.',
+            'data'    => $this->formatTransaction($transaction),
+        ], 200);
+    }
+
+    // =============================================================
     // WEBHOOK — dipanggil otomatis oleh server Midtrans
     // POST /api/webhook/midtrans
     // TIDAK perlu token — keamanan via signature key Midtrans
@@ -340,11 +379,23 @@ class TransactionController extends Controller
             'order'                   => $transaction->relationLoaded('order') ? [
                 'id'           => $transaction->order->id,
                 'order_number' => $transaction->order->order_number,
+                'status'       => $transaction->order->status,
+                'subtotal'     => $transaction->order->subtotal,
+                'tax'          => $transaction->order->tax,
                 'total'        => $transaction->order->total,
+                'notes'        => $transaction->order->notes,
                 'user'         => $transaction->order->relationLoaded('user') ? [
                     'id'   => $transaction->order->user->id,
                     'name' => $transaction->order->user->name,
                 ] : null,
+                'items'        => $transaction->order->relationLoaded('items')
+                    ? $transaction->order->items->map(fn($item) => [
+                        'product_name' => $item->product?->name ?? '-',
+                        'quantity'     => $item->quantity,
+                        'price'        => $item->price,
+                        'subtotal'     => $item->subtotal,
+                    ])
+                    : null,
             ] : null,
             'created_at' => $transaction->created_at->format('d M Y H:i'),
         ];

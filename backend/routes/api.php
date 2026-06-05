@@ -67,9 +67,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // KASIR ROUTES — kasir, admin & developer bisa akses
     // =============================================================
     Route::middleware('role:admin,kasir,developer')->group(function () {
-        Route::get('/orders',                    [OrderController::class, 'index']);
-        Route::patch('/orders/{id}/status',      [OrderController::class, 'updateStatus']);
-        Route::get('/transactions',              [TransactionController::class, 'index']);
+        Route::get('/orders',                              [OrderController::class, 'index']);
+        Route::patch('/orders/{id}/status',               [OrderController::class, 'updateStatus']);
+        Route::get('/transactions',                       [TransactionController::class, 'index']);
+        Route::patch('/transactions/{id}/cancel',         [TransactionController::class, 'cancelTransaction']);
     });
 
 
@@ -118,6 +119,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ----- AI ASSISTANT (admin & developer saja — pro/enterprise subscribers) -----
     Route::middleware('role:admin,developer')->group(function () {
+        Route::get('/ai/usage-today',    [AiController::class, 'usageToday']);
         Route::post('/ai/query',         [AiController::class, 'query']);
         Route::post('/ai/predict-stock', [AiController::class, 'predictStock']);
         Route::post('/ai/recommend',     [AiController::class, 'recommend']);

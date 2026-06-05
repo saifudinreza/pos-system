@@ -254,15 +254,18 @@ class OrderController extends Controller
             'status' => ['required', 'in:pending,paid,cancelled'],
         ]);
 
-        // Kalau order dibatalkan, kembalikan stok
+        // Kalau order dibatalkan, kembalikan stok dan cancel transaksi pending
         if ($validated['status'] === 'cancelled' && $order->status !== 'cancelled') {
             DB::transaction(function () use ($order, $validated) {
                 foreach ($order->items as $item) {
                     $item->product->increment('stock', $item->quantity);
-                    // ↑ increment() = tambah stok kembali
-                    // Kebalikan dari decreaseStock() saat order dibuat
                 }
                 $order->update(['status' => $validated['status']]);
+
+                // Sinkronkan status transaksi yang masih pending ikut dibatalkan
+                if ($order->transaction && $order->transaction->status === 'pending') {
+                    $order->transaction->update(['status' => 'cancel']);
+                }
             });
         } else {
             $order->update(['status' => $validated['status']]);

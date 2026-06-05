@@ -561,8 +561,8 @@ const ProductCard = ({ product, onAdd }) => {
       onClick={() => !outOfStock && onAdd(product)}
       disabled={outOfStock}
       className={`
-        text-left border-2 border-brand-black p-2.5 bg-white
-        transition-all duration-100 flex flex-col gap-1.5 group
+        text-left border-2 border-brand-black p-1.5 bg-white
+        transition-all duration-100 flex flex-col gap-1 group
         ${outOfStock
           ? "opacity-40 cursor-not-allowed"
           // Efek neobrutalism saat hover: geser sedikit ke kiri-atas
@@ -585,10 +585,9 @@ const ProductCard = ({ product, onAdd }) => {
         </div>
       )}
       <div>
-        <p className="font-bold text-xs text-brand-black line-clamp-2 leading-tight">{product.name}</p>
-        <p className="text-xs text-brand-black/60 font-mono font-bold mt-0.5">{formatCurrency(product.price)}</p>
-        {/* Warna teks stok berubah sesuai kondisi */}
-        <p className={`text-[10px] font-mono mt-0.5 ${
+        <p className="font-bold text-[11px] text-brand-black line-clamp-2 leading-tight">{product.name}</p>
+        <p className="text-[10px] text-brand-black/60 font-mono font-bold">{formatCurrency(product.price)}</p>
+        <p className={`text-[9px] font-mono ${
           outOfStock ? "text-red-500 font-black" : lowStock ? "text-orange-500" : "text-brand-black/30"
         }`}>
           {outOfStock ? "Stok Habis" : `Stok: ${product.stock}`}
@@ -854,13 +853,13 @@ export default function KasirPage() {
         <div className="flex-1 overflow-y-auto p-3 scrollbar-thin">
           {isLoading ? (
             // Skeleton loading: tampilkan placeholder saat data belum datang
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
               {Array.from({ length: 12 }, (_, i) => (
                 <div key={i} className="skeleton border-2 border-brand-black/10 aspect-[4/5]" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
               {products.map((p) => <ProductCard key={p.id} product={p} onAdd={addItem} />)}
               {products.length === 0 && (
                 <div className="col-span-full text-center py-16 text-brand-black/40 font-semibold">
@@ -887,7 +886,7 @@ export default function KasirPage() {
       <div
         className={`
           fixed lg:static right-0 top-14 bottom-0 lg:h-auto
-          w-72 lg:w-[38%] xl:w-80 shrink-0
+          w-72 lg:w-72 xl:w-80 shrink-0
           flex flex-col border-l-2 border-brand-black bg-white
           z-40 transition-transform duration-200
           ${cartVisible ? "translate-x-0" : "translate-x-full lg:translate-x-0"}

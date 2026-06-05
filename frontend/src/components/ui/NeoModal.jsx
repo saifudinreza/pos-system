@@ -3,7 +3,6 @@
 // Analogi: seperti memo penting di atas semua dokumen lain — harus direspons dulu
 
 import { useEffect } from "react";
-import NeoButton from "./NeoButton";
 
 export default function NeoModal({ isOpen, onClose, title, children, footer, size = "md" }) {
   // Kunci scroll body saat modal terbuka — supaya background tidak bergerak
@@ -26,7 +25,7 @@ export default function NeoModal({ isOpen, onClose, title, children, footer, siz
     >
       {/* Kotak modal — stopPropagation agar klik dalam modal tidak tutup modal */}
       <div
-        className={`bg-white border-3 border-brand-black w-full ${WIDTH[size] ?? WIDTH.md} flex flex-col max-h-[90vh]`}
+        className={`bg-white border-3 border-brand-black rounded-md w-full ${WIDTH[size] ?? WIDTH.md} flex flex-col max-h-[90vh]`}
         style={{ boxShadow: "6px 6px 0 #0A0A0A" }}
         onClick={(e) => e.stopPropagation()}
       >

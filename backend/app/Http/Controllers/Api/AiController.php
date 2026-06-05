@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AiChatUsage;
 use App\Models\AiQueryLog;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -16,7 +17,28 @@ use Illuminate\Support\Facades\Log;
 
 class AiController extends Controller
 {
+    private const DAILY_LIMIT = 10;
+
     public function __construct(private GroqService $groq) {}
+
+    // =============================================================
+    // USAGE TODAY — sisa kuota chat hari ini
+    // GET /api/ai/usage-today
+    // =============================================================
+    public function usageToday(): JsonResponse
+    {
+        $usage = AiChatUsage::where('user_id', auth()->id())
+            ->where('usage_date', today())
+            ->first();
+
+        $used = $usage?->count ?? 0;
+
+        return response()->json([
+            'used'      => $used,
+            'remaining' => max(0, self::DAILY_LIMIT - $used),
+            'limit'     => self::DAILY_LIMIT,
+        ]);
+    }
 
     // =============================================================
     // QUERY — analisis penjualan natural language
@@ -25,12 +47,14 @@ class AiController extends Controller
     // =============================================================
     public function query(Request $request): JsonResponse
     {
+        if (! $this->checkAndIncrementUsage()) {
+            return $this->limitReachedResponse();
+        }
+
         $validated = $request->validate([
             'query' => ['required', 'string', 'max:500'],
         ]);
 
-        // ===== AMBIL DATA PENJUALAN DARI DB =====
-        // Data ini yang akan diinject ke prompt Groq
         $topProducts = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('orders.status', 'paid')
@@ -54,7 +78,6 @@ class AiController extends Controller
             ->whereMonth('created_at', now()->month)
             ->count();
 
-        // Data yang dikirim ke Groq
         $salesData = [
             'bulan'           => now()->format('F Y'),
             'total_revenue'   => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
@@ -62,8 +85,7 @@ class AiController extends Controller
             'produk_terlaris' => $topProducts->toArray(),
         ];
 
-        // Build prompt dan kirim ke Groq
-        $systemPrompt = $this->groq->buildSalesPrompt($salesData, $validated['query']);
+        $systemPrompt = $this->groq->buildSalesPrompt($salesData);
 
         try {
             $result = $this->groq->ask($systemPrompt, $validated['query']);
@@ -72,7 +94,6 @@ class AiController extends Controller
             return response()->json(['message' => 'AI sedang tidak tersedia. Coba beberapa saat lagi.'], 503);
         }
 
-        // Simpan log ke database
         AiQueryLog::create([
             'user_id'     => $request->user()->id,
             'type'        => 'sales_analysis',
@@ -96,22 +117,23 @@ class AiController extends Controller
     // =============================================================
     // PREDICT STOCK — prediksi kapan stok habis
     // POST /api/ai/predict-stock
-    // Body: { "query": "kapan stok Indomie habis?" }
     // =============================================================
     public function predictStock(Request $request): JsonResponse
     {
+        if (! $this->checkAndIncrementUsage()) {
+            return $this->limitReachedResponse();
+        }
+
         $validated = $request->validate([
             'query' => ['required', 'string', 'max:500'],
         ]);
 
-        // Ambil data stok + rata-rata penjualan harian
         $products = Product::with('category')
             ->withCount([
                 'orderItems as total_sold_30_days' => function ($q) {
                     $q->join('orders', 'order_items.order_id', '=', 'orders.id')
                       ->where('orders.status', 'paid')
                       ->where('orders.created_at', '>=', now()->subDays(30));
-                    // ↑ Hitung total terjual 30 hari terakhir
                 }
             ])
             ->get()
@@ -121,7 +143,6 @@ class AiController extends Controller
                 'batas_alert'       => $p->stock_alert,
                 'terjual_30_hari'   => $p->total_sold_30_days ?? 0,
                 'rata_per_hari'     => round(($p->total_sold_30_days ?? 0) / 30, 2),
-                // ↑ Rata-rata terjual per hari — dasar prediksi AI
                 'estimasi_habis'    => ($p->total_sold_30_days ?? 0) > 0
                     ? round($p->stock / (($p->total_sold_30_days ?? 1) / 30)) . ' hari lagi'
                     : 'Tidak ada data penjualan',
@@ -133,7 +154,7 @@ class AiController extends Controller
             'data_produk'      => $products->toArray(),
         ];
 
-        $systemPrompt = $this->groq->buildStockPrompt($stockData, $validated['query']);
+        $systemPrompt = $this->groq->buildStockPrompt($stockData);
 
         try {
             $result = $this->groq->ask($systemPrompt, $validated['query']);
@@ -165,23 +186,22 @@ class AiController extends Controller
     // =============================================================
     // RECOMMEND — rekomendasi produk / upsell
     // POST /api/ai/recommend
-    // Body: { "query": "produk apa yang cocok dijual bareng Indomie?" }
     // =============================================================
     public function recommend(Request $request): JsonResponse
     {
+        if (! $this->checkAndIncrementUsage()) {
+            return $this->limitReachedResponse();
+        }
+
         $validated = $request->validate([
             'query'      => ['required', 'string', 'max:500'],
             'product_id' => ['nullable', 'exists:products,id'],
-            // ↑ Optional — kalau dikirim, AI fokus ke produk ini
         ]);
 
-        // Ambil pola transaksi — produk apa yang sering dibeli bersamaan
         $patterns = DB::table('order_items as a')
             ->join('order_items as b', function ($join) {
                 $join->on('a.order_id', '=', 'b.order_id')
                      ->whereColumn('a.product_id', '!=', 'b.product_id');
-                // ↑ Self-join order_items untuk cari produk yang dibeli barengan
-                // a dan b adalah produk berbeda dalam order yang sama
             })
             ->join('products as pa', 'a.product_id', '=', 'pa.id')
             ->join('products as pb', 'b.product_id', '=', 'pb.id')
@@ -189,7 +209,6 @@ class AiController extends Controller
             ->where('orders.status', 'paid')
             ->when($request->filled('product_id'), function ($q) use ($request) {
                 $q->where('a.product_id', $request->product_id);
-                // ↑ when() = kondisional — hanya filter kalau product_id dikirim
             })
             ->selectRaw('
                 pa.name as produk_a,
@@ -207,10 +226,8 @@ class AiController extends Controller
             'keterangan'       => 'frekuensi = berapa kali kedua produk dibeli dalam order yang sama',
         ];
 
-        $systemPrompt = $this->groq->buildRecommendationPrompt(
-            $transactionData,
-            $validated['query']
-        );
+        $systemPrompt = $this->groq->buildRecommendationPrompt($transactionData);
+
         try {
             $result = $this->groq->ask($systemPrompt, $validated['query']);
         } catch (\Exception $e) {
@@ -265,5 +282,37 @@ class AiController extends Controller
                 'last_page'    => $logs->lastPage(),
             ],
         ], 200);
+    }
+
+    // =============================================================
+    // PRIVATE HELPERS
+    // =============================================================
+
+    /**
+     * Cek apakah user masih punya kuota hari ini.
+     * Kalau belum habis, increment count dan return true.
+     * Kalau sudah 10x, return false.
+     */
+    private function checkAndIncrementUsage(): bool
+    {
+        $usage = AiChatUsage::firstOrCreate(
+            ['user_id' => auth()->id(), 'usage_date' => today()],
+            ['count' => 0]
+        );
+
+        if ($usage->count >= self::DAILY_LIMIT) {
+            return false;
+        }
+
+        $usage->increment('count');
+        return true;
+    }
+
+    private function limitReachedResponse(): JsonResponse
+    {
+        return response()->json([
+            'message'       => 'Daily AI chat limit reached. Resets tomorrow.',
+            'limit_reached' => true,
+        ], 429);
     }
 }

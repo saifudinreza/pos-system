@@ -80,10 +80,10 @@ export default function CategoriesPage() {
   ];
 
   return (
-    <div className="space-y-5 max-w-2xl">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 rounded-md">
+      <div className="flex items-center justify-between ">
         <h2 className="text-2xl font-black font-grotesk">Kategori</h2>
-        <NeoButton onClick={() => openModal()}>+ Tambah Kategori</NeoButton>
+        <NeoButton className="ml-4 rounded-md" onClick={() => openModal()}>+ Tambah Kategori</NeoButton>
       </div>
 
       <NeoTable columns={columns} data={categories} isLoading={isLoading} emptyText="Belum ada kategori" />
@@ -98,16 +98,16 @@ export default function CategoriesPage() {
           </>
         }
       >
-        <form onSubmit={handleSave} className="space-y-4">
-          {error && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border border-red-300">{error}</p>}
-          <NeoInput label="Nama Kategori" required id="cat-name"
+        <form onSubmit={handleSave} className="space-y-4 ">
+          {error && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border border-red-300 ">{error}</p>}
+          <NeoInput className="" label="Nama Kategori" required id="cat-name"
             value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
             placeholder="Contoh: Minuman, Makanan..." />
-          <label className="flex items-center gap-3 cursor-pointer">
+          <label className="flex items-center gap-3 cursor-pointer ">
             <input type="checkbox" checked={form.is_active}
               onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))}
-              className="w-4 h-4 border-2 border-brand-black" />
-            <span className="text-sm font-bold">Kategori aktif</span>
+              className="w-4 h-4 border-2 border-brand-black " />
+            <span className="text-sm font-bold ">Kategori aktif</span>
           </label>
         </form>
       </NeoModal>

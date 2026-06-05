@@ -183,7 +183,7 @@ export default function OrdersPage() {
   ];
 
   return (
-    <div className="space-y-5 max-w-6xl page-fade">
+    <div className="space-y-5 page-fade">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black font-grotesk">Pesanan</h2>

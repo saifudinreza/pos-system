@@ -64,6 +64,13 @@ const transactionService = {
     const { data } = await api.get(`/transactions/my/history${buildQueryString(params)}`);
     return data;
   },
+
+  // --- BATALKAN TRANSAKSI PENDING ---
+  // Hanya bisa untuk status "pending"
+  cancel: async (id) => {
+    const { data } = await api.patch(`/transactions/${id}/cancel`);
+    return data;
+  },
 };
 
 export default transactionService;

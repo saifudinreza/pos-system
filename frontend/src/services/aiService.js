@@ -61,13 +61,15 @@ const aiService = {
   },
 
   // --- LOG RIWAYAT QUERY AI ---
-  // Menampilkan semua pertanyaan yang pernah diajukan ke AI
-  // beserta jawaban dan jumlah token yang terpakai (untuk monitoring biaya)
-  // Analogi: buku catatan semua konsultasi yang pernah dilakukan
-  //
-  // @returns AiQueryLog[] — field: type, query, response, tokens_used, created_at
   getLogs: async () => {
     const { data } = await api.get("/ai/logs");
+    return data;
+  },
+
+  // --- KUOTA CHAT HARI INI ---
+  // @returns {{ used: number, remaining: number, limit: number }}
+  getUsageToday: async () => {
+    const { data } = await api.get("/ai/usage-today");
     return data;
   },
 };
