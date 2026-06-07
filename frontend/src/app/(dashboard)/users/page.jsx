@@ -258,12 +258,12 @@ export default function UsersPage() {
       {/* ── Role Summary Cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "Total",     value: meta?.total ?? users.length, color: "white" },
-          { label: "Admin",     value: roleStats.admin,             color: "black" },
-          { label: "Kasir",     value: roleStats.kasir,             color: "yellow" },
-          { label: "Aktif",     value: roleStats.aktif,             color: "green" },
+          { label: "Total Pengguna", value: meta?.total ?? users.length,  bg: "#ffffff",  fg: "#0A0A0A" },
+          { label: "Admin",          value: roleStats.admin,               bg: "#0A0A0A",  fg: "#ffffff" },
+          { label: "Kasir",          value: roleStats.kasir,               bg: "#FFE500",  fg: "#0A0A0A" },
+          { label: "Akun Aktif",     value: roleStats.aktif,               bg: "#dcfce7",  fg: "#0A0A0A" },
         ].map((s) => (
-          <NeoCard key={s.label} className={`${s.color === "white" ? "bg-white" : s.color === "black" ? "bg-brand-black text-white" : s.color === "yellow" ? "bg-brand-yellow" : "bg-green-100"} flex items-center gap-3 py-3`}>
+          <NeoCard key={s.label} className="flex items-center gap-3 py-3" style={{ backgroundColor: s.bg, color: s.fg }}>
             <div>
               <p className="text-xs font-black uppercase tracking-widest opacity-60 font-mono">{s.label}</p>
               <p className="text-2xl font-black font-mono">{s.value}</p>
