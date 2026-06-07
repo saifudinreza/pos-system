@@ -4,13 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Banknote, Receipt, Package, Users,
-  AlertTriangle, TrendingUp, MonitorCheck, Plus, CreditCard,
+  AlertTriangle, TrendingUp, MonitorCheck, Plus, CheckCircle2,
 } from "lucide-react";
-import StatCard             from "@/components/dashboard/StatCard";
-import SalesChart           from "@/components/dashboard/SalesChart";
-import TopProductsChart     from "@/components/dashboard/TopProductsChart";
-import PaymentMethodChart   from "@/components/dashboard/PaymentMethodChart";
-import NeoCard              from "@/components/ui/NeoCard";
+import StatCard         from "@/components/dashboard/StatCard";
+import SalesChart       from "@/components/dashboard/SalesChart";
+import TopProductsChart from "@/components/dashboard/TopProductsChart";
+import NeoCard          from "@/components/ui/NeoCard";
 import NeoButton            from "@/components/ui/NeoButton";
 import NeoBadge             from "@/components/ui/NeoBadge";
 import reportService        from "@/services/reportService";
@@ -18,14 +17,14 @@ import orderService         from "@/services/orderService";
 import { formatCurrency, formatDateTime, getOrderStatusConfig } from "@/lib/utils";
 
 export default function DashboardPage() {
-  const [summary,          setSummary]          = useState(null);
-  const [weekly,           setWeekly]           = useState([]);
-  const [topProds,         setTopProds]         = useState([]);
-  const [paymentBreakdown, setPaymentBreakdown] = useState([]);
-  const [stock,            setStock]            = useState([]);
-  const [orders,           setOrders]           = useState([]);
-  const [todayOrders,      setTodayOrders]      = useState(0);
-  const [loading,          setLoading]          = useState(true);
+  const [summary,      setSummary]      = useState(null);
+  const [weekly,       setWeekly]       = useState([]);
+  const [topProds,     setTopProds]     = useState([]);
+  const [stock,        setStock]        = useState([]);
+  const [stockSummary, setStockSummary] = useState(null);
+  const [orders,       setOrders]       = useState([]);
+  const [todayOrders,  setTodayOrders]  = useState(0);
+  const [loading,      setLoading]      = useState(true);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -59,13 +58,13 @@ export default function DashboardPage() {
             }))
           );
 
-          // Breakdown metode pembayaran untuk donut chart
-          setPaymentBreakdown(d?.payment_breakdown ?? []);
         }
 
         if (stockRes.status === "fulfilled") {
-          const stockProducts = stockRes.value?.data?.products ?? stockRes.value?.data ?? [];
+          const raw          = stockRes.value?.data ?? {};
+          const stockProducts = raw.products ?? stockRes.value?.data ?? [];
           setStock(stockProducts.filter((p) => p.is_low_stock));
+          setStockSummary(raw.summary ?? null);
         }
 
         if (ordersRes.status === "fulfilled") {
@@ -217,20 +216,68 @@ export default function DashboardPage() {
           </div>
         </NeoCard>
 
-        {/* Chart 3: Metode Pembayaran (Donut) */}
+        {/* Card 3: Kondisi Stok */}
         <NeoCard noPad className="slide-up stagger-3">
           <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between">
             <div>
-              <h3 className="font-black text-sm font-grotesk">Metode Bayar</h3>
-              <p className="text-xs text-brand-black/40">QRIS · Tunai · Transfer</p>
+              <h3 className="font-black text-sm font-grotesk">Kondisi Stok</h3>
+              <p className="text-xs text-brand-black/40">Ringkasan inventori terkini</p>
             </div>
-            <CreditCard size={16} className="text-brand-black/30" />
+            <Package size={16} className="text-brand-black/30" />
           </div>
-          <div className="px-3 py-4">
-            {loading
-              ? <div className="h-[220px] skeleton" />
-              : <PaymentMethodChart data={paymentBreakdown} />
-            }
+          <div className="px-4 py-4 space-y-3">
+            {loading ? (
+              <div className="h-[200px] skeleton" />
+            ) : (
+              <>
+                {[
+                  {
+                    label: "Total Produk",
+                    value: stockSummary?.total_products ?? (stock.length + " (menipis)"),
+                    cls:   "bg-brand-cream border-brand-black/20",
+                    icon:  <Package size={15} className="text-brand-black/50" />,
+                  },
+                  {
+                    label: "Stok Menipis",
+                    value: stockSummary?.low_stock_count ?? stock.length,
+                    cls:   (stockSummary?.low_stock_count ?? stock.length) > 0
+                      ? "bg-orange-50 border-orange-400"
+                      : "bg-green-50 border-green-400",
+                    icon:  <AlertTriangle size={15} className={
+                      (stockSummary?.low_stock_count ?? stock.length) > 0
+                        ? "text-orange-500" : "text-green-500"
+                    } />,
+                  },
+                  {
+                    label: "Stok Habis",
+                    value: stockSummary?.out_of_stock_count ?? 0,
+                    cls:   (stockSummary?.out_of_stock_count ?? 0) > 0
+                      ? "bg-red-50 border-red-400"
+                      : "bg-green-50 border-green-400",
+                    icon:  (stockSummary?.out_of_stock_count ?? 0) > 0
+                      ? <AlertTriangle size={15} className="text-red-500" />
+                      : <CheckCircle2 size={15} className="text-green-500" />,
+                  },
+                ].map(({ label, value, cls, icon }) => (
+                  <div
+                    key={label}
+                    className={`flex items-center justify-between px-4 py-3 border-2 rounded-md ${cls}`}
+                    style={{ boxShadow: "2px 2px 0 #0A0A0A33" }}
+                  >
+                    <div className="flex items-center gap-2">
+                      {icon}
+                      <span className="text-sm font-bold">{label}</span>
+                    </div>
+                    <span className="font-black text-lg font-mono">{value}</span>
+                  </div>
+                ))}
+                <Link href="/products?low_stock=true" className="block mt-1">
+                  <div className="text-center text-xs font-bold text-brand-black/40 hover:text-brand-black underline underline-offset-2 transition-colors">
+                    Lihat semua produk →
+                  </div>
+                </Link>
+              </>
+            )}
           </div>
         </NeoCard>
       </div>

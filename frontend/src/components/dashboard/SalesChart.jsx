@@ -54,7 +54,7 @@ export default function SalesChart({ data = [] }) {
         <Tooltip content={<CustomTooltip />} />
         <Line
           type="monotone"
-          dataKey="revenue"
+          dataKey="total_revenue"
           stroke="#FFE500"
           strokeWidth={3}
           dot={{ r: 5, fill: "#FFE500", stroke: "#0A0A0A", strokeWidth: 2 }}

@@ -561,36 +561,46 @@ const ProductCard = ({ product, onAdd }) => {
       onClick={() => !outOfStock && onAdd(product)}
       disabled={outOfStock}
       className={`
-        text-left border-2 border-brand-black p-1.5 bg-white
-        transition-all duration-100 flex flex-col gap-1 group
+        relative text-left rounded-xl border-2 border-brand-black bg-white
+        transition-all duration-100 flex flex-col overflow-hidden group
         ${outOfStock
           ? "opacity-40 cursor-not-allowed"
-          // Efek neobrutalism saat hover: geser sedikit ke kiri-atas
-          : "hover:bg-brand-yellow hover:-translate-x-0.5 hover:-translate-y-0.5 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+          : "hover:bg-brand-yellow hover:-translate-x-0.5 hover:-translate-y-0.5 cursor-pointer active:translate-x-0 active:translate-y-0"
         }
       `}
       style={{ boxShadow: outOfStock ? "none" : "3px 3px 0 #0A0A0A" }}
     >
-      {/* Gambar produk — fallback ke emoji kalau tidak ada gambar
-          image_url sudah full URL dari backend (contoh: http://localhost:8000/storage/products/abc.jpg) */}
-      {product.image_url ? (
-        <img
-          src={product.image_url}
-          alt={product.name}
-          className="w-full aspect-square object-cover border border-brand-black/10"
-        />
-      ) : (
-        <div className="w-full aspect-square bg-brand-cream border border-brand-black/10 flex items-center justify-center text-3xl">
-          📦
-        </div>
-      )}
-      <div>
+      {/* Gambar produk */}
+      <div className="relative w-full aspect-square bg-brand-cream overflow-hidden">
+        {product.image_url ? (
+          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-3xl select-none">📦</div>
+        )}
+        {/* Badge stok menipis */}
+        {lowStock && (
+          <span className="absolute top-1.5 right-1.5 bg-orange-400 border border-orange-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full leading-none">
+            TIPIS
+          </span>
+        )}
+        {/* Overlay "Habis" */}
+        {outOfStock && (
+          <div className="absolute inset-0 bg-brand-black/50 flex items-center justify-center">
+            <span className="text-white text-[10px] font-black tracking-widest">HABIS</span>
+          </div>
+        )}
+      </div>
+
+      {/* Info produk */}
+      <div className="p-2.5 flex flex-col gap-0.5 flex-1">
         <p className="font-bold text-[11px] text-brand-black line-clamp-2 leading-tight">{product.name}</p>
-        <p className="text-[10px] text-brand-black/60 font-mono font-bold">{formatCurrency(product.price)}</p>
+        <p className="text-[11px] text-brand-black font-black font-mono mt-auto pt-1">
+          {formatCurrency(product.price)}
+        </p>
         <p className={`text-[9px] font-mono ${
           outOfStock ? "text-red-500 font-black" : lowStock ? "text-orange-500" : "text-brand-black/30"
         }`}>
-          {outOfStock ? "Stok Habis" : `Stok: ${product.stock}`}
+          {outOfStock ? "Stok habis" : `Stok: ${product.stock}`}
         </p>
       </div>
     </button>
@@ -733,7 +743,7 @@ export default function KasirPage() {
         ...(customerPhone ? { customer_phone: customerPhone } : {}),
       });
       const orderId = orderRes.data?.id ?? orderRes.order?.id ?? orderRes.id;
-      if (orderId) await orderService.updateStatus(orderId, "paid");
+      if (orderId) await orderService.updateStatus(orderId, "paid", "cash");
       showReceipt(buildReceipt(orderRes, cashAmount, "Tunai"));
     } catch (err) {
       alert(err.response?.data?.message ?? "Gagal checkout. Coba lagi.");
@@ -853,13 +863,13 @@ export default function KasirPage() {
         <div className="flex-1 overflow-y-auto p-3 scrollbar-thin">
           {isLoading ? (
             // Skeleton loading: tampilkan placeholder saat data belum datang
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {Array.from({ length: 12 }, (_, i) => (
-                <div key={i} className="skeleton border-2 border-brand-black/10 aspect-[4/5]" />
+                <div key={i} className="skeleton rounded-xl aspect-[4/5]" />
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
               {products.map((p) => <ProductCard key={p.id} product={p} onAdd={addItem} />)}
               {products.length === 0 && (
                 <div className="col-span-full text-center py-16 text-brand-black/40 font-semibold">

@@ -78,8 +78,10 @@ const orderService = {
   //
   // @param {number} id
   // @param {"pending" | "paid" | "cancelled"} status
-  updateStatus: async (id, status) => {
-    const { data } = await api.patch(`/orders/${id}/status`, { status });
+  updateStatus: async (id, status, paymentMethod = null) => {
+    const payload = { status };
+    if (paymentMethod) payload.payment_method = paymentMethod;
+    const { data } = await api.patch(`/orders/${id}/status`, payload);
     return data;
   },
 };

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Transaction;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -251,7 +252,8 @@ class OrderController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => ['required', 'in:pending,paid,cancelled'],
+            'status'         => ['required', 'in:pending,paid,cancelled'],
+            'payment_method' => ['nullable', 'string', 'in:cash,qris,bank_transfer,credit_card,other'],
         ]);
 
         // Kalau order dibatalkan, kembalikan stok dan cancel transaksi pending
@@ -262,9 +264,29 @@ class OrderController extends Controller
                 }
                 $order->update(['status' => $validated['status']]);
 
-                // Sinkronkan status transaksi yang masih pending ikut dibatalkan
                 if ($order->transaction && $order->transaction->status === 'pending') {
                     $order->transaction->update(['status' => 'cancel']);
+                }
+            });
+        } elseif ($validated['status'] === 'paid' && $order->status !== 'paid') {
+            DB::transaction(function () use ($order, $validated) {
+                $order->update(['status' => 'paid']);
+
+                // Buat Transaction record untuk pembayaran tunai jika belum ada settlement
+                $hasSettlement = Transaction::where('order_id', $order->id)
+                    ->where('status', 'settlement')
+                    ->exists();
+
+                if (! $hasSettlement) {
+                    $method = $validated['payment_method'] ?? 'cash';
+                    Transaction::create([
+                        'order_id'          => $order->id,
+                        'midtrans_order_id' => $order->order_number . '-' . $method . '-' . time(),
+                        'status'            => 'settlement',
+                        'payment_method'    => $method,
+                        'amount'            => $order->total,
+                        'paid_at'           => now(),
+                    ]);
                 }
             });
         } else {
@@ -273,7 +295,6 @@ class OrderController extends Controller
 
         $order = $order->fresh()->load(['user', 'items.product', 'transaction']);
 
-        // Kirim struk WA kalau order baru di-set paid secara manual (kasir tandai lunas)
         if ($validated['status'] === 'paid') {
             app(WhatsAppService::class)->sendReceipt($order);
         }
