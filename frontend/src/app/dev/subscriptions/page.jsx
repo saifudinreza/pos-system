@@ -82,23 +82,23 @@ const STATUS_BADGE = {
 function StatCard({ label, value, sub, accent, Icon }) {
   return (
     <div
-      className="border-2 p-4 flex flex-col gap-2"
+      className="rounded-md border-2 p-4 flex flex-col gap-2"
       style={{
-        borderColor: accent ?? "rgba(255,255,255,0.15)",
-        boxShadow: `3px 3px 0 ${accent ?? "rgba(255,255,255,0.1)"}`,
-        background: "rgba(255,255,255,0.04)",
+        borderColor: accent ?? "rgba(255,255,255,0.12)",
+        boxShadow: `3px 3px 0 ${accent ? accent + "55" : "rgba(255,255,255,0.06)"}`,
+        background: "rgba(255,255,255,0.05)",
       }}
     >
       <div className="flex items-center justify-between">
         <p className="text-[10px] font-black uppercase tracking-widest text-white/40 font-mono">{label}</p>
         {Icon && (
-          <span style={{ color: accent ?? "rgba(255,255,255,0.2)" }}>
+          <span style={{ color: accent ?? "rgba(255,255,255,0.15)" }}>
             <Icon />
           </span>
         )}
       </div>
       <p className="text-3xl font-black text-white font-mono">{value}</p>
-      {sub && <p className="text-xs text-white/40">{sub}</p>}
+      {sub && <p className="text-xs text-white/40 font-mono">{sub}</p>}
     </div>
   );
 }
@@ -169,8 +169,12 @@ export default function SubscriptionsPage() {
 
       {/* Error state */}
       {error && (
-        <div className="border-2 border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-300 font-mono">
-          ⚠ {error}
+        <div className="rounded-md border-2 border-red-400/40 bg-red-400/10 px-4 py-3 text-sm text-red-300 font-mono flex items-center gap-2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 shrink-0">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          {error}
         </div>
       )}
 
@@ -192,7 +196,7 @@ export default function SubscriptionsPage() {
 
       {/* Plan revenue breakdown */}
       <div
-        className="border-2 border-white/10 p-4"
+        className="rounded-md border-2 border-white/10 p-4"
         style={{ background: "rgba(255,255,255,0.04)", boxShadow: "3px 3px 0 rgba(255,255,255,0.05)" }}
       >
         <p className="text-xs font-black text-white/40 uppercase tracking-widest mb-3 font-mono">
@@ -223,13 +227,13 @@ export default function SubscriptionsPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari nama atau email..."
-          className="flex-1 min-w-[200px] px-3 py-2 text-sm border-2 border-white/20 bg-white/5 text-white outline-none focus:border-brand-yellow placeholder:text-white/25 font-mono"
+          className="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-md border-2 border-white/20 bg-white/5 text-white outline-none focus:border-brand-yellow placeholder:text-white/25 font-mono"
           style={{ boxShadow: "2px 2px 0 rgba(255,255,255,0.05)" }}
         />
         <select
           value={filterPlan}
           onChange={(e) => setFilterPlan(e.target.value)}
-          className="px-3 py-2 text-sm border-2 border-white/20 bg-brand-black text-white outline-none focus:border-brand-yellow"
+          className="px-3 py-2 text-sm rounded-md border-2 border-white/20 bg-brand-black text-white outline-none focus:border-brand-yellow"
           style={{ boxShadow: "2px 2px 0 rgba(255,255,255,0.05)" }}
         >
           <option value="">Semua Plan</option>
@@ -241,7 +245,7 @@ export default function SubscriptionsPage() {
 
       {/* Table */}
       <div
-        className="border-2 border-white/10 overflow-hidden"
+        className="rounded-md border-2 border-white/10 overflow-hidden"
         style={{ boxShadow: "4px 4px 0 rgba(255,255,255,0.05)" }}
       >
         <div className="overflow-x-auto">
@@ -356,7 +360,7 @@ export default function SubscriptionsPage() {
       </div>
 
       {/* Feature Matrix */}
-      <div className="border-2 border-white/10 p-5" style={{ background: "rgba(255,255,255,0.03)" }}>
+      <div className="rounded-md border-2 border-white/10 p-5" style={{ background: "rgba(255,255,255,0.03)" }}>
         <h2 className="text-sm font-black text-white font-grotesk mb-4">Matriks Fitur per Plan</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
@@ -412,7 +416,7 @@ export default function SubscriptionsPage() {
           onClick={() => setEditModal(null)}
         >
           <div
-            className="bg-brand-black border-2 border-brand-yellow w-full max-w-sm p-6"
+            className="rounded-md bg-brand-black border-2 border-brand-yellow w-full max-w-sm p-6"
             style={{ boxShadow: "6px 6px 0 #FFE500" }}
             onClick={(e) => e.stopPropagation()}
           >

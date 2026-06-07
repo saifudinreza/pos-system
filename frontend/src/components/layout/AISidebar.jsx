@@ -72,11 +72,11 @@ const MessageBubble = ({ msg }) => {
   return (
     <div className={`flex flex-col gap-1 ${isUser ? "items-end" : "items-start"}`}>
       <div
-        className={`max-w-[92%] px-3 py-2 text-xs font-medium leading-relaxed border-2 border-brand-black rounded-md
+        className={`max-w-[92%] px-3 py-2 text-xs font-medium leading-relaxed border-2 border-brand-black/80 rounded-md
           ${isUser
             ? "bg-brand-yellow text-brand-black"
             : msg.isError
-              ? "bg-red-50 text-red-700"
+              ? "bg-red-50 text-red-700 border-red-300"
               : "bg-white text-brand-black"
           }
         `}
@@ -154,7 +154,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
   const barColor   = usageRatio >= 1 ? "bg-red-500" : usageRatio >= 0.7 ? "bg-amber-400" : "bg-green-400";
 
   const panelContent = (
-    <aside className="h-full w-80 lg:w-96 bg-white border-l-2 border-brand-black flex flex-col">
+    <aside className="h-full w-80 lg:w-96 bg-white border-l-2 border-brand-black flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 bg-brand-black text-white border-b-2 border-brand-black flex items-center justify-between shrink-0">
         <div>
@@ -214,7 +214,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
 
       {/* Warning banner — mendekati limit */}
       {!limitReached && usageWarning && (
-        <div className="mx-3 mt-3 px-3 py-2.5 bg-orange-50 border-2 border-orange-400 shrink-0">
+        <div className="mx-3 mt-3 px-3 py-2.5 rounded-md bg-orange-50 border-2 border-orange-400 shrink-0">
           <div className="flex items-start gap-2">
             <WarningIcon className="w-3.5 h-3.5 text-orange-500 mt-0.5 shrink-0" />
             <p className="text-xs font-bold text-orange-800 leading-snug">
@@ -226,7 +226,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
 
       {/* Limit reached banner */}
       {limitReached && (
-        <div className="mx-3 mt-3 px-3 py-2.5 bg-red-50 border-2 border-red-400 shrink-0">
+        <div className="mx-3 mt-3 px-3 py-2.5 rounded-md bg-red-50 border-2 border-red-400 shrink-0">
           <div className="flex items-start gap-2">
             <BlockIcon className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
             <p className="text-xs font-bold text-red-800 leading-snug">
