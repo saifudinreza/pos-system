@@ -21,6 +21,7 @@ import {
   Users,           // icon pengguna
   UserCircle,      // icon profil
   BrainCircuit,    // icon AI monitoring
+  Building2,       // icon tenant
 } from "lucide-react";
 
 const NAV_GROUPS = [
@@ -212,7 +213,14 @@ export default function Sidebar({ isOpen, onClose }) {
                   Icon={CreditCard}
                   label="Subscriptions"
                   badge="DEV"
-                  isActive={pathname.startsWith("/dev")}
+                  isActive={pathname === "/dev/subscriptions"}
+                />
+                <NavItem
+                  href="/dev/tenants"
+                  Icon={Building2}
+                  label="Manage Tenant"
+                  badge="DEV"
+                  isActive={pathname.startsWith("/dev/tenants")}
                 />
               </div>
             </div>

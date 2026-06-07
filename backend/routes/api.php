@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\TenantController;
 
 // =============================================================
 // PUBLIC ROUTES — tidak perlu login
@@ -112,12 +113,19 @@ Route::middleware('auth:sanctum')->group(function () {
     // =============================================================
     Route::middleware('role:developer')->group(function () {
         // ----- USER MANAGEMENT -----
-        Route::get('/users',               [UserController::class, 'index']);
-        Route::post('/users',              [UserController::class, 'store']);
-        Route::get('/users/{id}',          [UserController::class, 'show']);
-        Route::put('/users/{id}',          [UserController::class, 'update']);
-        Route::delete('/users/{id}',       [UserController::class, 'destroy']);
-        Route::patch('/users/{id}/toggle', [UserController::class, 'toggleActive']);
+        Route::get('/users',                [UserController::class, 'index']);
+        Route::post('/users',               [UserController::class, 'store']);
+        Route::get('/users/{id}',           [UserController::class, 'show']);
+        Route::put('/users/{id}',           [UserController::class, 'update']);
+        Route::delete('/users/{id}',        [UserController::class, 'destroy']);
+        Route::patch('/users/{id}/toggle',  [UserController::class, 'toggleActive']);
+        Route::patch('/users/{id}/role',    [UserController::class, 'patchRole']);
+
+        // ----- TENANT MANAGEMENT -----
+        Route::get('/dev/tenants',          [TenantController::class, 'index']);
+        Route::get('/dev/tenants/{id}',     [TenantController::class, 'show']);
+        Route::put('/dev/tenants/{id}',     [TenantController::class, 'update']);
+        Route::delete('/dev/tenants/{id}',  [TenantController::class, 'destroy']);
 
         // ----- DEVELOPER SUBSCRIPTION MANAGEMENT -----
         Route::get('/dev/subscriptions',                       [SubscriptionController::class, 'devIndex']);

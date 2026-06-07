@@ -155,6 +155,31 @@ class UserController extends Controller
     }
 
     // =============================================================
+    // PATCH ROLE — ganti role user secara cepat
+    // PATCH /api/users/{id}/role
+    // =============================================================
+    public function patchRole(Request $request, int $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'role' => ['required', Rule::in(['admin', 'kasir', 'user', 'developer'])],
+        ]);
+
+        $user = User::find($id);
+        if (! $user) return response()->json(['message' => 'User tidak ditemukan.'], 404);
+        if (Auth::id() === $user->id) return response()->json(['message' => 'Tidak bisa mengubah role sendiri.'], 422);
+        if ($user->role === 'developer' && $validated['role'] !== 'developer') {
+            return response()->json(['message' => 'Role developer tidak bisa diturunkan melalui panel ini.'], 422);
+        }
+
+        $user->update(['role' => $validated['role']]);
+
+        return response()->json([
+            'message' => "Role user \"{$user->name}\" berhasil diubah menjadi {$validated['role']}.",
+            'data'    => $this->formatUser($user->fresh()),
+        ], 200);
+    }
+
+    // =============================================================
     // TOGGLE ACTIVE — aktifkan / nonaktifkan user
     // =============================================================
     public function toggleActive(int $id): JsonResponse

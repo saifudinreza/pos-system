@@ -73,6 +73,11 @@ const userService = {
     const { data } = await api.patch(`/users/${id}/toggle`);
     return data;
   },
+
+  patchRole: async (id, role) => {
+    const { data } = await api.patch(`/users/${id}/role`, { role });
+    return data;
+  },
 };
 
 export default userService;

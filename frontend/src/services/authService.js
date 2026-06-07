@@ -71,14 +71,15 @@ const authService = {
   // Backend response shape sama dengan login
   register: async (payload) => {
     const { data } = await api.post("/register", payload);
-    const token = data.data?.token;
-    const user  = data.data?.user;
+    const token      = data.data?.token;
+    const user       = data.data?.user;
+    const isNewStore = data.data?.is_new_store ?? true;
     if (typeof window !== "undefined") {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
       if (token) setTokenCookie(token);
     }
-    return { token, user, message: data.message };
+    return { token, user, is_new_store: isNewStore, message: data.message };
   },
 
   // --- LOGOUT ---

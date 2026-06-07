@@ -118,6 +118,14 @@ export default function UsersPage() {
     finally { setDeleting(false); }
   };
 
+  const handleRoleChange = async (id, name, newRole) => {
+    if (!confirm(`Ubah role "${name}" menjadi ${newRole}?`)) return;
+    try {
+      const res = await userService.patchRole(id, newRole);
+      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, role: res.data?.role ?? newRole } : u));
+    } catch (err) { alert(getErrorMessage(err)); }
+  };
+
   const handleToggle = async (id, name, isActive) => {
     if (id === currentUser?.id) {
       alert("Tidak bisa mengubah status akunmu sendiri.");
@@ -181,6 +189,17 @@ export default function UsersPage() {
           <NeoButton size="sm" variant="secondary" onClick={() => openModal(row)}>Edit</NeoButton>
           {id !== currentUser?.id ? (
             <>
+              {/* Quick role toggle — kasir ↔ admin */}
+              {(row.role === "kasir" || row.role === "admin") && (
+                <NeoButton
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleRoleChange(id, row.name, row.role === "kasir" ? "admin" : "kasir")}
+                  title={row.role === "kasir" ? "Jadikan Admin" : "Jadikan Kasir"}
+                >
+                  {row.role === "kasir" ? "→ Admin" : "→ Kasir"}
+                </NeoButton>
+              )}
               <NeoButton
                 size="sm"
                 variant={row.is_active ? "danger" : "secondary"}
