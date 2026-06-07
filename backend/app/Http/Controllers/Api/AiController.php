@@ -17,9 +17,17 @@ use Illuminate\Support\Facades\Log;
 
 class AiController extends Controller
 {
-    private const DAILY_LIMIT = 10;
-
     public function __construct(private GroqService $groq) {}
+
+    private function dailyLimit(): int
+    {
+        return config('ai.daily_limit', 10);
+    }
+
+    private function warningThresholdPct(): int
+    {
+        return config('ai.warning_threshold_pct', 30);
+    }
 
     // =============================================================
     // USAGE TODAY — sisa kuota chat hari ini
@@ -27,23 +35,28 @@ class AiController extends Controller
     // =============================================================
     public function usageToday(): JsonResponse
     {
-        $usage = AiChatUsage::where('user_id', auth()->id())
+        $limit = $this->dailyLimit();
+        $usage = AiChatUsage::where('user_id', auth()->user()->id)
             ->where('usage_date', today())
             ->first();
 
-        $used = $usage?->count ?? 0;
+        $used      = $usage?->count ?? 0;
+        $remaining = max(0, $limit - $used);
+
+        $warningAt  = (int) ceil($limit * $this->warningThresholdPct() / 100);
+        $isWarning  = $remaining > 0 && $remaining <= $warningAt;
 
         return response()->json([
             'used'      => $used,
-            'remaining' => max(0, self::DAILY_LIMIT - $used),
-            'limit'     => self::DAILY_LIMIT,
+            'remaining' => $remaining,
+            'limit'     => $limit,
+            'warning'   => $isWarning,
         ]);
     }
 
     // =============================================================
     // QUERY — analisis penjualan natural language
     // POST /api/ai/query
-    // Body: { "query": "produk apa yang paling laku bulan ini?" }
     // =============================================================
     public function query(Request $request): JsonResponse
     {
@@ -100,7 +113,13 @@ class AiController extends Controller
             'query'       => $validated['query'],
             'response'    => $result['text'],
             'tokens_used' => $result['tokens_used'],
+            'provider'    => $result['provider'],
         ]);
+
+        $usageAfter = $this->currentUsage();
+        $limit      = $this->dailyLimit();
+        $remaining  = max(0, $limit - $usageAfter);
+        $warningAt  = (int) ceil($limit * $this->warningThresholdPct() / 100);
 
         return response()->json([
             'message' => 'AI berhasil menganalisis data penjualan.',
@@ -111,11 +130,17 @@ class AiController extends Controller
                 'provider'    => $result['provider'],
                 'model'       => $result['model'],
             ],
+            'usage' => [
+                'used'      => $usageAfter,
+                'remaining' => $remaining,
+                'limit'     => $limit,
+                'warning'   => $remaining > 0 && $remaining <= $warningAt,
+            ],
         ], 200);
     }
 
     // =============================================================
-    // PREDICT STOCK — prediksi kapan stok habis
+    // PREDICT STOCK
     // POST /api/ai/predict-stock
     // =============================================================
     public function predictStock(Request $request): JsonResponse
@@ -169,7 +194,13 @@ class AiController extends Controller
             'query'       => $validated['query'],
             'response'    => $result['text'],
             'tokens_used' => $result['tokens_used'],
+            'provider'    => $result['provider'],
         ]);
+
+        $usageAfter = $this->currentUsage();
+        $limit      = $this->dailyLimit();
+        $remaining  = max(0, $limit - $usageAfter);
+        $warningAt  = (int) ceil($limit * $this->warningThresholdPct() / 100);
 
         return response()->json([
             'message' => 'AI berhasil memprediksi stok.',
@@ -180,11 +211,17 @@ class AiController extends Controller
                 'provider'    => $result['provider'],
                 'model'       => $result['model'],
             ],
+            'usage' => [
+                'used'      => $usageAfter,
+                'remaining' => $remaining,
+                'limit'     => $limit,
+                'warning'   => $remaining > 0 && $remaining <= $warningAt,
+            ],
         ], 200);
     }
 
     // =============================================================
-    // RECOMMEND — rekomendasi produk / upsell
+    // RECOMMEND
     // POST /api/ai/recommend
     // =============================================================
     public function recommend(Request $request): JsonResponse
@@ -241,7 +278,13 @@ class AiController extends Controller
             'query'       => $validated['query'],
             'response'    => $result['text'],
             'tokens_used' => $result['tokens_used'],
+            'provider'    => $result['provider'],
         ]);
+
+        $usageAfter = $this->currentUsage();
+        $limit      = $this->dailyLimit();
+        $remaining  = max(0, $limit - $usageAfter);
+        $warningAt  = (int) ceil($limit * $this->warningThresholdPct() / 100);
 
         return response()->json([
             'message' => 'AI berhasil memberikan rekomendasi.',
@@ -251,6 +294,12 @@ class AiController extends Controller
                 'tokens_used' => $result['tokens_used'],
                 'provider'    => $result['provider'],
                 'model'       => $result['model'],
+            ],
+            'usage' => [
+                'used'      => $usageAfter,
+                'remaining' => $remaining,
+                'limit'     => $limit,
+                'warning'   => $remaining > 0 && $remaining <= $warningAt,
             ],
         ], 200);
     }
@@ -273,6 +322,7 @@ class AiController extends Controller
                 'query'       => $log->query,
                 'response'    => $log->response,
                 'tokens_used' => $log->tokens_used,
+                'provider'    => $log->provider,
                 'user'        => $log->user->name,
                 'created_at'  => $log->created_at->format('d M Y H:i'),
             ]),
@@ -285,27 +335,115 @@ class AiController extends Controller
     }
 
     // =============================================================
+    // STATS — ringkasan monitoring untuk admin
+    // GET /api/ai/stats
+    // =============================================================
+    public function stats(): JsonResponse
+    {
+        $today      = today();
+        $weekStart  = now()->startOfWeek();
+        $monthStart = now()->startOfMonth();
+        $limit      = $this->dailyLimit();
+        $tokenAlert = config('ai.token_alert_threshold', 50000);
+
+        $todayTokens = AiQueryLog::whereDate('created_at', $today)->sum('tokens_used');
+
+        $summary = [
+            'today' => [
+                'requests'         => AiQueryLog::whereDate('created_at', $today)->count(),
+                'tokens'           => $todayTokens,
+                'active_users'     => AiChatUsage::where('usage_date', $today)->count(),
+                'high_token_usage' => $todayTokens >= $tokenAlert,
+            ],
+            'week' => [
+                'requests' => AiQueryLog::where('created_at', '>=', $weekStart)->count(),
+                'tokens'   => AiQueryLog::where('created_at', '>=', $weekStart)->sum('tokens_used'),
+            ],
+            'month' => [
+                'requests' => AiQueryLog::where('created_at', '>=', $monthStart)->count(),
+                'tokens'   => AiQueryLog::where('created_at', '>=', $monthStart)->sum('tokens_used'),
+            ],
+        ];
+
+        $byType = AiQueryLog::whereDate('created_at', $today)
+            ->selectRaw('type, COUNT(*) as count, SUM(tokens_used) as tokens')
+            ->groupBy('type')
+            ->get()
+            ->map(fn($r) => [
+                'type'   => $r->type,
+                'count'  => (int) $r->count,
+                'tokens' => (int) $r->tokens,
+            ]);
+
+        $byProvider = AiQueryLog::whereDate('created_at', $today)
+            ->whereNotNull('provider')
+            ->selectRaw('provider, COUNT(*) as count')
+            ->groupBy('provider')
+            ->get()
+            ->map(fn($r) => ['provider' => $r->provider, 'count' => (int) $r->count]);
+
+        $usersToday = AiChatUsage::with('user')
+            ->where('usage_date', $today)
+            ->orderByDesc('count')
+            ->get()
+            ->map(fn($u) => [
+                'user'      => $u->user->name ?? 'Unknown',
+                'used'      => $u->count,
+                'remaining' => max(0, $limit - $u->count),
+                'limit'     => $limit,
+                'pct'       => $limit > 0 ? round($u->count / $limit * 100) : 0,
+                'near_limit' => ($limit - $u->count) <= (int) ceil($limit * $this->warningThresholdPct() / 100),
+            ]);
+
+        $dailyTrend = AiQueryLog::where('created_at', '>=', now()->subDays(6)->startOfDay())
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as requests, SUM(tokens_used) as tokens')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(fn($r) => [
+                'date'     => $r->date,
+                'requests' => (int) $r->requests,
+                'tokens'   => (int) $r->tokens,
+            ]);
+
+        return response()->json([
+            'summary'     => $summary,
+            'by_type'     => $byType,
+            'by_provider' => $byProvider,
+            'users_today' => $usersToday,
+            'daily_trend' => $dailyTrend,
+            'config'      => [
+                'daily_limit'          => $limit,
+                'warning_threshold_pct' => $this->warningThresholdPct(),
+                'token_alert_threshold' => $tokenAlert,
+            ],
+        ], 200);
+    }
+
+    // =============================================================
     // PRIVATE HELPERS
     // =============================================================
 
-    /**
-     * Cek apakah user masih punya kuota hari ini.
-     * Kalau belum habis, increment count dan return true.
-     * Kalau sudah 10x, return false.
-     */
     private function checkAndIncrementUsage(): bool
     {
         $usage = AiChatUsage::firstOrCreate(
-            ['user_id' => auth()->id(), 'usage_date' => today()],
+            ['user_id' => auth()->user()->id, 'usage_date' => today()],
             ['count' => 0]
         );
 
-        if ($usage->count >= self::DAILY_LIMIT) {
+        if ($usage->count >= $this->dailyLimit()) {
             return false;
         }
 
         $usage->increment('count');
         return true;
+    }
+
+    private function currentUsage(): int
+    {
+        return AiChatUsage::where('user_id', auth()->user()->id)
+            ->where('usage_date', today())
+            ->value('count') ?? 0;
     }
 
     private function limitReachedResponse(): JsonResponse

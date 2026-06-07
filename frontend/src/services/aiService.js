@@ -35,29 +35,17 @@ const aiService = {
   // @returns {{ message, response: string, tokens_used: number }}
   query: async (query) => {
     const { data } = await api.post("/ai/query", { query });
-    return data.data;
+    return { ...data.data, _usage: data.usage };
   },
 
-  // --- PREDIKSI STOK ---
-  // Analogi: konsultan memperkirakan kapan stok barang akan habis
-  // berdasarkan tren penjualan historis
-  //
-  // @param {{ query: string }} — misal: "Kapan stok Ayam Geprek akan habis?"
-  // @returns {{ message, response: string, tokens_used: number }}
   predictStock: async (query) => {
     const { data } = await api.post("/ai/predict-stock", { query });
-    return data.data;
+    return { ...data.data, _usage: data.usage };
   },
 
-  // --- REKOMENDASI PRODUK / STRATEGI ---
-  // Analogi: konsultan memberi saran "Produk apa yang perlu di-restock?"
-  // atau "Bagaimana cara meningkatkan penjualan Es Teh?"
-  //
-  // @param {{ query: string }}
-  // @returns {{ message, response: string, tokens_used: number }}
   recommend: async (query) => {
     const { data } = await api.post("/ai/recommend", { query });
-    return data.data;
+    return { ...data.data, _usage: data.usage };
   },
 
   // --- LOG RIWAYAT QUERY AI ---
@@ -67,9 +55,16 @@ const aiService = {
   },
 
   // --- KUOTA CHAT HARI INI ---
-  // @returns {{ used: number, remaining: number, limit: number }}
+  // @returns {{ used: number, remaining: number, limit: number, warning: boolean }}
   getUsageToday: async () => {
     const { data } = await api.get("/ai/usage-today");
+    return data;
+  },
+
+  // --- STATS MONITORING (admin/developer) ---
+  // @returns { summary, by_type, by_provider, users_today, daily_trend, config }
+  getStats: async () => {
+    const { data } = await api.get("/ai/stats");
     return data;
   },
 };

@@ -56,6 +56,13 @@ const userService = {
     return data;
   },
 
+  // --- HAPUS PERMANEN USER ---
+  // @param {number} id
+  delete: async (id) => {
+    const { data } = await api.delete(`/users/${id}`);
+    return data;
+  },
+
   // --- TOGGLE AKTIF/NONAKTIF USER ---
   // Analogi: HRD menonaktifkan akses karyawan yang sedang cuti atau keluar
   // Tidak menghapus akun — hanya ubah is_active (true ↔ false)

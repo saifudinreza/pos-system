@@ -71,7 +71,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
   const bottomRef = useRef(null);
   const {
     messages, isLoading, sendQuery, clearMessages,
-    dailyUsage, limitReached, fetchUsage,
+    dailyUsage, limitReached, usageWarning, fetchUsage,
   } = useAiStore();
 
   const lastAiMsg      = [...messages].reverse().find((m) => m.role === "assistant" && m.provider);
@@ -172,11 +172,20 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
         </div>
       </div>
 
+      {/* Warning banner — mendekati limit */}
+      {!limitReached && usageWarning && (
+        <div className="mx-3 mt-3 px-3 py-2.5 bg-orange-50 border-2 border-orange-400 rounded-md shrink-0">
+          <p className="text-xs font-bold text-orange-800 leading-snug">
+            ⚠️ Sisa kuota chat AI tinggal <span className="font-black">{dailyUsage.remaining}/{dailyUsage.limit}</span>. Gunakan dengan bijak!
+          </p>
+        </div>
+      )}
+
       {/* Limit reached banner */}
       {limitReached && (
-        <div className="mx-3 mt-3 px-3 py-2.5 bg-amber-50 border-2 border-amber-400 rounded-md shrink-0">
-          <p className="text-xs font-bold text-amber-800 leading-snug">
-            Batas chat AI harian kamu sudah habis (10/10). Coba lagi besok ya! 😊
+        <div className="mx-3 mt-3 px-3 py-2.5 bg-red-50 border-2 border-red-400 rounded-md shrink-0">
+          <p className="text-xs font-bold text-red-800 leading-snug">
+            🚫 Batas chat AI harian sudah habis ({dailyUsage.limit}/{dailyUsage.limit}). Coba lagi besok!
           </p>
         </div>
       )}

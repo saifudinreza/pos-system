@@ -20,6 +20,7 @@ import {
   TrendingUp,      // icon laporan
   Users,           // icon pengguna
   UserCircle,      // icon profil
+  BrainCircuit,    // icon AI monitoring
 } from "lucide-react";
 
 const NAV_GROUPS = [
@@ -42,8 +43,9 @@ const NAV_GROUPS = [
   {
     label: "Laporan & Admin",
     items: [
-      { href: "/reports", Icon: TrendingUp, label: "Laporan",  roles: ["admin", "developer"] },
-      { href: "/users",   Icon: Users,      label: "Pengguna", roles: ["developer"] },
+      { href: "/reports",        Icon: TrendingUp,   label: "Laporan",        roles: ["admin", "developer"] },
+      { href: "/ai-monitoring", Icon: BrainCircuit, label: "AI Monitoring",   roles: ["admin", "developer"] },
+      { href: "/users",          Icon: Users,        label: "Pengguna",        roles: ["developer"] },
     ],
   },
   {

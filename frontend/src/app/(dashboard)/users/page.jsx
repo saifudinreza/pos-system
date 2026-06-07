@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ShieldOff, UserPlus, Users } from "lucide-react";
+import { ShieldOff, UserPlus, Trash2 } from "lucide-react";
 import userService    from "@/services/userService";
 import useAuthStore   from "@/stores/authStore";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -55,10 +55,12 @@ export default function UsersPage() {
   const [denied,    setDenied]    = useState(false);
   const [search,    setSearch]    = useState("");
   const [filters,   setFilters]   = useState({ page: 1, per_page: 15 });
-  const [modal,     setModal]     = useState({ open: false, data: null });
-  const [form,      setForm]      = useState(EMPTY_FORM);
-  const [saving,    setSaving]    = useState(false);
-  const [formError, setFormError] = useState("");
+  const [modal,        setModal]        = useState({ open: false, data: null });
+  const [deleteModal,  setDeleteModal]  = useState({ open: false, data: null });
+  const [form,         setForm]         = useState(EMPTY_FORM);
+  const [saving,       setSaving]       = useState(false);
+  const [deleting,     setDeleting]     = useState(false);
+  const [formError,    setFormError]    = useState("");
   const debouncedSearch = useDebounce(search, 500);
 
   const fetchData = async () => {
@@ -103,6 +105,17 @@ export default function UsersPage() {
       fetchData();
     } catch (err) { setFormError(getErrorMessage(err)); }
     finally { setSaving(false); }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteModal.data) return;
+    setDeleting(true);
+    try {
+      await userService.delete(deleteModal.data.id);
+      setDeleteModal({ open: false, data: null });
+      fetchData();
+    } catch (err) { alert(getErrorMessage(err)); }
+    finally { setDeleting(false); }
   };
 
   const handleToggle = async (id, name, isActive) => {
@@ -167,17 +180,27 @@ export default function UsersPage() {
         <div className="flex gap-2">
           <NeoButton size="sm" variant="secondary" onClick={() => openModal(row)}>Edit</NeoButton>
           {id !== currentUser?.id ? (
-            <NeoButton
-              size="sm"
-              variant={row.is_active ? "danger" : "secondary"}
-              onClick={() => handleToggle(id, row.name, row.is_active)}
-            >
-              {row.is_active ? "Nonaktifkan" : "Aktifkan"}
-            </NeoButton>
+            <>
+              <NeoButton
+                size="sm"
+                variant={row.is_active ? "danger" : "secondary"}
+                onClick={() => handleToggle(id, row.name, row.is_active)}
+              >
+                {row.is_active ? "Nonaktifkan" : "Aktifkan"}
+              </NeoButton>
+              {row.role !== "developer" && (
+                <NeoButton
+                  size="sm"
+                  variant="danger"
+                  onClick={() => setDeleteModal({ open: true, data: row })}
+                  title="Hapus permanen"
+                >
+                  <Trash2 size={13} />
+                </NeoButton>
+              )}
+            </>
           ) : (
-            <span
-              className="px-2 py-1 text-[10px] font-black bg-brand-cream border-2 border-brand-black/20 text-brand-black/40"
-            >
+            <span className="px-2 py-1 text-[10px] font-black bg-brand-cream border-2 border-brand-black/20 text-brand-black/40">
               Akun Saya
             </span>
           )}
@@ -280,6 +303,40 @@ export default function UsersPage() {
           ))}
         </div>
       )}
+
+      {/* ── Delete Confirm Modal ── */}
+      <NeoModal
+        isOpen={deleteModal.open}
+        onClose={() => setDeleteModal({ open: false, data: null })}
+        title="Hapus Pengguna"
+        footer={
+          <div className="flex gap-3 justify-end">
+            <NeoButton variant="ghost" onClick={() => setDeleteModal({ open: false, data: null })} disabled={deleting}>
+              Batal
+            </NeoButton>
+            <NeoButton variant="danger" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Menghapus..." : "Ya, Hapus Permanen"}
+            </NeoButton>
+          </div>
+        }
+      >
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-3 bg-red-50 border-2 border-red-400">
+            <Trash2 size={20} className="text-red-500 shrink-0" />
+            <div>
+              <p className="font-bold text-sm text-red-800">Tindakan ini tidak bisa dibatalkan!</p>
+              <p className="text-xs text-red-600 mt-0.5">Semua data terkait user ini akan ikut terhapus.</p>
+            </div>
+          </div>
+          {deleteModal.data && (
+            <div className="p-3 bg-white border-2 border-brand-black/20 rounded">
+              <p className="text-xs text-brand-black/50 font-mono mb-1">User yang akan dihapus:</p>
+              <p className="font-bold text-brand-black">{deleteModal.data.name}</p>
+              <p className="text-xs text-brand-black/50 font-mono">{deleteModal.data.email}</p>
+            </div>
+          )}
+        </div>
+      </NeoModal>
 
       {/* ── Add/Edit Modal ── */}
       <NeoModal

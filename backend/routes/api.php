@@ -100,8 +100,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/reports/sales/download',  [ReportController::class, 'downloadSales']);
         Route::get('/reports/stock/download',  [ReportController::class, 'downloadStock']);
 
-        // ----- AI LOGS -----
-        Route::get('/ai/logs', [AiController::class, 'logs']);
+        // ----- AI LOGS & STATS -----
+        Route::get('/ai/logs',  [AiController::class, 'logs']);
+        Route::get('/ai/stats', [AiController::class, 'stats']);
     });
 
 
@@ -114,6 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/users',              [UserController::class, 'store']);
         Route::get('/users/{id}',          [UserController::class, 'show']);
         Route::put('/users/{id}',          [UserController::class, 'update']);
+        Route::delete('/users/{id}',       [UserController::class, 'destroy']);
         Route::patch('/users/{id}/toggle', [UserController::class, 'toggleActive']);
     });
 

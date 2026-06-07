@@ -129,6 +129,32 @@ class UserController extends Controller
     }
 
     // =============================================================
+    // DESTROY — hapus permanen user
+    // DELETE /api/users/{id}
+    // =============================================================
+    public function destroy(int $id): JsonResponse
+    {
+        $user = User::find($id);
+
+        if (! $user) {
+            return response()->json(['message' => 'User tidak ditemukan.'], 404);
+        }
+
+        if (Auth::id() === $user->id) {
+            return response()->json(['message' => 'Kamu tidak bisa menghapus akun sendiri.'], 422);
+        }
+
+        if ($user->role === 'developer') {
+            return response()->json(['message' => 'Akun developer tidak bisa dihapus melalui panel ini.'], 422);
+        }
+
+        $name = $user->name;
+        $user->delete();
+
+        return response()->json(['message' => "User \"{$name}\" berhasil dihapus."], 200);
+    }
+
+    // =============================================================
     // TOGGLE ACTIVE — aktifkan / nonaktifkan user
     // =============================================================
     public function toggleActive(int $id): JsonResponse

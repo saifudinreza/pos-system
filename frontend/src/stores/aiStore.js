@@ -57,6 +57,7 @@ const useAiStore = create((set) => ({
   // Kuota harian
   dailyUsage: { used: 0, remaining: 10, limit: 10 },
   limitReached: false,
+  usageWarning: false,
 
   // ============================================================
   // ACTIONS
@@ -66,7 +67,11 @@ const useAiStore = create((set) => ({
   fetchUsage: async () => {
     try {
       const data = await aiService.getUsageToday();
-      set({ dailyUsage: data, limitReached: data.remaining === 0 });
+      set({
+        dailyUsage:   data,
+        limitReached: data.remaining === 0,
+        usageWarning: data.warning === true,
+      });
     } catch {}
   },
 
@@ -99,16 +104,20 @@ const useAiStore = create((set) => ({
         model:       data.model,
       };
 
+      const usageUpdate = data._usage ?? null;
       set((state) => ({
         messages:        [...state.messages, aiMessage],
         isLoading:       false,
         totalTokensUsed: state.totalTokensUsed + (data.tokens_used ?? 0),
-        dailyUsage: {
-          ...state.dailyUsage,
-          used:      state.dailyUsage.used + 1,
-          remaining: Math.max(0, state.dailyUsage.remaining - 1),
-        },
-        limitReached: state.dailyUsage.remaining <= 1,
+        dailyUsage: usageUpdate
+          ? { used: usageUpdate.used, remaining: usageUpdate.remaining, limit: usageUpdate.limit }
+          : {
+              ...state.dailyUsage,
+              used:      state.dailyUsage.used + 1,
+              remaining: Math.max(0, state.dailyUsage.remaining - 1),
+            },
+        limitReached: usageUpdate ? usageUpdate.remaining === 0 : state.dailyUsage.remaining <= 1,
+        usageWarning: usageUpdate ? (usageUpdate.warning === true) : false,
       }));
 
       return data;
@@ -163,10 +172,16 @@ const useAiStore = create((set) => ({
         provider:    data.provider,
         model:       data.model,
       };
+      const usageUpdateStock = data._usage ?? null;
       set((state) => ({
         messages:        [...state.messages, aiMessage],
         isLoading:       false,
         totalTokensUsed: state.totalTokensUsed + (data.tokens_used ?? 0),
+        dailyUsage: usageUpdateStock
+          ? { used: usageUpdateStock.used, remaining: usageUpdateStock.remaining, limit: usageUpdateStock.limit }
+          : { ...state.dailyUsage, used: state.dailyUsage.used + 1, remaining: Math.max(0, state.dailyUsage.remaining - 1) },
+        limitReached: usageUpdateStock ? usageUpdateStock.remaining === 0 : state.limitReached,
+        usageWarning: usageUpdateStock ? (usageUpdateStock.warning === true) : state.usageWarning,
       }));
       return data;
     } catch (err) {
@@ -214,10 +229,16 @@ const useAiStore = create((set) => ({
         provider:    data.provider,
         model:       data.model,
       };
+      const usageUpdateRec = data._usage ?? null;
       set((state) => ({
         messages:        [...state.messages, aiMessage],
         isLoading:       false,
         totalTokensUsed: state.totalTokensUsed + (data.tokens_used ?? 0),
+        dailyUsage: usageUpdateRec
+          ? { used: usageUpdateRec.used, remaining: usageUpdateRec.remaining, limit: usageUpdateRec.limit }
+          : { ...state.dailyUsage, used: state.dailyUsage.used + 1, remaining: Math.max(0, state.dailyUsage.remaining - 1) },
+        limitReached: usageUpdateRec ? usageUpdateRec.remaining === 0 : state.limitReached,
+        usageWarning: usageUpdateRec ? (usageUpdateRec.warning === true) : state.usageWarning,
       }));
       return data;
     } catch (err) {
