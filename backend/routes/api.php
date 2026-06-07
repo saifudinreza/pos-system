@@ -14,8 +14,9 @@ use App\Http\Controllers\Api\SubscriptionController;
 // =============================================================
 // PUBLIC ROUTES — tidak perlu login
 // =============================================================
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login',    [AuthController::class, 'login']);
+Route::post('/register',      [AuthController::class, 'register']);
+Route::post('/login',         [AuthController::class, 'login']);
+Route::get('/check-tenant',   [AuthController::class, 'checkTenant']);
 // ↑ Dua endpoint ini bebas diakses siapa saja tanpa token
 
 

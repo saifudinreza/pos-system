@@ -28,33 +28,61 @@ class AuthController extends Controller
             'store_name' => ['nullable', 'string', 'max:255'],
         ]);
 
-        // Buat tenant (toko) baru untuk setiap registrasi
-        $storeName = $validated['store_name'] ?? ('Toko ' . $validated['name']);
-        $tenant    = Tenant::create([
-            'name' => $storeName,
-            'slug' => Str::slug($storeName . '-' . Str::random(6)),
-        ]);
+        $storeName      = trim($validated['store_name'] ?? ('Toko ' . $validated['name']));
+        $existingTenant = Tenant::where('name', $storeName)->first();
 
-        // User yang register mulai sebagai kasir (free plan)
-        // Role akan di-upgrade ke admin otomatis saat subscribe Pro/Enterprise
+        if ($existingTenant) {
+            // Bergabung ke tenant yang sudah ada sebagai kasir
+            $tenant  = $existingTenant;
+            $role    = 'kasir';
+            $message = 'Berhasil bergabung dengan toko "' . $storeName . '"! Login sebagai kasir.';
+        } else {
+            // Buat tenant baru, pendaftar pertama jadi admin toko
+            $tenant  = Tenant::create([
+                'name' => $storeName,
+                'slug' => Str::slug($storeName . '-' . Str::random(6)),
+            ]);
+            $role    = 'admin';
+            $message = 'Toko "' . $storeName . '" berhasil dibuat! Kamu terdaftar sebagai admin.';
+        }
+
         $user = User::create([
             'tenant_id' => $tenant->id,
             'name'      => $validated['name'],
             'email'     => $validated['email'],
             'password'  => Hash::make($validated['password']),
             'phone'     => $validated['phone'] ?? null,
-            'role'      => 'kasir',
+            'role'      => $role,
         ]);
 
         $token = $user->createToken('pos-token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Register berhasil. Selamat datang di ' . $storeName . '!',
+            'message' => $message,
             'data'    => [
-                'user'  => $this->formatUser($user),
-                'token' => $token,
+                'user'       => $this->formatUser($user->load('tenant')),
+                'token'      => $token,
+                'is_new_store' => !$existingTenant,
             ],
         ], 201);
+    }
+
+    // GET /api/check-tenant?name=xxx — cek apakah nama toko sudah terdaftar
+    public function checkTenant(Request $request): JsonResponse
+    {
+        $name = trim($request->query('name', ''));
+        if (strlen($name) < 2) {
+            return response()->json(['exists' => false, 'tenant' => null]);
+        }
+
+        $tenant = Tenant::where('name', $name)->first();
+        return response()->json([
+            'exists' => (bool) $tenant,
+            'tenant' => $tenant ? [
+                'name'        => $tenant->name,
+                'member_count' => $tenant->users()->count(),
+            ] : null,
+        ]);
     }
 
     // =============================================================
