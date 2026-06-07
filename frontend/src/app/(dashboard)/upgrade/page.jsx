@@ -2,13 +2,38 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Script from "next/script";
-import { CreditCard, User, Phone, MapPin, CheckCircle2, ArrowLeft } from "lucide-react";
+import { CreditCard, User, CheckCircle2, ArrowLeft } from "lucide-react";
 import useAuthStore from "@/stores/authStore";
 import subscriptionService from "@/services/subscriptionService";
 import NeoButton from "@/components/ui/NeoButton";
 import NeoInput  from "@/components/ui/NeoInput";
 import { getErrorMessage, formatCurrency } from "@/lib/utils";
+
+const SNAP_URL    = process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL    ?? "https://app.sandbox.midtrans.com/snap/snap.js";
+const CLIENT_KEY  = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY  ?? "";
+
+/** Load Midtrans Snap script on-demand. Resolves when window.snap is ready. */
+function loadSnap() {
+  return new Promise((resolve, reject) => {
+    if (window.snap) { resolve(); return; }
+    const existing = document.querySelector(`script[src="${SNAP_URL}"]`);
+    if (existing) {
+      // Script tag exists but snap might not be ready yet — poll briefly
+      let tries = 0;
+      const wait = setInterval(() => {
+        if (window.snap) { clearInterval(wait); resolve(); }
+        if (++tries > 40) { clearInterval(wait); reject(new Error("Snap timeout")); }
+      }, 150);
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = SNAP_URL;
+    s.setAttribute("data-client-key", CLIENT_KEY);
+    s.onload  = () => resolve();
+    s.onerror = () => reject(new Error("Gagal memuat Midtrans. Periksa koneksi internet."));
+    document.head.appendChild(s);
+  });
+}
 
 const PRICES = {
   pro:        { monthly: 250000, yearly: 200000 },
@@ -37,32 +62,28 @@ function UpgradeContent() {
   const plan  = searchParams.get("plan") ?? "pro";
   const cycle = searchParams.get("cycle") ?? "monthly";
 
-  const price   = PRICES[plan]?.[cycle] ?? PRICES.pro.monthly;
   const features = PLAN_FEATURES[plan] ?? PLAN_FEATURES.pro;
 
-  const [form, setForm]       = useState({ name: "", phone: "", address: "" });
+  const [form, setForm]     = useState({ name: "", phone: "", address: "" });
   const [billing, setBilling] = useState(cycle);
   const [paying,  setPaying]  = useState(false);
+  const [snapStep, setSnapStep] = useState("idle"); // idle | loading-script | loading-token | ready
   const [error,   setError]   = useState("");
-  const [snapReady, setSnapReady] = useState(false);
 
   useEffect(() => {
     if (user) setForm((p) => ({ ...p, name: user.name ?? "", phone: user.phone ?? "" }));
   }, [user]);
 
-  // Cek apakah snap sudah tersedia (bisa saja sudah load sebelum komponen mount)
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.snap) setSnapReady(true);
-  }, []);
-
-  const currentPrice = PRICES[plan]?.[billing] ?? price;
+  const currentPrice = PRICES[plan]?.[billing] ?? PRICES.pro.monthly;
 
   const handlePay = async (e) => {
     e.preventDefault();
-    if (!snapReady) { setError("Midtrans belum siap, coba sebentar lagi."); return; }
     setPaying(true);
     setError("");
+
     try {
+      // 1. Dapatkan snap_token dari backend
+      setSnapStep("loading-token");
       const res = await subscriptionService.initiate({
         plan,
         billing_cycle: billing,
@@ -71,35 +92,34 @@ function UpgradeContent() {
         address: form.address,
       });
 
+      // 2. Load Midtrans Snap script kalau belum ada
+      setSnapStep("loading-script");
+      await loadSnap();
+      setSnapStep("ready");
+
+      // 3. Buka popup Midtrans
       window.snap.pay(res.snap_token, {
-        onSuccess: () => {
-          router.push(`/upgrade/success?plan=${plan}&cycle=${billing}&amount=${currentPrice}`);
-        },
-        onPending: () => {
-          router.push(`/upgrade/pending?plan=${plan}`);
-        },
-        onError: () => {
-          router.push(`/upgrade/cancel?plan=${plan}`);
-        },
-        onClose: () => {
-          setPaying(false);
-        },
+        onSuccess: () => router.push(`/upgrade/success?plan=${plan}&cycle=${billing}&amount=${currentPrice}`),
+        onPending: () => router.push(`/upgrade/pending?plan=${plan}`),
+        onError:   () => router.push(`/upgrade/cancel?plan=${plan}`),
+        onClose:   () => { setPaying(false); setSnapStep("idle"); },
       });
     } catch (err) {
       setError(getErrorMessage(err));
       setPaying(false);
+      setSnapStep("idle");
     }
+  };
+
+  const btnLabel = () => {
+    if (!paying) return `Bayar ${formatCurrency(currentPrice)}`;
+    if (snapStep === "loading-token")  return "Menyiapkan pembayaran...";
+    if (snapStep === "loading-script") return "Memuat Midtrans...";
+    return "Memproses...";
   };
 
   return (
     <>
-      <Script
-        src={process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL}
-        data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
-        strategy="afterInteractive"
-        onLoad={() => setSnapReady(true)}
-        onError={() => setError("Gagal memuat Midtrans. Periksa koneksi internet Anda.")}
-      />
 
       <div className="space-y-6 max-w-4xl page-fade">
         <div className="flex items-center gap-3">
@@ -155,9 +175,9 @@ function UpgradeContent() {
               </div>
 
               <div className="pt-2">
-                <NeoButton type="submit" variant="primary" disabled={paying || !snapReady}>
+                <NeoButton type="submit" variant="primary" disabled={paying}>
                   <CreditCard size={14} className="inline mr-1.5" />
-                  {!snapReady ? "Memuat sistem pembayaran..." : paying ? "Memproses..." : `Bayar ${formatCurrency(currentPrice)}`}
+                  {btnLabel()}
                 </NeoButton>
                 <p className="text-xs text-brand-black/40 mt-2">
                   Pembayaran aman via Midtrans · QRIS, transfer bank, kartu kredit/debit
