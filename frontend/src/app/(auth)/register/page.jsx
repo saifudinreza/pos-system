@@ -115,13 +115,8 @@ function RegisterForm() {
     }
 
     try {
-      const result = await register(form);
-      const newUser    = result?.user;
-      const isNewStore = result?.is_new_store ?? true;
-
-      // Hanya redirect ke upgrade kalau user jadi admin di toko baru
-      // Kasir yang join toko existing tidak bisa upgrade secara mandiri
-      if ((plan === "pro" || plan === "enterprise") && isNewStore && newUser?.role === "admin") {
+      await register(form);
+      if (plan === "pro" || plan === "enterprise") {
         window.location.href = `/upgrade?plan=${plan}&cycle=monthly`;
       } else {
         window.location.href = "/dashboard";

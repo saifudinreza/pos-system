@@ -196,15 +196,6 @@ class AuthController extends Controller
     // =============================================================
     private function formatUser(User $user): array
     {
-        // Effective plan: for kasir use tenant admin's plan, else own plan
-        $effectivePlan = $user->subscription_plan ?? 'free';
-        if ($user->role === 'kasir' && $user->tenant_id) {
-            $admin = User::where('tenant_id', $user->tenant_id)
-                ->where('role', 'admin')
-                ->value('subscription_plan');
-            $effectivePlan = $admin ?? 'free';
-        }
-
         return [
             'id'                  => $user->id,
             'tenant_id'           => $user->tenant_id,
@@ -216,7 +207,6 @@ class AuthController extends Controller
             'phone'               => $user->phone,
             'is_active'           => $user->is_active,
             'subscription_plan'   => $user->subscription_plan ?? 'free',
-            'effective_plan'      => $effectivePlan,
             'created_at'          => $user->created_at->format('d M Y'),
         ];
     }

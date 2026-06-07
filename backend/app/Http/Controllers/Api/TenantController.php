@@ -14,7 +14,7 @@ class TenantController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Tenant::withCount('users')
-            ->with(['users' => fn($q) => $q->select('id', 'tenant_id', 'name', 'email', 'role', 'is_active', 'subscription_plan', 'created_at')]);
+            ->with(['users' => fn($q) => $q->select('id', 'tenant_id', 'name', 'email', 'role', 'is_active')]);
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -32,7 +32,7 @@ class TenantController extends Controller
     public function show(int $id): JsonResponse
     {
         $tenant = Tenant::withCount('users')
-            ->with(['users' => fn($q) => $q->select('id', 'tenant_id', 'name', 'email', 'role', 'is_active', 'subscription_plan', 'created_at')])
+            ->with(['users' => fn($q) => $q->select('id', 'tenant_id', 'name', 'email', 'role', 'is_active')])
             ->find($id);
 
         if (! $tenant) return response()->json(['message' => 'Tenant tidak ditemukan.'], 404);
@@ -79,7 +79,6 @@ class TenantController extends Controller
 
     private function formatTenant(Tenant $tenant): array
     {
-        $admin = $tenant->users?->firstWhere('role', 'admin');
         return [
             'id'          => $tenant->id,
             'name'        => $tenant->name,
@@ -87,15 +86,13 @@ class TenantController extends Controller
             'description' => $tenant->description,
             'is_active'   => $tenant->is_active,
             'users_count' => $tenant->users_count ?? 0,
-            'plan'        => $admin?->subscription_plan ?? 'free',
             'created_at'  => $tenant->created_at->format('d M Y'),
             'users'       => $tenant->users?->map(fn($u) => [
-                'id'       => $u->id,
-                'name'     => $u->name,
-                'email'    => $u->email,
-                'role'     => $u->role,
+                'id'        => $u->id,
+                'name'      => $u->name,
+                'email'     => $u->email,
+                'role'      => $u->role,
                 'is_active' => $u->is_active,
-                'plan'     => $u->subscription_plan ?? 'free',
             ])->values()->toArray() ?? [],
         ];
     }

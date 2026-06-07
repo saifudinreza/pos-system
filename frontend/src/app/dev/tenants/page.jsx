@@ -9,20 +9,7 @@ import NeoInput  from "@/components/ui/NeoInput";
 import NeoBadge  from "@/components/ui/NeoBadge";
 import { getErrorMessage } from "@/lib/utils";
 
-const PLAN_BADGE = {
-  free:       { label: "FREE",  cls: "bg-white border-brand-black/30 text-brand-black/50" },
-  pro:        { label: "PRO",   cls: "bg-brand-yellow border-brand-black text-brand-black" },
-  enterprise: { label: "ENT",   cls: "bg-brand-black border-brand-black text-white" },
-};
-
 const ROLE_COLORS = { admin: "black", kasir: "yellow", developer: "red", user: "gray" };
-
-function PlanBadge({ plan }) {
-  const b = PLAN_BADGE[plan] ?? PLAN_BADGE.free;
-  return (
-    <span className={`text-[9px] font-black font-mono border px-1.5 py-0.5 ${b.cls}`}>{b.label}</span>
-  );
-}
 
 // ── SVG icons ──────────────────────────────────────────────
 const IcoBuilding = (p) => (
@@ -122,8 +109,7 @@ export default function TenantsPage() {
   const stats = {
     total: tenants.length,
     active: tenants.filter((t) => t.is_active).length,
-    pro: tenants.filter((t) => t.plan === "pro").length,
-    enterprise: tenants.filter((t) => t.plan === "enterprise").length,
+    totalUsers: tenants.reduce((sum, t) => sum + (t.users_count ?? 0), 0),
   };
 
   return (
@@ -144,8 +130,8 @@ export default function TenantsPage() {
         {[
           { label: "Total Tenant", value: stats.total,      bg: "bg-white" },
           { label: "Aktif",        value: stats.active,     bg: "bg-green-100" },
-          { label: "Plan Pro",     value: stats.pro,        bg: "bg-brand-yellow" },
-          { label: "Enterprise",   value: stats.enterprise, bg: "bg-brand-black text-white" },
+          { label: "Total User",   value: stats.totalUsers, bg: "bg-brand-yellow" },
+          { label: "Nonaktif",     value: stats.total - stats.active, bg: "bg-brand-black text-white" },
         ].map((s) => (
           <div key={s.label} className={`${s.bg} border-2 border-brand-black p-4 rounded-md`} style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-60 font-mono">{s.label}</p>
@@ -195,7 +181,6 @@ export default function TenantsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-black text-sm">{tenant.name}</p>
-                    <PlanBadge plan={tenant.plan} />
                     {!tenant.is_active && <NeoBadge color="red">Nonaktif</NeoBadge>}
                   </div>
                   <p className="text-[11px] text-brand-black/40 font-mono">
@@ -325,7 +310,7 @@ export default function TenantsPage() {
             <div className="p-3 bg-white border-2 border-brand-black/20 rounded-md">
               <p className="text-xs text-brand-black/50 font-mono mb-1">Tenant yang akan dihapus:</p>
               <p className="font-black text-brand-black">{delModal.data.name}</p>
-              <p className="text-xs text-brand-black/50 font-mono">{delModal.data.users_count} anggota · Plan {delModal.data.plan}</p>
+              <p className="text-xs text-brand-black/50 font-mono">{delModal.data.users_count} anggota</p>
             </div>
           )}
         </div>
