@@ -12,7 +12,7 @@
 //   4. Token simpan di localStorage → redirect ke /dashboard
 // ============================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import useAuthStore from "@/stores/authStore";
 import { getErrorMessage } from "@/lib/utils";
@@ -20,8 +20,17 @@ import { getErrorMessage } from "@/lib/utils";
 export default function LoginPage() {
   const { login, isLoading } = useAuthStore();
 
-  const [form, setForm]   = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+  const [form, setForm]         = useState({ email: "", password: "" });
+  const [error, setError]       = useState("");
+  const [serverWarm, setServerWarm] = useState(false);
+
+  // Ping backend saat halaman login terbuka supaya Railway "bangun"
+  // sebelum user klik tombol Masuk — mengurangi cold start delay
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, { method: "GET" })
+      .then(() => setServerWarm(true))
+      .catch(() => setServerWarm(true));
+  }, []);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -96,6 +105,14 @@ export default function LoginPage() {
                 style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
               />
             </div>
+
+            {/* Status server */}
+            {!serverWarm && (
+              <p className="text-[11px] text-brand-black/40 font-mono flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse inline-block" />
+                Menghubungkan ke server...
+              </p>
+            )}
 
             {/* Tombol submit */}
             <button
