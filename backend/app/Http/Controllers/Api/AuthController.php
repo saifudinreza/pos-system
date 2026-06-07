@@ -28,8 +28,14 @@ class AuthController extends Controller
             'store_name' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $storeName      = trim($validated['store_name'] ?? ('Toko ' . $validated['name']));
-        $existingTenant = Tenant::where('name', $storeName)->first();
+        $storeName = trim($validated['store_name'] ?? ('Toko ' . $validated['name']));
+
+        // Ambil tenant yang punya paling banyak member (hindari tenant duplikat kosong)
+        $existingTenant = Tenant::where('name', $storeName)
+            ->withCount('users')
+            ->orderByDesc('users_count')
+            ->orderBy('id')
+            ->first();
 
         if ($existingTenant) {
             // Bergabung ke tenant yang sudah ada sebagai kasir
@@ -75,12 +81,18 @@ class AuthController extends Controller
             return response()->json(['exists' => false, 'tenant' => null]);
         }
 
-        $tenant = Tenant::where('name', $name)->first();
+        // Ambil tenant yang punya paling banyak member supaya tidak ambil tenant duplikat kosong
+        $tenant = Tenant::where('name', $name)
+            ->withCount('users')
+            ->orderByDesc('users_count')
+            ->orderBy('id')
+            ->first();
+
         return response()->json([
             'exists' => (bool) $tenant,
             'tenant' => $tenant ? [
-                'name'        => $tenant->name,
-                'member_count' => $tenant->users()->count(),
+                'name'         => $tenant->name,
+                'member_count' => $tenant->users_count,
             ] : null,
         ]);
     }
