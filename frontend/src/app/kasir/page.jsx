@@ -664,7 +664,7 @@ export default function KasirPage() {
   // Fetch kategori SEKALI saat halaman pertama load
   // Dependency array kosong [] = hanya jalan sekali (seperti componentDidMount)
   useEffect(() => {
-    categoryService.getAll({ is_active: true }).then(setCategories).catch(() => {});
+    categoryService.getAll({ is_active: true }).then((res) => setCategories(res.data ?? res)).catch(() => {});
   }, []);
 
   // Fetch produk setiap kali filter atau search berubah

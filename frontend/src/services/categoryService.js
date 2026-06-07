@@ -30,8 +30,8 @@ const categoryService = {
   // @returns Category[] (bukan paginated — backend mengembalikan semua sekaligus)
   getAll: async (params = {}) => {
     const { data } = await api.get(`/categories${buildQueryString(params)}`);
-    // Backend bisa kembalikan { data: [...] } atau langsung array
-    return data.data ?? data;
+    // Return full response so callers can access meta (plan_limit, is_limited)
+    return data;
   },
 
   // --- DETAIL KATEGORI ---

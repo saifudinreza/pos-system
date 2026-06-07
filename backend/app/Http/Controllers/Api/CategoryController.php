@@ -15,9 +15,6 @@ class CategoryController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Category::withCount('products');
-        // ↑ withCount() = tambah kolom products_count di hasil query
-        // Jadi bisa tau berapa produk di tiap kategori tanpa query tambahan
-        // Contoh output: "products_count": 5
 
         // ----- SEARCH -----
         if ($request->filled('search')) {
@@ -29,13 +26,26 @@ class CategoryController extends Controller
             $query->where('is_active', filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN));
         }
 
-        $categories = $query->orderBy('name', 'asc')->get();
-        // ↑ get() tanpa paginate karena kategori biasanya sedikit
-        // Diurutkan alphabetical supaya mudah dicari di dropdown frontend
+        $query->orderBy('name', 'asc');
+
+        // ----- PLAN-BASED READ LIMIT -----
+        $plan      = $this->getEffectivePlan($request->user());
+        $readLimit = $this->categoryReadLimits($plan);
+        $totalInTenant = (clone $query)->count();
+
+        $categories = $readLimit !== null
+            ? $query->take($readLimit)->get()
+            : $query->get();
 
         return response()->json([
             'message' => 'Data kategori berhasil diambil.',
-            'data' => $categories->map(fn($c) => $this->formatCategory($c)),
+            'data'    => $categories->map(fn($c) => $this->formatCategory($c)),
+            'meta'    => [
+                'plan'            => $plan,
+                'plan_limit'      => $readLimit,
+                'is_limited'      => $readLimit !== null && $totalInTenant > $readLimit,
+                'total_in_tenant' => $totalInTenant,
+            ],
         ], 200);
     }
 
@@ -86,9 +96,8 @@ class CategoryController extends Controller
     public function store(Request $request): JsonResponse
     {
         // ----- CEK LIMIT PAKET -----
-        $plan   = $request->user()->subscription_plan ?? 'free';
-        $limits = ['free' => 3, 'pro' => 10, 'enterprise' => null];
-        $limit  = $limits[$plan] ?? 3;
+        $plan  = $this->getEffectivePlan($request->user());
+        $limit = $this->categoryReadLimits($plan);
 
         if ($limit !== null && Category::count() >= $limit) {
             return response()->json([

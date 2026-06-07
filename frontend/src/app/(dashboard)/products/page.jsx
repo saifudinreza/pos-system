@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useProducts }    from "@/hooks/useProducts";
 import { useDebounce }    from "@/hooks/useDebounce";
 import categoryService    from "@/services/categoryService";
@@ -46,7 +47,9 @@ export default function ProductsPage() {
   const [activeFilter, setActiveFilter] = useState("all");
 
   useEffect(() => {
-    categoryService.getAll({ is_active: true }).then(setCategories).catch(() => {});
+    categoryService.getAll({ is_active: true })
+      .then((res) => setCategories(res.data ?? res))
+      .catch(() => {});
   }, []);
 
   const openModal = (data = null) => {
@@ -196,15 +199,44 @@ export default function ProductsPage() {
     },
   ];
 
+  const PLAN_LABEL = { free: "Free", pro: "Pro", enterprise: "Enterprise" };
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-black font-grotesk">Produk</h2>
-          <p className="text-sm text-brand-black/50">{meta?.total ?? 0} produk</p>
+          <p className="text-sm text-brand-black/50">
+            {meta?.is_limited
+              ? `${meta.total} dari ${meta.total_in_tenant} produk ditampilkan · ${PLAN_LABEL[meta.plan] ?? meta.plan}`
+              : `${meta?.total ?? 0} produk`
+            }
+          </p>
         </div>
         <NeoButton onClick={() => openModal()}>+ Tambah Produk</NeoButton>
       </div>
+
+      {/* Plan limit banner */}
+      {meta?.is_limited && (
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-amber-50 border-2 border-amber-400 rounded-md">
+          <div className="flex items-center gap-3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-amber-500 shrink-0">
+              <path d="M12 2L2 19h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+            </svg>
+            <div>
+              <p className="font-black text-amber-800 text-sm">
+                Paket {PLAN_LABEL[meta.plan] ?? meta.plan} — hanya {meta.plan_limit} produk yang ditampilkan
+              </p>
+              <p className="text-xs text-amber-700">
+                Toko ini punya {meta.total_in_tenant} produk. Upgrade untuk lihat & kelola semua.
+              </p>
+            </div>
+          </div>
+          <Link href="/upgrade">
+            <NeoButton size="sm" variant="primary">Upgrade →</NeoButton>
+          </Link>
+        </div>
+      )}
 
       <div className="flex gap-3 flex-wrap">
         <input value={search} onChange={(e) => setSearch(e.target.value)}

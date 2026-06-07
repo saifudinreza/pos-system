@@ -27,16 +27,13 @@ class ProductController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = Product::with('category');
-        // ↑ with('category') = eager loading
-        // Artinya data kategori langsung ikut diambil dalam 1 query
-        // Tanpa ini = N+1 problem (query kategori diulang tiap produk)
 
         // ----- SEARCH -----
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%')
-                ->orWhere('sku', 'like', '%' . $request->search . '%');
-            // ↑ Cari berdasarkan nama atau SKU
-            // filled() = cek apakah parameter ada DAN tidak kosong
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('sku',  'like', '%' . $request->search . '%');
+            });
         }
 
         // ----- FILTER KATEGORI -----
@@ -47,49 +44,60 @@ class ProductController extends Controller
         // ----- FILTER STATUS -----
         if ($request->filled('is_active')) {
             $query->where('is_active', filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN));
-            // ↑ filter_var() convert string "true"/"false" ke boolean
-            // Karena query string selalu string, bukan boolean
         }
 
         // ----- FILTER STOK MENIPIS -----
         if ($request->filled('low_stock')) {
             $query->whereColumn('stock', '<=', 'stock_alert');
-            // ↑ Ambil produk yang stoknya sudah di bawah atau sama dengan stock_alert
-            // Dipakai AI untuk prediksi restok
         }
 
         // ----- SORTING -----
-        $sortBy = $request->get('sort_by', 'created_at');
-        // ↑ Default sort by created_at
-        $sortOrder = $request->get('sort_order', 'desc');
-        // ↑ Default descending (terbaru dulu)
-
+        $sortBy    = $request->query('sort_by', 'created_at');
+        $sortOrder = $request->query('sort_order', 'desc');
         $allowedSorts = ['name', 'price', 'stock', 'created_at'];
-        // ↑ Whitelist kolom yang boleh di-sort
-        // Mencegah user sort by kolom sembarangan (security)
-
         if (in_array($sortBy, $allowedSorts)) {
             $query->orderBy($sortBy, $sortOrder === 'asc' ? 'asc' : 'desc');
         }
 
-        // ----- PAGINATION -----
-        $perPage = min($request->get('per_page', 10), 100);
-        // ↑ Default 10 per halaman, maksimal 100
-        // min() mencegah user minta 99999 data sekaligus
+        // ----- PLAN-BASED READ LIMIT -----
+        $plan       = $this->getEffectivePlan($request->user());
+        $readLimit  = $this->productReadLimits($plan);
+        $totalInTenant = (clone $query)->count();
 
+        if ($readLimit !== null) {
+            // Hard cap: return only the first $readLimit products
+            $items = $query->take($readLimit)->get();
+            return response()->json([
+                'message' => 'Data produk berhasil diambil.',
+                'data'    => $items->map(fn($p) => $this->formatProduct($p)),
+                'meta'    => [
+                    'current_page'    => 1,
+                    'per_page'        => $readLimit,
+                    'total'           => $items->count(),
+                    'last_page'       => 1,
+                    'plan'            => $plan,
+                    'plan_limit'      => $readLimit,
+                    'is_limited'      => $totalInTenant > $readLimit,
+                    'total_in_tenant' => $totalInTenant,
+                ],
+            ], 200);
+        }
+
+        // Enterprise / unlimited: normal pagination
+        $perPage  = min((int) $request->query('per_page', 10), 100);
         $products = $query->paginate($perPage);
-        // ↑ paginate() otomatis hitung total, halaman sekarang, dll
-
         return response()->json([
             'message' => 'Data produk berhasil diambil.',
             'data'    => $products->map(fn($p) => $this->formatProduct($p)),
-            // ↑ map() = loop semua produk dan format satu-satu
             'meta'    => [
-                'current_page' => $products->currentPage(),
-                'per_page'     => $products->perPage(),
-                'total'        => $products->total(),
-                'last_page'    => $products->lastPage(),
-                // ↑ Info pagination untuk frontend (buat tombol next/prev)
+                'current_page'    => $products->currentPage(),
+                'per_page'        => $products->perPage(),
+                'total'           => $products->total(),
+                'last_page'       => $products->lastPage(),
+                'plan'            => $plan,
+                'plan_limit'      => null,
+                'is_limited'      => false,
+                'total_in_tenant' => $totalInTenant,
             ],
         ], 200);
     }
@@ -123,9 +131,8 @@ class ProductController extends Controller
     public function store(Request $request): JsonResponse
     {
         // ----- CEK LIMIT PAKET -----
-        $plan   = $request->user()->subscription_plan ?? 'free';
-        $limits = ['free' => 5, 'pro' => 30, 'enterprise' => null];
-        $limit  = $limits[$plan] ?? 5;
+        $plan  = $this->getEffectivePlan($request->user());
+        $limit = $this->productReadLimits($plan);
 
         if ($limit !== null && Product::count() >= $limit) {
             return response()->json([
