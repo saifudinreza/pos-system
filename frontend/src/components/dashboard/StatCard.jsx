@@ -3,17 +3,19 @@
 
 import NeoCard from "@/components/ui/NeoCard";
 
+const BG_STYLE = {
+  yellow: { backgroundColor: "#FFE500", color: "#0A0A0A" },
+  black:  { backgroundColor: "#0A0A0A", color: "#ffffff" },
+  white:  { backgroundColor: "#ffffff", color: "#0A0A0A" },
+  green:  { backgroundColor: "#dcfce7", color: "#0A0A0A" },
+  orange: { backgroundColor: "#ffedd5", color: "#0A0A0A" },
+};
+
 export default function StatCard({ label, value, sub, icon, color = "yellow", trend }) {
-  const COLORS = {
-    yellow: "bg-brand-yellow",
-    black:  "bg-brand-black text-white",
-    white:  "bg-white",
-    green:  "bg-green-100",
-    orange: "bg-orange-100",
-  };
+  const bgStyle = BG_STYLE[color] ?? BG_STYLE.white;
 
   return (
-    <NeoCard className={`${COLORS[color]} flex flex-col gap-3 h-full`}>
+    <NeoCard className="flex flex-col gap-3 h-full" style={bgStyle}>
       {/* Baris atas: label + ikon */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-black uppercase tracking-widest opacity-60 font-mono">{label}</p>

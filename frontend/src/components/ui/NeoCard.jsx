@@ -4,7 +4,7 @@
 
 import { memo } from "react";
 
-const NeoCard = memo(function NeoCard({ children, className = "", onClick, noPad = false }) {
+const NeoCard = memo(function NeoCard({ children, className = "", style = {}, onClick, noPad = false }) {
   return (
     <div
       onClick={onClick}
@@ -14,7 +14,7 @@ const NeoCard = memo(function NeoCard({ children, className = "", onClick, noPad
         ${onClick ? "cursor-pointer hover:-translate-x-0.5 hover:-translate-y-0.5 transition-transform" : ""}
         ${className}
       `}
-      style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
+      style={{ boxShadow: "4px 4px 0 #0A0A0A", ...style }}
     >
       {children}
     </div>

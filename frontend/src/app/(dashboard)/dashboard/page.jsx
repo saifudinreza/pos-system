@@ -151,14 +151,14 @@ export default function DashboardPage() {
           />
         </div>
 
-        {/* Card 2: Order Hari Ini — hitam */}
+        {/* Card 2: Pesanan Bulan Ini */}
         <div className="slide-up stagger-2 h-full">
           <StatCard
-            label="Order Hari Ini"
-            value={loading ? "—" : todayOrders}
+            label="Pesanan Bulan Ini"
+            value={loading ? "—" : (summary?.total_orders ?? 0)}
             icon={<Receipt size={22} strokeWidth={2.5} />}
             color="black"
-            sub="transaksi"
+            sub="order dibayar"
           />
         </div>
 
