@@ -117,6 +117,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/users/{id}',          [UserController::class, 'update']);
         Route::delete('/users/{id}',       [UserController::class, 'destroy']);
         Route::patch('/users/{id}/toggle', [UserController::class, 'toggleActive']);
+
+        // ----- DEVELOPER SUBSCRIPTION MANAGEMENT -----
+        Route::get('/dev/subscriptions',                       [SubscriptionController::class, 'devIndex']);
+        Route::patch('/dev/subscriptions/{userId}/plan',       [SubscriptionController::class, 'devUpdatePlan']);
+        Route::patch('/dev/subscriptions/{userId}/toggle',     [SubscriptionController::class, 'devToggleStatus']);
     });
 
     // ----- AI ASSISTANT (admin & developer saja — pro/enterprise subscribers) -----

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -165,6 +166,118 @@ class SubscriptionController extends Controller
             Log::error('Subscription webhook error: ' . $e->getMessage());
             return response()->json(['message' => 'Error'], 500);
         }
+    }
+
+    // GET /api/dev/subscriptions — semua tenant & status langganan (developer only)
+    public function devIndex(): JsonResponse
+    {
+        $developer = User::withoutGlobalScopes()->where('role', 'developer')->first();
+
+        $users = User::withoutGlobalScopes()
+            ->where('role', 'admin')
+            ->with(['subscriptions' => fn($q) => $q->orderByDesc('created_at')])
+            ->get()
+            ->map(function ($user) {
+                $activeSub = $user->subscriptions->where('status', 'active')->first();
+                $latestSub = $user->subscriptions->first();
+
+                if (!$user->is_active) {
+                    $status = 'suspended';
+                } elseif ($activeSub) {
+                    $status = 'active';
+                } elseif ($latestSub) {
+                    $status = 'expired';
+                } else {
+                    $status = 'free';
+                }
+
+                return [
+                    'id'           => $user->id,
+                    'user_name'    => $user->name,
+                    'user_email'   => $user->email,
+                    'plan'         => $user->subscription_plan ?? 'free',
+                    'status'       => $status,
+                    'started_at'   => $activeSub?->paid_at?->format('Y-m-d')
+                                   ?? $activeSub?->created_at?->format('Y-m-d')
+                                   ?? $user->created_at->format('Y-m-d'),
+                    'expires_at'   => $activeSub?->expires_at?->format('Y-m-d'),
+                    'is_trial'     => false,
+                    'is_developer' => false,
+                    'is_active'    => $user->is_active,
+                ];
+            });
+
+        $devEntry = $developer ? [[
+            'id'           => $developer->id,
+            'user_name'    => $developer->name . ' (Developer)',
+            'user_email'   => $developer->email,
+            'plan'         => 'enterprise',
+            'status'       => 'active',
+            'started_at'   => '2025-01-01',
+            'expires_at'   => null,
+            'is_trial'     => false,
+            'is_developer' => true,
+            'is_active'    => true,
+        ]] : [];
+
+        $all = array_merge($devEntry, $users->toArray());
+
+        return response()->json([
+            'data'  => $all,
+            'stats' => [
+                'total'      => count($all),
+                'active'     => collect($all)->where('status', 'active')->count(),
+                'free'       => collect($all)->where('plan', 'free')->count(),
+                'pro'        => collect($all)->where('plan', 'pro')->count(),
+                'enterprise' => collect($all)->where('plan', 'enterprise')->count(),
+            ],
+        ]);
+    }
+
+    // PATCH /api/dev/subscriptions/{userId}/plan
+    public function devUpdatePlan(int $userId): JsonResponse
+    {
+        $validated = request()->validate(['plan' => ['required', 'in:free,pro,enterprise']]);
+        $user = User::withoutGlobalScopes()->findOrFail($userId);
+
+        if ($user->role === 'developer') {
+            return response()->json(['message' => 'Developer account tidak bisa diubah.'], 422);
+        }
+
+        $user->update(['subscription_plan' => $validated['plan']]);
+
+        if ($validated['plan'] === 'free') {
+            Subscription::where('user_id', $userId)->where('status', 'active')
+                ->update(['status' => 'expired', 'expires_at' => now()]);
+        }
+
+        return response()->json(['message' => 'Plan berhasil diubah.', 'plan' => $validated['plan']]);
+    }
+
+    // PATCH /api/dev/subscriptions/{userId}/toggle — suspend / aktifkan akun
+    public function devToggleStatus(int $userId): JsonResponse
+    {
+        $user = User::withoutGlobalScopes()->findOrFail($userId);
+
+        if ($user->role === 'developer') {
+            return response()->json(['message' => 'Developer account tidak bisa diubah.'], 422);
+        }
+
+        $newActive = !$user->is_active;
+        $user->update(['is_active' => $newActive]);
+
+        if (!$newActive) {
+            Subscription::where('user_id', $userId)->where('status', 'active')
+                ->update(['status' => 'suspended']);
+        } else {
+            Subscription::where('user_id', $userId)->where('status', 'suspended')
+                ->update(['status' => 'active']);
+        }
+
+        return response()->json([
+            'message' => $newActive ? 'Akun diaktifkan.' : 'Akun ditangguhkan.',
+            'status'  => $newActive ? 'active' : 'suspended',
+        ]);
     }
 
     private function formatSubscription(Subscription $s): array

@@ -8,24 +8,63 @@ const PROVIDER_LABEL = {
   openrouter:  { text: "OpenRouter",  cls: "bg-purple-100 text-purple-700" },
 };
 
-// Ikon chat yang ramah & modern — sesuai tema neobrutalism KasirAI
 const ChatIcon = ({ className = "" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l4.93-1.37A9.953 9.953 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" />
-    <circle cx="8.5"  cy="12" r="1" fill="currentColor" stroke="none" />
-    <circle cx="12"   cy="12" r="1" fill="currentColor" stroke="none" />
-    <circle cx="15.5" cy="12" r="1" fill="currentColor" stroke="none" />
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M12 2a9 9 0 0 1 9 9c0 2.4-.94 4.6-2.48 6.23L20 22l-4.5-1.5A9 9 0 1 1 12 2z"/>
+    <circle cx="8.5"  cy="11.5" r="1" fill="currentColor" stroke="none"/>
+    <circle cx="12"   cy="11.5" r="1" fill="currentColor" stroke="none"/>
+    <circle cx="15.5" cy="11.5" r="1" fill="currentColor" stroke="none"/>
   </svg>
 );
+
+const SendIcon = ({ className = "" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+  </svg>
+);
+
+const ResetIcon = ({ className = "" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
+  </svg>
+);
+
+const WarningIcon = ({ className = "" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
+);
+
+const BlockIcon = ({ className = "" }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+  </svg>
+);
+
+const QUICK_PROMPT_ICONS = {
+  "Produk terlaris bulan ini?": (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    </svg>
+  ),
+  "Stok apa yang mau habis?": (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    </svg>
+  ),
+  "Rekomendasikan produk untuk dijual bareng?": (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
+      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+    </svg>
+  ),
+  "Total penjualan hari ini?": (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
+      <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </svg>
+  ),
+};
 
 const MessageBubble = ({ msg }) => {
   const isUser = msg.role === "user";
@@ -146,9 +185,10 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
         <div className="flex gap-2 items-center">
           <button
             onClick={clearMessages}
-            className="text-white/40 hover:text-brand-yellow text-[10px] font-mono border border-white/20 px-2 py-0.5 hover:border-brand-yellow transition-colors rounded"
+            title="Reset percakapan"
+            className="flex items-center gap-1.5 text-white/40 hover:text-brand-yellow text-[10px] font-mono border border-white/20 px-2 py-0.5 hover:border-brand-yellow transition-colors rounded"
           >
-            Reset
+            <ResetIcon className="w-3 h-3" /> Reset
           </button>
           {!alwaysVisible && (
             <button onClick={onClose} className="text-white/60 hover:text-white font-black text-sm">✕</button>
@@ -174,19 +214,25 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
 
       {/* Warning banner — mendekati limit */}
       {!limitReached && usageWarning && (
-        <div className="mx-3 mt-3 px-3 py-2.5 bg-orange-50 border-2 border-orange-400 rounded-md shrink-0">
-          <p className="text-xs font-bold text-orange-800 leading-snug">
-            ⚠️ Sisa kuota chat AI tinggal <span className="font-black">{dailyUsage.remaining}/{dailyUsage.limit}</span>. Gunakan dengan bijak!
-          </p>
+        <div className="mx-3 mt-3 px-3 py-2.5 bg-orange-50 border-2 border-orange-400 shrink-0">
+          <div className="flex items-start gap-2">
+            <WarningIcon className="w-3.5 h-3.5 text-orange-500 mt-0.5 shrink-0" />
+            <p className="text-xs font-bold text-orange-800 leading-snug">
+              Sisa kuota chat AI tinggal <span className="font-black">{dailyUsage.remaining}/{dailyUsage.limit}</span>. Gunakan dengan bijak!
+            </p>
+          </div>
         </div>
       )}
 
       {/* Limit reached banner */}
       {limitReached && (
-        <div className="mx-3 mt-3 px-3 py-2.5 bg-red-50 border-2 border-red-400 rounded-md shrink-0">
-          <p className="text-xs font-bold text-red-800 leading-snug">
-            🚫 Batas chat AI harian sudah habis ({dailyUsage.limit}/{dailyUsage.limit}). Coba lagi besok!
-          </p>
+        <div className="mx-3 mt-3 px-3 py-2.5 bg-red-50 border-2 border-red-400 shrink-0">
+          <div className="flex items-start gap-2">
+            <BlockIcon className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
+            <p className="text-xs font-bold text-red-800 leading-snug">
+              Batas chat AI harian sudah habis ({dailyUsage.limit}/{dailyUsage.limit}). Coba lagi besok!
+            </p>
+          </div>
         </div>
       )}
 
@@ -221,8 +267,9 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
               key={q}
               onClick={() => handleQuickPrompt(q)}
               disabled={isLoading}
-              className="text-[10px] font-semibold bg-white border border-brand-black/20 px-2 py-1 rounded hover:bg-brand-yellow hover:border-brand-black transition-all duration-100 disabled:opacity-40"
+              className="flex items-center gap-1.5 text-[10px] font-semibold bg-white border border-brand-black/20 px-2 py-1 rounded hover:bg-brand-yellow hover:border-brand-black transition-all duration-100 disabled:opacity-40"
             >
+              {QUICK_PROMPT_ICONS[q]}
               {q}
             </button>
           ))}
@@ -245,10 +292,10 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading || limitReached}
-            className="px-3 bg-brand-yellow border-2 border-brand-black rounded-md font-black text-sm disabled:opacity-30 hover:bg-yellow-300 transition-colors"
+            className="px-3 bg-brand-yellow border-2 border-brand-black rounded-md disabled:opacity-30 hover:bg-yellow-300 transition-colors flex items-center"
             style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
           >
-            →
+            <SendIcon className="w-4 h-4" />
           </button>
         </div>
         {!limitReached && (
