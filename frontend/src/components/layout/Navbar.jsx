@@ -30,15 +30,13 @@ const ROLE_COLORS = {
   developer: "bg-brand-black text-brand-yellow border-brand-black",
 };
 
-const DEV_EMAIL = "donojomi@gmail.com";
-
 export default function Navbar({ onMenuToggle }) {
   const router   = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
 
   const pageTitle  = PAGE_TITLES[pathname] ?? "KasirAI";
-  const isDev      = user?.email === DEV_EMAIL;
+  const isDev      = user?.role === "developer";
   const effectivePlan = isDev ? "developer" : (user?.subscription_plan ?? "free");
   const planBadge  = PLAN_BADGE[effectivePlan] ?? PLAN_BADGE.free;
 
