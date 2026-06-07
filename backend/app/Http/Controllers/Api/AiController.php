@@ -311,6 +311,7 @@ class AiController extends Controller
     public function logs(): JsonResponse
     {
         $logs = AiQueryLog::with('user')
+            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
             ->latest()
             ->paginate(20);
 
@@ -346,26 +347,29 @@ class AiController extends Controller
         $limit      = $this->dailyLimit();
         $tokenAlert = config('ai.token_alert_threshold', 50000);
 
-        $todayTokens = AiQueryLog::whereDate('created_at', $today)->sum('tokens_used');
+        $noDev = fn($q) => $q->whereHas('user', fn($u) => $u->where('role', '!=', 'developer'));
+
+        $todayTokens = AiQueryLog::whereDate('created_at', $today)->tap($noDev)->sum('tokens_used');
 
         $summary = [
             'today' => [
-                'requests'         => AiQueryLog::whereDate('created_at', $today)->count(),
+                'requests'         => AiQueryLog::whereDate('created_at', $today)->tap($noDev)->count(),
                 'tokens'           => $todayTokens,
-                'active_users'     => AiChatUsage::where('usage_date', $today)->count(),
+                'active_users'     => AiChatUsage::where('usage_date', $today)->tap($noDev)->count(),
                 'high_token_usage' => $todayTokens >= $tokenAlert,
             ],
             'week' => [
-                'requests' => AiQueryLog::where('created_at', '>=', $weekStart)->count(),
-                'tokens'   => AiQueryLog::where('created_at', '>=', $weekStart)->sum('tokens_used'),
+                'requests' => AiQueryLog::where('created_at', '>=', $weekStart)->tap($noDev)->count(),
+                'tokens'   => AiQueryLog::where('created_at', '>=', $weekStart)->tap($noDev)->sum('tokens_used'),
             ],
             'month' => [
-                'requests' => AiQueryLog::where('created_at', '>=', $monthStart)->count(),
-                'tokens'   => AiQueryLog::where('created_at', '>=', $monthStart)->sum('tokens_used'),
+                'requests' => AiQueryLog::where('created_at', '>=', $monthStart)->tap($noDev)->count(),
+                'tokens'   => AiQueryLog::where('created_at', '>=', $monthStart)->tap($noDev)->sum('tokens_used'),
             ],
         ];
 
         $byType = AiQueryLog::whereDate('created_at', $today)
+            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
             ->selectRaw('type, COUNT(*) as count, SUM(tokens_used) as tokens')
             ->groupBy('type')
             ->get()
@@ -377,6 +381,7 @@ class AiController extends Controller
 
         $byProvider = AiQueryLog::whereDate('created_at', $today)
             ->whereNotNull('provider')
+            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
             ->selectRaw('provider, COUNT(*) as count')
             ->groupBy('provider')
             ->get()
@@ -384,6 +389,7 @@ class AiController extends Controller
 
         $usersToday = AiChatUsage::with('user')
             ->where('usage_date', $today)
+            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
             ->orderByDesc('count')
             ->get()
             ->map(fn($u) => [
@@ -396,6 +402,7 @@ class AiController extends Controller
             ]);
 
         $dailyTrend = AiQueryLog::where('created_at', '>=', now()->subDays(6)->startOfDay())
+            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as requests, SUM(tokens_used) as tokens')
             ->groupBy('date')
             ->orderBy('date')
