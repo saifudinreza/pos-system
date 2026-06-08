@@ -25,24 +25,21 @@ class ReportController extends Controller
     // =============================================================
     public function sales(Request $request): JsonResponse
     {
-        $period   = $request->get('period', 'daily');
-        // ↑ Default period = daily
-        $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
-        $dateTo   = $request->get('date_to', now()->toDateString());
-        // ↑ Default: dari awal bulan ini sampai hari ini
+        $period    = $request->get('period', 'daily');
+        $dateFrom  = $request->get('date_from', now()->startOfMonth()->toDateString());
+        $dateTo    = $request->get('date_to', now()->toDateString());
+        $tenantId  = $request->user()->tenant_id;
 
         // ===== SUMMARY CARD =====
-        // Data ringkasan untuk card di dashboard
         $summary = Transaction::where('status', 'settlement')
             ->whereBetween('paid_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
             ->selectRaw('
                 COUNT(*) as total_transactions,
                 SUM(amount) as total_revenue,
                 AVG(amount) as avg_transaction
             ')
             ->first();
-        // ↑ selectRaw() = pakai raw SQL untuk agregat
-        // Lebih fleksibel dari Eloquent untuk query laporan
 
         $totalOrders = Order::where('status', 'paid')
             ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
@@ -50,6 +47,7 @@ class ReportController extends Controller
 
         $totalItems = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->where('orders.status', 'paid')
+            ->when($tenantId, fn($q) => $q->where('orders.tenant_id', $tenantId))
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->sum('order_items.quantity');
 
@@ -60,6 +58,7 @@ class ReportController extends Controller
 
         $paymentBreakdown = Transaction::where('status', 'settlement')
             ->whereBetween('paid_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
             ->selectRaw('COALESCE(payment_method, "other") as method, COUNT(*) as total_count, SUM(amount) as total_amount')
             ->groupBy('method')
             ->get()
@@ -75,6 +74,7 @@ class ReportController extends Controller
             $year      = $request->get('year', now()->year);
             $chartData = Transaction::where('status', 'settlement')
                 ->whereYear('paid_at', $year)
+                ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
                 ->selectRaw('
                     MONTH(paid_at) as period,
                     MONTHNAME(paid_at) as label,
@@ -84,12 +84,10 @@ class ReportController extends Controller
                 ->groupBy('period', 'label')
                 ->orderBy('period')
                 ->get();
-            // ↑ Group by bulan — untuk grafik penjualan bulanan
-
         } else {
-            // Daily — 30 hari terakhir
             $chartData = Transaction::where('status', 'settlement')
                 ->whereBetween('paid_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
                 ->selectRaw('
                     DATE(paid_at) as period,
                     DATE_FORMAT(paid_at, "%d %b") as label,
@@ -99,13 +97,13 @@ class ReportController extends Controller
                 ->groupBy('period', 'label')
                 ->orderBy('period')
                 ->get();
-            // ↑ Group by hari — untuk grafik penjualan harian
         }
 
         // ===== TOP PRODUCTS — produk terlaris =====
         $topProducts = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('orders.status', 'paid')
+            ->when($tenantId, fn($q) => $q->where('orders.tenant_id', $tenantId))
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->selectRaw('
                 products.id,
@@ -118,18 +116,17 @@ class ReportController extends Controller
             ->orderByDesc('total_quantity')
             ->limit(10)
             ->get();
-        // ↑ Join 3 tabel untuk dapat produk terlaris
-        // Diurutkan by total quantity terjual
 
         // ===== RECENT TRANSACTIONS =====
         $recentTransactions = Transaction::with('order.user')
             ->where('status', 'settlement')
+            ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
             ->latest('paid_at')
             ->limit(10)
             ->get()
             ->map(fn($t) => [
-                'order_number'   => $t->order->order_number,
-                'customer'       => $t->order->user->name,
+                'order_number'   => $t->order?->order_number ?? '-',
+                'customer'       => $t->order?->user?->name ?? '-',
                 'amount'         => $t->amount,
                 'payment_method' => $t->payment_method,
                 'paid_at'        => $t->paid_at->format('d M Y H:i'),
