@@ -38,7 +38,12 @@ class TransactionController extends Controller
     // =============================================================
     public function index(Request $request): JsonResponse
     {
+        $tenantId = $request->user()->tenant_id;
+
         $query = Transaction::with('order.user')
+            ->when($tenantId, function ($q) use ($tenantId) {
+                $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId));
+            })
             ->latest();
 
         // ----- FILTER STATUS -----
@@ -366,6 +371,8 @@ class TransactionController extends Controller
     // =============================================================
     private function formatTransaction(Transaction $transaction): array
     {
+        $order = $transaction->relationLoaded('order') ? $transaction->order : null;
+
         return [
             'id'                      => $transaction->id,
             'order_id'                => $transaction->order_id,
@@ -376,20 +383,20 @@ class TransactionController extends Controller
             'amount'                  => $transaction->amount,
             'snap_token'              => $transaction->snap_token,
             'paid_at'                 => $transaction->paid_at?->format('d M Y H:i'),
-            'order'                   => $transaction->relationLoaded('order') ? [
-                'id'           => $transaction->order->id,
-                'order_number' => $transaction->order->order_number,
-                'status'       => $transaction->order->status,
-                'subtotal'     => $transaction->order->subtotal,
-                'tax'          => $transaction->order->tax,
-                'total'        => $transaction->order->total,
-                'notes'        => $transaction->order->notes,
-                'user'         => $transaction->order->relationLoaded('user') ? [
-                    'id'   => $transaction->order->user->id,
-                    'name' => $transaction->order->user->name,
+            'order'                   => $order ? [
+                'id'           => $order->id,
+                'order_number' => $order->order_number,
+                'status'       => $order->status,
+                'subtotal'     => $order->subtotal,
+                'tax'          => $order->tax,
+                'total'        => $order->total,
+                'notes'        => $order->notes,
+                'user'         => $order->relationLoaded('user') ? [
+                    'id'   => $order->user->id,
+                    'name' => $order->user->name,
                 ] : null,
-                'items'        => $transaction->order->relationLoaded('items')
-                    ? $transaction->order->items->map(fn($item) => [
+                'items'        => $order->relationLoaded('items')
+                    ? $order->items->map(fn($item) => [
                         'product_name' => $item->product?->name ?? '-',
                         'quantity'     => $item->quantity,
                         'price'        => $item->price,

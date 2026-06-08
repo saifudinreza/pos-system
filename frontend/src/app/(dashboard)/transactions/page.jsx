@@ -200,12 +200,18 @@ export default function TransactionsPage() {
   const [filters,      setFilters]      = useState({ page: 1, per_page: 10 });
   const [detailTxId,   setDetailTxId]   = useState(null);
 
+  const [fetchError, setFetchError] = useState("");
+
   const fetchData = useCallback(async () => {
     setIsLoading(true);
+    setFetchError("");
     try {
       const data = await transactionService.getAll(filters);
       setTransactions(data.data ?? []);
       setMeta(data.meta ?? null);
+    } catch (err) {
+      setFetchError(err.response?.data?.message ?? "Gagal memuat data transaksi.");
+      setTransactions([]);
     } finally { setIsLoading(false); }
   }, [filters]);
 
@@ -307,6 +313,12 @@ export default function TransactionsPage() {
           onChange={(e) => setFilters((p) => ({ ...p, date_to: e.target.value, page: 1 }))}
         />
       </div>
+
+      {fetchError && (
+        <div className="p-3 bg-red-50 border-2 border-red-300 text-sm text-red-700 font-semibold rounded-md">
+          {fetchError}
+        </div>
+      )}
 
       <NeoTable columns={columns} data={transactions} isLoading={isLoading} emptyText="Belum ada transaksi" />
 
