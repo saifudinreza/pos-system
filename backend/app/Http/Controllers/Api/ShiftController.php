@@ -45,7 +45,9 @@ class ShiftController extends Controller
     public function open(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'opening_balance' => ['required', 'numeric', 'min:0'],
+            'opening_balance'       => ['required', 'numeric', 'min:0'],
+            'opening_note'          => ['nullable', 'string', 'max:500'],
+            'opening_denominations' => ['nullable', 'array'],
         ]);
 
         $active = Shift::where('user_id', $request->user()->id)
@@ -72,13 +74,15 @@ class ShiftController extends Controller
         }
 
         $shift = Shift::create([
-            'tenant_id'       => $request->user()->tenant_id,
-            'user_id'         => $request->user()->id,
-            'shift_number'    => $number,
-            'shift_name'      => $name,
-            'status'          => 'open',
-            'opened_at'       => now(),
-            'opening_balance' => $validated['opening_balance'],
+            'tenant_id'             => $request->user()->tenant_id,
+            'user_id'               => $request->user()->id,
+            'shift_number'          => $number,
+            'shift_name'            => $name,
+            'status'                => 'open',
+            'opened_at'             => now(),
+            'opening_balance'       => $validated['opening_balance'],
+            'opening_note'          => $validated['opening_note'] ?? null,
+            'opening_denominations' => $validated['opening_denominations'] ?? null,
         ]);
 
         return response()->json([
@@ -104,8 +108,12 @@ class ShiftController extends Controller
         }
 
         $validated = $request->validate([
-            'closing_balance' => ['required', 'numeric', 'min:0'],
-            'notes'           => ['nullable', 'string', 'max:500'],
+            'closing_balance'       => ['required', 'numeric', 'min:0'],
+            'closing_denominations' => ['nullable', 'array'],
+            'petty_cash'            => ['nullable', 'numeric', 'min:0'],
+            'petty_cash_note'       => ['nullable', 'string', 'max:500'],
+            'notes'                 => ['nullable', 'string', 'max:500'],
+            'verified_by'           => ['nullable', 'string', 'max:100'],
         ]);
 
         $paidOrders = Order::where('shift_id', $shift->id)
@@ -117,16 +125,24 @@ class ShiftController extends Controller
             ->where('status', 'settlement')
             ->sum('amount');
 
-        $expectedBalance = $shift->opening_balance + $cashTotal;
+        $pettyCash = $validated['petty_cash'] ?? 0;
+
+        // Uang tunai seharusnya = Modal Awal + Penjualan Tunai − Pengeluaran Kas Kecil
+        $expectedBalance = $shift->opening_balance + $cashTotal - $pettyCash;
+        // Selisih = uang fisik − uang seharusnya  (minus = kurang, plus = lebih)
         $difference = $validated['closing_balance'] - $expectedBalance;
 
         $shift->update([
-            'status'           => 'closed',
-            'closed_at'        => now(),
-            'closing_balance'  => $validated['closing_balance'],
-            'expected_balance' => $expectedBalance,
-            'difference'       => $difference,
-            'notes'            => $validated['notes'] ?? null,
+            'status'                => 'closed',
+            'closed_at'             => now(),
+            'closing_balance'       => $validated['closing_balance'],
+            'closing_denominations' => $validated['closing_denominations'] ?? null,
+            'expected_balance'      => $expectedBalance,
+            'difference'            => $difference,
+            'petty_cash'            => $pettyCash,
+            'petty_cash_note'       => $validated['petty_cash_note'] ?? null,
+            'notes'                 => $validated['notes'] ?? null,
+            'verified_by'           => $validated['verified_by'] ?? null,
         ]);
 
         return response()->json([
@@ -157,6 +173,15 @@ class ShiftController extends Controller
         $totalRevenue = $paidOrders->sum('total');
         $totalItems = $paidOrders->sum(fn($o) => $o->items->sum('quantity'));
 
+        // ----- RINGKASAN PENJUALAN -----
+        // Catatan: proyek ini TIDAK punya fitur diskon, jadi "diskon" = 0.
+        //   Penjualan Kotor (subtotal) + PPN 11% = Penjualan Bersih (total diterima).
+        //   Void/Retur diwakili oleh order berstatus 'cancelled' (informasi saja).
+        $grossSales = $paidOrders->sum('subtotal');
+        $taxTotal   = $paidOrders->sum('tax');
+        $netSales   = $paidOrders->sum('total');
+        $voidAmount = $cancelledOrders->sum('total');
+
         $paymentBreakdown = Transaction::whereIn('order_id', $paidOrders->pluck('id'))
             ->where('status', 'settlement')
             ->selectRaw('COALESCE(payment_method, "other") as method, COUNT(*) as count, SUM(amount) as total')
@@ -173,7 +198,13 @@ class ShiftController extends Controller
             ->where('status', 'settlement')
             ->get();
 
-        $expectedCash = $shift->opening_balance + $cashTransactions->sum('amount');
+        // Kelompokkan pembayaran: Tunai vs Non-Tunai
+        $cashSales    = (float) $cashTransactions->sum('amount');
+        $nonCashSales = (float) $paymentBreakdown->where('method', '!=', 'cash')->sum('total');
+
+        // Uang tunai seharusnya = Modal Awal + Penjualan Tunai − Pengeluaran Kas Kecil
+        $pettyCash    = (float) ($shift->petty_cash ?? 0);
+        $expectedCash = $shift->opening_balance + $cashSales - $pettyCash;
 
         return response()->json([
             'message' => 'Laporan shift berhasil diambil.',
@@ -187,10 +218,22 @@ class ShiftController extends Controller
                     'pending_count'   => $pendingOrders->count(),
                     'cancelled_count' => $cancelledOrders->count(),
                 ],
+                'sales_summary' => [
+                    'gross_sales' => (float) $grossSales,   // subtotal sebelum PPN
+                    'tax'         => (float) $taxTotal,      // PPN 11%
+                    'net_sales'   => (float) $netSales,      // total diterima (subtotal + PPN)
+                    'void_count'  => $cancelledOrders->count(),
+                    'void_amount' => (float) $voidAmount,    // nilai transaksi dibatalkan (info)
+                ],
+                'payment_groups' => [
+                    'cash'     => $cashSales,
+                    'non_cash' => $nonCashSales,
+                ],
                 'cash_summary' => [
                     'opening_balance'  => (float) $shift->opening_balance,
-                    'cash_sales'       => (float) $cashTransactions->sum('amount'),
+                    'cash_sales'       => $cashSales,
                     'cash_count'       => $cashTransactions->count(),
+                    'petty_cash'       => $pettyCash,
                     'expected_cash'    => (float) $expectedCash,
                     'closing_balance'  => (float) ($shift->closing_balance ?? 0),
                     'difference'       => (float) ($shift->difference ?? 0),
@@ -247,10 +290,16 @@ class ShiftController extends Controller
             'opened_at'       => $shift->opened_at->format('d M Y H:i'),
             'closed_at'       => $shift->closed_at?->format('d M Y H:i'),
             'opening_balance' => (float) $shift->opening_balance,
+            'opening_note'    => $shift->opening_note,
+            'opening_denominations' => $shift->opening_denominations,
             'closing_balance' => (float) ($shift->closing_balance ?? 0),
+            'closing_denominations' => $shift->closing_denominations,
             'expected_balance' => (float) ($shift->expected_balance ?? 0),
             'difference'      => (float) ($shift->difference ?? 0),
+            'petty_cash'      => (float) ($shift->petty_cash ?? 0),
+            'petty_cash_note' => $shift->petty_cash_note,
             'notes'           => $shift->notes,
+            'verified_by'     => $shift->verified_by,
             'user'            => $shift->relationLoaded('user') ? [
                 'id'   => $shift->user->id,
                 'name' => $shift->user->name,

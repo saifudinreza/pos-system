@@ -645,45 +645,111 @@ const CartItem = ({ item, onAdd, onRemove, onDelete }) => (
   </div>
 );
 
-// ── ShiftOpenModal — Modal buka shift baru ─────────────────────
-function ShiftOpenModal({ isOpen, onClose, onConfirm }) {
-  const [balance, setBalance] = useState("");
+// ── Pecahan Rupiah (lembar & koin) untuk kalkulator laci ──────
+const RUPIAH = [100000, 50000, 20000, 10000, 5000, 2000, 1000, 500, 200, 100];
+
+// ── DenominationCounter — hitung total uang laci dari rincian pecahan ──
+// value: objek { "100000": qty, ... }; onChange(nextObj, total)
+function DenominationCounter({ value, onChange }) {
+  const counts = value || {};
+  const setQty = (denom, raw) => {
+    const n = Math.max(0, parseInt(raw, 10) || 0);
+    const next = { ...counts };
+    if (n === 0) delete next[denom];
+    else next[denom] = n;
+    const total = RUPIAH.reduce((s, d) => s + d * (next[d] || 0), 0);
+    onChange(next, total);
+  };
+
+  return (
+    <div className="border-2 border-brand-black divide-y divide-brand-black/10">
+      {RUPIAH.map((d) => {
+        const qty = counts[d] || 0;
+        return (
+          <div key={d} className="flex items-center gap-2 px-2.5 py-1.5 text-xs">
+            <span className="w-20 font-mono font-bold shrink-0">{formatCurrency(d)}</span>
+            <span className="text-brand-black/30">×</span>
+            <input
+              type="number" min="0" value={qty || ""}
+              onChange={(e) => setQty(d, e.target.value)}
+              placeholder="0"
+              className="w-14 text-center px-1 py-1 font-mono font-bold border-2 border-brand-black outline-none focus:border-brand-yellow"
+            />
+            <span className="ml-auto font-mono font-black text-right">{formatCurrency(d * qty)}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── ShiftOpenModal — Modal buka shift baru (identitas + kalkulator pecahan + catatan) ──
+function ShiftOpenModal({ isOpen, onClose, onConfirm, user, suggestedShift }) {
+  const [denoms, setDenoms] = useState({});
+  const [total, setTotal] = useState(0);
+  const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
   if (!isOpen) return null;
 
+  const reset = () => { setDenoms({}); setTotal(0); setNote(""); setErr(""); };
+
   const handleOpen = async () => {
-    const val = parseFloat(balance) || 0;
-    if (val < 0) { setErr("Saldo awal tidak boleh negatif."); return; }
     setLoading(true); setErr("");
     try {
-      await onConfirm(val);
-      setBalance("");
+      await onConfirm({
+        opening_balance: total,
+        opening_note: note || undefined,
+        opening_denominations: Object.keys(denoms).length ? denoms : undefined,
+      });
+      reset();
     } catch (e) { setErr(getErrorMessage(e)); }
     finally { setLoading(false); }
   };
 
+  const today = new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
-      <div className="bg-white border-2 border-brand-black w-full max-w-sm" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
-        <div className="px-5 py-4 bg-brand-yellow border-b-2 border-brand-black">
-          <h3 className="font-black text-lg font-grotesk">Buka Shift Baru</h3>
+      <div className="bg-white border-2 border-brand-black w-full max-w-md flex flex-col max-h-[92vh]" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        <div className="px-5 py-4 bg-brand-yellow border-b-2 border-brand-black shrink-0">
+          <h3 className="font-black text-lg font-grotesk">Buka Kasir / Shift Baru</h3>
         </div>
-        <div className="p-5 space-y-4">
-          <p className="text-sm font-semibold text-brand-black/70">
-            Kamu belum membuka shift. Silakan masukkan saldo awal kas untuk memulai shift.
-          </p>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-thin">
+          {/* 1. Identitas & Waktu */}
+          <div className="border-2 border-brand-black bg-brand-cream p-3 space-y-1.5 text-sm">
+            <div className="flex justify-between"><span className="text-brand-black/60">Tanggal</span><span className="font-bold">{today}</span></div>
+            <div className="flex justify-between"><span className="text-brand-black/60">Shift</span>
+              <span className="font-black">{suggestedShift ? `${suggestedShift.name} (#${suggestedShift.number})` : "-"}</span></div>
+            <div className="flex justify-between"><span className="text-brand-black/60">Kasir Bertugas</span><span className="font-bold">{user?.name ?? "-"}</span></div>
+          </div>
+
           {err && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border-2 border-red-300">{err}</p>}
+
+          {/* 2. Total Modal dari rincian pecahan */}
           <div>
-            <label className="text-sm font-bold block mb-1">Saldo Awal (Rp)</label>
-            <input type="number" value={balance} onChange={(e) => setBalance(e.target.value)}
-              placeholder="0" className="w-full px-3 py-3 text-2xl font-black font-mono border-2 border-brand-black outline-none focus:border-brand-yellow text-right"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }} autoFocus />
+            <label className="text-sm font-bold block mb-1">Rincian Uang Laci (Modal Awal)</label>
+            <DenominationCounter value={denoms} onChange={(d, t) => { setDenoms(d); setTotal(t); }} />
+          </div>
+          <div className="flex justify-between items-center py-3 px-4 border-2 border-brand-black bg-brand-yellow" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            <span className="font-black text-sm">TOTAL MODAL</span>
+            <span className="font-black text-2xl font-mono">{formatCurrency(total)}</span>
+          </div>
+
+          {/* 3. Catatan tambahan */}
+          <div>
+            <label className="text-sm font-bold block mb-1">Catatan (opsional)</label>
+            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
+              placeholder="Misal: tukar uang receh Rp 50.000 di awal shift..."
+              className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow resize-none"
+              style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
           </div>
         </div>
-        <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream">
-          <button onClick={() => { setBalance(""); setErr(""); onClose(); }}
+
+        <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream shrink-0">
+          <button onClick={() => { reset(); onClose(); }}
             className="flex-1 py-2.5 font-bold text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
             style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
             Nanti
@@ -699,29 +765,54 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm }) {
   );
 }
 
-// ── ShiftCloseModal — Modal tutup shift (klerek) ──────────────
+// ── ShiftCloseModal — Modal tutup shift (klerek lengkap) ──────────────
 function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
-  const [closingBalance, setClosingBalance] = useState("");
+  const [closingDenoms, setClosingDenoms] = useState({});
+  const [closingTotal, setClosingTotal] = useState(0);   // = saldo fisik laci
+  const [pettyCash, setPettyCash] = useState("");
+  const [pettyNote, setPettyNote] = useState("");
   const [notes, setNotes] = useState("");
+  const [verifiedBy, setVerifiedBy] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
   if (!isOpen || !shift) return null;
 
   const cashReport = report?.cash_summary;
-  const expected = cashReport?.expected_cash ?? 0;
+  const sales      = report?.sales_summary;
+  const groups     = report?.payment_groups;
+
+  const openingBalance = cashReport?.opening_balance ?? 0;
+  const cashSales      = cashReport?.cash_sales ?? 0;
+  const petty          = parseFloat(pettyCash) || 0;
+
+  // Uang tunai seharusnya = Modal Awal + Penjualan Tunai − Pengeluaran Kas Kecil
+  const expected = openingBalance + cashSales - petty;
+  // Selisih = uang fisik − seharusnya  (minus = kurang/shortage, plus = lebih/overage)
+  const variance = closingTotal - expected;
+
+  const reset = () => {
+    setClosingDenoms({}); setClosingTotal(0); setPettyCash(""); setPettyNote("");
+    setNotes(""); setVerifiedBy(""); setErr("");
+  };
 
   const handleClose = async () => {
-    const val = parseFloat(closingBalance) || 0;
-    if (val < 0) { setErr("Saldo akhir tidak boleh negatif."); return; }
     setLoading(true); setErr("");
     try {
-      await onConfirm(val, notes);
-      setClosingBalance("");
-      setNotes("");
+      await onConfirm({
+        closing_balance: closingTotal,
+        closing_denominations: Object.keys(closingDenoms).length ? closingDenoms : undefined,
+        petty_cash: petty || undefined,
+        petty_cash_note: pettyNote || undefined,
+        notes: notes || undefined,
+        verified_by: verifiedBy || undefined,
+      });
+      reset();
     } catch (e) { setErr(getErrorMessage(e)); }
     finally { setLoading(false); }
   };
+
+  const closeTime = new Date().toLocaleString("id-ID");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
@@ -731,108 +822,154 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
           <h3 className="font-black text-lg font-grotesk">🔒 Tutup Shift — {shift.shift_name}</h3>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
-          {/* Shift Info */}
-          <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-thin">
+          {/* 1. Informasi Dasar & Identitas */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             <div className="p-3 bg-brand-cream border-2 border-brand-black">
               <p className="text-[10px] font-bold text-brand-black/50 uppercase tracking-wider">Dibuka</p>
-              <p className="font-black font-mono">{shift.opened_at}</p>
+              <p className="font-black font-mono text-xs">{shift.opened_at}</p>
+            </div>
+            <div className="p-3 bg-brand-cream border-2 border-brand-black">
+              <p className="text-[10px] font-bold text-brand-black/50 uppercase tracking-wider">Ditutup</p>
+              <p className="font-black font-mono text-xs">{closeTime}</p>
+            </div>
+            <div className="p-3 bg-brand-cream border-2 border-brand-black">
+              <p className="text-[10px] font-bold text-brand-black/50 uppercase tracking-wider">Shift</p>
+              <p className="font-black">{shift.shift_name} <span className="text-brand-black/40 font-mono">#{shift.shift_number}</span></p>
             </div>
             <div className="p-3 bg-brand-cream border-2 border-brand-black">
               <p className="text-[10px] font-bold text-brand-black/50 uppercase tracking-wider">Kasir</p>
-              <p className="font-black">{shift.user?.name ?? "-"}</p>
+              <p className="font-black text-xs">{shift.user?.name ?? "-"}</p>
             </div>
           </div>
 
-          {/* Summary Cards */}
-          {report?.summary && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <div className="p-3 border-2 border-brand-black bg-white text-center"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
-                <p className="text-[10px] font-bold text-brand-black/50 uppercase">Pesanan</p>
-                <p className="font-black text-lg">{report.summary.total_paid}</p>
-              </div>
-              <div className="p-3 border-2 border-brand-black bg-white text-center"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
-                <p className="text-[10px] font-bold text-brand-black/50 uppercase">Item Terjual</p>
-                <p className="font-black text-lg">{report.summary.total_items}</p>
-              </div>
-              <div className="p-3 border-2 border-brand-black bg-white text-center col-span-2"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
-                <p className="text-[10px] font-bold text-brand-black/50 uppercase">Total Revenue</p>
-                <p className="font-black text-lg">{formatCurrency(report.summary.total_revenue)}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Payment Breakdown */}
-          {report?.payment_breakdown && report.payment_breakdown.length > 0 && (
-            <div>
-              <p className="text-sm font-bold mb-2">Rincian Pembayaran</p>
-              <div className="border-2 border-brand-black divide-y divide-brand-black/10">
-                {report.payment_breakdown.map((p, i) => (
-                  <div key={i} className="flex justify-between px-3 py-2 text-sm">
-                    <span className="font-semibold capitalize">{p.method}</span>
-                    <div className="text-right">
-                      <span className="font-black font-mono">{formatCurrency(p.total)}</span>
-                      <span className="text-brand-black/40 ml-2">({p.count} tx)</span>
-                    </div>
+          {/* 2. Ringkasan Penjualan (Sales Summary) */}
+          {sales && (
+            <div className="border-2 border-brand-black">
+              <div className="px-4 py-2 bg-brand-black text-white"><p className="font-bold text-xs uppercase">Ringkasan Penjualan</p></div>
+              <div className="p-4 space-y-2 text-sm">
+                <div className="flex justify-between"><span>Penjualan Kotor (sebelum PPN)</span><span className="font-mono font-bold">{formatCurrency(sales.gross_sales)}</span></div>
+                <div className="flex justify-between"><span>PPN 11%</span><span className="font-mono font-bold">{formatCurrency(sales.tax)}</span></div>
+                <div className="flex justify-between border-t-2 border-brand-black pt-2 font-black"><span>Penjualan Bersih (diterima)</span><span className="font-mono">{formatCurrency(sales.net_sales)}</span></div>
+                {sales.void_count > 0 && (
+                  <div className="flex justify-between text-brand-black/50 text-xs pt-1">
+                    <span>Transaksi dibatalkan (void)</span>
+                    <span className="font-mono">{sales.void_count} tx · {formatCurrency(sales.void_amount)}</span>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           )}
 
-          {/* Cash Summary */}
-          <div className="border-2 border-brand-black bg-brand-cream">
-            <div className="px-4 py-2 bg-brand-black text-white">
-              <p className="font-bold text-xs uppercase">Ringkasan Kas</p>
+          {/* 3. Metode Pembayaran (Tunai vs Non-Tunai) */}
+          {groups && (
+            <div>
+              <p className="text-sm font-bold mb-2">Metode Pembayaran</p>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="p-3 border-2 border-brand-black bg-white text-center" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                  <p className="text-[10px] font-bold text-brand-black/50 uppercase">Tunai</p>
+                  <p className="font-black font-mono">{formatCurrency(groups.cash)}</p>
+                </div>
+                <div className="p-3 border-2 border-brand-black bg-white text-center" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                  <p className="text-[10px] font-bold text-brand-black/50 uppercase">Non-Tunai</p>
+                  <p className="font-black font-mono">{formatCurrency(groups.non_cash)}</p>
+                </div>
+              </div>
+              {report?.payment_breakdown?.length > 0 && (
+                <div className="border-2 border-brand-black divide-y divide-brand-black/10">
+                  {report.payment_breakdown.map((p, i) => (
+                    <div key={i} className="flex justify-between px-3 py-1.5 text-xs">
+                      <span className="font-semibold capitalize">{p.method}</span>
+                      <div className="text-right">
+                        <span className="font-black font-mono">{formatCurrency(p.total)}</span>
+                        <span className="text-brand-black/40 ml-2">({p.count} tx)</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+          )}
+
+          {/* 4. Perhitungan Uang Tunai Fisik (Cash Counting) */}
+          <div>
+            <p className="text-sm font-bold mb-2">Hitung Uang Fisik di Laci</p>
+            <DenominationCounter value={closingDenoms} onChange={(d, t) => { setClosingDenoms(d); setClosingTotal(t); }} />
+            <div className="flex justify-between items-center py-2.5 px-4 border-2 border-brand-black bg-brand-yellow mt-2" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              <span className="font-black text-sm">SALDO FISIK (LACI)</span>
+              <span className="font-black text-xl font-mono">{formatCurrency(closingTotal)}</span>
+            </div>
+          </div>
+
+          {/* Petty cash — pengeluaran kas kecil */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-sm font-bold block mb-1">Pengeluaran Kas Kecil (Rp)</label>
+              <input type="number" min="0" value={pettyCash} onChange={(e) => setPettyCash(e.target.value)}
+                placeholder="0"
+                className="w-full text-right px-3 py-2 font-black font-mono border-2 border-brand-black outline-none focus:border-brand-yellow text-sm"
+                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+            </div>
+            <div>
+              <label className="text-sm font-bold block mb-1">Catatan Pengeluaran</label>
+              <input value={pettyNote} onChange={(e) => setPettyNote(e.target.value)}
+                placeholder="Misal: beli lakban, bayar kurir"
+                className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
+                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+            </div>
+          </div>
+
+          {/* 5. Rekonsiliasi & Selisih (Variance) */}
+          <div className="border-2 border-brand-black bg-brand-cream">
+            <div className="px-4 py-2 bg-brand-black text-white"><p className="font-bold text-xs uppercase">Rekonsiliasi Kas</p></div>
             <div className="p-4 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Saldo Awal</span>
-                <span className="font-mono font-bold">{formatCurrency(cashReport?.opening_balance ?? 0)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Penjualan Tunai</span>
-                <span className="font-mono font-bold">{formatCurrency(cashReport?.cash_sales ?? 0)}</span>
-              </div>
-              <div className="flex justify-between border-t-2 border-brand-black pt-2 font-black">
-                <span>Saldo yang Diharapkan</span>
-                <span className="font-mono">{formatCurrency(expected)}</span>
-              </div>
-              <div className="flex justify-between items-center pt-2 border-t-2 border-brand-black">
-                <span className="font-bold">Saldo Akhir (Fisik)</span>
-                <input type="number" value={closingBalance}
-                  onChange={(e) => setClosingBalance(e.target.value)}
-                  placeholder="0" autoFocus
-                  className="w-36 text-right px-2 py-1 font-black font-mono border-2 border-brand-black outline-none focus:border-brand-yellow text-sm"
-                  style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
-              </div>
-              {parseFloat(closingBalance || 0) > 0 && (
+              <div className="flex justify-between"><span>Modal Awal</span><span className="font-mono font-bold">{formatCurrency(openingBalance)}</span></div>
+              <div className="flex justify-between"><span>+ Penjualan Tunai</span><span className="font-mono font-bold">{formatCurrency(cashSales)}</span></div>
+              <div className="flex justify-between"><span>− Pengeluaran Kas Kecil</span><span className="font-mono font-bold">{formatCurrency(petty)}</span></div>
+              <div className="flex justify-between border-t-2 border-brand-black pt-2 font-black"><span>Uang Tunai Seharusnya</span><span className="font-mono">{formatCurrency(expected)}</span></div>
+              <div className="flex justify-between"><span>Uang Fisik di Laci</span><span className="font-mono font-bold">{formatCurrency(closingTotal)}</span></div>
+              {closingTotal > 0 && (
                 <div className={`flex justify-between font-black text-base p-3 border-2 mt-2 ${
-                  parseFloat(closingBalance) === expected
+                  variance === 0
                     ? "bg-green-50 border-green-400 text-green-700"
-                    : Math.abs(parseFloat(closingBalance) - expected) < 1000
+                    : Math.abs(variance) < 1000
                     ? "bg-yellow-50 border-yellow-400 text-yellow-700"
                     : "bg-red-50 border-red-400 text-red-700"
                 }`}>
-                  <span>SELISIH</span>
-                  <span className="font-mono">{formatCurrency(parseFloat(closingBalance || 0) - expected)}</span>
+                  <span>SELISIH {variance === 0 ? "(PAS)" : variance > 0 ? "(LEBIH)" : "(KURANG)"}</span>
+                  <span className="font-mono">{formatCurrency(variance)}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Notes */}
+          {/* 6. Validasi (Otorisasi) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="p-3 border-2 border-brand-black bg-white">
+              <p className="text-[10px] font-bold text-brand-black/50 uppercase tracking-wider">Ditutup oleh (Kasir)</p>
+              <p className="font-black text-sm mt-0.5">{shift.user?.name ?? "-"}</p>
+              <p className="text-[10px] text-brand-black/40">Tercatat otomatis oleh sistem</p>
+            </div>
+            <div>
+              <label className="text-sm font-bold block mb-1">Diverifikasi oleh (Supervisor)</label>
+              <input value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)}
+                placeholder="Nama supervisor (opsional)"
+                className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
+                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+            </div>
+          </div>
+
+          {/* Catatan umum */}
           <div>
-            <label className="text-sm font-bold block mb-1">Catatan (opsional)</label>
+            <label className="text-sm font-bold block mb-1">Catatan Shift (opsional)</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
               placeholder="Catatan untuk shift ini..."
               rows={2}
               className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow resize-none"
               style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
           </div>
+
+          {err && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border-2 border-red-300">{err}</p>}
 
           {/* Recent Orders */}
           {report?.orders && report.orders.length > 0 && (
@@ -862,8 +999,6 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
               </div>
             </div>
           )}
-
-          {err && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border-2 border-red-300">{err}</p>}
         </div>
 
         <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream shrink-0">
@@ -1103,14 +1238,14 @@ export default function KasirPage() {
     }
   };
 
-  const handleOpenShift = async (balance) => {
-    const res = await shiftService.open(balance);
+  const handleOpenShift = async (payload) => {
+    const res = await shiftService.open(payload);
     setCurrentShift(res.data);
     setShiftOpenModal(false);
   };
 
-  const handleCloseShift = async (closingBalance, notes) => {
-    const res = await shiftService.close(currentShift.id, closingBalance, notes);
+  const handleCloseShift = async (payload) => {
+    const res = await shiftService.close(currentShift.id, payload);
     setShiftCloseModal(false);
     setCurrentShift(null);
     setShiftReport(null);
@@ -1487,6 +1622,8 @@ export default function KasirPage() {
       isOpen={shiftOpenModal}
       onClose={() => setShiftOpenModal(false)}
       onConfirm={handleOpenShift}
+      user={user}
+      suggestedShift={suggestedShift}
     />
 
     <ShiftCloseModal

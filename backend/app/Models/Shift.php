@@ -19,22 +19,31 @@ class Shift extends Model
         'opened_at',
         'closed_at',
         'opening_balance',
+        'opening_note',
+        'opening_denominations',
         'closing_balance',
+        'closing_denominations',
         'expected_balance',
         'difference',
+        'petty_cash',
+        'petty_cash_note',
         'notes',
+        'verified_by',
     ];
 
     protected function casts(): array
     {
         return [
-            'opened_at'        => 'datetime',
-            'closed_at'        => 'datetime',
-            'opening_balance'  => 'decimal:2',
-            'closing_balance'  => 'decimal:2',
-            'expected_balance' => 'decimal:2',
-            'difference'       => 'decimal:2',
-            'shift_number'     => 'integer',
+            'opened_at'             => 'datetime',
+            'closed_at'             => 'datetime',
+            'opening_balance'       => 'decimal:2',
+            'closing_balance'       => 'decimal:2',
+            'expected_balance'      => 'decimal:2',
+            'difference'            => 'decimal:2',
+            'petty_cash'            => 'decimal:2',
+            'opening_denominations' => 'array',
+            'closing_denominations' => 'array',
+            'shift_number'          => 'integer',
         ];
     }
 
