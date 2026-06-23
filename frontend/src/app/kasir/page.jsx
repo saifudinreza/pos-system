@@ -40,6 +40,7 @@ import productService     from "@/services/productService";
 import categoryService    from "@/services/categoryService";
 import orderService       from "@/services/orderService";
 import transactionService from "@/services/transactionService";
+import shiftService       from "@/services/shiftService";
 import useCartStore       from "@/stores/cartStore";
 import useAuthStore       from "@/stores/authStore";
 import { formatCurrency, getErrorMessage } from "@/lib/utils";
@@ -644,6 +645,287 @@ const CartItem = ({ item, onAdd, onRemove, onDelete }) => (
   </div>
 );
 
+// ── ShiftOpenModal — Modal buka shift baru ─────────────────────
+function ShiftOpenModal({ isOpen, onClose, onConfirm }) {
+  const [balance, setBalance] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  if (!isOpen) return null;
+
+  const handleOpen = async () => {
+    const val = parseFloat(balance) || 0;
+    if (val < 0) { setErr("Saldo awal tidak boleh negatif."); return; }
+    setLoading(true); setErr("");
+    try {
+      await onConfirm(val);
+      setBalance("");
+    } catch (e) { setErr(getErrorMessage(e)); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
+      <div className="bg-white border-2 border-brand-black w-full max-w-sm" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        <div className="px-5 py-4 bg-brand-yellow border-b-2 border-brand-black">
+          <h3 className="font-black text-lg font-grotesk">Buka Shift Baru</h3>
+        </div>
+        <div className="p-5 space-y-4">
+          <p className="text-sm font-semibold text-brand-black/70">
+            Kamu belum membuka shift. Silakan masukkan saldo awal kas untuk memulai shift.
+          </p>
+          {err && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border-2 border-red-300">{err}</p>}
+          <div>
+            <label className="text-sm font-bold block mb-1">Saldo Awal (Rp)</label>
+            <input type="number" value={balance} onChange={(e) => setBalance(e.target.value)}
+              placeholder="0" className="w-full px-3 py-3 text-2xl font-black font-mono border-2 border-brand-black outline-none focus:border-brand-yellow text-right"
+              style={{ boxShadow: "2px 2px 0 #0A0A0A" }} autoFocus />
+          </div>
+        </div>
+        <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream">
+          <button onClick={() => { setBalance(""); setErr(""); onClose(); }}
+            className="flex-1 py-2.5 font-bold text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            Nanti
+          </button>
+          <button onClick={handleOpen} disabled={loading}
+            className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300 disabled:opacity-40"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            {loading ? "Membuka..." : "Buka Shift"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── ShiftCloseModal — Modal tutup shift (klerek) ──────────────
+function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
+  const [closingBalance, setClosingBalance] = useState("");
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
+
+  if (!isOpen || !shift) return null;
+
+  const cashReport = report?.cash_summary;
+  const expected = cashReport?.expected_cash ?? 0;
+
+  const handleClose = async () => {
+    const val = parseFloat(closingBalance) || 0;
+    if (val < 0) { setErr("Saldo akhir tidak boleh negatif."); return; }
+    setLoading(true); setErr("");
+    try {
+      await onConfirm(val, notes);
+      setClosingBalance("");
+      setNotes("");
+    } catch (e) { setErr(getErrorMessage(e)); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
+      <div className="bg-white border-2 border-brand-black w-full max-w-2xl flex flex-col max-h-[95vh]"
+        style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        <div className="px-5 py-4 bg-brand-black text-white border-b-2 border-brand-black shrink-0">
+          <h3 className="font-black text-lg font-grotesk">🔒 Tutup Shift — {shift.shift_name}</h3>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {/* Shift Info */}
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="p-3 bg-brand-cream border-2 border-brand-black">
+              <p className="text-[10px] font-bold text-brand-black/50 uppercase tracking-wider">Dibuka</p>
+              <p className="font-black font-mono">{shift.opened_at}</p>
+            </div>
+            <div className="p-3 bg-brand-cream border-2 border-brand-black">
+              <p className="text-[10px] font-bold text-brand-black/50 uppercase tracking-wider">Kasir</p>
+              <p className="font-black">{shift.user?.name ?? "-"}</p>
+            </div>
+          </div>
+
+          {/* Summary Cards */}
+          {report?.summary && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="p-3 border-2 border-brand-black bg-white text-center"
+                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                <p className="text-[10px] font-bold text-brand-black/50 uppercase">Pesanan</p>
+                <p className="font-black text-lg">{report.summary.total_paid}</p>
+              </div>
+              <div className="p-3 border-2 border-brand-black bg-white text-center"
+                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                <p className="text-[10px] font-bold text-brand-black/50 uppercase">Item Terjual</p>
+                <p className="font-black text-lg">{report.summary.total_items}</p>
+              </div>
+              <div className="p-3 border-2 border-brand-black bg-white text-center col-span-2"
+                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                <p className="text-[10px] font-bold text-brand-black/50 uppercase">Total Revenue</p>
+                <p className="font-black text-lg">{formatCurrency(report.summary.total_revenue)}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Payment Breakdown */}
+          {report?.payment_breakdown && report.payment_breakdown.length > 0 && (
+            <div>
+              <p className="text-sm font-bold mb-2">Rincian Pembayaran</p>
+              <div className="border-2 border-brand-black divide-y divide-brand-black/10">
+                {report.payment_breakdown.map((p, i) => (
+                  <div key={i} className="flex justify-between px-3 py-2 text-sm">
+                    <span className="font-semibold capitalize">{p.method}</span>
+                    <div className="text-right">
+                      <span className="font-black font-mono">{formatCurrency(p.total)}</span>
+                      <span className="text-brand-black/40 ml-2">({p.count} tx)</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Cash Summary */}
+          <div className="border-2 border-brand-black bg-brand-cream">
+            <div className="px-4 py-2 bg-brand-black text-white">
+              <p className="font-bold text-xs uppercase">Ringkasan Kas</p>
+            </div>
+            <div className="p-4 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Saldo Awal</span>
+                <span className="font-mono font-bold">{formatCurrency(cashReport?.opening_balance ?? 0)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Penjualan Tunai</span>
+                <span className="font-mono font-bold">{formatCurrency(cashReport?.cash_sales ?? 0)}</span>
+              </div>
+              <div className="flex justify-between border-t-2 border-brand-black pt-2 font-black">
+                <span>Saldo yang Diharapkan</span>
+                <span className="font-mono">{formatCurrency(expected)}</span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t-2 border-brand-black">
+                <span className="font-bold">Saldo Akhir (Fisik)</span>
+                <input type="number" value={closingBalance}
+                  onChange={(e) => setClosingBalance(e.target.value)}
+                  placeholder="0" autoFocus
+                  className="w-36 text-right px-2 py-1 font-black font-mono border-2 border-brand-black outline-none focus:border-brand-yellow text-sm"
+                  style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+              </div>
+              {parseFloat(closingBalance || 0) > 0 && (
+                <div className={`flex justify-between font-black text-base p-3 border-2 mt-2 ${
+                  parseFloat(closingBalance) === expected
+                    ? "bg-green-50 border-green-400 text-green-700"
+                    : Math.abs(parseFloat(closingBalance) - expected) < 1000
+                    ? "bg-yellow-50 border-yellow-400 text-yellow-700"
+                    : "bg-red-50 border-red-400 text-red-700"
+                }`}>
+                  <span>SELISIH</span>
+                  <span className="font-mono">{formatCurrency(parseFloat(closingBalance || 0) - expected)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="text-sm font-bold block mb-1">Catatan (opsional)</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)}
+              placeholder="Catatan untuk shift ini..."
+              rows={2}
+              className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow resize-none"
+              style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+          </div>
+
+          {/* Recent Orders */}
+          {report?.orders && report.orders.length > 0 && (
+            <div>
+              <p className="text-sm font-bold mb-2">Riwayat Transaksi ({report.orders.length})</p>
+              <div className="max-h-48 overflow-y-auto border-2 border-brand-black scrollbar-thin">
+                <table className="w-full text-xs">
+                  <thead className="bg-brand-black text-white sticky top-0">
+                    <tr>
+                      <th className="text-left px-2 py-1.5">Order</th>
+                      <th className="text-left px-2 py-1.5">Item</th>
+                      <th className="text-left px-2 py-1.5">Metode</th>
+                      <th className="text-right px-2 py-1.5">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-brand-black/10">
+                    {report.orders.map((o) => (
+                      <tr key={o.id} className="hover:bg-brand-cream">
+                        <td className="px-2 py-1.5 font-mono font-bold">{o.order_number}</td>
+                        <td className="px-2 py-1.5">{o.item_count}</td>
+                        <td className="px-2 py-1.5 capitalize">{o.payment_method ?? "-"}</td>
+                        <td className="px-2 py-1.5 text-right font-mono font-bold">{formatCurrency(o.total)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {err && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border-2 border-red-300">{err}</p>}
+        </div>
+
+        <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream shrink-0">
+          <button onClick={onClose}
+            className="flex-1 py-2.5 font-bold text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            Kembali
+          </button>
+          <button onClick={handleClose} disabled={loading}
+            className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300 disabled:opacity-40"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            {loading ? "Menutup..." : "Tutup Shift"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── ShiftHistoryModal — Riwayat shift ─────────────────────────
+function ShiftHistoryModal({ isOpen, onClose, shifts, onSelectShift }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
+      <div className="bg-white border-2 border-brand-black w-full max-w-lg flex flex-col max-h-[80vh]"
+        style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        <div className="px-5 py-4 bg-brand-black text-white border-b-2 border-brand-black flex items-center justify-between shrink-0">
+          <h3 className="font-black text-lg font-grotesk">Riwayat Shift</h3>
+          <button onClick={onClose} className="text-white/60 hover:text-white font-black">✕</button>
+        </div>
+        <div className="flex-1 overflow-y-auto divide-y divide-brand-black/10">
+          {shifts.length === 0 ? (
+            <p className="text-center py-8 text-sm text-brand-black/40">Belum ada riwayat shift.</p>
+          ) : (
+            shifts.map((s) => (
+              <button key={s.id} onClick={() => onSelectShift(s)}
+                className="w-full text-left px-4 py-3 hover:bg-brand-cream transition-colors">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-black text-sm">{s.shift_name}</span>
+                    <span className={`ml-2 text-[10px] font-black px-1.5 py-0.5 ${
+                      s.status === "open" ? "bg-green-100 text-green-700 border border-green-300" : "bg-gray-100 text-gray-500 border border-gray-300"
+                    }`}>
+                      {s.status === "open" ? "AKTIF" : "TUTUP"}
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono text-brand-black/40">{s.opened_at}</span>
+                </div>
+                <div className="flex gap-4 mt-1 text-xs text-brand-black/60">
+                  <span>Order: <strong>{s.order_count}</strong></span>
+                  <span>Penjualan: <strong>{formatCurrency(s.total_sales)}</strong></span>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ============================================================
 // KasirPage — Komponen utama halaman kasir
 // ============================================================
@@ -662,6 +944,17 @@ export default function KasirPage() {
   const [receiptData,  setReceiptData] = useState(null);    // data struk setelah bayar
   const [receiptOpen,  setReceiptOpen] = useState(false);   // tampilkan struk
 
+  // ── Shift State ──
+  const [currentShift,  setCurrentShift]  = useState(null);
+  const [suggestedShift, setSuggestedShift] = useState(null);
+  const [shiftLoading,  setShiftLoading]  = useState(true);
+  const [shiftOpenModal, setShiftOpenModal] = useState(false);
+  const [shiftCloseModal, setShiftCloseModal] = useState(false);
+  const [shiftReport,   setShiftReport]   = useState(null);
+  const [shiftHistory,   setShiftHistory]  = useState([]);
+  const [shiftHistoryModal, setShiftHistoryModal] = useState(false);
+  const [closeReportLoading, setCloseReportLoading] = useState(false);
+
   // useDebounce: tunda request pencarian sampai 400ms setelah user berhenti ketik
   // Tanpa ini, setiap keystroke langsung kirim request API (spam)
   const debouncedSearch = useDebounce(search, 400);
@@ -671,10 +964,10 @@ export default function KasirPage() {
   const { items, addItem, removeItem, deleteItem, getSubtotal, getTax, getTotal, clearCart, getOrderPayload } = useCartStore();
   const user = useAuthStore((s) => s.user);
 
-  // Fetch kategori SEKALI saat halaman pertama load
-  // Dependency array kosong [] = hanya jalan sekali (seperti componentDidMount)
+  // Fetch kategori & shift SEKALI saat halaman pertama load
   useEffect(() => {
     categoryService.getAll({ is_active: true }).then((res) => setCategories(res.data ?? res)).catch(() => {});
+    loadCurrentShift();
   }, []);
 
   // Fetch produk setiap kali filter atau search berubah
@@ -734,6 +1027,10 @@ export default function KasirPage() {
 
   // Checkout tunai: buat order → tandai paid → tampilkan struk
   const handleCashCheckout = async (cashAmount) => {
+    if (!currentShift) {
+      alert("Kamu harus membuka shift terlebih dahulu sebelum bertransaksi.");
+      return;
+    }
     setCashModal(false);
     setPaying(true);
     try {
@@ -745,6 +1042,7 @@ export default function KasirPage() {
       const orderId = orderRes.data?.id ?? orderRes.order?.id ?? orderRes.id;
       if (orderId) await orderService.updateStatus(orderId, "paid", "cash");
       showReceipt(buildReceipt(orderRes, cashAmount, "Tunai"));
+      loadCurrentShift();
     } catch (err) {
       alert(err.response?.data?.message ?? "Gagal checkout. Coba lagi.");
     } finally { setPaying(false); }
@@ -753,6 +1051,10 @@ export default function KasirPage() {
   // Checkout digital: buat order → buat transaksi → buka Midtrans Snap
   const handleDigitalCheckout = async () => {
     if (items.length === 0) return alert("Keranjang masih kosong!");
+    if (!currentShift) {
+      alert("Kamu harus membuka shift terlebih dahulu sebelum bertransaksi.");
+      return;
+    }
     setPaying(true);
     try {
       const orderRes  = await orderService.create({
@@ -766,7 +1068,10 @@ export default function KasirPage() {
 
       if (snapToken && window.snap) {
         window.snap.pay(snapToken, {
-          onSuccess: () => showReceipt(buildReceipt(orderRes, getTotal(), "QRIS")),
+          onSuccess: () => {
+            showReceipt(buildReceipt(orderRes, getTotal(), "QRIS"));
+            loadCurrentShift();
+          },
           onPending: () => alert("Menunggu pembayaran..."),
           onError:   () => alert("Pembayaran gagal. Coba lagi."),
           onClose:   () => {},
@@ -781,12 +1086,152 @@ export default function KasirPage() {
     } finally { setPaying(false); }
   };
 
+  // ── Shift Functions ──
+  const loadCurrentShift = async () => {
+    setShiftLoading(true);
+    try {
+      const res = await shiftService.getCurrent();
+      if (res.data) {
+        setCurrentShift(res.data);
+      } else if (res.suggested_shift) {
+        setSuggestedShift(res.suggested_shift);
+      }
+    } catch (e) {
+      // ignore
+    } finally {
+      setShiftLoading(false);
+    }
+  };
+
+  const handleOpenShift = async (balance) => {
+    const res = await shiftService.open(balance);
+    setCurrentShift(res.data);
+    setShiftOpenModal(false);
+  };
+
+  const handleCloseShift = async (closingBalance, notes) => {
+    const res = await shiftService.close(currentShift.id, closingBalance, notes);
+    setShiftCloseModal(false);
+    setCurrentShift(null);
+    setShiftReport(null);
+
+    // Beri konfirmasi hasil rekonsiliasi kas ke kasir
+    const diff = res.data?.difference ?? 0;
+    const status =
+      diff === 0 ? "Kas PAS ✅"
+      : diff > 0 ? `Kas LEBIH ${formatCurrency(diff)} 🔼`
+      : `Kas KURANG ${formatCurrency(Math.abs(diff))} 🔽`;
+    alert(`Shift berhasil ditutup.\n\nSelisih kas: ${status}`);
+
+    // Muat ulang status shift → tampilkan saran shift berikutnya di info bar
+    loadCurrentShift();
+  };
+
+  const openCloseModal = async () => {
+    setCloseReportLoading(true);
+    try {
+      const res = await shiftService.getReport(currentShift.id);
+      setShiftReport(res.data);
+      setShiftCloseModal(true);
+    } catch (e) {
+      alert(getErrorMessage(e));
+    } finally {
+      setCloseReportLoading(false);
+    }
+  };
+
+  const openShiftHistory = async () => {
+    try {
+      const res = await shiftService.getAll();
+      setShiftHistory(res.data ?? []);
+      setShiftHistoryModal(true);
+    } catch (e) {
+      alert(getErrorMessage(e));
+    }
+  };
+
+  const viewShiftReport = async (shift) => {
+    setShiftHistoryModal(false);
+    setCloseReportLoading(true);
+    try {
+      const res = await shiftService.getReport(shift.id);
+      setShiftReport(res.data);
+      setShiftCloseModal(true);
+    } catch (e) {
+      alert(getErrorMessage(e));
+    } finally {
+      setCloseReportLoading(false);
+    }
+  };
+
   // Total item di keranjang (jumlah unit, bukan jenis produk)
   // Dipakai untuk badge di tombol 🛒 mobile
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
 
   return (
     <>
+    {/* ── Shift Info Bar ── */}
+    {!shiftLoading && (
+      <div className={`px-4 py-1.5 border-b-2 border-brand-black flex items-center justify-between text-xs font-bold shrink-0 ${
+        currentShift ? "bg-green-50" : "bg-yellow-50"
+      }`}>
+        <div className="flex items-center gap-3">
+          {currentShift ? (
+            <>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                <span className="font-black">{currentShift.shift_name}</span>
+                <span className="text-brand-black/40 font-mono">#{currentShift.shift_number}</span>
+              </span>
+              <span className="text-brand-black/50">|</span>
+              <span className="text-brand-black/60 font-mono">Buka: {currentShift.opened_at}</span>
+              <span className="text-brand-black/50">|</span>
+              <span className="text-brand-black/60">
+                Order: <strong>{currentShift.order_count}</strong>
+              </span>
+              {currentShift.total_sales > 0 && (
+                <>
+                  <span className="text-brand-black/50">|</span>
+                  <span className="text-brand-black/60 font-mono">
+                    {formatCurrency(currentShift.total_sales)}
+                  </span>
+                </>
+              )}
+            </>
+          ) : (
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />
+              <span className="font-semibold">Belum ada shift aktif</span>
+              {suggestedShift && (
+                <span className="text-brand-black/50">
+                  — Buka shift <strong>{suggestedShift.name}</strong> untuk mulai bertransaksi
+                </span>
+              )}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {currentShift ? (
+            <>
+              <button onClick={openShiftHistory}
+                className="text-[10px] px-2 py-1 border border-brand-black/30 hover:bg-white transition-colors font-semibold">
+                Riwayat Shift
+              </button>
+              <button onClick={openCloseModal} disabled={closeReportLoading}
+                className="text-[10px] px-2 py-1 bg-brand-black text-white border border-brand-black hover:bg-gray-800 transition-colors font-black disabled:opacity-40">
+                {closeReportLoading ? "Memuat..." : "🔒 Tutup Shift"}
+              </button>
+            </>
+          ) : (
+            <button onClick={() => setShiftOpenModal(true)}
+              className="text-[10px] px-2 py-1 bg-brand-yellow border-2 border-brand-black font-black hover:bg-yellow-300 transition-colors">
+              Buka Shift
+            </button>
+          )}
+        </div>
+      </div>
+    )}
+
     {/* Layout dua kolom: grid produk (kiri) + keranjang (kanan) */}
     <div className="flex h-full gap-0 overflow-hidden bg-brand-cream">
 
@@ -1035,6 +1480,28 @@ export default function KasirPage() {
         productService.getAll({ is_active: true, per_page: 60 })
           .then((d) => setProducts(d.data ?? []));
       }}
+    />
+
+    {/* Shift modals */}
+    <ShiftOpenModal
+      isOpen={shiftOpenModal}
+      onClose={() => setShiftOpenModal(false)}
+      onConfirm={handleOpenShift}
+    />
+
+    <ShiftCloseModal
+      isOpen={shiftCloseModal}
+      shift={currentShift}
+      report={shiftReport}
+      onClose={() => setShiftCloseModal(false)}
+      onConfirm={handleCloseShift}
+    />
+
+    <ShiftHistoryModal
+      isOpen={shiftHistoryModal}
+      onClose={() => setShiftHistoryModal(false)}
+      shifts={shiftHistory}
+      onSelectShift={viewShiftReport}
     />
     </>
   );

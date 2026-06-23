@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TenantController;
+use App\Http\Controllers\Api\ShiftController;
 
 // =============================================================
 // PUBLIC ROUTES — tidak perlu login
@@ -73,6 +74,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/orders/{id}/status',               [OrderController::class, 'updateStatus']);
         Route::get('/transactions',                       [TransactionController::class, 'index']);
         Route::patch('/transactions/{id}/cancel',         [TransactionController::class, 'cancelTransaction']);
+
+        // ----- SHIFT MANAGEMENT -----
+        Route::get('/shifts',                             [ShiftController::class, 'index']);
+        Route::get('/shifts/current',                     [ShiftController::class, 'current']);
+        Route::post('/shifts/open',                       [ShiftController::class, 'open']);
+        Route::post('/shifts/{id}/close',                 [ShiftController::class, 'close']);
+        Route::get('/shifts/{id}/report',                 [ShiftController::class, 'report']);
     });
 
 

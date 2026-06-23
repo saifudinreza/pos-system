@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Shift;
 use App\Models\Transaction;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
@@ -155,11 +156,27 @@ class OrderController extends Controller
             }
         }
 
+        // ----- WAJIB ADA SHIFT AKTIF -----
+        // Setiap transaksi HARUS terjadi di dalam shift yang sedang berjalan,
+        // supaya rekonsiliasi kas saat tutup shift selalu akurat.
+        // (Frontend juga sudah memblokir, ini lapisan pengaman di backend.)
+        $shift = Shift::where('user_id', $request->user()->id)
+            ->where('status', 'open')
+            ->latest('opened_at')
+            ->first();
+
+        if (! $shift) {
+            return response()->json([
+                'message'   => 'Belum ada shift yang dibuka. Buka shift terlebih dahulu sebelum bertransaksi.',
+                'no_shift'  => true,
+            ], 422);
+        }
+
         // ===== JALANKAN DALAM DATABASE TRANSACTION =====
         // ↑ DB::transaction() = semua query di dalamnya harus sukses semua
         // Kalau ada 1 yang gagal, semua dibatalkan (rollback)
         // Mencegah stok berkurang tapi order tidak tersimpan
-        $order = DB::transaction(function () use ($validated, $request) {
+        $order = DB::transaction(function () use ($validated, $request, $shift) {
 
             $subtotal = 0;
             $items    = [];
@@ -210,6 +227,7 @@ class OrderController extends Controller
             $order = Order::create([
                 'tenant_id'      => $request->user()->tenant_id,
                 'user_id'        => $request->user()->id,
+                'shift_id'       => $shift->id,
                 'order_number'   => Order::generateOrderNumber(),
                 'status'         => 'pending',
                 'subtotal'       => $subtotal,
