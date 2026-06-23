@@ -12,15 +12,19 @@
 // Tidak ada state atau data — murni UI statis.
 // ============================================================
 
+"use client";
+
 import Link from "next/link";
+import { Reveal } from "./motion";
 
 export default function CTASection() {
   return (
-    <section className="py-20 px-4 sm:px-6 bg-brand-gray">
+    <section className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray">
       <div className="max-w-6xl mx-auto">
 
         {/* Kotak CTA utama — hitam pekat untuk kontras maksimal */}
-        <div
+        <Reveal
+          y={32}
           className="bg-brand-black text-white border-3 border-brand-black p-12 sm:p-16 text-center relative overflow-hidden"
           style={{ boxShadow: "8px 8px 0 #FFE500" }}
         >
@@ -59,17 +63,17 @@ export default function CTASection() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/register"
-                className="px-8 py-4 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black text-lg neo-hover inline-block"
+                className="btn-shine relative overflow-hidden px-8 py-4 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black text-lg neo-hover inline-block"
                 style={{ boxShadow: "4px 4px 0 #FFE500" }}
               >
                 Coba Gratis 14 Hari →
               </Link>
-              <a
-                href="#"
+              <Link
+                href="/login"
                 className="px-8 py-4 bg-transparent text-white border-2 border-white/40 font-bold text-lg hover:border-white hover:bg-white/10 transition-colors inline-block"
               >
-                Jadwalkan Demo
-              </a>
+                Masuk / Lihat Demo
+              </Link>
             </div>
 
             {/* Trust badges terakhir — pengingat final */}
@@ -80,7 +84,7 @@ export default function CTASection() {
               <span>✓ Setup dalam 5 menit</span>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

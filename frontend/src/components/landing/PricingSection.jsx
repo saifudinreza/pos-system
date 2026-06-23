@@ -16,6 +16,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
 // Data paket harga — tiap objek = satu paket
 const PLANS = [
@@ -182,11 +183,19 @@ export default function PricingSection() {
   const [billing, setBilling] = useState("monthly");
 
   return (
-    <section id="harga" className="py-20 px-4 sm:px-6 bg-brand-gray">
-      <div className="max-w-6xl mx-auto">
+    <section id="harga" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray overflow-hidden">
+      {/* Shape parallax dekoratif */}
+      <Parallax speed={-0.45} aria-hidden="true" className="pointer-events-none absolute left-4 top-24 -z-0">
+        <div className="w-20 h-20 bg-brand-yellow/25 border-3 border-brand-black/15 rotate-6" />
+      </Parallax>
+      <Parallax speed={0.4} aria-hidden="true" className="pointer-events-none absolute right-6 bottom-20 -z-0">
+        <div className="w-16 h-16 rounded-full bg-[#8B5CF6]/15 border-3 border-[#8B5CF6]/30" />
+      </Parallax>
+
+      <div className="relative max-w-6xl mx-auto">
 
         {/* === HEADER === */}
-        <div className="text-center mb-12">
+        <Reveal className="text-center mb-12">
           <div
             className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-4"
             style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
@@ -233,14 +242,16 @@ export default function PricingSection() {
               </span>
             </button>
           </div>
-        </div>
+        </Reveal>
 
         {/* === GRID PAKET HARGA === */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+        <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch" gap={0.1}>
           {PLANS.map((plan) => (
-            <PricingCard key={plan.name} plan={plan} billing={billing} />
+            <StaggerItem key={plan.name} className="h-full">
+              <PricingCard plan={plan} billing={billing} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
         {/* Catatan garansi di bawah — mengurangi kekhawatiran */}
         <div className="text-center mt-10 text-sm text-brand-black/50 font-medium">

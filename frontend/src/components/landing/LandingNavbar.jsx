@@ -34,10 +34,10 @@ const Logo = () => (
 // --- Daftar link navigasi ---
 // Analogi: Seperti daftar menu di papan restoran — tiap item membawa ke bagian tertentu
 const NAV_LINKS = [
-  { label: "Fitur",       href: "#fitur" },
-  { label: "Cara Kerja",  href: "#cara-kerja" },
-  { label: "Harga",       href: "#harga" },
-  { label: "Testimoni",   href: "#testimoni" },
+  { label: "Masalah", href: "#masalah" },
+  { label: "Fitur",   href: "#fitur" },
+  { label: "AI",      href: "#ai" },
+  { label: "Harga",   href: "#harga" },
 ];
 
 export default function LandingNavbar() {

@@ -50,6 +50,27 @@ h1, h2, h3, h4, h5, h6,
     box-shadow: 0px 0px 0px #0A0A0A;
   }
 
+  /* btn-shine: kilau menyapu saat hover (untuk CTA) */
+  .btn-shine::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -130%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(
+      120deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      transparent
+    );
+    transform: skewX(-20deg);
+    pointer-events: none;
+  }
+  .btn-shine:hover::after {
+    animation: shineSweep 0.75s ease;
+  }
+
   /* neo-card */
   .neo-card {
     border: 2px solid #0A0A0A;
@@ -119,7 +140,8 @@ h1, h2, h3, h4, h5, h6,
 
 .hero-stage {
   position: relative;
-  height: 680px;
+  /* Tinggi diatur sendiri oleh komponen HeroStage (auto-scale).
+     Tidak lagi pakai tinggi tetap supaya responsif di semua device. */
 }
 
 .hero-dot {
@@ -208,6 +230,17 @@ h1, h2, h3, h4, h5, h6,
   50% { opacity: 0; }
 }
 
+@keyframes typingDot {
+  0%, 100% { transform: translateY(0); opacity: .4; }
+  50%      { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Sweep kilau pada tombol CTA saat hover */
+@keyframes shineSweep {
+  from { left: -130%; }
+  to   { left: 130%; }
+}
+
 @keyframes ringout {
   0%   { transform: scale(.6); opacity: 1; }
   100% { transform: scale(1.8); opacity: 0; }
@@ -215,6 +248,10 @@ h1, h2, h3, h4, h5, h6,
 
 @keyframes rayspin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes rayspinRev {
+  to { transform: rotate(-360deg); }
 }
 
 @keyframes tickerSlide {
@@ -257,15 +294,60 @@ h1, h2, h3, h4, h5, h6,
     padding: 128px 32px 60px;
     gap: 40px;
   }
-  .hero-stage { height: 580px; }
 }
 
 @media (max-width: 900px) {
   .hero-section-grid {
     grid-template-columns: 1fr;
-    padding: 100px 24px 60px;
+    padding: 96px 24px 56px;
+    gap: 8px;
   }
-  .hero-stage { display: none; }
+  /* Stage TIDAK lagi disembunyikan — komponen meng-scale dirinya
+     sendiri agar muat & tetap bercerita di tablet maupun HP. */
+  .hero-stage {
+    margin-top: 16px;
+    max-width: 540px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-section-grid {
+    padding: 88px 18px 48px;
+  }
+}
+
+/* ============================================================
+   Aksesibilitas — hormati prefers-reduced-motion
+   Kalau user mematikan animasi di OS-nya, semua animasi
+   dekoratif (float, pulse, spin, shimmer) dihentikan.
+   Framer Motion sudah ditangani via useReducedMotion di JS;
+   blok ini menutup animasi berbasis CSS murni.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Hero showcase: aksen kecil tetap "hidup" walau OS reduce-motion
+     (selector class menang atas universal *). Animasi utama hero
+     ditangani Framer Motion sehingga juga tidak terpengaruh blok ini. */
+  .hero-dot {
+    animation: neo-pulse 1.6s ease-in-out infinite !important;
+    animation-iteration-count: infinite !important;
+  }
+  .hero-dot-red {
+    animation: neo-pulse 1s ease-in-out infinite !important;
+    animation-iteration-count: infinite !important;
+  }
+  .hero-ping::after {
+    animation: ringout 1.6s ease-out infinite !important;
+    animation-iteration-count: infinite !important;
+  }
 }
 
 /* ============================================================

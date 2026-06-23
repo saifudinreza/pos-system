@@ -1,3 +1,13 @@
+"use client";
+
+// ============================================================
+// FeaturesSection — "Solusi": fitur POS yang di-reveal saat scroll
+//
+// Posisi cerita: jawaban langsung atas ProblemSection. Tiap kartu
+// fitur muncul berurutan (stagger) saat masuk viewport — memberi
+// kesan "satu per satu masalahmu beres".
+// ============================================================
+
 import {
   MonitorCheck,
   BrainCircuit,
@@ -6,6 +16,7 @@ import {
   Building2,
   Wallet,
 } from "lucide-react";
+import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
 const FEATURES = [
   {
@@ -61,7 +72,7 @@ const FEATURES = [
 
 const FeatureCard = ({ Icon, title, description, tag, tagColor, iconBg, iconColor = "text-brand-black" }) => (
   <div
-    className="bg-white border-3 border-brand-black p-6 flex flex-col gap-4 group transition-all duration-150 hover:-translate-x-1 hover:-translate-y-1"
+    className="h-full bg-white border-3 border-brand-black p-6 flex flex-col gap-4 group transition-all duration-150 hover:-translate-x-1 hover:-translate-y-1"
     style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
   >
     <div className="flex items-center justify-between">
@@ -86,21 +97,27 @@ const FeatureCard = ({ Icon, title, description, tag, tagColor, iconBg, iconColo
     <p className="text-sm text-brand-black/60 font-medium leading-relaxed flex-1">
       {description}
     </p>
-
-    
   </div>
 );
 
 export default function FeaturesSection() {
   return (
-    <section id="fitur" className="py-20 px-4 sm:px-6 bg-brand-gray">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-12">
+    <section id="fitur" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray overflow-hidden">
+      {/* Shape parallax dekoratif */}
+      <Parallax speed={-0.45} aria-hidden="true" className="pointer-events-none absolute right-4 top-20 -z-0">
+        <div className="w-24 h-24 bg-brand-yellow/30 border-3 border-brand-black/20 rotate-6" />
+      </Parallax>
+      <Parallax speed={0.4} aria-hidden="true" className="pointer-events-none absolute -left-8 bottom-24 -z-0">
+        <div className="w-16 h-16 rounded-full bg-[#0066FF]/15 border-3 border-[#0066FF]/30" />
+      </Parallax>
+
+      <div className="relative max-w-6xl mx-auto">
+        <Reveal className="mb-12">
           <div
             className="inline-block bg-brand-black text-white px-3 py-1 text-xs font-mono font-black tracking-wider mb-4"
             style={{ boxShadow: "2px 2px 0 #FFE500" }}
           >
-            ✦ FITUR
+            ✦ SOLUSINYA
           </div>
           <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk max-w-xl">
             Semua yang kamu
@@ -112,45 +129,49 @@ export default function FeaturesSection() {
             Dari kasir hingga laporan, dari manajemen stok hingga AI — semuanya
             terhubung dan bekerja otomatis buat bisnis Anda.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" gap={0.08}>
           {FEATURES.map((feature) => (
-            <FeatureCard key={feature.title} {...feature} />
+            <StaggerItem key={feature.title} className="h-full">
+              <FeatureCard {...feature} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
 
-        <div
-          className="mt-8 bg-brand-black text-white border-3 border-brand-black p-8 flex flex-col sm:flex-row items-center justify-between gap-6"
-          style={{ boxShadow: "6px 6px 0 #FFE500" }}
-        >
-          <div>
-            <div className="text-brand-yellow font-mono font-black text-sm tracking-wider mb-2">
-              ✦ FITUR UNGGULAN
-            </div>
-            <h3 className="text-2xl font-black leading-tight">
-              AI Assistant yang benar-benar paham bisnis Anda
-            </h3>
-            <p className="text-white/60 mt-2 text-sm font-medium max-w-md">
-              Bukan sekadar chatbot biasa. AI KasirAI membaca data penjualan Anda dan
-              memberi insight yang actionable — kapan saja Anda tanya.
-            </p>
-          </div>
-          <div className="shrink-0 space-y-2">
-            {[
-              '"Produk apa yang paling laris minggu ini?"',
-              '"Stok mana yang perlu saya reorder?"',
-              '"Berapa rata-rata omzet per hari bulan ini?"',
-            ].map((q) => (
-              <div
-                key={q}
-                className="bg-white/10 border border-white/20 px-3 py-1.5 text-xs font-mono text-white/80"
-              >
-                {q}
+        <Reveal delay={0.1}>
+          <div
+            className="mt-8 bg-brand-black text-white border-3 border-brand-black p-8 flex flex-col sm:flex-row items-center justify-between gap-6"
+            style={{ boxShadow: "6px 6px 0 #FFE500" }}
+          >
+            <div>
+              <div className="text-brand-yellow font-mono font-black text-sm tracking-wider mb-2">
+                ✦ FITUR UNGGULAN
               </div>
-            ))}
+              <h3 className="text-2xl font-black leading-tight">
+                AI Assistant yang benar-benar paham bisnis Anda
+              </h3>
+              <p className="text-white/60 mt-2 text-sm font-medium max-w-md">
+                Bukan sekadar chatbot biasa. AI KasirAI membaca data penjualan Anda dan
+                memberi insight yang actionable — kapan saja Anda tanya.
+              </p>
+            </div>
+            <div className="shrink-0 space-y-2">
+              {[
+                '"Produk apa yang paling laris minggu ini?"',
+                '"Stok mana yang perlu saya reorder?"',
+                '"Berapa rata-rata omzet per hari bulan ini?"',
+              ].map((q) => (
+                <div
+                  key={q}
+                  className="bg-white/10 border border-white/20 px-3 py-1.5 text-xs font-mono text-white/80"
+                >
+                  {q}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
