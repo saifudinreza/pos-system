@@ -12,4 +12,4 @@ Disallow: /users
 Disallow: /categories
 Disallow: /dev
 
-Sitemap: https://kasir-ai.vercel.app/sitemap.xml
+Sitemap: https://kasirai.vercel.app/sitemap.xml

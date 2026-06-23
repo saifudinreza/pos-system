@@ -1,7 +1,7 @@
 import "./globals.css";
 import Script from "next/script";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://kasir-ai.vercel.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://kasirai.vercel.app";
 
 export const metadata = {
   metadataBase: new URL(APP_URL),
