@@ -19,6 +19,15 @@ use App\Http\Controllers\Api\ShiftController;
 Route::post('/register',      [AuthController::class, 'register']);
 Route::post('/login',         [AuthController::class, 'login']);
 Route::get('/check-tenant',   [AuthController::class, 'checkTenant']);
+
+// Media proxy — serve gambar dari R2/storage tanpa butuh auth
+Route::get('/media/{path}', function (string $path) {
+    $disk = env('R2_ACCESS_KEY_ID') ? 'r2' : 'public';
+    if (! \Illuminate\Support\Facades\Storage::disk($disk)->exists($path)) {
+        abort(404);
+    }
+    return \Illuminate\Support\Facades\Storage::disk($disk)->response($path);
+})->where('path', '.*');
 // ↑ Dua endpoint ini bebas diakses siapa saja tanpa token
 
 

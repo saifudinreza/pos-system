@@ -283,11 +283,8 @@ class ProductController extends Controller
             // ↑ Helper dari Model — true kalau stok sudah mepet
             'is_active'   => $product->is_active,
             'image_url'   => $product->image
-                ? Storage::disk(PRODUCT_DISK)->url($product->image)
+                ? url('/api/media/' . $product->image)
                 : null,
-            // ↑ Pakai Storage::url() agar URL diambil dari disk yang aktif:
-            // - R2: URL publik Cloudflare (https://pub-xxx.r2.dev/products/file.jpg)
-            // - public: URL lokal (http://localhost:8000/storage/products/file.jpg)
             'category'    => $product->relationLoaded('category') ? [
                 'id'   => $product->category->id,
                 'name' => $product->category->name,
