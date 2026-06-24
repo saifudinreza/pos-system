@@ -1,142 +1,113 @@
 <div align="center">
 
-# KasirAI — Point of Sale System
+<img src="https://img.shields.io/badge/STATUS-PRODUCTION%20READY-00C851?style=for-the-badge" />
 
-### Full Stack Web Application · Next.js 14 + Laravel 11 + Groq AI
+# KasirAI
+## Smart Point of Sale System with AI Assistant
 
-[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-kasirai.vercel.app-FFD600?style=for-the-badge&logoColor=black)](https://kasirai.vercel.app/)
+*Solusi kasir digital lengkap untuk UMKM Indonesia — dibangun dari nol sebagai Final Project Full Stack Bootcamp*
+
+[![Live Demo](https://img.shields.io/badge/🚀%20LIVE%20DEMO-kasirai.vercel.app-FFD600?style=for-the-badge&logoColor=black)](https://kasirai.vercel.app/)
+
+---
 
 ![Next.js](https://img.shields.io/badge/Next.js-14-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
 ![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
-
-**Aplikasi kasir digital (POS) berbasis web untuk UMKM.**  
-Dibangun sebagai Final Project Full Stack Bootcamp dengan integrasi AI Assistant, payment gateway, shift management (klerek), subscription plan, dan WhatsApp API.
-
-[🌐 Live Demo](https://kasirai.vercel.app/) · [Lihat Kode Frontend](./frontend) · [Lihat Kode Backend](./backend)
+![Docker](https://img.shields.io/badge/Docker-Railway-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 
 </div>
 
 ---
 
-## Tentang Project
+## Apa itu KasirAI?
 
-KasirAI adalah sistem kasir modern yang memecahkan masalah nyata UMKM:
+KasirAI adalah aplikasi **Point of Sale (POS) berbasis web** yang dibangun untuk menyelesaikan masalah nyata UMKM Indonesia. Lebih dari sekadar aplikasi kasir — KasirAI dilengkapi **AI Assistant** yang bisa diajak bicara dalam bahasa Indonesia untuk menganalisis bisnis, memproses **pembayaran digital** via Midtrans (QRIS, GoPay, OVO), dan mengirim **struk otomatis ke WhatsApp** pelanggan.
 
-| Masalah UMKM | Solusi di KasirAI |
+Dibangun sebagai **Final Project Full Stack Bootcamp 2026** — dari desain, arsitektur, coding, hingga deployment production — oleh satu developer dalam waktu kurang dari 2 bulan.
+
+> **"Saya tidak hanya belajar coding — saya membangun produk nyata yang bisa dipakai bisnis sungguhan."**
+
+---
+
+## Kenapa Project Ini Berbeda?
+
+Kebanyakan project bootcamp hanya CRUD sederhana. KasirAI berbeda:
+
+| Fitur | Tingkat Kompleksitas |
 |---|---|
-| Struk manual, sering lupa kirim | Struk otomatis via WhatsApp (Fonnte API) |
-| Tidak tahu produk terlaris | AI Assistant — tanya pakai bahasa Indonesia biasa |
-| Stok sering tidak terpantau | Alert stok menipis + laporan stok real-time |
-| Laporan harus buat manual di Excel | Export otomatis PDF & Excel dari backend |
-| Satu sistem hanya untuk satu toko | Multi-tenant: satu aplikasi untuk banyak bisnis |
-| Tidak ada kontrol penggunaan AI | Limit harian per user + monitoring dashboard untuk admin |
-| Tidak ada kontrol shift kasir | Shift management (klerek) dengan rekonsiliasi kas otomatis |
+| Multi-tenant architecture dengan Laravel Global Scope | ⭐⭐⭐⭐⭐ |
+| AI Assistant dengan dual-provider + auto fallback | ⭐⭐⭐⭐⭐ |
+| Per-tenant Midtrans keys (split payment model) | ⭐⭐⭐⭐⭐ |
+| Shift management + rekonsiliasi kas otomatis | ⭐⭐⭐⭐ |
+| Payment gateway webhook + stok rollback | ⭐⭐⭐⭐ |
+| Server-side WhatsApp proxy (token tidak expose ke browser) | ⭐⭐⭐⭐ |
+| E2E Testing dengan TestSprite (20/20 PASSED) | ⭐⭐⭐⭐ |
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-| | Teknologi | Alasan Dipilih |
-|---|---|---|
-| Framework | **Next.js 14** (App Router) | SSR, file-based routing, API routes built-in |
-| UI Library | **React 18** | Component-based, ekosistem luas |
-| Styling | **Tailwind CSS 3.4** | Utility-first, custom design system cepat |
-| Animation | **Framer Motion** | Animasi 3D, spring physics, gesture-aware |
-| State Management | **Zustand 5** | Lightweight, lebih simpel dari Redux |
-| HTTP Client | **Axios** | Interceptors untuk auto-attach auth token |
-| Charts | **Recharts** | Composable chart library untuk React |
-| Icons | **Lucide React** | Konsisten, tree-shakeable |
-| Design System | **Neobrutalism** | Bold, unik, memorable — custom built |
+| Teknologi | Kegunaan |
+|---|---|
+| **Next.js 14** (App Router) | Framework utama — SSR, routing, API routes |
+| **React 18** | UI component-based |
+| **Tailwind CSS 3.4** | Styling — custom neobrutalism design system |
+| **Framer Motion** | Animasi halaman, 3D card flip, spring physics |
+| **Zustand 5** | Global state management (cart, auth, AI) |
+| **Axios** | HTTP client dengan Bearer token interceptor |
+| **Recharts** | Chart interaktif untuk dashboard analytics |
+| **Lucide React** | Icon library |
 
 ### Backend
-| | Teknologi | Alasan Dipilih |
-|---|---|---|
-| Framework | **Laravel 11** | Eloquent ORM, Sanctum auth, expressive syntax |
-| Database | **PostgreSQL 16** | Relasional, ACID-compliant untuk transaksi finansial |
-| Auth | **Laravel Sanctum** | Token-based API auth yang ringan |
-| PDF | **DomPDF** | Generate laporan PDF server-side |
-| Excel | **Maatwebsite Excel** | Export data ke .xlsx |
-| Payment | **Midtrans PHP SDK** | Payment gateway terpercaya di Indonesia |
-
-### Deployment
-| | Platform |
+| Teknologi | Kegunaan |
 |---|---|
-| Frontend | **Vercel** — `https://kasirai.vercel.app` |
-| Backend | **Railway** — Docker + Nginx + PHP-FPM |
-| Database | **Railway PostgreSQL** |
+| **Laravel 11** | REST API framework |
+| **MySQL 8** | Database relasional — ACID compliant |
+| **Laravel Sanctum** | Token-based authentication |
+| **Laravel Global Scope** | Multi-tenant data isolation otomatis |
+| **DomPDF** | Generate laporan PDF server-side |
+| **Maatwebsite Excel** | Export data ke .xlsx |
+| **Midtrans PHP SDK** | Payment gateway integration |
 
-### External Services
-| Service | Kegunaan |
+### Infrastructure & Services
+| | Platform / Service |
 |---|---|
-| **Groq LLaMA 3.3 70B** | AI Assistant primary — analisis data bisnis bahasa natural, gratis & cepat |
-| **OpenRouter LLaMA 3.1 8B** | AI fallback otomatis — aktif saat Groq rate-limited |
-| **Midtrans Snap** | Payment gateway: QRIS, GoPay, OVO, Virtual Account, Kartu Kredit |
-| **Fonnte.com** | WhatsApp API — kirim struk digital otomatis ke customer |
+| Frontend | **Vercel** + Speed Insights |
+| Backend | **Railway** (Docker + Nginx + PHP-FPM) |
+| Database | **Railway MySQL** |
+| AI Primary | **Groq API** — LLaMA 3.3 70B (gratis & cepat) |
+| AI Fallback | **OpenRouter** — LLaMA 3.1 8B (auto-switch) |
+| Payment | **Midtrans Snap** — QRIS, GoPay, OVO, VA |
+| WhatsApp | **Fonnte API** — struk digital otomatis |
 
 ---
 
-## Arsitektur Sistem
+## Arsitektur & Keputusan Teknis
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    Browser (Client)                              │
-│                                                                 │
-│  Next.js 14 App — kasirai.vercel.app                           │
-│  ├── App Router → /kasir, /dashboard, /products, ...            │
-│  ├── Zustand   → cartStore, authStore, aiStore (global state)   │
-│  ├── Axios     → API calls + Bearer token interceptor           │
-│  └── /api/send-whatsapp → server-side proxy (token aman)        │
-└───────────────────────┬─────────────────────────────────────────┘
-                        │ REST API (JSON)
-                        ▼
-┌─────────────────────────────────────────────────────────────────┐
-│               Laravel 11 API — Railway                           │
-│                                                                 │
-│  Middleware Stack:                                              │
-│  ├── Sanctum Authentication (Bearer Token)                      │
-│  ├── RoleMiddleware (admin | kasir | developer | user)          │
-│  └── TenantScope (Global Scope — auto filter tenant_id)         │
-│                                                                 │
-│  Controllers → Models (Eloquent ORM) → PostgreSQL              │
-└──────────────┬────────────────────────┬────────────────────────┘
-               │                        │
-   ┌───────────▼────────┐   ┌───────────▼────────────────────┐
-   │  PostgreSQL DB      │   │   External Services             │
-   │  (Railway)         │   │                                  │
-   │  Multi-tenant data │   │  ├── Groq API (LLaMA 3.3 70B)  │
-   │  isolation via     │   │  │   └── fallback: OpenRouter   │
-   │  tenant_id +       │   │  ├── Midtrans (payment)         │
-   │  Global Scope      │   │  └── Fonnte (WhatsApp)          │
-   └────────────────────┘   └──────────────────────────────────┘
-```
+### 1. Multi-Tenant dengan Laravel Global Scope
 
-### Keputusan Arsitektur yang Menarik
-
-**1. Multi-Tenant dengan Laravel Global Scope**
-
-Setiap bisnis (tenant) punya data yang sepenuhnya terisolasi. Setiap query ke database otomatis ditambahkan `WHERE tenant_id = ?` tanpa perlu ditulis manual di setiap controller.
+Setiap bisnis punya data yang **100% terisolasi**. Tidak perlu tulis `WHERE tenant_id = ?` di setiap query — Global Scope menanganinya secara otomatis di semua model.
 
 ```php
-// TenantScope.php — diterapkan di semua model: Product, Category, Order, dll
+// TenantScope.php — aktif di semua model: Product, Order, Shift, dll
 public function apply(Builder $builder, Model $model): void
 {
     if (Auth::check() && Auth::user()->tenant_id !== null) {
         $builder->where($model->getTable() . '.tenant_id', Auth::user()->tenant_id);
     }
-    // Role developer (tenant_id = null) → bypass, bisa lihat semua tenant
+    // Developer (tenant_id = null) → bisa lihat semua data lintas tenant
 }
 ```
 
-**2. AI Dual-Provider dengan Auto Fallback**
+### 2. AI Dual-Provider dengan Auto Fallback
 
-Groq dipakai sebagai provider utama (gratis, cepat). Jika Groq terkena rate limit (429), sistem otomatis beralih ke OpenRouter selama 65 detik menggunakan Laravel Cache, lalu kembali ke Groq setelah reset window selesai.
+Groq sebagai provider utama (gratis, sangat cepat). Saat terkena rate limit, sistem **otomatis beralih** ke OpenRouter tanpa intervensi manual, menggunakan Laravel Cache sebagai circuit breaker.
 
 ```php
-// GroqService.php — auto-fallback tanpa intervensi manual
 public function ask(string $systemPrompt, string $userQuery): array
 {
     if (Cache::get('groq_rate_limited', false)) {
@@ -146,7 +117,7 @@ public function ask(string $systemPrompt, string $userQuery): array
         return $this->callGroq($systemPrompt, $userQuery);
     } catch (\Exception $e) {
         if ($this->isRateLimitError($e)) {
-            Cache::put('groq_rate_limited', true, 65);
+            Cache::put('groq_rate_limited', true, 65); // cooldown 65 detik
             return $this->callOpenRouter($systemPrompt, $userQuery);
         }
         throw $e;
@@ -154,256 +125,147 @@ public function ask(string $systemPrompt, string $userQuery): array
 }
 ```
 
-**3. Shift Management dengan Rekonsiliasi Kas**
+### 3. Per-Tenant Payment Gateway (Split Payment Model)
 
-Setiap kasir wajib buka shift sebelum bertransaksi. Saat tutup shift, sistem otomatis menghitung selisih kas berdasarkan formula:
+Setiap tenant bisa pakai **Midtrans key mereka sendiri** — bukan key terpusat milik platform. Server Key dienkripsi di database. Client Key digunakan frontend untuk load Snap.js secara dinamis.
+
+```php
+// TransactionController.php
+private function configureServerKey(Request $request): void
+{
+    $serverKey = $request->user()->tenant?->midtrans_server_key
+        ?? config('services.midtrans.server_key');
+
+    if (empty($serverKey)) {
+        abort(422, 'Midtrans belum dikonfigurasi. Atur key di halaman Profil.');
+    }
+
+    Config::$serverKey = $serverKey;
+}
+```
+
+```js
+// kasir/page.jsx — Snap.js dimuat dinamis dengan client key milik tenant
+const loadMidtransSnap = (clientKey) => new Promise((resolve, reject) => {
+    if (window.snap) return resolve();
+    const script = document.createElement("script");
+    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    script.setAttribute("data-client-key", clientKey);
+    script.onload = resolve;
+    document.body.appendChild(script);
+});
+```
+
+### 4. Shift Management & Rekonsiliasi Kas
+
+Kasir wajib buka shift sebelum bertransaksi. Saat tutup shift, sistem menghitung **selisih kas otomatis** dari denominasi uang pecahan yang dihitung kasir.
 
 ```
-Seharusnya = Modal Awal + Penjualan Tunai − Pengeluaran Kas Kecil
-Selisih    = Saldo Fisik − Seharusnya
+Seharusnya  =  Modal Awal + Total Penjualan Tunai − Kas Kecil
+Selisih     =  Saldo Fisik (dari hitung pecahan) − Seharusnya
 ```
 
-Backend memvalidasi dan menyimpan denominasi pecahan uang (Rp100.000 s.d. Rp100) untuk audit trail lengkap.
+### 5. Server-side WhatsApp Proxy
 
-**4. Server-side WhatsApp Proxy**
-
-Token Fonnte tidak pernah sampai ke browser. Frontend memanggil Next.js API Route `/api/send-whatsapp` yang berjalan di server, lalu server yang menghubungi Fonnte. Token hanya ada di environment variable server.
-
-**5. Cash Payment Auto-Mark Paid**
-
-Berbeda dari Midtrans yang butuh webhook, pembayaran tunai langsung mengubah status order ke `paid` saat kasir klik konfirmasi — tanpa roundtrip ke payment gateway.
+Token Fonnte **tidak pernah menyentuh browser**. Frontend memanggil Next.js API Route `/api/send-whatsapp` di server, yang kemudian menghubungi Fonnte. Token hanya ada di environment variable server.
 
 ---
 
 ## Fitur Lengkap
 
-### Kasir / POS Terminal (`/kasir`)
-- Split-screen: grid produk (kiri) + keranjang belanja (kanan)
-- Search produk real-time dengan debounce 400ms
-- Filter produk per kategori (tab horizontal scroll)
-- Keranjang dengan kontrol quantity + validasi stok real-time
-- **Bayar Tunai:** modal kembalian otomatis + tombol nominal cepat
-- **Bayar Digital:** Midtrans Snap popup (QRIS, GoPay, OVO, VA, dll)
-- Struk digital: tampil di layar → cetak → kirim WhatsApp otomatis ke customer
-- Panel kelola produk langsung dari halaman kasir (slide-over)
-- Responsive: mobile-friendly dengan drawer keranjang
+### POS Terminal (`/kasir`)
+- Split-screen: grid produk + keranjang belanja
+- Search real-time dengan debounce 400ms
+- Filter produk per kategori
+- Validasi stok real-time saat tambah ke keranjang
+- **Bayar Tunai** — kalkulasi kembalian otomatis
+- **Bayar Digital** — Midtrans Snap (QRIS, GoPay, OVO, VA, Kartu Kredit)
+- Struk digital → cetak / kirim WhatsApp
+- Panel kelola produk langsung dari kasir (slide-over)
 
-### Shift Management / Klerek (`/kasir`)
-- Wajib buka shift sebelum bertransaksi — backend guard di setiap order
-- **Modal Buka Shift:** identitas kasir + kalkulator pecahan uang (Rp100.000–Rp100) + catatan opsional
-- **Modal Tutup Shift (6 section):**
-  1. Identitas shift (tanggal, nama shift, kasir, jam buka)
-  2. Ringkasan penjualan (gross sales, PPN 11%, net sales, info void)
-  3. Breakdown pembayaran (Tunai vs Non-Tunai + detail per metode)
-  4. Hitung kas fisik (kalkulator pecahan closing + total saldo fisik)
-  5. Kas kecil / pengeluaran selama shift
-  6. Rekonsiliasi otomatis: Modal Awal + Tunai − Kas Kecil = Seharusnya vs Fisik → Selisih berwarna
-- Riwayat semua shift dengan laporan detail per shift
+### Shift Management / Klerek
+- Guard: tidak bisa transaksi tanpa shift aktif
+- **Buka Shift** — kalkulator denominasi uang (Rp100.000 s.d. Rp100) + modal awal + catatan
+- **Tutup Shift** — 6 section: identitas, ringkasan penjualan, breakdown pembayaran, hitung kas fisik (denominasi), kas kecil, rekonsiliasi otomatis dengan indikator selisih warna
+- Riwayat shift lengkap dengan laporan per-shift
 
-### Dashboard & Analytics (`/dashboard`)
-- Stat cards: total revenue, total order, produk stok kritis, total produk
-- Line chart tren penjualan 7 hari terakhir
-- Bar chart top produk terlaris bulan ini
-- Pie chart distribusi metode pembayaran
-- Tabel 10 transaksi terbaru
+### Dashboard & Analytics
+- Revenue, order, stok kritis, total produk — stat cards real-time
+- Line chart tren 7 hari, bar chart top produk, pie chart metode pembayaran
+- 10 transaksi terbaru
 
-### AI Assistant (Sidebar kanan)
-- Chat sidebar persisten — tanya dengan bahasa Indonesia biasa
-- Backend otomatis mengambil data penjualan & stok terkini sebagai konteks
-- 3 mode analisis: **Sales Analysis**, **Prediksi Stok**, **Rekomendasi Produk**
-- Quick prompts: produk terlaris, stok mau habis, rekomendasi bundling
-- Typing indicator saat AI generate jawaban
-- Indikator provider aktif: badge "Groq" atau "FALLBACK OpenRouter"
-- **Warning banner** saat kuota harian hampir habis (≤30% sisa)
-- **Limit banner** saat kuota harian habis sepenuhnya
+### AI Assistant (Sidebar)
+- Chat bahasa Indonesia — tanya apa saja tentang bisnis
+- Backend inject data penjualan & stok terkini sebagai konteks AI
+- 3 mode: analisis penjualan, prediksi stok habis, rekomendasi bundling
+- Badge provider aktif: Groq / FALLBACK OpenRouter
+- Limit harian dengan warning banner
 
-### Manajemen Produk (`/products`)
-- CRUD lengkap + upload foto (JPG/PNG/WebP, maks 2MB)
-- Auto-generate SKU dari nama produk
-- Toggle aktif/nonaktif produk dari tabel
-- Filter: status, kategori, stok rendah
+### Laporan (`/reports`)
+- Filter: hari ini, 7 hari, 30 hari, custom range
+- Download **PDF** & **Excel** (generate di backend)
+- Tab penjualan + tab stok
+
+### Manajemen Produk, Kategori, Pesanan, Transaksi
+- CRUD lengkap + upload foto
 - Badge stok: Normal / Menipis / Habis
+- Update status order, void, batalkan transaksi
 
-### Laporan (`/reports`) — Admin & Developer
-- **Tab Penjualan:** total revenue, jumlah transaksi, rata-rata, produk terjual
-- Filter periode: hari ini, 7 hari, 30 hari, bulanan, custom date range
-- Line chart tren harian + tabel top produk dengan % kontribusi revenue
-- **Tab Stok:** total produk aktif, stok menipis, stok habis, nilai total stok
-- Download laporan: **PDF** & **Excel** (generate di backend)
-
-### AI Monitoring Dashboard (`/ai-monitoring`) — Admin & Developer
-- Total request, total token, user aktif hari ini
-- Alert token tinggi jika melewati threshold
-- Stat mingguan & bulanan, breakdown per tipe query & per provider
-- Tabel per-user dengan progress bar kuota + badge status
-
-### User Management, Pesanan, Transaksi, Profil & Subscription
-- CRUD user dengan role-based access (Developer only)
-- Riwayat order & transaksi dengan filter status & tanggal
-- Upgrade subscription via Midtrans payment
+### User Management & AI Monitoring
+- CRUD user dengan role-based guard (Developer only)
+- Dashboard monitoring penggunaan AI: token, provider, per-user quota
 
 ---
 
-## Role & Akses
+## Role & Hak Akses
 
 | Fitur | user | kasir | admin | developer |
 |---|:---:|:---:|:---:|:---:|
-| Kasir (buat order + shift) | ✅ | ✅ | ✅ | ✅ |
-| Lihat produk & kategori | ✅ | ✅ | ✅ | ✅ |
-| CRUD produk & kategori | — | ✅ | ✅ | ✅ |
-| Kelola pesanan & transaksi | — | ✅ | ✅ | ✅ |
-| Dashboard & laporan | — | — | ✅ | ✅ |
+| POS + Shift Management | ✅ | ✅ | ✅ | ✅ |
+| Kelola Produk & Kategori | — | ✅ | ✅ | ✅ |
+| Pesanan & Transaksi | — | ✅ | ✅ | ✅ |
+| Dashboard & Laporan | — | — | ✅ | ✅ |
+| Konfigurasi Midtrans | — | — | ✅ | ✅ |
 | AI Assistant | — | — | ✅ | ✅ |
 | AI Monitoring | — | — | ✅ | ✅ |
 | User Management | — | — | — | ✅ |
-| Dev panel (subscriptions) | — | — | — | ✅ |
-
-> AI Assistant juga bisa diakses oleh user dengan subscription **Pro** atau **Enterprise**
-
----
-
-## Database Schema
-
-```
-tenants
-  id, name, slug, subscription_plan (free|pro|enterprise), timestamps
-
-users
-  id, tenant_id, name, email, password, role (admin|kasir|user|developer),
-  phone, is_active, subscription_plan, timestamps
-
-categories
-  id, tenant_id, name, slug, is_active, timestamps
-
-products
-  id, tenant_id, category_id, name, sku, price, stock, stock_alert,
-  image, is_active, timestamps
-
-shifts
-  id, tenant_id, user_id, shift_number, shift_name (Pagi|Siang|Malam),
-  status (open|closed), opened_at, closed_at,
-  opening_balance, opening_note, opening_denominations (JSON),
-  closing_balance, closing_denominations (JSON),
-  expected_balance, difference,
-  petty_cash, petty_cash_note, notes, verified_by, timestamps
-
-orders
-  id, tenant_id, user_id, shift_id, order_number,
-  status (pending|paid|cancelled|void),
-  subtotal, tax, total, payment_method, customer_phone, notes, timestamps
-
-order_items
-  id, order_id, product_id, quantity, price (snapshot harga saat beli), subtotal
-
-transactions
-  id, order_id, snap_token, payment_method, status, amount, paid_at, timestamps
-
-subscriptions
-  id, user_id, tenant_id, snap_token, status, plan, amount, paid_at, timestamps
-
-ai_query_logs
-  id, user_id, type (sales_analysis|stock_prediction|recommendation),
-  query, response, tokens_used, provider (groq|openrouter), timestamps
-
-ai_chat_usage
-  id, user_id, usage_date, count
-  [unique: user_id + usage_date]
-```
-
----
-
-## API Endpoints
-
-```
-Auth
-  POST   /api/register                    → daftar + otomatis buat tenant baru
-  POST   /api/login                       → login → dapat Bearer token
-  POST   /api/logout                      → logout (hapus token)
-  GET    /api/me                          → data user yang sedang login
-  PUT    /api/profile                     → update profil sendiri
-
-Shifts (Klerek)
-  GET    /api/shifts/current              → shift aktif user + saran shift berikutnya
-  POST   /api/shifts/open                 → buka shift baru (dengan modal awal + denominasi)
-  POST   /api/shifts/{id}/close           → tutup shift (dengan denominasi + kas kecil)
-  GET    /api/shifts/{id}/report          → laporan detail shift (sales, payment, kas)
-  GET    /api/shifts                      → riwayat semua shift
-
-Products
-  GET    /api/products                    → list (filter: search, category, status, stok)
-  POST   /api/products                    → tambah + upload foto [Admin]
-  PUT    /api/products/{id}               → update [Admin]
-  DELETE /api/products/{id}               → hapus [Admin]
-
-Orders
-  POST   /api/orders                      → buat order (wajib ada shift aktif)
-  GET    /api/orders                      → list semua order [Kasir+]
-  GET    /api/orders/{id}                 → detail order
-  PATCH  /api/orders/{id}/status          → update status [Kasir+]
-
-Transactions
-  POST   /api/transactions                → buat transaksi → dapat snap_token Midtrans
-  GET    /api/transactions                → list semua [Kasir+]
-  PATCH  /api/transactions/{id}/cancel    → batalkan [Admin]
-  POST   /api/webhook/midtrans            → webhook dari server Midtrans (public)
-
-Reports [Admin+]
-  GET    /api/reports/sales               → data penjualan (filter periode)
-  GET    /api/reports/stock               → kondisi stok semua produk
-  GET    /api/reports/sales/download      → ?format=pdf|excel
-  GET    /api/reports/stock/download      → ?format=pdf|excel
-
-AI Assistant [Admin+]
-  POST   /api/ai/query                    → analisis penjualan bahasa natural
-  POST   /api/ai/predict-stock            → prediksi kapan stok habis
-  POST   /api/ai/recommend               → rekomendasi produk / bundling
-  GET    /api/ai/usage-today              → kuota hari ini
-  GET    /api/ai/stats                    → monitoring usage LLM [Admin]
-```
 
 ---
 
 ## Testing
 
-Project ini diuji menggunakan **TestSprite** — AI testing agent yang menjalankan test end-to-end secara otomatis di browser.
+Diuji menggunakan **TestSprite** — AI testing agent yang menjalankan test end-to-end di browser nyata.
 
-**Hasil: 20/20 test PASSED** (termasuk 8 test flow utama + 12 test UI/auth)
+**Hasil: 20/20 test PASSED** ✅
 
-| Flow | Verdict |
-|---|---|
-| Kasir login | ✅ PASSED |
+| Test Flow | Verdict |
+|---|:---:|
+| Login & autentikasi | ✅ PASSED |
 | Buka shift dengan kalkulator pecahan | ✅ PASSED |
 | Checkout tunai + struk digital | ✅ PASSED |
 | Tutup shift + rekonsiliasi kas | ✅ PASSED |
-| Edge case: checkout tanpa shift (harus error) | ✅ PASSED |
-| Edge case: tombol bayar disabled saat cart kosong | ✅ PASSED |
+| Edge: checkout tanpa shift (harus ditolak) | ✅ PASSED |
+| Edge: tombol bayar disabled saat cart kosong | ✅ PASSED |
 | Search produk real-time | ✅ PASSED |
 | Riwayat shift | ✅ PASSED |
 
 ---
 
-## Cara Menjalankan di Local
+## Cara Menjalankan Lokal
 
-### Prasyarat
-- PHP 8.3+, Composer
-- Node.js 18+, npm
-- PostgreSQL (atau MySQL 8)
-
-### 1. Backend (Laravel)
+### Backend (Laravel)
 
 ```bash
 cd backend
 composer install
 cp .env.example .env
 
-# Edit .env — isi nilai berikut:
-# DB_CONNECTION=pgsql
+# Isi .env:
+# DB_CONNECTION=mysql
 # DB_DATABASE=kasirai
-# DB_USERNAME=postgres
-# DB_PASSWORD=
-# GROQ_API_KEY=gsk_...          ← dari console.groq.com (gratis)
-# MIDTRANS_SERVER_KEY=SB-Mid-...
-# MIDTRANS_CLIENT_KEY=SB-Mid-...
+# GROQ_API_KEY=gsk_...
+# MIDTRANS_SERVER_KEY=SB-Mid-server-...
+# MIDTRANS_CLIENT_KEY=SB-Mid-client-...
 
 php artisan key:generate
 php artisan migrate --seed
@@ -411,7 +273,7 @@ php artisan storage:link
 php artisan serve
 ```
 
-### 2. Frontend (Next.js)
+### Frontend (Next.js)
 
 ```bash
 cd frontend
@@ -420,12 +282,10 @@ npm install
 # Buat .env.local:
 # NEXT_PUBLIC_API_URL=http://localhost:8000/api
 # NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=SB-Mid-client-...
-# FONNTE_TOKEN=...              ← dari fonnte.com
+# FONNTE_TOKEN=...
 
 npm run dev
 ```
-
-Akses di `http://localhost:3000`
 
 ---
 
@@ -433,44 +293,45 @@ Akses di `http://localhost:3000`
 
 | Layer | Implementasi |
 |---|---|
-| Autentikasi | Laravel Sanctum — Bearer token wajib di semua endpoint protected |
-| Otorisasi | RoleMiddleware per route group + guard ownership di controller |
-| Isolasi data | TenantScope — `WHERE tenant_id = ?` otomatis di setiap query |
-| File upload | Validasi MIME type (JPG/PNG/WebP) + max size 2MB di backend |
-| Secret API | Fonnte token disimpan server-side (tidak pernah ke browser) |
-| Payment | Midtrans webhook diverifikasi dengan signature key dari Midtrans |
-| SQL Injection | Dilindungi Eloquent ORM + parameter binding Laravel |
+| Auth | Laravel Sanctum Bearer Token |
+| Otorisasi | RoleMiddleware per route group |
+| Isolasi Data | TenantScope — `WHERE tenant_id = ?` otomatis |
+| Payment Key | Server Key dienkripsi di DB (`encrypted` cast) |
+| WhatsApp Token | Server-side only, tidak pernah ke browser |
+| File Upload | Validasi MIME + max 2MB |
+| SQL Injection | Eloquent ORM + parameter binding |
 
 ---
 
 ## Developer
 
+<div align="center">
+
 <table>
   <tr>
-    <td align="center">
+    <td align="center" style="padding: 20px">
       <strong>Saifudin Reza</strong><br/>
-      Full Stack Developer<br/>
+      <em>Full Stack Developer</em><br/>
       <em>Final Project — Full Stack Web Development Bootcamp 2026</em><br/><br/>
       <a href="mailto:donojomi@gmail.com">donojomi@gmail.com</a>
     </td>
   </tr>
 </table>
 
-**Skills yang didemonstrasikan dalam project ini:**
+### Skills yang didemonstrasikan
 
-`Next.js 14` `React 18` `Laravel 11` `PHP 8.3` `PostgreSQL` `REST API Design`  
-`Zustand` `Tailwind CSS` `Framer Motion` `Neobrutalism Design System` `Multi-tenant Architecture`  
-`Laravel Sanctum` `Laravel Global Scope` `Groq AI Integration` `OpenRouter Fallback`  
-`LLM Rate Limiting & Monitoring` `Midtrans Payment Gateway` `WhatsApp API (Fonnte)`  
-`Shift Management & Cash Reconciliation` `PDF & Excel Generation` `Role-based Access Control`  
-`E2E Testing (TestSprite)` `Vercel Deployment` `Railway + Docker Deployment`
+`Next.js 14 App Router` `React 18` `Laravel 11` `PHP 8.3` `MySQL` `REST API Design`
+`Zustand` `Tailwind CSS` `Framer Motion` `Neobrutalism Design System`
+`Multi-tenant Architecture` `Laravel Sanctum` `Laravel Global Scope`
+`Groq AI Integration` `OpenRouter Fallback` `LLM Rate Limiting`
+`Midtrans Split Payment` `WhatsApp API` `PDF & Excel Export`
+`Shift Management & Cash Reconciliation` `Role-based Access Control`
+`E2E Testing (TestSprite)` `Docker` `Vercel` `Railway`
 
 ---
 
-<div align="center">
+**[🌐 Coba Live Demo → kasirai.vercel.app](https://kasirai.vercel.app/)**
 
-**[🌐 Live Demo → kasirai.vercel.app](https://kasirai.vercel.app/)**
-
-*Dibangun dengan sepenuh hati sebagai Final Project Bootcamp — Mei–Juni 2026*
+*Dibangun dengan sepenuh hati — Mei–Juni 2026*
 
 </div>
