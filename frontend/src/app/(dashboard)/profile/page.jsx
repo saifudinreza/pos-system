@@ -87,6 +87,7 @@ export default function ProfilePage() {
     try {
       const res = await subscriptionService.updateProfile(form);
       setUser(res.data);
+      await fetchCurrentUser();
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
