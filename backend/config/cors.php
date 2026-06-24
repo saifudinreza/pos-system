@@ -13,13 +13,14 @@ return [
     // Tambahkan domain Vercel kamu di sini
     'allowed_origins' => [
         'http://localhost:3000',
+        'https://kasirai.vercel.app',
         'https://pos-system-seven-rose.vercel.app',
         env('FRONTEND_URL', 'http://localhost:3000'),
     ],
 
     'allowed_origins_patterns' => [
-        // Izinkan semua subdomain Vercel (untuk preview deployments)
-        '#^https://pos-system.*\.vercel\.app$#',
+        // Izinkan semua preview deployment Vercel
+        '#^https://.*\.vercel\.app$#',
     ],
 
     // Header yang boleh dikirim client
