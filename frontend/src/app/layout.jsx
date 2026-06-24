@@ -1,5 +1,4 @@
 import "./globals.css";
-import Script from "next/script";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://kasirai.vercel.app";
@@ -97,11 +96,6 @@ export default function RootLayout({ children }) {
       <body className="antialiased bg-brand-cream text-brand-black">
         {children}
         <SpeedInsights />
-        <Script
-          src="https://app.sandbox.midtrans.com/snap/snap.js"
-          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ?? ""}
-          strategy="lazyOnload"
-        />
       </body>
     </html>
   );

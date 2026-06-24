@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   UserCircle, Mail, Shield, CreditCard,
-  ArrowUpCircle, CheckCircle2, Calendar, Zap, Store,
+  ArrowUpCircle, CheckCircle2, Calendar, Zap, Store, KeyRound,
 } from "lucide-react";
 import useAuthStore from "@/stores/authStore";
 import subscriptionService from "@/services/subscriptionService";
@@ -49,7 +49,7 @@ export default function ProfilePage() {
   const { user, setUser, fetchCurrentUser } = useAuthStore();
 
   const [sub,       setSub]       = useState(null);
-  const [form,      setForm]      = useState({ name: "", phone: "", store_name: "", store_description: "" });
+  const [form,      setForm]      = useState({ name: "", phone: "", store_name: "", store_description: "", midtrans_server_key: "", midtrans_client_key: "" });
   const [saving,    setSaving]    = useState(false);
   const [formError, setFormError] = useState("");
   const [success,   setSuccess]   = useState(false);
@@ -63,10 +63,12 @@ export default function ProfilePage() {
   useEffect(() => {
     if (user) {
       setForm({
-        name:              user.name ?? "",
-        phone:             user.phone ?? "",
-        store_name:        user.tenant_name ?? "",
-        store_description: user.tenant_description ?? "",
+        name:                 user.name ?? "",
+        phone:                user.phone ?? "",
+        store_name:           user.tenant_name ?? "",
+        store_description:    user.tenant_description ?? "",
+        midtrans_server_key:  "",
+        midtrans_client_key:  user.midtrans_client_key ?? "",
       });
     }
   }, [user]);
@@ -186,6 +188,55 @@ export default function ProfilePage() {
               <div className="flex items-center gap-2 text-xs text-brand-black/40 pt-1">
                 <Store size={12} />
                 <span>Toko: <span className="font-bold text-brand-black">{user.tenant_name}</span></span>
+              </div>
+            )}
+
+            {/* ── Midtrans Keys (admin/developer only) ── */}
+            {canEditStore && (
+              <div className="pt-3 border-t-2 border-brand-black/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <KeyRound size={14} className="text-brand-black/50" />
+                    <p className="text-xs font-black uppercase tracking-wider text-brand-black/50">Midtrans Payment</p>
+                  </div>
+                  <span className={`text-xs font-black px-2 py-0.5 border-2 ${user?.midtrans_configured ? "bg-green-100 border-green-400 text-green-700" : "bg-red-50 border-red-300 text-red-600"}`}>
+                    {user?.midtrans_configured ? "✓ Terkonfigurasi" : "Belum Dikonfigurasi"}
+                  </span>
+                </div>
+
+                <p className="text-xs text-brand-black/50">
+                  Dapatkan key dari <span className="font-bold">dashboard.midtrans.com</span> → Settings → Access Keys. Server Key bersifat rahasia, tidak akan ditampilkan kembali setelah disimpan.
+                </p>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-black uppercase tracking-wider text-brand-black/60">
+                    Server Key <span className="normal-case font-normal text-brand-black/40">(Rahasia — isi hanya jika ingin mengubah)</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={form.midtrans_server_key}
+                    onChange={(e) => setForm((p) => ({ ...p, midtrans_server_key: e.target.value }))}
+                    placeholder={user?.midtrans_configured ? "••••••••••••••••• (sudah tersimpan)" : "SB-Mid-server-..."}
+                    className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono placeholder:text-brand-black/25"
+                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-black uppercase tracking-wider text-brand-black/60">
+                    Client Key <span className="normal-case font-normal text-brand-black/40">(Public)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={form.midtrans_client_key}
+                    onChange={(e) => setForm((p) => ({ ...p, midtrans_client_key: e.target.value }))}
+                    placeholder="SB-Mid-client-..."
+                    className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono placeholder:text-brand-black/25"
+                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    autoComplete="off"
+                  />
+                </div>
               </div>
             )}
 

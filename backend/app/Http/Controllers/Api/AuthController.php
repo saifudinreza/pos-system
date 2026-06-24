@@ -164,10 +164,12 @@ class AuthController extends Controller
     public function updateProfile(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'name'              => ['sometimes', 'string', 'max:255'],
-            'phone'             => ['nullable', 'string', 'max:20'],
-            'store_name'        => ['sometimes', 'string', 'max:255'],
-            'store_description' => ['nullable', 'string', 'max:500'],
+            'name'                 => ['sometimes', 'string', 'max:255'],
+            'phone'                => ['nullable', 'string', 'max:20'],
+            'store_name'           => ['sometimes', 'string', 'max:255'],
+            'store_description'    => ['nullable', 'string', 'max:500'],
+            'midtrans_server_key'  => ['nullable', 'string', 'max:500'],
+            'midtrans_client_key'  => ['nullable', 'string', 'max:255'],
         ]);
 
         $user = $request->user();
@@ -177,11 +179,13 @@ class AuthController extends Controller
             $user->update($userFields);
         }
 
-        // Only admin/developer can update their store info
+        // Only admin/developer can update their store info + Midtrans keys
         if ($user->tenant && in_array($user->role, ['admin', 'developer'])) {
             $tenantData = [];
-            if (isset($validated['store_name']))        $tenantData['name']        = $validated['store_name'];
+            if (isset($validated['store_name']))           $tenantData['name']                = $validated['store_name'];
             if (array_key_exists('store_description', $validated)) $tenantData['description'] = $validated['store_description'];
+            if (array_key_exists('midtrans_server_key', $validated)) $tenantData['midtrans_server_key'] = $validated['midtrans_server_key'];
+            if (array_key_exists('midtrans_client_key', $validated)) $tenantData['midtrans_client_key'] = $validated['midtrans_client_key'];
             if (!empty($tenantData)) $user->tenant->update($tenantData);
         }
 
@@ -197,17 +201,19 @@ class AuthController extends Controller
     private function formatUser(User $user): array
     {
         return [
-            'id'                  => $user->id,
-            'tenant_id'           => $user->tenant_id,
-            'tenant_name'         => $user->tenant?->name,
-            'tenant_description'  => $user->tenant?->description,
-            'name'                => $user->name,
-            'email'               => $user->email,
-            'role'                => $user->role,
-            'phone'               => $user->phone,
-            'is_active'           => $user->is_active,
-            'subscription_plan'   => $user->subscription_plan ?? 'free',
-            'created_at'          => $user->created_at->format('d M Y'),
+            'id'                    => $user->id,
+            'tenant_id'             => $user->tenant_id,
+            'tenant_name'           => $user->tenant?->name,
+            'tenant_description'    => $user->tenant?->description,
+            'midtrans_client_key'   => $user->tenant?->midtrans_client_key,
+            'midtrans_configured'   => !empty($user->tenant?->midtrans_server_key) && !empty($user->tenant?->midtrans_client_key),
+            'name'                  => $user->name,
+            'email'                 => $user->email,
+            'role'                  => $user->role,
+            'phone'                 => $user->phone,
+            'is_active'             => $user->is_active,
+            'subscription_plan'     => $user->subscription_plan ?? 'free',
+            'created_at'            => $user->created_at->format('d M Y'),
         ];
     }
 }

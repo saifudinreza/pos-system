@@ -14,12 +14,15 @@ class Tenant extends Model
         'slug',
         'description',
         'is_active',
+        'midtrans_server_key',
+        'midtrans_client_key',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_active' => 'boolean',
+            'is_active'           => 'boolean',
+            'midtrans_server_key' => 'encrypted',
         ];
     }
 

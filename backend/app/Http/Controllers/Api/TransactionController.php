@@ -18,18 +18,26 @@ class TransactionController extends Controller
 {
     public function __construct()
     {
-        // Setup konfigurasi Midtrans
-        Config::$serverKey    = config('services.midtrans.server_key');
         Config::$isProduction = config('services.midtrans.is_production');
         Config::$isSanitized  = true;
         Config::$is3ds        = true;
 
-        // Override notification URL — dipakai saat development dengan ngrok
-        // Di production, hapus MIDTRANS_NOTIFICATION_URL dari .env agar pakai URL dari dashboard
         $notifUrl = config('services.midtrans.notification_url');
         if ($notifUrl) {
             Config::$overrideNotifUrl = $notifUrl;
         }
+    }
+
+    private function configureServerKey(Request $request): void
+    {
+        $tenant    = $request->user()->tenant;
+        $serverKey = $tenant?->midtrans_server_key ?? config('services.midtrans.server_key');
+
+        if (empty($serverKey)) {
+            abort(422, 'Midtrans belum dikonfigurasi. Masuk ke Profil → atur Server Key & Client Key Midtrans terlebih dahulu.');
+        }
+
+        Config::$serverKey = $serverKey;
     }
 
     // =============================================================
@@ -135,6 +143,8 @@ class TransactionController extends Controller
     // =============================================================
     public function create(Request $request): JsonResponse
     {
+        $this->configureServerKey($request);
+
         $validated = $request->validate([
             'order_id' => ['required', 'exists:orders,id'],
         ]);

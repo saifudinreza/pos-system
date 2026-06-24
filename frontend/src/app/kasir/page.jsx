@@ -1183,6 +1183,20 @@ export default function KasirPage() {
     } finally { setPaying(false); }
   };
 
+  // Load snap.js Midtrans secara dinamis dengan client key milik tenant
+  const loadMidtransSnap = (clientKey) => new Promise((resolve, reject) => {
+    if (window.snap) return resolve();
+    const existing = document.getElementById("midtrans-snap-js");
+    if (existing) { existing.onload = resolve; return; }
+    const script = document.createElement("script");
+    script.id = "midtrans-snap-js";
+    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    script.setAttribute("data-client-key", clientKey);
+    script.onload  = resolve;
+    script.onerror = () => reject(new Error("Gagal memuat Midtrans Snap."));
+    document.body.appendChild(script);
+  });
+
   // Checkout digital: buat order → buat transaksi → buka Midtrans Snap
   const handleDigitalCheckout = async () => {
     if (items.length === 0) return alert("Keranjang masih kosong!");
@@ -1190,8 +1204,14 @@ export default function KasirPage() {
       alert("Kamu harus membuka shift terlebih dahulu sebelum bertransaksi.");
       return;
     }
+    if (!user?.midtrans_client_key) {
+      alert("Midtrans belum dikonfigurasi. Masuk ke Profil → atur Midtrans Client Key & Server Key terlebih dahulu.");
+      return;
+    }
     setPaying(true);
     try {
+      await loadMidtransSnap(user.midtrans_client_key);
+
       const orderRes  = await orderService.create({
         items: getOrderPayload(),
         notes,
