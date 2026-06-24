@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 // Disk yang dipakai untuk upload gambar produk.
 // Kalau R2 dikonfigurasi → pakai R2 (persistent, cloud).
 // Kalau tidak → fallback ke 'public' (local, hilang saat redeploy).
-define('PRODUCT_DISK', env('R2_ACCESS_KEY_ID') ? 'r2' : 'public');
+define('PRODUCT_DISK', !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public');
 
 class ProductController extends Controller
 {

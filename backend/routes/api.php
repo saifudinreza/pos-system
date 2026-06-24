@@ -22,7 +22,7 @@ Route::get('/check-tenant',   [AuthController::class, 'checkTenant']);
 
 // Media proxy — serve gambar dari R2/storage tanpa butuh auth
 Route::get('/media/{path}', function (string $path) {
-    $disk = env('R2_ACCESS_KEY_ID') ? 'r2' : 'public';
+    $disk = !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public';
     if (! \Illuminate\Support\Facades\Storage::disk($disk)->exists($path)) {
         abort(404);
     }
