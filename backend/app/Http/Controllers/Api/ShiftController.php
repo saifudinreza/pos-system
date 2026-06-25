@@ -14,21 +14,31 @@ class ShiftController extends Controller
 {
     public function current(Request $request): JsonResponse
     {
-        $shift = Shift::where('user_id', $request->user()->id)
-            ->where('status', 'open')
+        // Cek shift aktif milik tenant (bukan per-user) — semua kasir share 1 shift
+        $shift = Shift::where('status', 'open')
             ->latest('opened_at')
             ->first();
 
         if (!$shift) {
-            $suggested = Shift::getShiftForTime();
             return response()->json([
                 'message' => 'Tidak ada shift yang sedang berjalan.',
                 'data'    => null,
-                'suggested_shift' => [
-                    'number' => $suggested[0],
-                    'name'   => $suggested[1],
-                ],
             ], 200);
+        }
+
+        // Cek apakah waktu sekarang masih dalam window shift
+        $withinWindow = true;
+        if ($shift->start_time && $shift->end_time) {
+            $now   = now()->format('H:i:s');
+            $start = $shift->start_time;
+            $end   = $shift->end_time;
+
+            // Handle shift yang melewati tengah malam (misal 22:00 - 06:00)
+            if ($end < $start) {
+                $withinWindow = $now >= $start || $now <= $end;
+            } else {
+                $withinWindow = $now >= $start && $now <= $end;
+            }
         }
 
         $orderCount = Order::where('shift_id', $shift->id)->count();
@@ -37,47 +47,38 @@ class ShiftController extends Controller
             ->sum('total');
 
         return response()->json([
-            'message' => 'Shift aktif ditemukan.',
-            'data'    => $this->formatShift($shift, $orderCount, $totalSales),
+            'message'        => 'Shift aktif ditemukan.',
+            'data'           => $this->formatShift($shift, $orderCount, $totalSales),
+            'within_window'  => $withinWindow,
         ], 200);
     }
 
     public function open(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'shift_name'            => ['required', 'string', 'max:50'],
+            'start_time'            => ['required', 'date_format:H:i'],
+            'end_time'              => ['required', 'date_format:H:i'],
             'opening_balance'       => ['required', 'numeric', 'min:0'],
             'opening_note'          => ['nullable', 'string', 'max:500'],
             'opening_denominations' => ['nullable', 'array'],
         ]);
 
-        $active = Shift::where('user_id', $request->user()->id)
-            ->where('status', 'open')
-            ->exists();
-
+        // Cek apakah tenant sudah punya shift aktif
+        $active = Shift::where('status', 'open')->exists();
         if ($active) {
             return response()->json([
-                'message' => 'Kamu masih memiliki shift yang sedang berjalan. Tutup shift terlebih dahulu.',
-            ], 422);
-        }
-
-        [$number, $name] = Shift::getShiftForTime();
-
-        $sameDayClosed = Shift::where('user_id', $request->user()->id)
-            ->where('shift_number', $number)
-            ->whereDate('opened_at', today())
-            ->exists();
-
-        if ($sameDayClosed) {
-            return response()->json([
-                'message' => "Shift {$name} ({$number}) hari ini sudah pernah dibuka dan ditutup.",
+                'message' => 'Masih ada shift yang sedang berjalan. Tutup shift tersebut terlebih dahulu.',
             ], 422);
         }
 
         $shift = Shift::create([
             'tenant_id'             => $request->user()->tenant_id,
             'user_id'               => $request->user()->id,
-            'shift_number'          => $number,
-            'shift_name'            => $name,
+            'shift_number'          => 1,
+            'shift_name'            => $validated['shift_name'],
+            'start_time'            => $validated['start_time'] . ':00',
+            'end_time'              => $validated['end_time'] . ':00',
             'status'                => 'open',
             'opened_at'             => now(),
             'opening_balance'       => $validated['opening_balance'],
@@ -86,7 +87,7 @@ class ShiftController extends Controller
         ]);
 
         return response()->json([
-            'message' => "Shift {$name} berhasil dibuka.",
+            'message' => "Shift {$validated['shift_name']} berhasil dibuka.",
             'data'    => $this->formatShift($shift),
         ], 201);
     }
@@ -103,9 +104,7 @@ class ShiftController extends Controller
             return response()->json(['message' => 'Shift ini sudah ditutup.'], 422);
         }
 
-        if ($shift->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Kamu tidak punya akses ke shift ini.'], 403);
-        }
+
 
         $validated = $request->validate([
             'closing_balance'       => ['required', 'numeric', 'min:0'],
@@ -286,6 +285,8 @@ class ShiftController extends Controller
             'id'              => $shift->id,
             'shift_number'    => $shift->shift_number,
             'shift_name'      => $shift->shift_name,
+            'start_time'      => $shift->start_time ? substr($shift->start_time, 0, 5) : null,
+            'end_time'        => $shift->end_time   ? substr($shift->end_time, 0, 5)   : null,
             'status'          => $shift->status,
             'opened_at'       => $shift->opened_at->format('d M Y H:i'),
             'closed_at'       => $shift->closed_at?->format('d M Y H:i'),

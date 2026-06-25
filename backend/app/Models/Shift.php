@@ -15,6 +15,8 @@ class Shift extends Model
         'user_id',
         'shift_number',
         'shift_name',
+        'start_time',
+        'end_time',
         'status',
         'opened_at',
         'closed_at',

@@ -42,19 +42,26 @@ class GroqService
             try {
                 return $this->callGroq($systemPrompt, $userQuery);
             } catch (\Exception $e) {
-                // Kalau 429 (rate limit) → tandai dan langsung coba OpenRouter
                 if ($this->isRateLimitError($e)) {
                     Log::warning('Groq rate limit hit — switching to OpenRouter for ' . self::GROQ_RATE_LIMIT_TTL . 's');
                     Cache::put(self::GROQ_RATE_LIMIT_KEY, true, self::GROQ_RATE_LIMIT_TTL);
-                    return $this->callOpenRouter($systemPrompt, $userQuery);
+                    if (! empty($this->orKey)) {
+                        return $this->callOpenRouter($systemPrompt, $userQuery);
+                    }
+                    throw new \Exception('Groq rate limited dan OpenRouter tidak dikonfigurasi.');
                 }
                 throw $e;
             }
         }
 
-        // Groq sedang rate-limited → pakai OpenRouter
+        // Groq sedang rate-limited → pakai OpenRouter jika tersedia
         Log::info('Groq masih rate-limited, menggunakan OpenRouter');
-        return $this->callOpenRouter($systemPrompt, $userQuery);
+        if (! empty($this->orKey)) {
+            return $this->callOpenRouter($systemPrompt, $userQuery);
+        }
+        // Tunggu sampai Groq cooldown habis
+        Cache::forget(self::GROQ_RATE_LIMIT_KEY);
+        return $this->callGroq($systemPrompt, $userQuery);
     }
 
     // ============================================================

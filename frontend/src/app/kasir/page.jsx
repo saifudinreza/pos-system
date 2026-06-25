@@ -683,8 +683,11 @@ function DenominationCounter({ value, onChange }) {
   );
 }
 
-// ── ShiftOpenModal — Modal buka shift baru (identitas + kalkulator pecahan + catatan) ──
-function ShiftOpenModal({ isOpen, onClose, onConfirm, user, suggestedShift }) {
+// ── ShiftOpenModal — Modal buka shift baru ──
+function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
+  const [shiftName, setShiftName] = useState("Pagi");
+  const [startTime, setStartTime] = useState("07:00");
+  const [endTime,   setEndTime]   = useState("16:00");
   const [denoms, setDenoms] = useState({});
   const [total, setTotal] = useState(0);
   const [note, setNote] = useState("");
@@ -693,12 +696,32 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user, suggestedShift }) {
 
   if (!isOpen) return null;
 
-  const reset = () => { setDenoms({}); setTotal(0); setNote(""); setErr(""); };
+  const SHIFT_PRESETS = [
+    { label: "Pagi",  start: "07:00", end: "16:00" },
+    { label: "Siang", start: "12:00", end: "21:00" },
+    { label: "Malam", start: "17:00", end: "23:59" },
+  ];
+
+  const applyPreset = (preset) => {
+    setShiftName(preset.label);
+    setStartTime(preset.start);
+    setEndTime(preset.end);
+  };
+
+  const reset = () => {
+    setShiftName("Pagi"); setStartTime("07:00"); setEndTime("16:00");
+    setDenoms({}); setTotal(0); setNote(""); setErr("");
+  };
 
   const handleOpen = async () => {
+    if (!shiftName.trim()) { setErr("Nama shift wajib diisi."); return; }
+    if (!startTime || !endTime) { setErr("Jam mulai dan selesai wajib diisi."); return; }
     setLoading(true); setErr("");
     try {
       await onConfirm({
+        shift_name: shiftName.trim(),
+        start_time: startTime,
+        end_time: endTime,
         opening_balance: total,
         opening_note: note || undefined,
         opening_denominations: Object.keys(denoms).length ? denoms : undefined,
@@ -718,17 +741,51 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user, suggestedShift }) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-thin">
-          {/* 1. Identitas & Waktu */}
+          {/* 1. Identitas */}
           <div className="border-2 border-brand-black bg-brand-cream p-3 space-y-1.5 text-sm">
             <div className="flex justify-between"><span className="text-brand-black/60">Tanggal</span><span className="font-bold">{today}</span></div>
-            <div className="flex justify-between"><span className="text-brand-black/60">Shift</span>
-              <span className="font-black">{suggestedShift ? `${suggestedShift.name} (#${suggestedShift.number})` : "-"}</span></div>
             <div className="flex justify-between"><span className="text-brand-black/60">Kasir Bertugas</span><span className="font-bold">{user?.name ?? "-"}</span></div>
           </div>
 
           {err && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border-2 border-red-300">{err}</p>}
 
-          {/* 2. Total Modal dari rincian pecahan */}
+          {/* 2. Nama & Jam Shift */}
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-bold block mb-1">Nama Shift</label>
+              <div className="flex gap-2 mb-2">
+                {SHIFT_PRESETS.map(p => (
+                  <button key={p.label} onClick={() => applyPreset(p)}
+                    className={`px-3 py-1 text-xs font-black border-2 border-brand-black transition-colors ${shiftName === p.label ? "bg-brand-yellow" : "bg-white hover:bg-brand-cream"}`}
+                    style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+              <input type="text" value={shiftName} onChange={e => setShiftName(e.target.value)}
+                placeholder="Atau ketik nama shift..."
+                className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow"
+                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-bold block mb-1">Jam Mulai</label>
+                <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)}
+                  className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow font-mono"
+                  style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+              </div>
+              <div>
+                <label className="text-sm font-bold block mb-1">Jam Selesai</label>
+                <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
+                  className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow font-mono"
+                  style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+              </div>
+            </div>
+            <p className="text-xs text-brand-black/50">Kasir hanya bisa diakses selama jam shift berlangsung.</p>
+          </div>
+
+          {/* 3. Modal Awal */}
           <div>
             <label className="text-sm font-bold block mb-1">Rincian Uang Laci (Modal Awal)</label>
             <DenominationCounter value={denoms} onChange={(d, t) => { setDenoms(d); setTotal(t); }} />
@@ -738,7 +795,7 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user, suggestedShift }) {
             <span className="font-black text-2xl font-mono">{formatCurrency(total)}</span>
           </div>
 
-          {/* 3. Catatan tambahan */}
+          {/* 4. Catatan */}
           <div>
             <label className="text-sm font-bold block mb-1">Catatan (opsional)</label>
             <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
@@ -1080,9 +1137,9 @@ export default function KasirPage() {
   const [receiptOpen,  setReceiptOpen] = useState(false);   // tampilkan struk
 
   // ── Shift State ──
-  const [currentShift,  setCurrentShift]  = useState(null);
-  const [suggestedShift, setSuggestedShift] = useState(null);
-  const [shiftLoading,  setShiftLoading]  = useState(true);
+  const [currentShift,     setCurrentShift]     = useState(null);
+  const [shiftWithinWindow, setShiftWithinWindow] = useState(true);
+  const [shiftLoading,     setShiftLoading]     = useState(true);
   const [shiftOpenModal, setShiftOpenModal] = useState(false);
   const [shiftCloseModal, setShiftCloseModal] = useState(false);
   const [shiftReport,   setShiftReport]   = useState(null);
@@ -1166,6 +1223,10 @@ export default function KasirPage() {
       alert("Kamu harus membuka shift terlebih dahulu sebelum bertransaksi.");
       return;
     }
+    if (!shiftWithinWindow) {
+      alert(`Jam shift ${currentShift.shift_name} (${currentShift.start_time}–${currentShift.end_time}) sudah berakhir. Lakukan klerk untuk menutup shift.`);
+      return;
+    }
     setCashModal(false);
     setPaying(true);
     try {
@@ -1202,6 +1263,10 @@ export default function KasirPage() {
     if (items.length === 0) return alert("Keranjang masih kosong!");
     if (!currentShift) {
       alert("Kamu harus membuka shift terlebih dahulu sebelum bertransaksi.");
+      return;
+    }
+    if (!shiftWithinWindow) {
+      alert(`Jam shift ${currentShift.shift_name} (${currentShift.start_time}–${currentShift.end_time}) sudah berakhir. Lakukan klerk untuk menutup shift.`);
       return;
     }
     if (!user?.midtrans_client_key) {
@@ -1248,8 +1313,10 @@ export default function KasirPage() {
       const res = await shiftService.getCurrent();
       if (res.data) {
         setCurrentShift(res.data);
-      } else if (res.suggested_shift) {
-        setSuggestedShift(res.suggested_shift);
+        setShiftWithinWindow(res.within_window !== false);
+      } else {
+        setCurrentShift(null);
+        setShiftWithinWindow(true);
       }
     } catch (e) {
       // ignore
@@ -1327,16 +1394,19 @@ export default function KasirPage() {
     <>
     {/* ── Shift Info Bar ── */}
     {!shiftLoading && (
+      <>
       <div className={`px-4 py-1.5 border-b-2 border-brand-black flex items-center justify-between text-xs font-bold shrink-0 ${
-        currentShift ? "bg-green-50" : "bg-yellow-50"
+        currentShift ? (shiftWithinWindow ? "bg-green-50" : "bg-orange-50") : "bg-yellow-50"
       }`}>
         <div className="flex items-center gap-3">
           {currentShift ? (
             <>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                <span className={`w-2 h-2 rounded-full inline-block ${shiftWithinWindow ? "bg-green-500" : "bg-orange-400"}`} />
                 <span className="font-black">{currentShift.shift_name}</span>
-                <span className="text-brand-black/40 font-mono">#{currentShift.shift_number}</span>
+                {currentShift.start_time && currentShift.end_time && (
+                  <span className="text-brand-black/50 font-mono">{currentShift.start_time}–{currentShift.end_time}</span>
+                )}
               </span>
               <span className="text-brand-black/50">|</span>
               <span className="text-brand-black/60 font-mono">Buka: {currentShift.opened_at}</span>
@@ -1357,11 +1427,7 @@ export default function KasirPage() {
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />
               <span className="font-semibold">Belum ada shift aktif</span>
-              {suggestedShift && (
-                <span className="text-brand-black/50">
-                  — Buka shift <strong>{suggestedShift.name}</strong> untuk mulai bertransaksi
-                </span>
-              )}
+              <span className="text-brand-black/50">— Buka shift untuk mulai bertransaksi</span>
             </span>
           )}
         </div>
@@ -1385,6 +1451,14 @@ export default function KasirPage() {
           )}
         </div>
       </div>
+      {/* Banner peringatan di luar jam shift */}
+      {currentShift && !shiftWithinWindow && (
+        <div className="px-4 py-2 bg-orange-100 border-b-2 border-orange-400 text-xs font-semibold text-orange-700 flex items-center gap-2 shrink-0">
+          <span>⚠️</span>
+          <span>Di luar jam shift <strong>{currentShift.shift_name}</strong> ({currentShift.start_time}–{currentShift.end_time}). Transaksi diblokir — lakukan klerk untuk menutup shift ini.</span>
+        </div>
+      )}
+      </>
     )}
 
     {/* Layout dua kolom: grid produk (kiri) + keranjang (kanan) */}
@@ -1643,7 +1717,6 @@ export default function KasirPage() {
       onClose={() => setShiftOpenModal(false)}
       onConfirm={handleOpenShift}
       user={user}
-      suggestedShift={suggestedShift}
     />
 
     <ShiftCloseModal
