@@ -22,7 +22,7 @@
 
 import { create } from "zustand";
 
-const TAX_RATE = 0;
+const TAX_RATE = 0.11;
 
 const useCartStore = create((set, get) => ({
   // ============================================================

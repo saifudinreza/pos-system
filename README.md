@@ -41,7 +41,8 @@ Kebanyakan project bootcamp hanya CRUD sederhana. KasirAI berbeda:
 | Multi-tenant architecture dengan Laravel Global Scope | ⭐⭐⭐⭐⭐ |
 | AI Assistant dengan dual-provider + auto fallback | ⭐⭐⭐⭐⭐ |
 | Per-tenant Midtrans keys (split payment model) | ⭐⭐⭐⭐⭐ |
-| Shift management + rekonsiliasi kas otomatis | ⭐⭐⭐⭐ |
+| Cloudflare R2 cloud storage + backend proxy (bypass SSL) | ⭐⭐⭐⭐ |
+| Shift management per-tenant — custom time range + realtime enforcement | ⭐⭐⭐⭐ |
 | Payment gateway webhook + stok rollback | ⭐⭐⭐⭐ |
 | Server-side WhatsApp proxy (token tidak expose ke browser) | ⭐⭐⭐⭐ |
 | E2E Testing dengan TestSprite (20/20 PASSED) | ⭐⭐⭐⭐ |
@@ -82,6 +83,7 @@ Kebanyakan project bootcamp hanya CRUD sederhana. KasirAI berbeda:
 | AI Primary | **Groq API** — LLaMA 3.3 70B (gratis & cepat) |
 | AI Fallback | **OpenRouter** — LLaMA 3.1 8B (auto-switch) |
 | Payment | **Midtrans Snap** — QRIS, GoPay, OVO, VA |
+| Storage | **Cloudflare R2** — upload & serve foto produk (S3-compatible) |
 | WhatsApp | **Fonnte API** — struk digital otomatis |
 
 ---
@@ -156,16 +158,40 @@ const loadMidtransSnap = (clientKey) => new Promise((resolve, reject) => {
 });
 ```
 
-### 4. Shift Management & Rekonsiliasi Kas
+### 4. Shift Management Per-Tenant dengan Realtime Enforcement
 
-Kasir wajib buka shift sebelum bertransaksi. Saat tutup shift, sistem menghitung **selisih kas otomatis** dari denominasi uang pecahan yang dihitung kasir.
+Shift bersifat **per-tenant** (bukan per-user) — satu shift aktif dipakai bersama semua kasir. User mendefinisikan sendiri nama shift dan jam berlaku. Sistem **memblokir transaksi** di luar jam shift secara realtime.
+
+```
+// Auto-resume: login saat shift masih aktif → langsung terhubung tanpa isi form
+// within_window: cek jam sekarang vs start_time/end_time di backend
+// Warning banner orange + transaksi diblokir kalau di luar jam shift
+```
+
+Saat tutup shift (klerk), sistem menghitung **selisih kas otomatis**:
 
 ```
 Seharusnya  =  Modal Awal + Total Penjualan Tunai − Kas Kecil
 Selisih     =  Saldo Fisik (dari hitung pecahan) − Seharusnya
 ```
 
-### 5. Server-side WhatsApp Proxy
+### 5. Cloudflare R2 + Backend Media Proxy
+
+Foto produk disimpan di **Cloudflare R2** (S3-compatible). Karena R2 public URL memerlukan custom domain untuk SSL, semua gambar diproksikan melalui backend Laravel — tidak ada URL R2 yang terekspos ke browser.
+
+```php
+// api.php — proxy route, tidak perlu auth
+Route::get('/media/{path}', function (string $path) {
+    $disk = !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public';
+    if (! Storage::disk($disk)->exists($path)) abort(404);
+    return Storage::disk($disk)->response($path);
+})->where('path', '.*');
+
+// ProductController.php — URL selalu via proxy backend, bukan R2 langsung
+'image_url' => $product->image ? url('/api/media/' . $product->image) : null,
+```
+
+### 6. Server-side WhatsApp Proxy
 
 Token Fonnte **tidak pernah menyentuh browser**. Frontend memanggil Next.js API Route `/api/send-whatsapp` di server, yang kemudian menghubungi Fonnte. Token hanya ada di environment variable server.
 
@@ -184,9 +210,12 @@ Token Fonnte **tidak pernah menyentuh browser**. Frontend memanggil Next.js API 
 - Panel kelola produk langsung dari kasir (slide-over)
 
 ### Shift Management / Klerek
-- Guard: tidak bisa transaksi tanpa shift aktif
-- **Buka Shift** — kalkulator denominasi uang (Rp100.000 s.d. Rp100) + modal awal + catatan
-- **Tutup Shift** — 6 section: identitas, ringkasan penjualan, breakdown pembayaran, hitung kas fisik (denominasi), kas kecil, rekonsiliasi otomatis dengan indikator selisih warna
+- Shift **per-tenant** — satu shift aktif untuk semua kasir, bukan per-user
+- **Auto-resume**: login saat shift masih aktif → langsung terhubung, tidak perlu isi form lagi
+- **Form buka shift** — nama shift custom + preset (Pagi/Siang/Malam) + pilih jam mulai & selesai + kalkulator denominasi (Rp100.000 s.d. Rp100) + modal awal
+- **Realtime enforcement** — transaksi diblokir di luar jam shift; banner warning orange + pesan informatif
+- **Info bar** — tampilkan nama shift, jam aktif, jumlah order, total penjualan langsung di kasir
+- **Tutup Shift / Klerek** — 6 section: identitas, ringkasan penjualan, breakdown pembayaran, hitung kas fisik (denominasi), kas kecil, rekonsiliasi otomatis dengan indikator selisih warna
 - Riwayat shift lengkap dengan laporan per-shift
 
 ### Dashboard & Analytics
@@ -298,7 +327,8 @@ npm run dev
 | Isolasi Data | TenantScope — `WHERE tenant_id = ?` otomatis |
 | Payment Key | Server Key dienkripsi di DB (`encrypted` cast) |
 | WhatsApp Token | Server-side only, tidak pernah ke browser |
-| File Upload | Validasi MIME + max 2MB |
+| File Upload | Validasi MIME + max 2MB, disimpan di Cloudflare R2 |
+| Gambar Produk | Diproksikan via backend — URL R2 tidak pernah terekspos ke browser |
 | SQL Injection | Eloquent ORM + parameter binding |
 
 ---
@@ -325,13 +355,14 @@ npm run dev
 `Multi-tenant Architecture` `Laravel Sanctum` `Laravel Global Scope`
 `Groq AI Integration` `OpenRouter Fallback` `LLM Rate Limiting`
 `Midtrans Split Payment` `WhatsApp API` `PDF & Excel Export`
-`Shift Management & Cash Reconciliation` `Role-based Access Control`
-`E2E Testing (TestSprite)` `Docker` `Vercel` `Railway`
+`Cloudflare R2 (S3-compatible)` `Backend Media Proxy` `Cloud Storage`
+`Shift Management & Cash Reconciliation` `Realtime Time Enforcement`
+`Role-based Access Control` `E2E Testing (TestSprite)` `Docker` `Vercel` `Railway`
 
 ---
 
 **[🌐 Coba Live Demo → kasirai.vercel.app](https://kasirai.vercel.app/)**
 
-*Dibangun dengan sepenuh hati — Mei–Juni 2026*
+*Dibangun dengan sepenuh hati — Mei–Juni 2026 · Production ready*
 
 </div>

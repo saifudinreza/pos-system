@@ -139,38 +139,31 @@ function ReceiptModal({ isOpen, data, onClose }) {
   if (!isOpen || !data) return null;
 
   const buildWhatsAppText = () => {
-    const LINE = "━━━━━━━━━━━━━━━━━━━━━━━━━";
+    const SEP = "-----------------------------";
     let t = "";
 
-    t += `*KASIR AI*\n`;
-    t += `_Struk Pembayaran Digital_\n`;
-    t += `${LINE}\n\n`;
-
-    t += ` *Detail Pesanan*\n`;
-    t += ` No. Order  : *${data.order_number}*\n`;
-    t += ` Kasir       : ${data.kasir}\n`;
-    t += ` Tanggal    : ${data.date}\n\n`;
-
-    t += `${LINE}\n`;
-    t += ` *Item Pesanan*\n`;
-    t += `${LINE}\n`;
+    t += `*STRUK PEMBAYARAN*\n`;
+    t += `${SEP}\n`;
+    t += `No. Order : *${data.order_number}*\n`;
+    t += `Tanggal   : ${data.date}\n`;
+    t += `Kasir     : ${data.kasir}\n`;
+    t += `${SEP}\n`;
+    t += `*ITEM PESANAN*\n`;
     data.items.forEach((i) => {
-      t += `▸ *${i.name}*\n`;
-      t += `   ${i.quantity} pcs × ${formatCurrency(i.price)} = *${formatCurrency(i.price * i.quantity)}*\n`;
+      t += `${i.name}\n`;
+      t += `  ${i.quantity} x ${formatCurrency(i.price)} = ${formatCurrency(i.price * i.quantity)}\n`;
     });
-    t += `${LINE}\n\n`;
-
-    t += ` Subtotal       : ${formatCurrency(data.subtotal)}\n`;
-    t += `${LINE}\n`;
-    t += ` *TOTAL           : ${formatCurrency(data.total)}*\n`;
-    t += `${LINE}\n\n`;
-
-    t += ` Bayar (${data.payment_method}) : ${formatCurrency(data.cash)}\n`;
-    if (data.change > 0) t += ` Kembalian        : *${formatCurrency(data.change)}*\n`;
-
-    t += `\n${LINE}\n`;
-    t += `*Terima kasih sudah berbelanja!*\n`;
-    t += `Sampai jumpa lagi & selamat menikmati! 👋✨`;
+    t += `${SEP}\n`;
+    t += `Subtotal  : ${formatCurrency(data.subtotal)}\n`;
+    t += `PPN 11%   : ${formatCurrency(data.tax)}\n`;
+    t += `${SEP}\n`;
+    t += `*TOTAL    : ${formatCurrency(data.total)}*\n`;
+    t += `${SEP}\n`;
+    t += `Bayar (${data.payment_method}) : ${formatCurrency(data.cash)}\n`;
+    if (data.change > 0) t += `Kembalian : *${formatCurrency(data.change)}*\n`;
+    t += `${SEP}\n`;
+    t += `Terima kasih sudah berbelanja!\n`;
+    t += `Sampai jumpa kembali.`;
 
     return t;
   };
@@ -191,13 +184,14 @@ function ReceiptModal({ isOpen, data, onClose }) {
       ${data.items.map((i) => `<div class="b">${i.name}</div><div class="row"><span style="padding-left:8px">${i.quantity} x ${fmt(i.price)}</span><span>${fmt(i.price * i.quantity)}</span></div>`).join("")}
       <div class="sep"></div>
       <div class="row"><span>Subtotal</span><span>${fmt(data.subtotal)}</span></div>
+      <div class="row"><span>PPN 11%</span><span>${fmt(data.tax)}</span></div>
       <div class="sep"></div>
       <div class="row b"><span>TOTAL</span><span>${fmt(data.total)}</span></div>
       <div class="sep"></div>
       <div class="row"><span>Bayar (${data.payment_method})</span><span>${fmt(data.cash)}</span></div>
       ${data.change > 0 ? `<div class="row"><span>Kembalian</span><span class="b">${fmt(data.change)}</span></div>` : ""}
       <div class="sep"></div>
-      <div class="c">Terima kasih sudah berbelanja! 😊</div>
+      <div class="c">Terima kasih sudah berbelanja!</div>
       <script>window.onload=function(){window.print();window.close()}</script>
       </body></html>`);
     w.document.close();
@@ -256,6 +250,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
           ))}
           <div className="border-t border-dashed border-brand-black/30 my-2" />
           <div className="flex justify-between text-xs"><span>Subtotal</span><span>{formatCurrency(data.subtotal)}</span></div>
+          <div className="flex justify-between text-xs text-brand-black/60"><span>PPN 11%</span><span>{formatCurrency(data.tax)}</span></div>
           <div className="border-t-2 border-brand-black mt-2 pt-2">
             <div className="flex justify-between font-black text-base"><span>TOTAL</span><span>{formatCurrency(data.total)}</span></div>
           </div>
@@ -266,7 +261,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
               <span>Kembalian</span><span>{formatCurrency(data.change)}</span>
             </div>
           )}
-          <div className="text-center mt-4 text-xs text-brand-black/40">Terima kasih sudah berbelanja! 😊</div>
+          <div className="text-center mt-4 text-xs text-brand-black/40">Terima kasih sudah berbelanja!</div>
         </div>
         {/* Actions */}
         <div className="p-4 border-t-2 border-brand-black space-y-2 bg-brand-cream shrink-0">
@@ -1651,8 +1646,16 @@ export default function KasirPage() {
           />
 
           {/* Ringkasan harga */}
-          <div className="space-y-1.5 text-sm">
-            <div className="flex justify-between font-black text-base border-t-2 border-brand-black pt-2">
+          <div className="space-y-1 text-sm border-t-2 border-brand-black pt-2">
+            <div className="flex justify-between text-brand-black/60">
+              <span>Subtotal</span>
+              <span className="font-mono">{formatCurrency(getSubtotal())}</span>
+            </div>
+            <div className="flex justify-between text-brand-black/60">
+              <span>PPN 11%</span>
+              <span className="font-mono">{formatCurrency(getTax())}</span>
+            </div>
+            <div className="flex justify-between font-black text-base border-t border-brand-black/30 pt-1.5 mt-1">
               <span>TOTAL</span>
               <span className="font-mono">{formatCurrency(getTotal())}</span>
             </div>
