@@ -11,7 +11,7 @@ import NeoTable   from "@/components/ui/NeoTable";
 import NeoBadge   from "@/components/ui/NeoBadge";
 import NeoModal   from "@/components/ui/NeoModal";
 import NeoInput   from "@/components/ui/NeoInput";
-import { formatCurrency, getImageUrl, getErrorMessage } from "@/lib/utils";
+import { formatCurrency, getErrorMessage } from "@/lib/utils";
 
 const EMPTY_FORM = {
   name: "", sku: "", description: "",
