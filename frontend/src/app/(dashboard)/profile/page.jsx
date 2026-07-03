@@ -217,7 +217,7 @@ export default function ProfilePage() {
                     type="password"
                     value={form.midtrans_server_key}
                     onChange={(e) => setForm((p) => ({ ...p, midtrans_server_key: e.target.value }))}
-                    placeholder={user?.midtrans_configured ? "••••••••••••••••• (sudah tersimpan)" : "SB-Mid-server-..."}
+                    placeholder={user?.midtrans_configured ? "••••••••••••••••• (sudah tersimpan)" : "Mid-server-..."}
                     className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono placeholder:text-brand-black/25"
                     style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
                     autoComplete="off"
@@ -232,7 +232,7 @@ export default function ProfilePage() {
                     type="text"
                     value={form.midtrans_client_key}
                     onChange={(e) => setForm((p) => ({ ...p, midtrans_client_key: e.target.value }))}
-                    placeholder="SB-Mid-client-..."
+                    placeholder="Mid-client-..."
                     className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono placeholder:text-brand-black/25"
                     style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
                     autoComplete="off"

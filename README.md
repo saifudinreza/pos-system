@@ -151,7 +151,7 @@ private function configureServerKey(Request $request): void
 const loadMidtransSnap = (clientKey) => new Promise((resolve, reject) => {
     if (window.snap) return resolve();
     const script = document.createElement("script");
-    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    script.src = process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL ?? "https://app.midtrans.com/snap/snap.js";
     script.setAttribute("data-client-key", clientKey);
     script.onload = resolve;
     document.body.appendChild(script);
@@ -293,8 +293,9 @@ cp .env.example .env
 # DB_CONNECTION=mysql
 # DB_DATABASE=kasirai
 # GROQ_API_KEY=gsk_...
-# MIDTRANS_SERVER_KEY=SB-Mid-server-...
-# MIDTRANS_CLIENT_KEY=SB-Mid-client-...
+# MIDTRANS_SERVER_KEY=Mid-server-...      # production (SB-Mid-server-... untuk sandbox)
+# MIDTRANS_CLIENT_KEY=Mid-client-...      # production (SB-Mid-client-... untuk sandbox)
+# MIDTRANS_IS_PRODUCTION=true
 
 php artisan key:generate
 php artisan migrate --seed
@@ -310,7 +311,8 @@ npm install
 
 # Buat .env.local:
 # NEXT_PUBLIC_API_URL=http://localhost:8000/api
-# NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=SB-Mid-client-...
+# NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=Mid-client-...
+# NEXT_PUBLIC_MIDTRANS_SNAP_URL=https://app.midtrans.com/snap/snap.js
 # FONNTE_TOKEN=...
 
 npm run dev

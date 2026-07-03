@@ -9,7 +9,7 @@ import NeoButton from "@/components/ui/NeoButton";
 import NeoInput  from "@/components/ui/NeoInput";
 import { getErrorMessage, formatCurrency } from "@/lib/utils";
 
-const SNAP_URL    = process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL    ?? "https://app.sandbox.midtrans.com/snap/snap.js";
+const SNAP_URL    = process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL    ?? "https://app.midtrans.com/snap/snap.js";
 const CLIENT_KEY  = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY  ?? "";
 
 /** Load Midtrans Snap script on-demand. Resolves when window.snap is ready. */

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
+import LogoMark from "@/components/brand/LogoMark";
 
 export default function KasirLayout({ children }) {
   const hydrateFromStorage = useAuthStore((s) => s.hydrateFromStorage);
@@ -34,12 +35,7 @@ export default function KasirLayout({ children }) {
       {/* Kasir Navbar — minimal, no sidebar */}
       <header className="h-14 bg-brand-black text-white flex items-center justify-between px-4 border-b-2 border-brand-black shrink-0 z-10">
         <div className="flex items-center gap-3">
-          <div
-            className="w-8 h-8 bg-brand-yellow border-2 border-brand-black flex items-center justify-center font-black text-sm"
-            style={{ boxShadow: "2px 2px 0 #FFE500" }}
-          >
-            K
-          </div>
+          <LogoMark size={32} />
           <span className="font-black font-grotesk text-white">KasirAI</span>
           <span
             className="hidden sm:inline-block text-[10px] font-black font-mono bg-brand-yellow text-brand-black border border-brand-black px-2 py-0.5"

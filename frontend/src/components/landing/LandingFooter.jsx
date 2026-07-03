@@ -1,3 +1,5 @@
+import LogoMark from "@/components/brand/LogoMark";
+
 // ─── Contact & social config — ganti sesuai data bisnis kamu ────
 const CONTACT = {
   email:     "donojomi@gmail.com",
@@ -111,12 +113,7 @@ export default function LandingFooter() {
 
             {/* Logo */}
             <div className="flex items-center gap-3 mb-4">
-              <div
-                className="w-10 h-10 bg-brand-yellow border-2 border-white flex items-center justify-center font-black text-xl text-brand-black leading-none rounded-md"
-                style={{ boxShadow: "3px 3px 0 #FFE500" }}
-              >
-                K
-              </div>
+              <LogoMark size={40} />
               <span className="font-black text-2xl tracking-tight font-grotesk">
                 KasirAI
               </span>

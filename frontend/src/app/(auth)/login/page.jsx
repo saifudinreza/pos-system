@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import useAuthStore from "@/stores/authStore";
 import { getErrorMessage } from "@/lib/utils";
+import LogoMark from "@/components/brand/LogoMark";
 
 export default function LoginPage() {
   const { login, isLoading } = useAuthStore();
@@ -55,12 +56,7 @@ export default function LoginPage() {
 
         {/* Logo */}
         <div className="flex items-center gap-3 justify-center mb-8">
-          <div
-            className="w-12 h-12 bg-brand-yellow border-3 border-brand-black flex items-center justify-center font-black text-2xl"
-            style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
-          >
-            K
-          </div>
+          <LogoMark size={48} />
           <span className="font-black text-3xl font-grotesk">KasirAI</span>
         </div>
 

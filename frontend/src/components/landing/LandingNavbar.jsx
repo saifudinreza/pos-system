@@ -12,18 +12,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import LogoMark from "@/components/brand/LogoMark";
 
 // --- Logo komponen ---
 // Analogi: Logo adalah "wajah" brand — kotak kuning dengan K, langsung dikenal
 const Logo = () => (
   <Link href="/" className="flex items-center gap-3 group">
-    {/* Kotak kuning berisi huruf K — identitas visual neobrutalist */}
-    <div
-      className="w-9 h-9 bg-brand-yellow border-2 border-brand-black flex items-center justify-center font-black text-lg leading-none"
-      style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-    >
-      K
-    </div>
+    {/* Ikon brand — identitas visual neobrutalist */}
+    <LogoMark size={36} className="group-hover:-rotate-3 transition-transform" />
     {/* Nama brand di sebelah logo */}
     <span className="font-black text-xl text-brand-black tracking-tight font-grotesk">
       KasirAI

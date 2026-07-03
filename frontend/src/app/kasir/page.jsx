@@ -1246,7 +1246,7 @@ export default function KasirPage() {
     if (existing) { existing.onload = resolve; return; }
     const script = document.createElement("script");
     script.id = "midtrans-snap-js";
-    script.src = "https://app.sandbox.midtrans.com/snap/snap.js";
+    script.src = process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL ?? "https://app.midtrans.com/snap/snap.js";
     script.setAttribute("data-client-key", clientKey);
     script.onload  = resolve;
     script.onerror = () => reject(new Error("Gagal memuat Midtrans Snap."));

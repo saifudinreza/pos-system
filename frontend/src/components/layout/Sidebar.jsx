@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
+import LogoMark from "@/components/brand/LogoMark";
 import {
   LayoutDashboard, // icon dashboard
   MonitorCheck,    // icon kasir
@@ -149,12 +150,7 @@ export default function Sidebar({ isOpen, onClose }) {
         {/* ── Logo + tombol tutup (mobile) ── */}
         <div className="px-4 py-4 border-b-2 border-brand-black flex items-center justify-between shrink-0">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div
-              className="w-8 h-8 bg-brand-yellow border-2 border-brand-black flex items-center justify-center font-black text-sm"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-            >
-              K
-            </div>
+            <LogoMark size={32} />
             <span className="font-black text-lg font-grotesk">KasirAI</span>
           </Link>
           {/* Tombol ✕ hanya di mobile (lg:hidden) */}
