@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
+use Midtrans\Transaction;
 
 class SubscriptionController extends Controller
 {
@@ -37,10 +38,44 @@ class SubscriptionController extends Controller
             ->orderByDesc('created_at')
             ->first();
 
+        $pending = Subscription::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->orderByDesc('created_at')
+            ->first();
+
         return response()->json([
             'plan'         => $user->subscription_plan,
             'subscription' => $active ? $this->formatSubscription($active) : null,
+            'pending'      => $pending ? $this->formatSubscription($pending) : null,
         ]);
+    }
+
+    // POST /api/subscription/cancel-pending — user batalkan transaksi pending miliknya sendiri
+    public function cancelPending(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $subscription = Subscription::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->orderByDesc('created_at')
+            ->first();
+
+        if (! $subscription) {
+            return response()->json(['message' => 'Tidak ada transaksi pending untuk dibatalkan.'], 404);
+        }
+
+        // Batalkan juga di sisi Midtrans supaya VA/instruksi bayar yang sudah
+        // diterbitkan langsung nonaktif (user tidak bisa transfer lagi setelah ini).
+        try {
+            Transaction::cancel($subscription->midtrans_order_id);
+        } catch (\Exception $e) {
+            // Transaksi mungkin belum sempat berstatus "pending" di sisi Midtrans
+            // (misal user tutup popup sebelum pilih metode bayar) — aman dilanjutkan.
+            Log::warning('Midtrans cancel gagal, lanjut batalkan lokal: ' . $e->getMessage());
+        }
+
+        $subscription->update(['status' => 'cancelled']);
+
+        return response()->json(['message' => 'Transaksi berhasil dibatalkan.']);
     }
 
     // POST /api/subscription/initiate — buat transaksi Midtrans untuk upgrade

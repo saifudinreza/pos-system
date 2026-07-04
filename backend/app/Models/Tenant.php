@@ -16,14 +16,23 @@ class Tenant extends Model
         'is_active',
         'midtrans_server_key',
         'midtrans_client_key',
+        'midtrans_is_production',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_active'           => 'boolean',
-            'midtrans_server_key' => 'encrypted',
+            'is_active'               => 'boolean',
+            'midtrans_server_key'     => 'encrypted',
+            'midtrans_is_production'  => 'boolean',
         ];
+    }
+
+    // Mode Midtrans efektif untuk tenant ini: pakai preferensi tenant kalau
+    // sudah diisi (isi server key sendiri), fallback ke mode platform kalau belum.
+    public function midtransIsProduction(): bool
+    {
+        return $this->midtrans_is_production ?? config('services.midtrans.is_production');
     }
 
     public function users(): \Illuminate\Database\Eloquent\Relations\HasMany

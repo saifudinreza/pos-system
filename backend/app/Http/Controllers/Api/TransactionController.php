@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
@@ -37,7 +38,16 @@ class TransactionController extends Controller
             abort(422, 'Midtrans belum dikonfigurasi. Masuk ke Profil → atur Server Key & Client Key Midtrans terlebih dahulu.');
         }
 
-        Config::$serverKey = $serverKey;
+        Config::$serverKey    = $serverKey;
+        Config::$isProduction = $tenant?->midtransIsProduction() ?? config('services.midtrans.is_production');
+    }
+
+    // Versi configureServerKey() untuk webhook — tidak ada user login,
+    // jadi tenant dicari lewat transaksi yang sedang diverifikasi.
+    private function configureServerKeyForTenant(?Tenant $tenant): void
+    {
+        Config::$serverKey    = $tenant?->midtrans_server_key ?? config('services.midtrans.server_key');
+        Config::$isProduction = $tenant?->midtransIsProduction() ?? config('services.midtrans.is_production');
     }
 
     // =============================================================
@@ -291,6 +301,27 @@ class TransactionController extends Controller
     public function webhook(Request $request): JsonResponse
     {
         try {
+            // Ambil order_id langsung dari body notifikasi — belum diverifikasi,
+            // cuma dipakai untuk tahu transaksi & tenant mana yang bersangkutan,
+            // supaya kita tahu server key MANA yang harus dipakai untuk verifikasi.
+            $rawOrderId = $request->input('order_id');
+
+            $transaction = Transaction::with('order.tenant')
+                ->where('midtrans_order_id', $rawOrderId)
+                ->first();
+
+            if (! $transaction) {
+                Log::warning('Transaksi tidak ditemukan untuk order_id: ' . $rawOrderId);
+                return response()->json(['message' => 'OK'], 200);
+                // ↑ Return 200 tetap supaya Midtrans tidak retry webhook
+            }
+
+            // Set server key sesuai tenant pemilik transaksi ini SEBELUM
+            // verifikasi signature — kalau tenant punya Midtrans sendiri,
+            // Midtrans menyegel notifikasi pakai server key tenant itu,
+            // bukan server key platform.
+            $this->configureServerKeyForTenant($transaction->order?->tenant);
+
             // Verifikasi bahwa request benar-benar dari Midtrans
             $notification = new Notification();
             // ↑ Midtrans SDK otomatis verifikasi signature key
@@ -306,15 +337,6 @@ class TransactionController extends Controller
                 'status'   => $transactionStatus,
             ]);
             // ↑ Log setiap webhook masuk untuk debugging
-
-            // Cari transaksi berdasarkan midtrans_order_id
-            $transaction = Transaction::where('midtrans_order_id', $orderId)->first();
-
-            if (! $transaction) {
-                Log::warning('Transaksi tidak ditemukan untuk order_id: ' . $orderId);
-                return response()->json(['message' => 'OK'], 200);
-                // ↑ Return 200 tetap supaya Midtrans tidak retry webhook
-            }
 
             // ===== UPDATE STATUS BERDASARKAN NOTIFIKASI MIDTRANS =====
             DB::transaction(function () use (

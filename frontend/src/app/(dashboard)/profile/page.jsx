@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   UserCircle, Mail, Shield, CreditCard,
-  ArrowUpCircle, CheckCircle2, Calendar, Zap, Store, KeyRound,
+  ArrowUpCircle, CheckCircle2, Calendar, Zap, Store, KeyRound, Clock, XCircle,
 } from "lucide-react";
 import useAuthStore from "@/stores/authStore";
 import subscriptionService from "@/services/subscriptionService";
@@ -49,7 +49,9 @@ export default function ProfilePage() {
   const { user, setUser, fetchCurrentUser } = useAuthStore();
 
   const [sub,       setSub]       = useState(null);
-  const [form,      setForm]      = useState({ name: "", phone: "", store_name: "", store_description: "", midtrans_server_key: "", midtrans_client_key: "" });
+  const [pending,   setPending]   = useState(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [form,      setForm]      = useState({ name: "", phone: "", store_name: "", store_description: "", midtrans_server_key: "", midtrans_client_key: "", midtrans_is_production: true });
   const [saving,    setSaving]    = useState(false);
   const [formError, setFormError] = useState("");
   const [success,   setSuccess]   = useState(false);
@@ -69,15 +71,33 @@ export default function ProfilePage() {
         store_description:    user.tenant_description ?? "",
         midtrans_server_key:  "",
         midtrans_client_key:  user.midtrans_client_key ?? "",
+        midtrans_is_production: user.midtrans_is_production ?? true,
       });
     }
   }, [user]);
 
-  useEffect(() => {
+  const loadSubscriptionStatus = () => {
     subscriptionService.getStatus()
-      .then((d) => setSub(d.subscription))
+      .then((d) => { setSub(d.subscription); setPending(d.pending); })
       .catch(() => {});
+  };
+
+  useEffect(() => {
+    loadSubscriptionStatus();
   }, []);
+
+  const handleCancelPending = async () => {
+    if (!confirm("Batalkan transaksi pembayaran ini?")) return;
+    setCancelling(true);
+    try {
+      await subscriptionService.cancelPending();
+      setPending(null);
+    } catch (err) {
+      alert(getErrorMessage(err));
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -238,6 +258,27 @@ export default function ProfilePage() {
                     autoComplete="off"
                   />
                 </div>
+
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-wider text-brand-black/60">Mode Production</p>
+                    <p className="text-[11px] text-brand-black/40">
+                      Matikan untuk pakai key sandbox (testing) sebelum serius pakai uang asli.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={form.midtrans_is_production}
+                    onClick={() => setForm((p) => ({ ...p, midtrans_is_production: !p.midtrans_is_production }))}
+                    className={`shrink-0 w-12 h-7 border-2 border-brand-black transition-colors relative ${form.midtrans_is_production ? "bg-brand-yellow" : "bg-white"}`}
+                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-5 h-5 bg-brand-black transition-transform ${form.midtrans_is_production ? "translate-x-[22px]" : "translate-x-0.5"}`}
+                    />
+                  </button>
+                </div>
               </div>
             )}
 
@@ -255,11 +296,38 @@ export default function ProfilePage() {
               <CreditCard size={20} strokeWidth={2.5} />
             </div>
             <h3 className="font-black text-base font-grotesk">
-              {hasActiveSub ? "Status Langganan" : "Paket Langganan"}
+              {hasActiveSub ? "Status Langganan" : pending ? "Menunggu Pembayaran" : "Paket Langganan"}
             </h3>
           </div>
 
-          {hasActiveSub ? (
+          {!hasActiveSub && pending ? (
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 border-2 border-brand-black bg-brand-yellow font-black text-sm"
+                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                <Clock size={14} />
+                KasirAI {PLAN_LABELS[pending.plan] ?? pending.plan}
+              </div>
+
+              <div className="p-4 bg-yellow-50 border-2 border-yellow-400 space-y-2">
+                <p className="flex items-center gap-2 text-yellow-800 font-black text-sm">
+                  <Clock size={15} /> Menunggu Pembayaran
+                </p>
+                <p className="text-xs text-brand-black/60">
+                  Selesaikan pembayaran sesuai instruksi Midtrans, atau batalkan kalau tidak jadi lanjut.
+                </p>
+              </div>
+
+              <NeoButton
+                variant="danger"
+                size="sm"
+                className="w-full"
+                disabled={cancelling}
+                onClick={handleCancelPending}
+              >
+                <XCircle size={13} /> {cancelling ? "Membatalkan..." : "Batalkan Transaksi"}
+              </NeoButton>
+            </div>
+          ) : hasActiveSub ? (
             <div className="space-y-4">
               {/* Badge plan aktif */}
               <div className={`inline-flex items-center gap-2 px-3 py-1.5 border-2 font-black text-sm ${PLAN_COLORS[plan] ?? PLAN_COLORS.free}`}

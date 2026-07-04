@@ -11,6 +11,11 @@ const subscriptionService = {
     return data;
   },
 
+  cancelPending: async () => {
+    const { data } = await api.post("/subscription/cancel-pending");
+    return data;
+  },
+
   updateProfile: async (payload) => {
     const { data } = await api.put("/profile", payload);
     return data;

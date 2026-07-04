@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ----- SUBSCRIPTION -----
     Route::get('/subscription',          [SubscriptionController::class, 'status']);
     Route::post('/subscription/initiate', [SubscriptionController::class, 'initiate']);
+    Route::post('/subscription/cancel-pending', [SubscriptionController::class, 'cancelPending']);
     // ↑ /me = ambil data user yang sedang login
 
 

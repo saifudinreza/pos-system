@@ -170,6 +170,7 @@ class AuthController extends Controller
             'store_description'    => ['nullable', 'string', 'max:500'],
             'midtrans_server_key'  => ['nullable', 'string', 'max:500'],
             'midtrans_client_key'  => ['nullable', 'string', 'max:255'],
+            'midtrans_is_production' => ['nullable', 'boolean'],
         ]);
 
         $user = $request->user();
@@ -186,6 +187,7 @@ class AuthController extends Controller
             if (array_key_exists('store_description', $validated)) $tenantData['description'] = $validated['store_description'];
             if (array_key_exists('midtrans_server_key', $validated)) $tenantData['midtrans_server_key'] = $validated['midtrans_server_key'];
             if (array_key_exists('midtrans_client_key', $validated)) $tenantData['midtrans_client_key'] = $validated['midtrans_client_key'];
+            if (array_key_exists('midtrans_is_production', $validated)) $tenantData['midtrans_is_production'] = $validated['midtrans_is_production'];
             if (!empty($tenantData)) $user->tenant->update($tenantData);
         }
 
@@ -206,6 +208,7 @@ class AuthController extends Controller
             'tenant_name'           => $user->tenant?->name,
             'tenant_description'    => $user->tenant?->description,
             'midtrans_client_key'   => $user->tenant?->midtrans_client_key,
+            'midtrans_is_production' => $user->tenant?->midtrans_is_production,
             'midtrans_configured'   => !empty($user->tenant?->midtrans_server_key) && !empty($user->tenant?->midtrans_client_key),
             'name'                  => $user->name,
             'email'                 => $user->email,
