@@ -171,9 +171,9 @@ const AIChat = () => {
 
   useEffect(() => {
     let t;
-    if (phase === 1)        t = setTimeout(() => setPhase(TYPING), 1400);
+    if (phase === 1) t = setTimeout(() => setPhase(TYPING), 1400);
     else if (phase === TYPING) t = setTimeout(() => setPhase(2), 1100);
-    else if (phase === 2)   t = setTimeout(() => {
+    else if (phase === 2) t = setTimeout(() => {
       setPhase(1);
       setIdx((i) => (i + 1) % CONVO.length);
     }, 2600);
@@ -292,9 +292,9 @@ const StampRays = ({ visible, reduce }) => (
 // ======================================================
 const OrderTicker = () => {
   const orders = [
-    { inv: "#3829", time: "2 mnt",   amt: "Rp 45.000", pay: "QRIS",     payBg: "#0066FF", payFg: "#fff" },
-    { inv: "#3830", time: "barusan", amt: "Rp 25.000", pay: "Cash",     payBg: "#FFE500", payFg: "#0A0A0A" },
-    { inv: "#3831", time: "5 mnt",   amt: "Rp 78.000", pay: "Transfer", payBg: "#00C27C", payFg: "#fff" },
+    { inv: "#3829", time: "2 mnt", amt: "Rp 45.000", pay: "QRIS", payBg: "#0066FF", payFg: "#fff" },
+    { inv: "#3830", time: "barusan", amt: "Rp 25.000", pay: "Cash", payBg: "#FFE500", payFg: "#0A0A0A" },
+    { inv: "#3831", time: "5 mnt", amt: "Rp 78.000", pay: "Transfer", payBg: "#00C27C", payFg: "#fff" },
   ];
   const [idx, setIdx] = useState(0);
   const [tick, setTick] = useState(0);
@@ -409,293 +409,293 @@ function HeroStage() {
           transition={reduce ? undefined : { duration: 8, repeat: Infinity, ease: "easeInOut" }}
           style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
         >
-        {/* Dekorasi geometris — translateZ negatif → di "belakang", parallax saat tilt */}
-        <div style={{
-          position: "absolute", width: "130px", height: "130px",
-          background: "#FF7AB6", border: "2.5px solid #0A0A0A",
-          top: 0, right: "6%", transform: "rotate(10deg) translateZ(-60px)",
-          boxShadow: "6px 6px 0 #0A0A0A",
-        }} />
-        <div style={{
-          position: "absolute", width: "76px", height: "76px",
-          background: "#0066FF", border: "2.5px solid #0A0A0A",
-          bottom: "30px", right: 0, borderRadius: "50%",
-          boxShadow: "5px 5px 0 #0A0A0A",
-          transform: "translateZ(-40px)",
-        }} />
-        <div style={{
-          position: "absolute", width: "58px", height: "58px",
-          background: "#8B5CF6", border: "2.5px solid #0A0A0A",
-          top: "46%", left: "-6px", transform: "rotate(-12deg) translateZ(-30px)",
-          boxShadow: "5px 5px 0 #0A0A0A",
-        }} />
-
-        {/* Ping dots */}
-        <div className="hero-ping" style={{ top: "38%", left: "30%" }} />
-        <div className="hero-ping" style={{ top: "16%", right: "34%" }} />
-
-        {/* ---- Dashboard Window (depth sedang) ---- */}
-        <div style={{
-          position: "absolute", top: "18px", left: "8px", width: "420px",
-          background: "#fff", border: "2.5px solid #0A0A0A",
-          boxShadow: "10px 10px 0 #0A0A0A",
-          transform: "rotate(-1.5deg) translateZ(20px)",
-        }}>
-          {/* Titlebar */}
+          {/* Dekorasi geometris — translateZ negatif → di "belakang", parallax saat tilt */}
           <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "10px 14px", background: "#0A0A0A", color: "#fff",
-            borderBottom: "2.5px solid #0A0A0A",
-          }}>
-            <div style={{ display: "flex", gap: "6px" }}>
-              {["#FF3B3B", "#FFE500", "#00C27C"].map((c, i) => (
-                <span key={i} style={{
-                  width: "11px", height: "11px", borderRadius: "50%",
-                  border: "1.5px solid #fff", background: c, display: "block",
-                }} />
-              ))}
-            </div>
-            <div style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
-              background: "#222", border: "1.5px solid #555",
-              padding: "3px 10px", color: "#ccc",
-            }}>
-              kasirai.id/dashboard
-            </div>
-            <div style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
-              color: "#FFE500", fontWeight: 700, letterSpacing: ".06em",
-            }}>
-              ● LIVE
-            </div>
-          </div>
+            position: "absolute", width: "130px", height: "130px",
+            background: "#FF7AB6", border: "2.5px solid #0A0A0A",
+            top: 0, right: "6%", transform: "rotate(10deg) translateZ(-60px)",
+            boxShadow: "6px 6px 0 #0A0A0A",
+          }} />
+          <div style={{
+            position: "absolute", width: "76px", height: "76px",
+            background: "#0066FF", border: "2.5px solid #0A0A0A",
+            bottom: "30px", right: 0, borderRadius: "50%",
+            boxShadow: "5px 5px 0 #0A0A0A",
+            transform: "translateZ(-40px)",
+          }} />
+          <div style={{
+            position: "absolute", width: "58px", height: "58px",
+            background: "#8B5CF6", border: "2.5px solid #0A0A0A",
+            top: "46%", left: "-6px", transform: "rotate(-12deg) translateZ(-30px)",
+            boxShadow: "5px 5px 0 #0A0A0A",
+          }} />
 
-          {/* Body */}
-          <div style={{ padding: "18px" }}>
+          {/* Ping dots */}
+          <div className="hero-ping" style={{ top: "38%", left: "30%" }} />
+          <div className="hero-ping" style={{ top: "16%", right: "34%" }} />
+
+          {/* ---- Dashboard Window (depth sedang) ---- */}
+          <div style={{
+            position: "absolute", top: "18px", left: "8px", width: "420px",
+            background: "#fff", border: "2.5px solid #0A0A0A",
+            boxShadow: "10px 10px 0 #0A0A0A",
+            transform: "rotate(-1.5deg) translateZ(20px)",
+          }}>
+            {/* Titlebar */}
             <div style={{
-              display: "flex", alignItems: "baseline",
-              justifyContent: "space-between", marginBottom: "14px",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              padding: "10px 14px", background: "#0A0A0A", color: "#fff",
+              borderBottom: "2.5px solid #0A0A0A",
             }}>
+              <div style={{ display: "flex", gap: "6px" }}>
+                {["#FF3B3B", "#FFE500", "#00C27C"].map((c, i) => (
+                  <span key={i} style={{
+                    width: "11px", height: "11px", borderRadius: "50%",
+                    border: "1.5px solid #fff", background: c, display: "block",
+                  }} />
+                ))}
+              </div>
               <div style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 800, fontSize: "16px", letterSpacing: "-.02em",
+                fontFamily: "'JetBrains Mono', monospace", fontSize: "11px",
+                background: "#222", border: "1.5px solid #555",
+                padding: "3px 10px", color: "#ccc",
               }}>
-                Penjualan Minggu Ini
-                <span style={{
-                  display: "block",
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "10px", fontWeight: 500, color: "#666",
-                  textTransform: "uppercase", letterSpacing: ".06em", marginTop: "2px",
-                }}>
-                  Senin 18 – Minggu 24 Mei
-                </span>
+                sikasirai.com/dashboard
               </div>
               <div style={{
                 fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
-                fontWeight: 700, background: "#00C27C", color: "#fff",
-                padding: "3px 8px", border: "1.5px solid #0A0A0A",
-                display: "inline-flex", alignItems: "center", gap: "4px",
+                color: "#FFE500", fontWeight: 700, letterSpacing: ".06em",
               }}>
-                ↑ REALTIME
+                ● LIVE
               </div>
             </div>
 
-            {/* Stat Strip */}
-            <div style={{
-              display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
-              gap: "8px", marginBottom: "16px",
-            }}>
-              {[
-                { label: "Revenue", val: "Rp 4,7jt", trend: "↑ 18%", bg: "#FFE500" },
-                { label: "Order",   val: "312",       trend: "↑ 12%", bg: "#FFFBEB" },
-                { label: "AOV",     val: "Rp 15k",    trend: "→ stabil", bg: "#F5F5F5", trendColor: "#0066FF" },
-              ].map((s) => (
-                <div key={s.label} style={{ border: "2px solid #0A0A0A", padding: "8px 10px", background: s.bg }}>
-                  <div style={{
-                    fontFamily: "'JetBrains Mono', monospace", fontSize: "9px",
-                    fontWeight: 700, textTransform: "uppercase",
-                    letterSpacing: ".06em", color: "#333",
-                  }}>
-                    {s.label}
-                  </div>
-                  <div style={{
-                    fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800,
-                    fontSize: "18px", letterSpacing: "-.02em", marginTop: "2px",
-                  }}>
-                    {s.val}
-                  </div>
-                  <div style={{
-                    fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
-                    fontWeight: 700, color: s.trendColor || "#00C27C", marginTop: "2px",
-                  }}>
-                    {s.trend}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <BarChart />
-          </div>
-        </div>
-
-        {/* ---- LUNAS Stamp ---- */}
-        {/* Outer: jaga kedalaman 3D (translateZ) untuk parallax saat tilt */}
-        <div style={{
-          position: "absolute", top: "44px", right: "30px",
-          width: "110px", height: "110px",
-          transform: "translateZ(55px)", transformStyle: "preserve-3d",
-        }}>
-          {/* Entrance: melenting masuk sambil BERPUTAR dari -200° → -12° */}
-          <motion.div
-            initial={reduce ? { scale: 1, rotate: -12 } : { scale: 0, rotate: -200 }}
-            animate={
-              stampVisible
-                ? { scale: 1, rotate: -12 }
-                : (reduce ? { scale: 1, rotate: -12 } : { scale: 0, rotate: -200 })
-            }
-            transition={{ type: "spring", stiffness: 170, damping: 11 }}
-            style={{
-              width: "100%", height: "100%",
-              background: "#00C27C", color: "#fff",
-              border: "3px solid #0A0A0A", borderRadius: "50%",
-              boxShadow: "6px 6px 0 #0A0A0A", overflow: "visible",
-            }}
-          >
-            {/* Wobble halus terus-menerus → stamp terasa "hidup" */}
-            <motion.div
-              animate={reduce ? undefined : { rotate: [-4, 4, -4] }}
-              transition={reduce ? undefined : { duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              style={{
-                position: "absolute", inset: 0,
-                display: "grid", placeItems: "center", textAlign: "center",
-              }}
-            >
-              <StampRays visible={stampVisible} reduce={reduce} />
-              <div style={{ position: "relative", zIndex: 1 }}>
+            {/* Body */}
+            <div style={{ padding: "18px" }}>
+              <div style={{
+                display: "flex", alignItems: "baseline",
+                justifyContent: "space-between", marginBottom: "14px",
+              }}>
                 <div style={{
                   fontFamily: "'Space Grotesk', sans-serif",
-                  fontWeight: 800, fontSize: "22px", letterSpacing: ".02em",
+                  fontWeight: 800, fontSize: "16px", letterSpacing: "-.02em",
                 }}>
-                  LUNAS
+                  Penjualan Minggu Ini
+                  <span style={{
+                    display: "block",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px", fontWeight: 500, color: "#666",
+                    textTransform: "uppercase", letterSpacing: ".06em", marginTop: "2px",
+                  }}>
+                    Senin 18 – Minggu 24 Mei
+                  </span>
                 </div>
                 <div style={{
-                  fontFamily: "'JetBrains Mono', monospace",
-                  fontSize: "9px", fontWeight: 700, letterSpacing: ".1em", marginTop: "2px",
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
+                  fontWeight: 700, background: "#00C27C", color: "#fff",
+                  padding: "3px 8px", border: "1.5px solid #0A0A0A",
+                  display: "inline-flex", alignItems: "center", gap: "4px",
                 }}>
-                  PAID · QRIS
+                  ↑ REALTIME
                 </div>
               </div>
+
+              {/* Stat Strip */}
+              <div style={{
+                display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
+                gap: "8px", marginBottom: "16px",
+              }}>
+                {[
+                  { label: "Revenue", val: "Rp 4,7jt", trend: "↑ 18%", bg: "#FFE500" },
+                  { label: "Order", val: "312", trend: "↑ 12%", bg: "#FFFBEB" },
+                  { label: "AOV", val: "Rp 15k", trend: "→ stabil", bg: "#F5F5F5", trendColor: "#0066FF" },
+                ].map((s) => (
+                  <div key={s.label} style={{ border: "2px solid #0A0A0A", padding: "8px 10px", background: s.bg }}>
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: "9px",
+                      fontWeight: 700, textTransform: "uppercase",
+                      letterSpacing: ".06em", color: "#333",
+                    }}>
+                      {s.label}
+                    </div>
+                    <div style={{
+                      fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800,
+                      fontSize: "18px", letterSpacing: "-.02em", marginTop: "2px",
+                    }}>
+                      {s.val}
+                    </div>
+                    <div style={{
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
+                      fontWeight: 700, color: s.trendColor || "#00C27C", marginTop: "2px",
+                    }}>
+                      {s.trend}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <BarChart />
+            </div>
+          </div>
+
+          {/* ---- LUNAS Stamp ---- */}
+          {/* Outer: jaga kedalaman 3D (translateZ) untuk parallax saat tilt */}
+          <div style={{
+            position: "absolute", top: "44px", right: "30px",
+            width: "110px", height: "110px",
+            transform: "translateZ(55px)", transformStyle: "preserve-3d",
+          }}>
+            {/* Entrance: melenting masuk sambil BERPUTAR dari -200° → -12° */}
+            <motion.div
+              initial={reduce ? { scale: 1, rotate: -12 } : { scale: 0, rotate: -200 }}
+              animate={
+                stampVisible
+                  ? { scale: 1, rotate: -12 }
+                  : (reduce ? { scale: 1, rotate: -12 } : { scale: 0, rotate: -200 })
+              }
+              transition={{ type: "spring", stiffness: 170, damping: 11 }}
+              style={{
+                width: "100%", height: "100%",
+                background: "#00C27C", color: "#fff",
+                border: "3px solid #0A0A0A", borderRadius: "50%",
+                boxShadow: "6px 6px 0 #0A0A0A", overflow: "visible",
+              }}
+            >
+              {/* Wobble halus terus-menerus → stamp terasa "hidup" */}
+              <motion.div
+                animate={reduce ? undefined : { rotate: [-4, 4, -4] }}
+                transition={reduce ? undefined : { duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                style={{
+                  position: "absolute", inset: 0,
+                  display: "grid", placeItems: "center", textAlign: "center",
+                }}
+              >
+                <StampRays visible={stampVisible} reduce={reduce} />
+                <div style={{ position: "relative", zIndex: 1 }}>
+                  <div style={{
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontWeight: 800, fontSize: "22px", letterSpacing: ".02em",
+                  }}>
+                    LUNAS
+                  </div>
+                  <div style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "9px", fontWeight: 700, letterSpacing: ".1em", marginTop: "2px",
+                  }}>
+                    PAID · QRIS
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        </div>
-
-        {/* ---- Order Ticker ---- */}
-        <div style={{
-          position: "absolute", right: "-6px", top: "238px", width: "210px",
-          background: "#fff", border: "2.5px solid #0A0A0A",
-          boxShadow: "5px 5px 0 #0A0A0A",
-          transform: "rotate(4deg) translateZ(45px)", overflow: "hidden",
-        }}>
-          <div style={{
-            background: "#0A0A0A", color: "#FFE500", padding: "6px 10px",
-            fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
-            fontWeight: 700, letterSpacing: ".06em",
-            display: "flex", alignItems: "center", gap: "6px",
-          }}>
-            <span className="hero-dot-red" />
-            ORDER MASUK
           </div>
-          <OrderTicker />
-        </div>
 
-        {/* ---- Stock Alert ---- */}
-        <div style={{
-          position: "absolute", top: "396px", right: "8px", width: "196px",
-          background: "#FF6B00", color: "#fff",
-          border: "2.5px solid #0A0A0A", boxShadow: "5px 5px 0 #0A0A0A",
-          padding: "10px 12px", transform: "rotate(-3deg) translateZ(35px)",
-          display: "flex", alignItems: "center", gap: "10px",
-        }}>
-          <motion.div
-            animate={{ rotate: [0, -8, 0, 8, 0] }}
-            transition={{ duration: 1.4, ease: "easeInOut", repeat: Infinity }}
-            style={{
-              width: "34px", height: "34px", minWidth: "34px",
-              background: "#fff", color: "#FF6B00",
-              border: "2px solid #0A0A0A",
-              display: "grid", placeItems: "center",
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 800, fontSize: "18px",
-            }}
-          >
-            !
-          </motion.div>
-          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: "13px", lineHeight: 1.2 }}>
-            Stok Menipis
-            <span style={{
-              display: "block",
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "10px", fontWeight: 500, opacity: 0.9, marginTop: "2px",
-            }}>
-              Es Kopi Susu · sisa 8
-            </span>
-          </div>
-        </div>
-
-        {/* ---- AI Chat Panel ---- */}
-        <div style={{
-          position: "absolute", top: "452px", left: "0", width: "330px",
-          background: "#0A0A0A", color: "#fff",
-          border: "2.5px solid #0A0A0A",
-          boxShadow: "8px 8px 0 #FFE500, 8px 8px 0 2.5px #0A0A0A",
-          transform: "rotate(2.2deg) translateZ(70px)",
-        }}>
+          {/* ---- Order Ticker ---- */}
           <div style={{
-            padding: "10px 14px", borderBottom: "2px solid #333",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
+            position: "absolute", right: "-6px", top: "238px", width: "210px",
+            background: "#fff", border: "2.5px solid #0A0A0A",
+            boxShadow: "5px 5px 0 #0A0A0A",
+            transform: "rotate(4deg) translateZ(45px)", overflow: "hidden",
           }}>
             <div style={{
-              display: "flex", alignItems: "center", gap: "8px",
+              background: "#0A0A0A", color: "#FFE500", padding: "6px 10px",
               fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
-              fontWeight: 700, letterSpacing: ".08em",
-              textTransform: "uppercase", color: "#FFE500",
+              fontWeight: 700, letterSpacing: ".06em",
+              display: "flex", alignItems: "center", gap: "6px",
             }}>
-              <span style={{
-                width: "8px", height: "8px", background: "#00C27C",
-                borderRadius: "50%", boxShadow: "0 0 8px #00C27C",
-                display: "inline-block",
-              }} />
-              AI Assistant
+              <span className="hero-dot-red" />
+              ORDER MASUK
             </div>
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "9px", color: "#888" }}>
-              Groq · LLaMA 3.3
+            <OrderTicker />
+          </div>
+
+          {/* ---- Stock Alert ---- */}
+          <div style={{
+            position: "absolute", top: "396px", right: "8px", width: "196px",
+            background: "#FF6B00", color: "#fff",
+            border: "2.5px solid #0A0A0A", boxShadow: "5px 5px 0 #0A0A0A",
+            padding: "10px 12px", transform: "rotate(-3deg) translateZ(35px)",
+            display: "flex", alignItems: "center", gap: "10px",
+          }}>
+            <motion.div
+              animate={{ rotate: [0, -8, 0, 8, 0] }}
+              transition={{ duration: 1.4, ease: "easeInOut", repeat: Infinity }}
+              style={{
+                width: "34px", height: "34px", minWidth: "34px",
+                background: "#fff", color: "#FF6B00",
+                border: "2px solid #0A0A0A",
+                display: "grid", placeItems: "center",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 800, fontSize: "18px",
+              }}
+            >
+              !
+            </motion.div>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: "13px", lineHeight: 1.2 }}>
+              Stok Menipis
+              <span style={{
+                display: "block",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "10px", fontWeight: 500, opacity: 0.9, marginTop: "2px",
+              }}>
+                Es Kopi Susu · sisa 8
+              </span>
             </div>
           </div>
 
-          <AIChat />
-
+          {/* ---- AI Chat Panel ---- */}
           <div style={{
-            padding: "8px 12px", borderTop: "2px solid #333",
-            display: "flex", alignItems: "center", gap: "8px",
-            background: "#1a1a1a",
+            position: "absolute", top: "452px", left: "0", width: "330px",
+            background: "#0A0A0A", color: "#fff",
+            border: "2.5px solid #0A0A0A",
+            boxShadow: "8px 8px 0 #FFE500, 8px 8px 0 2.5px #0A0A0A",
+            transform: "rotate(2.2deg) translateZ(70px)",
           }}>
             <div style={{
-              flex: 1, fontFamily: "'JetBrains Mono', monospace",
-              fontSize: "11px", color: "#777",
-              border: "1.5px solid #444", padding: "4px 8px", background: "#0a0a0a",
+              padding: "10px 14px", borderBottom: "2px solid #333",
+              display: "flex", alignItems: "center", justifyContent: "space-between",
             }}>
-              Tanya apa saja tentang bisnismu...
+              <div style={{
+                display: "flex", alignItems: "center", gap: "8px",
+                fontFamily: "'JetBrains Mono', monospace", fontSize: "10px",
+                fontWeight: 700, letterSpacing: ".08em",
+                textTransform: "uppercase", color: "#FFE500",
+              }}>
+                <span style={{
+                  width: "8px", height: "8px", background: "#00C27C",
+                  borderRadius: "50%", boxShadow: "0 0 8px #00C27C",
+                  display: "inline-block",
+                }} />
+                AI Assistant
+              </div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: "9px", color: "#888" }}>
+                Groq · LLaMA 3.3
+              </div>
             </div>
+
+            <AIChat />
+
             <div style={{
-              background: "#FFE500", color: "#0A0A0A",
-              border: "1.5px solid #FFE500", padding: "4px 8px",
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 800, fontSize: "10px", cursor: "pointer",
+              padding: "8px 12px", borderTop: "2px solid #333",
+              display: "flex", alignItems: "center", gap: "8px",
+              background: "#1a1a1a",
             }}>
-              KIRIM →
+              <div style={{
+                flex: 1, fontFamily: "'JetBrains Mono', monospace",
+                fontSize: "11px", color: "#777",
+                border: "1.5px solid #444", padding: "4px 8px", background: "#0a0a0a",
+              }}>
+                Tanya apa saja tentang bisnismu...
+              </div>
+              <div style={{
+                background: "#FFE500", color: "#0A0A0A",
+                border: "1.5px solid #FFE500", padding: "4px 8px",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 800, fontSize: "10px", cursor: "pointer",
+              }}>
+                KIRIM →
+              </div>
             </div>
           </div>
-        </div>
         </motion.div>
       </motion.div>
     </div>
@@ -854,13 +854,13 @@ export default function HeroSection() {
           {/* Proof Stats */}
           <motion.div variants={item} style={{ display: "flex", gap: "28px", marginTop: "48px", alignItems: "center", flexWrap: "wrap" }}>
             {[
-              { num: "11%",      label: "Pajak otomatis" },
+              { num: "11%", label: "Pajak otomatis" },
               null,
-              { num: "5+",       label: "Metode Bayar" },
+              { num: "5+", label: "Metode Bayar" },
               null,
               { num: "PDF·XLSX", label: "Export Laporan" },
               null,
-              { num: "24/7",     label: "AI Insight" },
+              { num: "24/7", label: "AI Insight" },
             ].map((it, i) =>
               it === null ? (
                 <div key={`d${i}`} style={{ width: "2.5px", height: "36px", background: "#0A0A0A", flexShrink: 0 }} />
