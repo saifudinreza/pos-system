@@ -1,6 +1,8 @@
 import { ImageResponse } from "next/og";
 
-// Generate saat request — pola resmi Vercel untuk load font custom di next/og.
+// Generate saat request (bukan saat build) supaya kompatibel dengan
+// force-dynamic. Pakai font default satori — font custom via fetch()
+// sempat dicoba tapi bikin 500 di Vercel, jadi sengaja tidak dipakai.
 export const dynamic = "force-dynamic";
 
 export const size = { width: 1200, height: 630 };

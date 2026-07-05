@@ -1,6 +1,7 @@
 postman/
 .postman/
 .claude
+CLAUDE.md
 .dev.ps1
 dev.ps1
 
