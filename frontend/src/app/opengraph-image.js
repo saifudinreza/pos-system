@@ -1,9 +1,6 @@
-import { readFileSync } from "fs";
-import { join } from "path";
 import { ImageResponse } from "next/og";
 
-// Generate saat request (Node.js runtime) — baca font langsung dari disk,
-// tidak bergantung resolusi URL relatif yang bermasalah di beberapa environment.
+// Generate saat request — pola resmi Vercel untuk load font custom di next/og.
 export const dynamic = "force-dynamic";
 
 export const size = { width: 1200, height: 630 };
@@ -11,7 +8,9 @@ export const contentType = "image/png";
 export const alt = "KasirAI — Kasir yang Ngerti Bisnis Kamu";
 
 export default async function Image() {
-  const fontData = readFileSync(join(process.cwd(), "src/app/_og-font.ttf"));
+  const fontData = await fetch(new URL("./_og-font.ttf", import.meta.url)).then((res) =>
+    res.arrayBuffer()
+  );
 
   return new ImageResponse(
     (
