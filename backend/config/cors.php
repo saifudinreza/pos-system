@@ -15,6 +15,8 @@ return [
         'http://localhost:3000',
         'https://kasirai.vercel.app',
         'https://pos-system-seven-rose.vercel.app',
+        'https://sikasirai.com',
+        'https://www.sikasirai.com',
         env('FRONTEND_URL', 'http://localhost:3000'),
     ],
 
