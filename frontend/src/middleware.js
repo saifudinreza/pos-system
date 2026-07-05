@@ -80,5 +80,5 @@ export function middleware(request) {
 // Kita SKIP file-file statis (gambar, CSS, JS bundle Next.js, favicon)
 // karena tidak perlu pengecekan token untuk file-file itu
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|apple-touch-icon|og-image|images/).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|apple-touch-icon|og-image|images/|sitemap.xml|robots.txt).*)"],
 };
