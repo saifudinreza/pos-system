@@ -1,16 +1,16 @@
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://kasirai.vercel.app";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sikasirai.com";
 
 export const metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "KasirAI — POS + AI Assistant Cerdas",
+    default: "KasirAI — Kasir yang Ngerti Bisnis Kamu",
     template: "%s | KasirAI",
   },
   description:
-    "Kasir pintar berbasis AI. Kelola penjualan, stok, laporan, dan pelanggan dalam satu platform terintegrasi. Didukung Groq LLaMA. Coba gratis 14 hari.",
+    "Kasir POS + AI Assistant yang jawab pertanyaan bisnismu — \"produk apa paling laku?\" langsung dijawab AI. Kelola stok, transaksi, pajak otomatis, & laporan PDF/Excel. QRIS, kartu, transfer. Coba gratis 14 hari, tanpa kartu kredit.",
   keywords: [
     "pos system", "kasir online", "software kasir", "manajemen stok",
     "laporan penjualan", "AI assistant", "kasir pintar", "point of sale",
@@ -35,23 +35,15 @@ export const metadata = {
     locale: "id_ID",
     url: APP_URL,
     siteName: "KasirAI",
-    title: "KasirAI — POS + AI Assistant Cerdas",
+    title: "KasirAI — Kasir yang Ngerti Bisnis Kamu",
     description:
-      "Kasir pintar berbasis AI. Kelola penjualan, stok, laporan dalam satu platform. Coba gratis 14 hari.",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "KasirAI — POS System dengan AI",
-      },
-    ],
+      "Tanya \"produk apa paling laku bulan ini?\" — AI Assistant KasirAI langsung jawab. Kelola stok, transaksi, pajak otomatis, & laporan PDF/Excel dalam satu platform. Coba gratis 14 hari.",
+    // ↑ Gambar og:image di-generate otomatis oleh app/opengraph-image.js, tidak perlu didaftarkan manual di sini
   },
   twitter: {
     card: "summary_large_image",
-    title: "KasirAI — POS + AI Assistant Cerdas",
-    description: "Kasir pintar berbasis AI. Kelola penjualan, stok, laporan. Coba gratis!",
-    images: ["/og-image.png"],
+    title: "KasirAI — Kasir yang Ngerti Bisnis Kamu",
+    description: "AI Assistant jawab \"produk apa paling laku?\" dalam hitungan detik. Kelola stok, kasir, laporan otomatis. Coba gratis 14 hari!",
     creator: "@kasiraai",
   },
   alternates: {
@@ -85,8 +77,6 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#FFE500" />
         <script
           type="application/ld+json"
