@@ -3,9 +3,9 @@
 <img src="https://img.shields.io/badge/STATUS-PRODUCTION%20READY-00C851?style=for-the-badge" />
 
 # KasirAI
-## Smart Point of Sale System with AI Assistant
+## SaaS Point of Sale dengan AI Assistant untuk UMKM Indonesia
 
-*Solusi kasir digital lengkap untuk UMKM Indonesia — dibangun dari nol sebagai Final Project Full Stack Bootcamp*
+*Bukan sekadar CRUD bootcamp — ini produk SaaS multi-tenant nyata: ada landing page, paket harga, pembayaran langganan, dan puluhan tenant bisa jalan berdampingan di satu instance yang sama.*
 
 [![Live Demo](https://img.shields.io/badge/🚀%20LIVE%20DEMO-kasirai.vercel.app-FFD600?style=for-the-badge&logoColor=black)](https://kasirai.vercel.app/)
 
@@ -22,28 +22,35 @@
 
 ---
 
+## Untuk Recruiter — TL;DR 30 Detik
+
+- **Full-stack production app**, bukan tutorial project: multi-tenant SaaS, payment gateway asli (bukan sandbox iseng), AI terintegrasi ke data bisnis real-time, dan sudah live dipakai lewat demo publik.
+- Dikerjakan **solo, dari nol sampai deploy**, sebagai final project Full Stack Web Development Bootcamp 2026 — desain, database, backend API, frontend, integrasi pihak ketiga, testing, sampai infrastruktur produksi.
+- Bagian paling layak dilihat kalau waktu terbatas: **[Tantangan Teknis & Solusi](#tantangan-teknis--solusi-yang-saya-hadapi)** — di situ terlihat cara berpikir saat debugging masalah production yang tidak diajarkan langsung di kelas.
+
+---
+
 ## Apa itu KasirAI?
 
-KasirAI adalah aplikasi **Point of Sale (POS) berbasis web** yang dibangun untuk menyelesaikan masalah nyata UMKM Indonesia. Lebih dari sekadar aplikasi kasir — KasirAI dilengkapi **AI Assistant** yang bisa diajak bicara dalam bahasa Indonesia untuk menganalisis bisnis, memproses **pembayaran digital** via Midtrans (QRIS, GoPay, OVO), dan mengirim **struk otomatis ke WhatsApp** pelanggan.
+KasirAI adalah **SaaS Point of Sale (POS)** berbasis web untuk UMKM Indonesia. Setiap toko yang daftar jadi satu *tenant* terisolasi dengan datanya sendiri, bisa langsung pakai kasir, kelola stok, terima pembayaran digital via Midtrans (QRIS, GoPay, OVO), kirim struk otomatis ke WhatsApp pelanggan, dan tanya-jawab soal bisnisnya ke **AI Assistant** berbahasa Indonesia. Ada landing page publik, paket harga (Free/Pro/Enterprise), dan alur upgrade langganan yang dibayar sungguhan lewat Midtrans.
 
-Dibangun sebagai **Final Project Full Stack Bootcamp 2026** — dari desain, arsitektur, coding, hingga deployment production — oleh satu developer dalam waktu kurang dari 2 bulan.
-
-> **"Saya tidak hanya belajar coding — saya membangun produk nyata yang bisa dipakai bisnis sungguhan."**
+> **"Saya tidak hanya belajar coding — saya membangun produk SaaS yang punya model bisnis, bukan cuma fitur."**
 
 ---
 
 ## Kenapa Project Ini Berbeda?
 
-Kebanyakan project bootcamp hanya CRUD sederhana. KasirAI berbeda:
+Kebanyakan project bootcamp berhenti di CRUD. KasirAI melangkah lebih jauh ke arah produk SaaS yang bisa dijual:
 
 | Fitur | Tingkat Kompleksitas |
 |---|---|
 | Multi-tenant architecture dengan Laravel Global Scope | ⭐⭐⭐⭐⭐ |
+| Subscription billing (Free/Pro/Enterprise) via Midtrans + webhook | ⭐⭐⭐⭐⭐ |
 | AI Assistant dengan dual-provider + auto fallback | ⭐⭐⭐⭐⭐ |
 | Per-tenant Midtrans keys (split payment model) | ⭐⭐⭐⭐⭐ |
 | Cloudflare R2 cloud storage + backend proxy (bypass SSL) | ⭐⭐⭐⭐ |
 | Shift management per-tenant — custom time range + realtime enforcement | ⭐⭐⭐⭐ |
-| Payment gateway webhook + stok rollback | ⭐⭐⭐⭐ |
+| Landing page marketing dengan Framer Motion (parallax, reveal, stagger) | ⭐⭐⭐⭐ |
 | Server-side WhatsApp proxy (token tidak expose ke browser) | ⭐⭐⭐⭐ |
 | E2E Testing dengan TestSprite (20/20 PASSED) | ⭐⭐⭐⭐ |
 
@@ -57,8 +64,8 @@ Kebanyakan project bootcamp hanya CRUD sederhana. KasirAI berbeda:
 | **Next.js 14** (App Router) | Framework utama — SSR, routing, API routes |
 | **React 18** | UI component-based |
 | **Tailwind CSS 3.4** | Styling — custom neobrutalism design system |
-| **Framer Motion** | Animasi halaman, 3D card flip, spring physics |
-| **Zustand 5** | Global state management (cart, auth, AI) |
+| **Framer Motion** | Animasi halaman, landing page (parallax/reveal/stagger), 3D card flip |
+| **Zustand 5** | Global state management (cart, auth, AI, subscription) |
 | **Axios** | HTTP client dengan Bearer token interceptor |
 | **Recharts** | Chart interaktif untuk dashboard analytics |
 | **Lucide React** | Icon library |
@@ -72,7 +79,7 @@ Kebanyakan project bootcamp hanya CRUD sederhana. KasirAI berbeda:
 | **Laravel Global Scope** | Multi-tenant data isolation otomatis |
 | **DomPDF** | Generate laporan PDF server-side |
 | **Maatwebsite Excel** | Export data ke .xlsx |
-| **Midtrans PHP SDK** | Payment gateway integration |
+| **Midtrans PHP SDK** | Payment gateway — transaksi kasir & subscription billing |
 
 ### Infrastructure & Services
 | | Platform / Service |
@@ -82,32 +89,37 @@ Kebanyakan project bootcamp hanya CRUD sederhana. KasirAI berbeda:
 | Database | **Railway MySQL** |
 | AI Primary | **Groq API** — LLaMA 3.3 70B (gratis & cepat) |
 | AI Fallback | **OpenRouter** — LLaMA 3.1 8B (auto-switch) |
-| Payment | **Midtrans Snap** — QRIS, GoPay, OVO, VA |
+| Payment | **Midtrans Snap (Production)** — QRIS, GoPay, OVO, VA, kartu kredit |
 | Storage | **Cloudflare R2** — upload & serve foto produk (S3-compatible) |
 | WhatsApp | **Fonnte API** — struk digital otomatis |
 
 ---
 
-## Arsitektur & Keputusan Teknis
+## Tantangan Teknis & Solusi yang Saya Hadapi
 
-### 1. Multi-Tenant dengan Laravel Global Scope
+Bagian ini merangkum masalah nyata yang muncul saat membangun & men-deploy KasirAI ke production, dan bagaimana saya menyelesaikannya.
 
-Setiap bisnis punya data yang **100% terisolasi**. Tidak perlu tulis `WHERE tenant_id = ?` di setiap query — Global Scope menanganinya secara otomatis di semua model.
+### 1. "Bagaimana isolasi data ratusan tenant tanpa lupa `WHERE tenant_id` di satu query pun?"
+
+**Masalah:** Kalau isolasi tenant ditulis manual di setiap controller, satu query yang lupa filter tenant = kebocoran data pelanggan lain. Ini fatal untuk SaaS.
+
+**Solusi:** Laravel **Global Scope** (`TenantScope`) yang otomatis inject `WHERE tenant_id = ?` ke semua model tenant-aware, di level query builder — bukan di controller. Developer (role khusus, `tenant_id = null`) tetap bisa melihat lintas tenant untuk keperluan support/monitoring.
 
 ```php
-// TenantScope.php — aktif di semua model: Product, Order, Shift, dll
+// TenantScope.php — aktif otomatis di semua model: Product, Order, Shift, dll
 public function apply(Builder $builder, Model $model): void
 {
     if (Auth::check() && Auth::user()->tenant_id !== null) {
         $builder->where($model->getTable() . '.tenant_id', Auth::user()->tenant_id);
     }
-    // Developer (tenant_id = null) → bisa lihat semua data lintas tenant
 }
 ```
 
-### 2. AI Dual-Provider dengan Auto Fallback
+### 2. "AI gratisan (Groq) kena rate limit di jam sibuk — apa fitur AI harus mati?"
 
-Groq sebagai provider utama (gratis, sangat cepat). Saat terkena rate limit, sistem **otomatis beralih** ke OpenRouter tanpa intervensi manual, menggunakan Laravel Cache sebagai circuit breaker.
+**Masalah:** Groq API gratis dan cepat, tapi ada limit request per menit. Kalau limit kena saat tenant lagi butuh, fitur AI Assistant langsung error ke user.
+
+**Solusi:** Dual-provider dengan **circuit breaker pattern** pakai Laravel Cache. Saat Groq melempar error rate-limit, sistem set flag cooldown 65 detik dan otomatis alihkan semua request ke OpenRouter tanpa user sadar ada masalah — tanpa perlu restart atau intervensi manual.
 
 ```php
 public function ask(string $systemPrompt, string $userQuery): array
@@ -119,7 +131,7 @@ public function ask(string $systemPrompt, string $userQuery): array
         return $this->callGroq($systemPrompt, $userQuery);
     } catch (\Exception $e) {
         if ($this->isRateLimitError($e)) {
-            Cache::put('groq_rate_limited', true, 65); // cooldown 65 detik
+            Cache::put('groq_rate_limited', true, 65);
             return $this->callOpenRouter($systemPrompt, $userQuery);
         }
         throw $e;
@@ -127,12 +139,13 @@ public function ask(string $systemPrompt, string $userQuery): array
 }
 ```
 
-### 3. Per-Tenant Payment Gateway (Split Payment Model)
+### 3. "Tiap tenant mau terima uang ke rekening Midtrans-nya sendiri, bukan rekening developer."
 
-Setiap tenant bisa pakai **Midtrans key mereka sendiri** — bukan key terpusat milik platform. Server Key dienkripsi di database. Client Key digunakan frontend untuk load Snap.js secara dinamis.
+**Masalah:** Model payment gateway biasa cuma punya satu server key terpusat — semua uang masuk ke satu akun. Untuk SaaS multi-merchant, tiap tenant butuh split payment ke akun Midtrans masing-masing, dan credential itu sensitif.
+
+**Solusi:** Server key per-tenant disimpan **terenkripsi** di database (`encrypted` cast Eloquent), dengan fallback ke key platform kalau tenant belum setting sendiri. Client key dikirim ke frontend untuk load Snap.js secara dinamis per tenant.
 
 ```php
-// TransactionController.php
 private function configureServerKey(Request $request): void
 {
     $serverKey = $request->user()->tenant?->midtrans_server_key
@@ -141,68 +154,65 @@ private function configureServerKey(Request $request): void
     if (empty($serverKey)) {
         abort(422, 'Midtrans belum dikonfigurasi. Atur key di halaman Profil.');
     }
-
     Config::$serverKey = $serverKey;
 }
 ```
 
-```js
-// kasir/page.jsx — Snap.js dimuat dinamis dengan client key milik tenant
-const loadMidtransSnap = (clientKey) => new Promise((resolve, reject) => {
-    if (window.snap) return resolve();
-    const script = document.createElement("script");
-    script.src = process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL ?? "https://app.midtrans.com/snap/snap.js";
-    script.setAttribute("data-client-key", clientKey);
-    script.onload = resolve;
-    document.body.appendChild(script);
-});
+### 4. "Setelah pindah dari sandbox ke Midtrans production, alur upgrade langganan malah gagal untuk sebagian tenant."
+
+**Masalah:** Saat migrasi ke Midtrans production, konfigurasi key campur antara key platform (untuk billing subscription internal) dan key per-tenant (untuk transaksi kasir tenant) — keduanya sempat saling menimpa sehingga webhook subscription tidak match dengan konteks Midtrans yang benar.
+
+**Solusi:** Dipisah tegas dua jalur konfigurasi Midtrans: `SubscriptionController` selalu pakai server key **platform** (karena yang menagih adalah KasirAI, bukan tenant), sementara `TransactionController` resolve key **per-tenant** saat runtime. Webhook subscription juga difilter berdasar prefix `order_id` (`SUB-`) supaya tidak pernah tercampur dengan notifikasi transaksi kasir tenant manapun.
+
+### 5. "Foto produk disimpan di Cloudflare R2, tapi browser menolak load karena masalah SSL/CORS di custom domain."
+
+**Masalah:** R2 public URL butuh custom domain + sertifikat sendiri untuk bisa diakses langsung dari browser dengan aman — tidak praktis untuk skala kecil dan menambah biaya infrastruktur.
+
+**Solusi:** Semua request gambar diproksikan lewat **backend Laravel**, jadi URL R2 asli tidak pernah terekspos ke publik dan tidak butuh domain SSL tambahan.
+
+```php
+Route::get('/media/{path}', function (string $path) {
+    $disk = !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public';
+    if (! Storage::disk($disk)->exists($path)) abort(404);
+    return Storage::disk($disk)->response($path);
+})->where('path', '.*');
 ```
 
-### 4. Shift Management Per-Tenant dengan Realtime Enforcement
+### 6. "Satu toko punya banyak kasir bergantian shift — gimana caranya transaksi tetap tercatat rapi tanpa kasir harus login ulang tiap ganti orang?"
 
-Shift bersifat **per-tenant** (bukan per-user) — satu shift aktif dipakai bersama semua kasir. User mendefinisikan sendiri nama shift dan jam berlaku. Sistem **memblokir transaksi** di luar jam shift secara realtime.
+**Masalah:** Shift biasanya didesain per-user. Tapi realita warung/toko: satu perangkat kasir dipakai bergantian, dan pemilik ingin satu shift aktif yang dipakai bersama, dengan jam operasional yang bisa mereka atur sendiri (bukan hardcode 8 jam).
 
-```
-// Auto-resume: login saat shift masih aktif → langsung terhubung tanpa isi form
-// within_window: cek jam sekarang vs start_time/end_time di backend
-// Warning banner orange + transaksi diblokir kalau di luar jam shift
-```
-
-Saat tutup shift (klerk), sistem menghitung **selisih kas otomatis**:
+**Solusi:** Shift dibuat **per-tenant** (bukan per-user), dengan jam mulai/selesai custom yang didefinisikan pemilik toko. Sistem melakukan **realtime enforcement** — transaksi otomatis diblokir kalau di luar jam shift, lengkap dengan banner peringatan. Saat login dan shift masih dalam jam aktif, sistem **auto-resume** tanpa perlu isi ulang form buka shift. Saat tutup shift, selisih kas dihitung otomatis dari kalkulator pecahan uang fisik.
 
 ```
 Seharusnya  =  Modal Awal + Total Penjualan Tunai − Kas Kecil
 Selisih     =  Saldo Fisik (dari hitung pecahan) − Seharusnya
 ```
 
-### 5. Cloudflare R2 + Backend Media Proxy
+### 7. "Token WhatsApp dan Server Key Midtrans tidak boleh pernah terlihat di DevTools browser."
 
-Foto produk disimpan di **Cloudflare R2** (S3-compatible). Karena R2 public URL memerlukan custom domain untuk SSL, semua gambar diproksikan melalui backend Laravel — tidak ada URL R2 yang terekspos ke browser.
+**Masalah:** Kalau dipanggil langsung dari client, token pihak ketiga bisa dicuri lewat Network tab browser siapa saja.
 
-```php
-// api.php — proxy route, tidak perlu auth
-Route::get('/media/{path}', function (string $path) {
-    $disk = !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public';
-    if (! Storage::disk($disk)->exists($path)) abort(404);
-    return Storage::disk($disk)->response($path);
-})->where('path', '.*');
-
-// ProductController.php — URL selalu via proxy backend, bukan R2 langsung
-'image_url' => $product->image ? url('/api/media/' . $product->image) : null,
-```
-
-### 6. Server-side WhatsApp Proxy
-
-Token Fonnte **tidak pernah menyentuh browser**. Frontend memanggil Next.js API Route `/api/send-whatsapp` di server, yang kemudian menghubungi Fonnte. Token hanya ada di environment variable server.
+**Solusi:** Kedua integrasi selalu lewat lapisan server — WhatsApp lewat **Next.js API Route** (token di env server Next.js), Midtrans server key hanya pernah dipakai di controller Laravel, tidak pernah dikirim ke response API.
 
 ---
 
 ## Fitur Lengkap
 
+### Landing Page & Onboarding
+- Halaman marketing publik: Hero, Problem, Features, How It Works, AI Spotlight, Testimonials, Pricing, CTA
+- Animasi scroll (parallax, reveal, stagger) dengan Framer Motion
+- Alur daftar → pilih paket → dashboard, siap dipakai calon pelanggan asli
+
+### Subscription & Billing (SaaS Model)
+- 3 paket: **Free** (1 outlet, batas produk/transaksi), **Pro**, **Enterprise** (fitur & outlet tak terbatas)
+- Upgrade paket dibayar langsung via **Midtrans Snap** (bulanan/tahunan, harga tahunan diskon)
+- Webhook otomatis aktivasi paket + upgrade role user begitu pembayaran `settlement`
+- User bisa batalkan transaksi pending sendiri; developer bisa monitor semua tenant, ubah plan, atau suspend akun dari panel khusus
+
 ### POS Terminal (`/kasir`)
 - Split-screen: grid produk + keranjang belanja
-- Search real-time dengan debounce 400ms
-- Filter produk per kategori
+- Search real-time dengan debounce 400ms, filter per kategori
 - Validasi stok real-time saat tambah ke keranjang
 - **Bayar Tunai** — kalkulasi kembalian otomatis
 - **Bayar Digital** — Midtrans Snap (QRIS, GoPay, OVO, VA, Kartu Kredit)
@@ -210,13 +220,12 @@ Token Fonnte **tidak pernah menyentuh browser**. Frontend memanggil Next.js API 
 - Panel kelola produk langsung dari kasir (slide-over)
 
 ### Shift Management / Klerek
-- Shift **per-tenant** — satu shift aktif untuk semua kasir, bukan per-user
-- **Auto-resume**: login saat shift masih aktif → langsung terhubung, tidak perlu isi form lagi
-- **Form buka shift** — nama shift custom + preset (Pagi/Siang/Malam) + pilih jam mulai & selesai + kalkulator denominasi (Rp100.000 s.d. Rp100) + modal awal
-- **Realtime enforcement** — transaksi diblokir di luar jam shift; banner warning orange + pesan informatif
-- **Info bar** — tampilkan nama shift, jam aktif, jumlah order, total penjualan langsung di kasir
-- **Tutup Shift / Klerek** — 6 section: identitas, ringkasan penjualan, breakdown pembayaran, hitung kas fisik (denominasi), kas kecil, rekonsiliasi otomatis dengan indikator selisih warna
-- Riwayat shift lengkap dengan laporan per-shift
+- Shift **per-tenant** — satu shift aktif dipakai bersama semua kasir
+- **Auto-resume** saat login dalam jam shift aktif
+- Form buka shift: nama custom + preset (Pagi/Siang/Malam) + jam custom + kalkulator denominasi + modal awal
+- **Realtime enforcement** — transaksi diblokir di luar jam shift
+- Tutup shift 6 section: identitas, ringkasan penjualan, breakdown pembayaran, hitung kas fisik, kas kecil, rekonsiliasi otomatis dengan indikator selisih warna
+- Riwayat shift lengkap per-shift
 
 ### Dashboard & Analytics
 - Revenue, order, stok kritis, total produk — stat cards real-time
@@ -240,8 +249,9 @@ Token Fonnte **tidak pernah menyentuh browser**. Frontend memanggil Next.js API 
 - Badge stok: Normal / Menipis / Habis
 - Update status order, void, batalkan transaksi
 
-### User Management & AI Monitoring
+### User & Tenant Management, AI Monitoring
 - CRUD user dengan role-based guard (Developer only)
+- Panel developer: monitor semua tenant & status langganan, ubah plan, suspend/aktifkan akun
 - Dashboard monitoring penggunaan AI: token, provider, per-user quota
 
 ---
@@ -258,6 +268,7 @@ Token Fonnte **tidak pernah menyentuh browser**. Frontend memanggil Next.js API 
 | AI Assistant | — | — | ✅ | ✅ |
 | AI Monitoring | — | — | ✅ | ✅ |
 | User Management | — | — | — | ✅ |
+| Kelola Tenant & Subscription (semua toko) | — | — | — | ✅ |
 
 ---
 
@@ -318,6 +329,8 @@ npm install
 npm run dev
 ```
 
+> Ada juga `dev.ps1` di root repo untuk menjalankan backend & frontend sekaligus di Windows.
+
 ---
 
 ## Keamanan
@@ -328,6 +341,7 @@ npm run dev
 | Otorisasi | RoleMiddleware per route group |
 | Isolasi Data | TenantScope — `WHERE tenant_id = ?` otomatis |
 | Payment Key | Server Key dienkripsi di DB (`encrypted` cast) |
+| Webhook Payment | Validasi prefix order_id + update status dalam DB transaction |
 | WhatsApp Token | Server-side only, tidak pernah ke browser |
 | File Upload | Validasi MIME + max 2MB, disimpan di Cloudflare R2 |
 | Gambar Produk | Diproksikan via backend — URL R2 tidak pernah terekspos ke browser |
@@ -355,8 +369,8 @@ npm run dev
 `Next.js 14 App Router` `React 18` `Laravel 11` `PHP 8.3` `MySQL` `REST API Design`
 `Zustand` `Tailwind CSS` `Framer Motion` `Neobrutalism Design System`
 `Multi-tenant Architecture` `Laravel Sanctum` `Laravel Global Scope`
-`Groq AI Integration` `OpenRouter Fallback` `LLM Rate Limiting`
-`Midtrans Split Payment` `WhatsApp API` `PDF & Excel Export`
+`SaaS Subscription Billing` `Groq AI Integration` `OpenRouter Fallback` `LLM Rate Limiting`
+`Midtrans Split Payment (Production)` `WhatsApp API` `PDF & Excel Export`
 `Cloudflare R2 (S3-compatible)` `Backend Media Proxy` `Cloud Storage`
 `Shift Management & Cash Reconciliation` `Realtime Time Enforcement`
 `Role-based Access Control` `E2E Testing (TestSprite)` `Docker` `Vercel` `Railway`
@@ -365,6 +379,6 @@ npm run dev
 
 **[🌐 Coba Live Demo → kasirai.vercel.app](https://kasirai.vercel.app/)**
 
-*Dibangun dengan sepenuh hati — Mei–Juni 2026 · Production ready*
+*Dibangun dengan sepenuh hati — Mei 2026–sekarang · Production ready*
 
 </div>
