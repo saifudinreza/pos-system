@@ -8,10 +8,6 @@ export const contentType = "image/png";
 export const alt = "KasirAI — Kasir yang Ngerti Bisnis Kamu";
 
 export default async function Image() {
-  const fontData = await fetch(new URL("./_og-font.ttf", import.meta.url)).then((res) =>
-    res.arrayBuffer()
-  );
-
   return new ImageResponse(
     (
       <div
@@ -23,7 +19,6 @@ export default async function Image() {
           alignItems: "center",
           justifyContent: "center",
           backgroundColor: "#FFFBEB",
-          fontFamily: "Space Grotesk",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
@@ -93,16 +88,6 @@ export default async function Image() {
         </div>
       </div>
     ),
-    {
-      ...size,
-      fonts: [
-        {
-          name: "Space Grotesk",
-          data: fontData,
-          style: "normal",
-          weight: 700,
-        },
-      ],
-    }
+    { ...size }
   );
 }
