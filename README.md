@@ -7,7 +7,7 @@
 
 *Bukan sekadar CRUD bootcamp — ini produk SaaS multi-tenant nyata: ada landing page, paket harga, pembayaran langganan, dan puluhan tenant bisa jalan berdampingan di satu instance yang sama.*
 
-[![Live Demo](https://img.shields.io/badge/🚀%20LIVE%20DEMO-kasirai.vercel.app-FFD600?style=for-the-badge&logoColor=black)](https://kasirai.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/%20LIVE%20DEMO-sikasirai.com-FFD600?style=for-the-badge&logoColor=black)](https://sikasirai.com/)
 
 ---
 
@@ -377,7 +377,7 @@ npm run dev
 
 ---
 
-**[🌐 Coba Live Demo → kasirai.vercel.app](https://kasirai.vercel.app/)**
+**[Coba Live Demo → sikasirai.com](https://sikasirai.com)**
 
 *Dibangun dengan sepenuh hati — Mei 2026–sekarang · Production ready*
 

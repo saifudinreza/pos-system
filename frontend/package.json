@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@next/third-parties": "^14.2.35",
     "@vercel/speed-insights": "^2.0.0",
     "axios": "^1.16.1",
     "framer-motion": "^11.18.2",

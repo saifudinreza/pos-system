@@ -1,5 +1,8 @@
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
+
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sikasirai.com";
 
@@ -86,6 +89,7 @@ export default function RootLayout({ children }) {
       <body className="antialiased bg-brand-cream text-brand-black">
         {children}
         <SpeedInsights />
+        {GA_MEASUREMENT_ID && <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />}
       </body>
     </html>
   );
