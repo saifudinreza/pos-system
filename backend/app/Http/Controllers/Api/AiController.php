@@ -68,10 +68,36 @@ class AiController extends Controller
             'query' => ['required', 'string', 'max:500'],
         ]);
 
+        // ===== PENJUALAN PER PERIODE — supaya AI tidak salah kira periode =====
+        // Sebelumnya cuma data bulan ini yang dikirim, jadi pertanyaan "minggu ini"
+        // atau "hari ini" tetap dijawab pakai angka bulanan. Sekarang kita hitung
+        // ketiganya sekaligus dan biarkan AI pilih sesuai kata dalam pertanyaan user.
+        $periods = [
+            'hari_ini'   => [now()->startOfDay(), now()->endOfDay()],
+            'minggu_ini' => [now()->startOfWeek(), now()->endOfWeek()],
+            'bulan_ini'  => [now()->startOfMonth(), now()->endOfMonth()],
+        ];
+
+        $penjualanPerPeriode = [];
+        foreach ($periods as $label => [$start, $end]) {
+            $revenue = Transaction::where('status', 'settlement')
+                ->whereBetween('paid_at', [$start, $end])
+                ->sum('amount');
+
+            $orders = Order::where('status', 'paid')
+                ->whereBetween('created_at', [$start, $end])
+                ->count();
+
+            $penjualanPerPeriode[$label] = [
+                'total_revenue' => 'Rp ' . number_format($revenue, 0, ',', '.'),
+                'total_orders'  => $orders,
+            ];
+        }
+
         $topProducts = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('orders.status', 'paid')
-            ->whereMonth('orders.created_at', now()->month)
+            ->whereBetween('orders.created_at', $periods['bulan_ini'])
             ->selectRaw('
                 products.name,
                 products.sku,
@@ -83,19 +109,25 @@ class AiController extends Controller
             ->limit(10)
             ->get();
 
-        $totalRevenue = Transaction::where('status', 'settlement')
-            ->whereMonth('paid_at', now()->month)
-            ->sum('amount');
-
-        $totalOrders = Order::where('status', 'paid')
-            ->whereMonth('created_at', now()->month)
-            ->count();
+        // ===== KATALOG PRODUK & STOK — supaya pertanyaan stok/produk juga
+        // bisa dijawab dari chat utama, tidak perlu endpoint terpisah =====
+        $catalog = Product::with('category')
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($p) => [
+                'nama'     => $p->name,
+                'sku'      => $p->sku,
+                'kategori' => $p->category?->name,
+                'harga'    => 'Rp ' . number_format($p->price, 0, ',', '.'),
+                'stok'     => $p->stock,
+                'status_stok' => $p->isLowStock() ? 'MENIPIS' : 'Normal',
+            ]);
 
         $salesData = [
-            'bulan'           => now()->format('F Y'),
-            'total_revenue'   => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),
-            'total_orders'    => $totalOrders,
-            'produk_terlaris' => $topProducts->toArray(),
+            'tanggal_sekarang'          => now()->format('l, d F Y'),
+            'penjualan_per_periode'     => $penjualanPerPeriode,
+            'produk_terlaris_bulan_ini' => $topProducts->toArray(),
+            'katalog_dan_stok_produk'   => $catalog->toArray(),
         ];
 
         $systemPrompt = $this->groq->buildSalesPrompt($salesData);

@@ -187,7 +187,19 @@ Store data context:
     public function buildSalesPrompt(array $salesData): string
     {
         $dataJson = json_encode($salesData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-        return $this->baseSystemPrompt($dataJson);
+
+        $extra = "\n\nATURAN WAJIB SOAL PERIODE WAKTU:
+- Data \"penjualan_per_periode\" berisi 3 rentang: hari_ini, minggu_ini, bulan_ini — masing-masing sudah dihitung terpisah dan akurat.
+- Cocokkan periode yang dipakai jawaban PERSIS dengan kata yang diucapkan user: \"hari ini\"/\"hari ini juga\" → pakai hari_ini. \"minggu ini\" → pakai minggu_ini. \"bulan ini\" → pakai bulan_ini.
+- Kalau user tidak sebutkan periode sama sekali, default pakai bulan_ini tapi sebutkan eksplisit \"(bulan ini)\" di jawaban supaya tidak ambigu.
+- JANGAN PERNAH menjawab pakai angka dari periode lain daripada yang diminta user — ini penyebab utama jawaban salah, jadi selalu cek ulang periode sebelum menjawab.
+
+ATURAN SOAL STOK & KATALOG PRODUK:
+- \"katalog_dan_stok_produk\" berisi semua produk aktif toko ini beserta harga, kategori, stok, dan status (Normal/MENIPIS).
+- Gunakan data ini untuk jawab pertanyaan soal stok, harga, atau detail produk tertentu — jangan bilang tidak ada data kalau informasinya sebenarnya ada di situ.
+- Kalau ditanya \"stok apa yang mau habis\", filter & sebutkan hanya yang berstatus MENIPIS.";
+
+        return $this->baseSystemPrompt($dataJson . $extra);
     }
 
     public function buildStockPrompt(array $stockData): string
