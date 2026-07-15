@@ -92,6 +92,8 @@ Kebanyakan project bootcamp berhenti di CRUD. KasirAI melangkah lebih jauh ke ar
 | Payment | **Midtrans Snap (Production)** — QRIS, GoPay, OVO, VA, kartu kredit |
 | Storage | **Cloudflare R2** — upload & serve foto produk (S3-compatible) |
 | WhatsApp | **Fonnte API** — struk digital otomatis |
+| Analytics & SEO | **Google Analytics 4**, sitemap/robots/OG image di-generate dinamis (Next.js Metadata API) |
+| Domain | **sikasirai.com** (custom domain), DNS dikelola manual via Domainesia |
 
 ---
 
@@ -195,6 +197,28 @@ Selisih     =  Saldo Fisik (dari hitung pecahan) − Seharusnya
 
 **Solusi:** Kedua integrasi selalu lewat lapisan server — WhatsApp lewat **Next.js API Route** (token di env server Next.js), Midtrans server key hanya pernah dipakai di controller Laravel, tidak pernah dikirim ke response API.
 
+### 8. "Webhook Midtrans untuk tenant yang pakai server key sendiri diam-diam selalu gagal — status transaksi tidak pernah ter-update otomatis."
+
+**Masalah:** SDK `midtrans/midtrans-php` versi yang dipakai ternyata **memanggil balik API Midtrans** (`Transaction::status()`) di dalam constructor `Notification`, memakai `Config::$serverKey` yang aktif saat itu — bukan sekadar mencocokkan hash signature secara lokal seperti dugaan awal. Karena `webhook()` tidak pernah set server key sebelum verifikasi, request selalu memakai key default platform, sehingga verifikasi gagal total untuk tenant yang pakai Midtrans sendiri.
+
+**Solusi:** Sebelum bikin instance `Notification`, sistem cari dulu `Transaction` + `tenant` pemiliknya dari `order_id` mentah di body request, lalu set `Config::$serverKey` sesuai tenant tersebut. Diverifikasi dengan simulasi notifikasi nyata (server key custom vs default) sebelum dinyatakan beres — bukan cuma asumsi dari membaca kode.
+
+```php
+// TransactionController::webhook() — urutan ini krusial
+$transaction = Transaction::with('order.tenant')
+    ->where('midtrans_order_id', $request->input('order_id'))
+    ->first();
+
+$this->configureServerKeyForTenant($transaction->order?->tenant); // set key dulu
+$notification = new Notification(); // baru verifikasi — SDK panggil API pakai key di atas
+```
+
+### 9. "AI Assistant ditanya 'penjualan minggu ini?' tapi selalu jawab angka bulanan."
+
+**Masalah:** Backend cuma pernah menghitung satu rentang waktu (`whereMonth`) dan mengirimnya ke LLM apa pun pertanyaan user. AI tidak salah paham bahasa — dia memang cuma pernah dikasih satu angka, jadi terpaksa "menebak" label periode yang diminta.
+
+**Solusi:** Hitung 3 rentang waktu sekaligus (hari ini/minggu ini/bulan ini, pakai `whereBetween` bukan `whereMonth`) dan kirim semuanya ke LLM dengan instruksi eksplisit untuk mencocokkan periode sesuai kata di pertanyaan user. Divalidasi dengan skenario nyata: buat transaksi dummy di 3 rentang waktu berbeda, tanya AI satu-satu, pastikan jawabannya berbeda dan sesuai — bukan cuma percaya kode "kelihatan benar".
+
 ---
 
 ## Fitur Lengkap
@@ -234,7 +258,8 @@ Selisih     =  Saldo Fisik (dari hitung pecahan) − Seharusnya
 
 ### AI Assistant (Sidebar)
 - Chat bahasa Indonesia — tanya apa saja tentang bisnis
-- Backend inject data penjualan & stok terkini sebagai konteks AI
+- **Sadar periode waktu** — data penjualan dihitung terpisah per hari ini/minggu ini/bulan ini di setiap request, jadi AI tidak salah kira konteks waktu yang ditanya user
+- Backend inject katalog & stok produk lengkap sebagai konteks AI (bukan cuma ringkasan)
 - 3 mode: analisis penjualan, prediksi stok habis, rekomendasi bundling
 - Badge provider aktif: Groq / FALLBACK OpenRouter
 - Limit harian dengan warning banner
