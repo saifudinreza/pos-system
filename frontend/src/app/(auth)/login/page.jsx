@@ -67,7 +67,7 @@ export default function LoginPage() {
         >
           <h1 className="font-black text-2xl font-grotesk mb-1">Masuk</h1>
           <p className="text-sm text-brand-black/50 font-medium mb-6">
-            Masukkan akun Anda untuk melanjutkan
+            Masukkan akun kamu untuk melanjutkan
           </p>
 
           {/* Error global */}

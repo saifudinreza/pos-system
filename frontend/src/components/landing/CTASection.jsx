@@ -48,7 +48,7 @@ export default function CTASection() {
 
             {/* Headline CTA — sesimpel dan sekuat mungkin */}
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-grotesk leading-tight mb-4">
-              Tingkatkan bisnis Anda
+              Tingkatkan bisnis kamu
               <br />
               <span className="text-brand-yellow">hari ini juga.</span>
             </h2>

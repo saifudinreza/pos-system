@@ -22,7 +22,7 @@ function CancelContent() {
         <h2 className="text-2xl font-black font-grotesk mb-2">Pembayaran Dibatalkan</h2>
         <p className="text-brand-black/60 text-sm mb-6">
           Pembayaran untuk paket <span className="font-black capitalize">{plan}</span> dibatalkan atau gagal.
-          Tidak ada biaya yang dikenakan. Anda bisa mencoba lagi kapan saja.
+          Tidak ada biaya yang dikenakan. Kamu bisa mencoba lagi kapan saja.
         </p>
 
         <div className="bg-red-50 border-2 border-red-200 p-4 mb-6 text-left text-sm space-y-1.5">
@@ -31,7 +31,7 @@ function CancelContent() {
             <li>Saldo kartu/rekening tidak mencukupi</li>
             <li>Pembayaran melebihi batas waktu</li>
             <li>Transaksi ditolak oleh bank</li>
-            <li>Anda menutup halaman pembayaran</li>
+            <li>Kamu menutup halaman pembayaran</li>
           </ul>
         </div>
 

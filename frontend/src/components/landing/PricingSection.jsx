@@ -205,7 +205,7 @@ export default function PricingSection() {
           <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk mb-4">
             Pilih paket yang pas
             <br />
-            untuk bisnis Anda
+            untuk bisnis kamu
           </h2>
           <p className="text-brand-black/60 font-medium max-w-md mx-auto">
             Semua paket termasuk free trial 14 hari. Tidak perlu kartu kredit.

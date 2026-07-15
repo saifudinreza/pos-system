@@ -55,7 +55,7 @@ function SuccessContent() {
         </div>
 
         <p className="text-brand-black/60 text-sm mb-6">
-          Selamat! Akun Anda kini sudah aktif sebagai pengguna{" "}
+          Selamat! Akun kamu kini sudah aktif sebagai pengguna{" "}
           <span className="font-black capitalize text-brand-black">KasirAI {plan}</span>.
           Nikmati semua fitur premium sekarang.
         </p>
@@ -101,7 +101,7 @@ function SuccessContent() {
 
         {activating && (
           <p className="text-xs text-brand-black/40 mt-3">
-            Halaman ini otomatis memperbarui status akun Anda. Harap tunggu.
+            Halaman ini otomatis memperbarui status akun kamu. Harap tunggu.
           </p>
         )}
       </div>

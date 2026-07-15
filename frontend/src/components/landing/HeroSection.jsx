@@ -779,7 +779,7 @@ export default function HeroSection() {
             }}
           >
             <motion.span variants={line} style={{ display: "block", transformOrigin: "top center" }}>
-              Kasir yang
+              Kasir yang{" "}
             </motion.span>
 
             <motion.span variants={line} style={{ display: "block", transformOrigin: "top center", margin: "8px 0" }}>
@@ -794,11 +794,11 @@ export default function HeroSection() {
                 }}
               >
                 ngerti bisnis
-              </motion.span>
+              </motion.span>{" "}
             </motion.span>
 
             <motion.span variants={line} style={{ display: "block", transformOrigin: "top center" }}>
-              kamu, bukan cuma
+              kamu, bukan cuma{" "}
             </motion.span>
 
             <motion.span variants={line} style={{ display: "block", transformOrigin: "top center" }}>

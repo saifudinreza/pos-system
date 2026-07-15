@@ -39,7 +39,7 @@ const useAiStore = create((set) => ({
     {
       id:        "welcome",
       role:      "assistant",
-      content:   "Halo! Saya AI Assistant KasirAI. Tanya apa saja tentang bisnis Anda — penjualan, stok, tren produk, atau rekomendasi strategi. Saya siap membantu! 🤖",
+      content:   "Halo! Saya AI Assistant KasirAI. Tanya apa saja tentang bisnis kamu — penjualan, stok, tren produk, atau rekomendasi strategi. Saya siap membantu! 🤖",
       timestamp: new Date().toISOString(),
     },
   ],

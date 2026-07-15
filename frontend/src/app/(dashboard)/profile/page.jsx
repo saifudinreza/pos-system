@@ -129,7 +129,7 @@ export default function ProfilePage() {
     <div className="space-y-6 page-fade">
       <div>
         <h2 className="text-2xl sm:text-3xl font-black font-grotesk">Profil & Langganan</h2>
-        <p className="text-sm text-brand-black/50">Kelola informasi akun dan paket langganan Anda.</p>
+        <p className="text-sm text-brand-black/50">Kelola informasi akun dan paket langganan kamu.</p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
@@ -185,7 +185,7 @@ export default function ProfilePage() {
 
                 <NeoInput label="Nama Toko" id="p-store-name" value={form.store_name}
                   onChange={(e) => setForm((p) => ({ ...p, store_name: e.target.value }))}
-                  placeholder="Nama toko Anda" />
+                  placeholder="Nama toko kamu" />
 
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-black uppercase tracking-wider text-brand-black/60">
@@ -195,7 +195,7 @@ export default function ProfilePage() {
                     id="p-store-desc"
                     value={form.store_description}
                     onChange={(e) => setForm((p) => ({ ...p, store_description: e.target.value }))}
-                    placeholder="Ceritakan sedikit tentang toko Anda..."
+                    placeholder="Ceritakan sedikit tentang toko kamu..."
                     rows={3}
                     className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none resize-none focus:border-brand-yellow placeholder:text-brand-black/25"
                     style={{ boxShadow: "2px 2px 0 #0A0A0A" }}

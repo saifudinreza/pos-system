@@ -21,7 +21,7 @@ function PendingContent() {
 
         <h2 className="text-2xl font-black font-grotesk mb-2">Pembayaran Pending</h2>
         <p className="text-brand-black/60 text-sm mb-6">
-          Pembayaran Anda sedang diproses. Kami akan mengaktifkan paket{" "}
+          Pembayaran kamu sedang diproses. Kami akan mengaktifkan paket{" "}
           <span className="font-black capitalize">{plan}</span> segera setelah pembayaran dikonfirmasi
           oleh bank/penyedia pembayaran.
         </p>
@@ -36,7 +36,7 @@ function PendingContent() {
           <div className="flex items-start gap-2">
             <AlertCircle size={14} className="mt-0.5 shrink-0 text-yellow-700" />
             <p className="text-brand-black/70">
-              Akun Anda akan otomatis diupgrade dalam beberapa menit setelah pembayaran dikonfirmasi.
+              Akun kamu akan otomatis diupgrade dalam beberapa menit setelah pembayaran dikonfirmasi.
             </p>
           </div>
         </div>

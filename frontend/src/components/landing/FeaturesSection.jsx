@@ -127,7 +127,7 @@ export default function FeaturesSection() {
           </h2>
           <p className="mt-4 text-brand-black/60 font-medium max-w-lg">
             Dari kasir hingga laporan, dari manajemen stok hingga AI — semuanya
-            terhubung dan bekerja otomatis buat bisnis Anda.
+            terhubung dan bekerja otomatis buat bisnis kamu.
           </p>
         </Reveal>
 
@@ -149,11 +149,11 @@ export default function FeaturesSection() {
                 ✦ FITUR UNGGULAN
               </div>
               <h3 className="text-2xl font-black leading-tight">
-                AI Assistant yang benar-benar paham bisnis Anda
+                AI Assistant yang benar-benar paham bisnis kamu
               </h3>
               <p className="text-white/60 mt-2 text-sm font-medium max-w-md">
-                Bukan sekadar chatbot biasa. AI KasirAI membaca data penjualan Anda dan
-                memberi insight yang actionable — kapan saja Anda tanya.
+                Bukan sekadar chatbot biasa. AI KasirAI membaca data penjualan kamu dan
+                memberi insight yang actionable — kapan saja kamu tanya.
               </p>
             </div>
             <div className="shrink-0 space-y-2">

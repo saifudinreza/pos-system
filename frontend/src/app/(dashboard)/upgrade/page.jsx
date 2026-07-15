@@ -156,7 +156,7 @@ function UpgradeContent() {
 
               <NeoInput label="Alamat (opsional)" id="u-address" value={form.address}
                 onChange={(e) => setForm((p) => ({ ...p, address: e.target.value }))}
-                placeholder="Alamat usaha Anda" />
+                placeholder="Alamat usaha kamu" />
 
               {/* Toggle billing cycle */}
               <div className="pt-1">
@@ -201,7 +201,7 @@ function UpgradeContent() {
             </div>
 
             <div className="border-2 border-brand-black bg-white p-5" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
-              <p className="text-xs font-black uppercase tracking-wider mb-3">Yang Anda Dapat</p>
+              <p className="text-xs font-black uppercase tracking-wider mb-3">Yang Kamu Dapat</p>
               <ul className="space-y-2">
                 {features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-sm text-brand-black/70">

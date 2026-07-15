@@ -12,7 +12,7 @@ export default function NotFound() {
           <p className="font-black text-6xl font-mono">404</p>
         </div>
         <h1 className="text-2xl font-black font-grotesk mb-2">Halaman Tidak Ditemukan</h1>
-        <p className="text-brand-black/50 font-medium mb-6">Halaman yang Anda cari tidak ada atau telah dipindahkan.</p>
+        <p className="text-brand-black/50 font-medium mb-6">Halaman yang kamu cari tidak ada atau telah dipindahkan.</p>
         <Link
           href="/"
           className="inline-block px-5 py-2.5 bg-brand-black text-white font-bold border-2 border-brand-black"

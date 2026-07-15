@@ -1157,6 +1157,12 @@ export default function KasirPage() {
     loadCurrentShift();
   }, []);
 
+  // Belum ada shift aktif → langsung tampilkan form buka shift di depan,
+  // sebelum kasir sempat menyentuh grid produk / keranjang.
+  useEffect(() => {
+    if (!shiftLoading && !currentShift) setShiftOpenModal(true);
+  }, [shiftLoading, currentShift]);
+
   // Fetch produk setiap kali filter atau search berubah
   // Dependency: selCategory dan debouncedSearch (bukan search mentah)
   useEffect(() => {
@@ -1456,8 +1462,12 @@ export default function KasirPage() {
       </>
     )}
 
+    {/* Wrapper relative: dasar untuk overlay kunci shift */}
+    <div className="relative h-full">
     {/* Layout dua kolom: grid produk (kiri) + keranjang (kanan) */}
-    <div className="flex h-full gap-0 overflow-hidden bg-brand-cream">
+    <div className={`flex h-full gap-0 overflow-hidden bg-brand-cream transition-all duration-200 ${
+      !shiftLoading && !currentShift ? "blur-sm pointer-events-none select-none" : ""
+    }`}>
 
       {/* ═══════════════════════════════════════
           KOLOM KIRI — Grid Produk
@@ -1685,6 +1695,30 @@ export default function KasirPage() {
           </p>
         </div>
       </div>
+    </div>
+
+    {/* Overlay kunci: tampil selama belum ada shift aktif */}
+    {!shiftLoading && !currentShift && (
+      <div className="absolute inset-0 z-20 flex items-center justify-center bg-brand-black/10">
+        <div className="bg-white border-2 border-brand-black px-6 py-5 text-center max-w-xs" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+          <div className="w-12 h-12 mx-auto mb-3 bg-brand-yellow border-2 border-brand-black rounded-full flex items-center justify-center" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="5" y="11" width="14" height="10" rx="1.5" stroke="#0A0A0A" strokeWidth="2.2" strokeLinejoin="round" />
+              <path d="M8 11V7.5a4 4 0 0 1 8 0V11" stroke="#0A0A0A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="12" cy="15.5" r="1.4" fill="#0A0A0A" />
+              <path d="M12 16.9V18.6" stroke="#0A0A0A" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          </div>
+          <p className="font-black mb-1">Kasir terkunci</p>
+          <p className="text-xs text-brand-black/60 mb-4">Buka shift terlebih dahulu untuk mulai bertransaksi.</p>
+          <button onClick={() => setShiftOpenModal(true)}
+            className="w-full py-2.5 bg-brand-yellow border-2 border-brand-black font-black text-sm hover:bg-yellow-300 transition-colors"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            Buka Shift
+          </button>
+        </div>
+      </div>
+    )}
     </div>
 
     {/* Modal bayar tunai */}

@@ -11,7 +11,7 @@ const STEPS = [
   {
     number:      "02",
     title:       "Setup Produk",
-    description: "Tambahkan produk dan kategori Anda. Bisa import dari Excel atau input manual. Stok dan harga langsung tersimpan.",
+    description: "Tambahkan produk dan kategori kamu. Bisa import dari Excel atau input manual. Stok dan harga langsung tersimpan.",
     Icon:        LayoutList,
     details:     ["Import atau input manual", "Atur kategori", "Set stok awal"],
   },
