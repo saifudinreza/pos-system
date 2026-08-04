@@ -153,6 +153,15 @@ class TransactionController extends Controller
     // =============================================================
     public function create(Request $request): JsonResponse
     {
+        // Pembayaran digital (QRIS/e-wallet/VA) hanya untuk Pro & Enterprise
+        // Paket FREE melayani pembayaran tunai saja.
+        if ($this->getEffectivePlan($request->user()) === 'free') {
+            return response()->json([
+                'message'       => 'Pembayaran QRIS/digital hanya tersedia untuk paket Pro & Enterprise. Upgrade untuk mengaktifkannya.',
+                'plan_required' => 'pro',
+            ], 422);
+        }
+
         $this->configureServerKey($request);
 
         $validated = $request->validate([

@@ -10,6 +10,7 @@ import {
   AlertTriangle, ShoppingCart, Download, Calendar,
 } from "lucide-react";
 import reportService, { triggerFileDownload } from "@/services/reportService";
+import useAuthStore from "@/stores/authStore";
 import StatCard  from "@/components/dashboard/StatCard";
 import NeoButton from "@/components/ui/NeoButton";
 import NeoCard   from "@/components/ui/NeoCard";
@@ -56,6 +57,11 @@ export default function ReportsPage() {
   const [loading,      setLoading]      = useState(false);
   const [denied,       setDenied]       = useState(false);
   const [downloading,  setDownloading]  = useState(false);
+
+  // Export PDF/Excel hanya untuk paket Pro/Enterprise (back-end juga memblokir)
+  const isFreePlan = useAuthStore((s) =>
+    (s.user?.effective_plan ?? s.user?.subscription_plan ?? "free") === "free"
+  );
 
   // Compute API params from current preset
   const getParams = useCallback(() => {
@@ -198,12 +204,22 @@ export default function ReportsPage() {
           <p className="text-sm text-brand-black/50">Analisis penjualan &amp; kondisi stok</p>
         </div>
         <div className="flex gap-2">
-          <NeoButton variant="secondary" size="sm" onClick={() => handleDownload("pdf")} disabled={downloading}>
-            <Download size={13} />PDF
-          </NeoButton>
-          <NeoButton variant="dark" size="sm" onClick={() => handleDownload("excel")} disabled={downloading}>
-            <Download size={13} />Excel
-          </NeoButton>
+          {isFreePlan ? (
+            <div className="text-[10px] font-mono font-bold text-brand-black/50 border border-dashed border-brand-black/30 px-3 py-2 flex items-center gap-1.5 max-w-[240px]">
+              <AlertTriangle size={12} className="shrink-0" />
+              Export PDF/Excel untuk paket <b>Pro &amp; Enterprise</b> —{" "}
+              <a href="/upgrade?plan=pro" className="underline font-black">upgrade</a>
+            </div>
+          ) : (
+            <>
+              <NeoButton variant="secondary" size="sm" onClick={() => handleDownload("pdf")} disabled={downloading}>
+                <Download size={13} />PDF
+              </NeoButton>
+              <NeoButton variant="dark" size="sm" onClick={() => handleDownload("excel")} disabled={downloading}>
+                <Download size={13} />Excel
+              </NeoButton>
+            </>
+          )}
         </div>
       </div>
 

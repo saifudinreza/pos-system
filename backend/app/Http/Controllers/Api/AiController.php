@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Services\GroqService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -19,9 +20,34 @@ class AiController extends Controller
 {
     public function __construct(private GroqService $groq) {}
 
-    private function dailyLimit(): int
+    /**
+     * Limit kuota AI untuk user yang sedang login.
+     * FREE = 5 prompt/bulan (trial), PRO/Enterprise = tak terbatas (null),
+     * developer = tak terbatas. Kasir mengikuti plan admin tenant-nya.
+     */
+    private function monthlyLimit(): ?int
     {
-        return config('ai.daily_limit', 10);
+        $user = auth()->user();
+
+        if (! $user || $user->role === 'developer') {
+            return null;
+        }
+
+        $plan = $this->getEffectivePlan($user);
+
+        return $plan === 'free' ? (int) config('ai.free_monthly_limit', 5) : null;
+    }
+
+    /** Limit untuk user tertentu (dipakai monitoring statistik). */
+    private function limitForUser(User $user): ?int
+    {
+        if ($user->role === 'developer') {
+            return null;
+        }
+
+        $plan = $this->getEffectivePlan($user);
+
+        return $plan === 'free' ? (int) config('ai.free_monthly_limit', 5) : null;
     }
 
     private function warningThresholdPct(): int
@@ -30,21 +56,17 @@ class AiController extends Controller
     }
 
     // =============================================================
-    // USAGE TODAY — sisa kuota chat hari ini
+    // USAGE — sisa kuota AI user yang login (dihitung per bulan)
     // GET /api/ai/usage-today
     // =============================================================
     public function usageToday(): JsonResponse
     {
-        $limit = $this->dailyLimit();
-        $usage = AiChatUsage::where('user_id', auth()->user()->id)
-            ->where('usage_date', today())
-            ->first();
+        $limit     = $this->monthlyLimit();
+        $used      = $this->currentUsage();
+        $remaining = $limit === null ? null : max(0, $limit - $used);
 
-        $used      = $usage?->count ?? 0;
-        $remaining = max(0, $limit - $used);
-
-        $warningAt  = (int) ceil($limit * $this->warningThresholdPct() / 100);
-        $isWarning  = $remaining > 0 && $remaining <= $warningAt;
+        $warningAt = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
+        $isWarning = $remaining !== null && $remaining > 0 && $remaining <= $warningAt;
 
         return response()->json([
             'used'      => $used,
@@ -68,10 +90,14 @@ class AiController extends Controller
             'query' => ['required', 'string', 'max:500'],
         ]);
 
+        $tenantId = $request->user()->tenant_id;
+
         // ===== PENJUALAN PER PERIODE — supaya AI tidak salah kira periode =====
         // Sebelumnya cuma data bulan ini yang dikirim, jadi pertanyaan "minggu ini"
         // atau "hari ini" tetap dijawab pakai angka bulanan. Sekarang kita hitung
         // ketiganya sekaligus dan biarkan AI pilih sesuai kata dalam pertanyaan user.
+        // CATATAN: Transaction tidak punya tenant_id — isolasi tenant wajib manual
+        // via whereHas('order', tenant_id), sama seperti di ReportController.
         $periods = [
             'hari_ini'   => [now()->startOfDay(), now()->endOfDay()],
             'minggu_ini' => [now()->startOfWeek(), now()->endOfWeek()],
@@ -82,6 +108,7 @@ class AiController extends Controller
         foreach ($periods as $label => [$start, $end]) {
             $revenue = Transaction::where('status', 'settlement')
                 ->whereBetween('paid_at', [$start, $end])
+                ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
                 ->sum('amount');
 
             $orders = Order::where('status', 'paid')
@@ -97,6 +124,7 @@ class AiController extends Controller
         $topProducts = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('orders.status', 'paid')
+            ->when($tenantId, fn($q) => $q->where('orders.tenant_id', $tenantId))
             ->whereBetween('orders.created_at', $periods['bulan_ini'])
             ->selectRaw('
                 products.name,
@@ -149,9 +177,9 @@ class AiController extends Controller
         ]);
 
         $usageAfter = $this->currentUsage();
-        $limit      = $this->dailyLimit();
-        $remaining  = max(0, $limit - $usageAfter);
-        $warningAt  = (int) ceil($limit * $this->warningThresholdPct() / 100);
+        $limit      = $this->monthlyLimit();
+        $remaining  = $limit === null ? null : max(0, $limit - $usageAfter);
+        $warningAt  = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
 
         return response()->json([
             'message' => 'AI berhasil menganalisis data penjualan.',
@@ -166,7 +194,7 @@ class AiController extends Controller
                 'used'      => $usageAfter,
                 'remaining' => $remaining,
                 'limit'     => $limit,
-                'warning'   => $remaining > 0 && $remaining <= $warningAt,
+                'warning'   => $remaining !== null && $remaining > 0 && $remaining <= $warningAt,
             ],
         ], 200);
     }
@@ -185,11 +213,14 @@ class AiController extends Controller
             'query' => ['required', 'string', 'max:500'],
         ]);
 
+        $tenantId = $request->user()->tenant_id;
+
         $products = Product::with('category')
             ->withCount([
-                'orderItems as total_sold_30_days' => function ($q) {
+                'orderItems as total_sold_30_days' => function ($q) use ($tenantId) {
                     $q->join('orders', 'order_items.order_id', '=', 'orders.id')
                       ->where('orders.status', 'paid')
+                      ->when($tenantId, fn($o) => $o->where('orders.tenant_id', $tenantId))
                       ->where('orders.created_at', '>=', now()->subDays(30));
                 }
             ])
@@ -230,9 +261,9 @@ class AiController extends Controller
         ]);
 
         $usageAfter = $this->currentUsage();
-        $limit      = $this->dailyLimit();
-        $remaining  = max(0, $limit - $usageAfter);
-        $warningAt  = (int) ceil($limit * $this->warningThresholdPct() / 100);
+        $limit      = $this->monthlyLimit();
+        $remaining  = $limit === null ? null : max(0, $limit - $usageAfter);
+        $warningAt  = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
 
         return response()->json([
             'message' => 'AI berhasil memprediksi stok.',
@@ -247,7 +278,7 @@ class AiController extends Controller
                 'used'      => $usageAfter,
                 'remaining' => $remaining,
                 'limit'     => $limit,
-                'warning'   => $remaining > 0 && $remaining <= $warningAt,
+                'warning'   => $remaining !== null && $remaining > 0 && $remaining <= $warningAt,
             ],
         ], 200);
     }
@@ -267,6 +298,8 @@ class AiController extends Controller
             'product_id' => ['nullable', 'exists:products,id'],
         ]);
 
+        $tenantId = $request->user()->tenant_id;
+
         $patterns = DB::table('order_items as a')
             ->join('order_items as b', function ($join) {
                 $join->on('a.order_id', '=', 'b.order_id')
@@ -276,6 +309,7 @@ class AiController extends Controller
             ->join('products as pb', 'b.product_id', '=', 'pb.id')
             ->join('orders', 'a.order_id', '=', 'orders.id')
             ->where('orders.status', 'paid')
+            ->when($tenantId, fn($q) => $q->where('orders.tenant_id', $tenantId))
             ->when($request->filled('product_id'), function ($q) use ($request) {
                 $q->where('a.product_id', $request->product_id);
             })
@@ -314,9 +348,9 @@ class AiController extends Controller
         ]);
 
         $usageAfter = $this->currentUsage();
-        $limit      = $this->dailyLimit();
-        $remaining  = max(0, $limit - $usageAfter);
-        $warningAt  = (int) ceil($limit * $this->warningThresholdPct() / 100);
+        $limit      = $this->monthlyLimit();
+        $remaining  = $limit === null ? null : max(0, $limit - $usageAfter);
+        $warningAt  = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
 
         return response()->json([
             'message' => 'AI berhasil memberikan rekomendasi.',
@@ -331,7 +365,7 @@ class AiController extends Controller
                 'used'      => $usageAfter,
                 'remaining' => $remaining,
                 'limit'     => $limit,
-                'warning'   => $remaining > 0 && $remaining <= $warningAt,
+                'warning'   => $remaining !== null && $remaining > 0 && $remaining <= $warningAt,
             ],
         ], 200);
     }
@@ -342,8 +376,12 @@ class AiController extends Controller
     // =============================================================
     public function logs(): JsonResponse
     {
+        $tenantId = auth()->user()->tenant_id;
+
         $logs = AiQueryLog::with('user')
-            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
+            ->whereHas('user', fn($q) => $q
+                ->where('role', '!=', 'developer')
+                ->when($tenantId, fn($u) => $u->where('tenant_id', $tenantId)))
             ->latest()
             ->paginate(20);
 
@@ -376,32 +414,42 @@ class AiController extends Controller
         $today      = today();
         $weekStart  = now()->startOfWeek();
         $monthStart = now()->startOfMonth();
-        $limit      = $this->dailyLimit();
+        $limit      = $this->monthlyLimit();
         $tokenAlert = config('ai.token_alert_threshold', 50000);
 
-        $noDev = fn($q) => $q->whereHas('user', fn($u) => $u->where('role', '!=', 'developer'));
+        // Admin hanya melihat data user dalam tenant-nya sendiri;
+        // developer (tenant_id null) melihat semua tenant.
+        $tenantId = auth()->user()->tenant_id;
+        $scopeFn  = function ($q) use ($tenantId) {
+            $q->whereHas('user', function ($u) use ($tenantId) {
+                $u->where('role', '!=', 'developer');
+                if ($tenantId) {
+                    $u->where('tenant_id', $tenantId);
+                }
+            });
+        };
 
-        $todayTokens = AiQueryLog::whereDate('created_at', $today)->tap($noDev)->sum('tokens_used');
+        $todayTokens = AiQueryLog::whereDate('created_at', $today)->tap($scopeFn)->sum('tokens_used');
 
         $summary = [
             'today' => [
-                'requests'         => AiQueryLog::whereDate('created_at', $today)->tap($noDev)->count(),
+                'requests'         => AiQueryLog::whereDate('created_at', $today)->tap($scopeFn)->count(),
                 'tokens'           => $todayTokens,
-                'active_users'     => AiChatUsage::where('usage_date', $today)->tap($noDev)->count(),
+                'active_users'     => AiChatUsage::where('usage_date', $today)->tap($scopeFn)->count(),
                 'high_token_usage' => $todayTokens >= $tokenAlert,
             ],
             'week' => [
-                'requests' => AiQueryLog::where('created_at', '>=', $weekStart)->tap($noDev)->count(),
-                'tokens'   => AiQueryLog::where('created_at', '>=', $weekStart)->tap($noDev)->sum('tokens_used'),
+                'requests' => AiQueryLog::where('created_at', '>=', $weekStart)->tap($scopeFn)->count(),
+                'tokens'   => AiQueryLog::where('created_at', '>=', $weekStart)->tap($scopeFn)->sum('tokens_used'),
             ],
             'month' => [
-                'requests' => AiQueryLog::where('created_at', '>=', $monthStart)->tap($noDev)->count(),
-                'tokens'   => AiQueryLog::where('created_at', '>=', $monthStart)->tap($noDev)->sum('tokens_used'),
+                'requests' => AiQueryLog::where('created_at', '>=', $monthStart)->tap($scopeFn)->count(),
+                'tokens'   => AiQueryLog::where('created_at', '>=', $monthStart)->tap($scopeFn)->sum('tokens_used'),
             ],
         ];
 
         $byType = AiQueryLog::whereDate('created_at', $today)
-            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
+            ->tap($scopeFn)
             ->selectRaw('type, COUNT(*) as count, SUM(tokens_used) as tokens')
             ->groupBy('type')
             ->get()
@@ -413,28 +461,40 @@ class AiController extends Controller
 
         $byProvider = AiQueryLog::whereDate('created_at', $today)
             ->whereNotNull('provider')
-            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
+            ->tap($scopeFn)
             ->selectRaw('provider, COUNT(*) as count')
             ->groupBy('provider')
             ->get()
             ->map(fn($r) => ['provider' => $r->provider, 'count' => (int) $r->count]);
 
+        $monthStart = now()->startOfMonth();
         $usersToday = AiChatUsage::with('user')
             ->where('usage_date', $today)
-            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
+            ->tap($scopeFn)
             ->orderByDesc('count')
             ->get()
-            ->map(fn($u) => [
-                'user'      => $u->user->name ?? 'Unknown',
-                'used'      => $u->count,
-                'remaining' => max(0, $limit - $u->count),
-                'limit'     => $limit,
-                'pct'       => $limit > 0 ? round($u->count / $limit * 100) : 0,
-                'near_limit' => ($limit - $u->count) <= (int) ceil($limit * $this->warningThresholdPct() / 100),
-            ]);
+            ->map(function ($u) {
+                $monthlyUsed = $u->user
+                    ? (int) AiChatUsage::where('user_id', $u->user_id)
+                        ->where('usage_date', '>=', now()->startOfMonth())
+                        ->tap(fn($q) => $q->whereNotNull('user_id'))
+                        ->sum('count')
+                    : $u->count;
+                $userLimit   = $u->user ? $this->limitForUser($u->user) : null;
+                $remaining   = $userLimit === null ? null : max(0, $userLimit - $monthlyUsed);
+
+                return [
+                    'user'       => $u->user->name ?? 'Unknown',
+                    'used'       => $monthlyUsed,
+                    'remaining'  => $remaining,
+                    'limit'      => $userLimit,
+                    'pct'        => $userLimit > 0 ? round($monthlyUsed / $userLimit * 100) : null,
+                    'near_limit' => $userLimit !== null && ($userLimit - $monthlyUsed) <= (int) ceil($userLimit * $this->warningThresholdPct() / 100),
+                ];
+            });
 
         $dailyTrend = AiQueryLog::where('created_at', '>=', now()->subDays(6)->startOfDay())
-            ->whereHas('user', fn($q) => $q->where('role', '!=', 'developer'))
+            ->tap($scopeFn)
             ->selectRaw('DATE(created_at) as date, COUNT(*) as requests, SUM(tokens_used) as tokens')
             ->groupBy('date')
             ->orderBy('date')
@@ -452,7 +512,7 @@ class AiController extends Controller
             'users_today' => $usersToday,
             'daily_trend' => $dailyTrend,
             'config'      => [
-                'daily_limit'          => $limit,
+                'free_monthly_limit'   => (int) config('ai.free_monthly_limit', 5),
                 'warning_threshold_pct' => $this->warningThresholdPct(),
                 'token_alert_threshold' => $tokenAlert,
             ],
@@ -465,12 +525,15 @@ class AiController extends Controller
 
     private function checkAndIncrementUsage(): bool
     {
+        $limit = $this->monthlyLimit();
+
         $usage = AiChatUsage::firstOrCreate(
             ['user_id' => auth()->user()->id, 'usage_date' => today()],
             ['count' => 0]
         );
 
-        if ($usage->count >= $this->dailyLimit()) {
+        // Paket PRO/Enterprise (limit null) = tak terbatas, tetap dicatat untuk monitoring.
+        if ($limit !== null && $this->currentUsage() >= $limit) {
             return false;
         }
 
@@ -478,17 +541,18 @@ class AiController extends Controller
         return true;
     }
 
+    /** Total prompt yang terpakai bulan ini (menjumlah semua baris usage harian). */
     private function currentUsage(): int
     {
-        return AiChatUsage::where('user_id', auth()->user()->id)
-            ->where('usage_date', today())
-            ->value('count') ?? 0;
+        return (int) (AiChatUsage::where('user_id', auth()->user()->id)
+            ->where('usage_date', '>=', now()->startOfMonth()->toDateString())
+            ->sum('count') ?? 0);
     }
 
     private function limitReachedResponse(): JsonResponse
     {
         return response()->json([
-            'message'       => 'Daily AI chat limit reached. Resets tomorrow.',
+            'message'       => 'Kuota AI bulanan untuk paket FREE sudah habis. Upgrade ke Pro untuk AI tak terbatas.',
             'limit_reached' => true,
         ], 429);
     }

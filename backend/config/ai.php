@@ -3,12 +3,13 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | AI Daily Request Limit per User
+    | AI Monthly Request Limit — Paket FREE
     |--------------------------------------------------------------------------
-    | Jumlah maksimum request AI yang boleh dilakukan satu user per hari.
-    | Atur via AI_DAILY_LIMIT di .env
+    | Jumlah maksimum prompt AI yang boleh dilakukan satu user paket FREE
+    | per bulan (dihitung per bulan kalender). Paket Pro & Enterprise
+    | tidak terbatas. Atur via AI_FREE_MONTHLY_LIMIT di .env
     */
-    'daily_limit' => (int) env('AI_DAILY_LIMIT', 10),
+    'free_monthly_limit' => (int) env('AI_FREE_MONTHLY_LIMIT', 5),
 
     /*
     |--------------------------------------------------------------------------

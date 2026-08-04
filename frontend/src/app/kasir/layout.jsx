@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Script from "next/script";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import LogoMark from "@/components/brand/LogoMark";
@@ -25,12 +24,9 @@ export default function KasirLayout({ children }) {
 
   return (
     <>
-    {/* Load Midtrans Snap JS — strategy="lazyOnload" supaya tidak block render */}
-    <Script
-      src={process.env.NEXT_PUBLIC_MIDTRANS_SNAP_URL}
-      data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
-      strategy="lazyOnload"
-    />
+    {/* Catatan: Midtrans Snap JS TIDAK di-load di sini — dimuat on-demand oleh
+        loadMidtransSnap() di kasir/page.jsx dengan data-client-key milik tenant,
+        supaya tidak double-load dengan script inject manual. */}
     <div className="flex flex-col h-screen bg-brand-cream overflow-hidden">
       {/* Kasir Navbar — minimal, no sidebar */}
       <header className="h-14 bg-brand-black text-white flex items-center justify-between px-4 border-b-2 border-brand-black shrink-0 z-10">

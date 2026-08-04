@@ -51,18 +51,6 @@ export function cn(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-// --- URL GAMBAR PRODUK ---
-// Backend menyimpan path relatif di DB, misal: "products/abc.jpg"
-// Kita perlu ubah ke URL lengkap yang bisa diakses browser
-// Analogi: seperti mengubah nomor rak → alamat lengkap gudang
-export function getImageUrl(path) {
-  if (!path) return null;
-  // Jika sudah URL lengkap (misal dari test seed), langsung pakai
-  if (path.startsWith("http")) return path;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "");
-  return `${baseUrl}/storage/${path}`;
-}
-
 // --- STATUS ORDER → LABEL + WARNA ---
 // Mengembalikan teks dan kelas warna Tailwind sesuai status order
 // Analogi: seperti lampu sinyal lalu lintas — setiap warna punya arti

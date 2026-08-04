@@ -1151,6 +1151,11 @@ export default function KasirPage() {
   const { items, addItem, removeItem, deleteItem, getSubtotal, getTax, getTotal, clearCart, getOrderPayload } = useCartStore();
   const user = useAuthStore((s) => s.user);
 
+  // Paket efektif — kasir mengikuti plan admin tenant-nya (dari backend /me)
+  const isFreePlan = user
+    ? (user.effective_plan ?? user.subscription_plan ?? "free") === "free"
+    : true;
+
   // Fetch kategori & shift SEKALI saat halaman pertama load
   useEffect(() => {
     categoryService.getAll({ is_active: true }).then((res) => setCategories(res.data ?? res)).catch(() => {});
@@ -1268,6 +1273,10 @@ export default function KasirPage() {
     }
     if (!shiftWithinWindow) {
       alert(`Jam shift ${currentShift.shift_name} (${currentShift.start_time}–${currentShift.end_time}) sudah berakhir. Lakukan klerk untuk menutup shift.`);
+      return;
+    }
+    if (isFreePlan) {
+      alert("Pembayaran QRIS/digital hanya tersedia untuk paket Pro & Enterprise. Upgrade di menu Profil → Langganan.");
       return;
     }
     if (!user?.midtrans_client_key) {
@@ -1671,7 +1680,9 @@ export default function KasirPage() {
             </div>
           </div>
 
-          {/* Dua tombol bayar: TUNAI dan DIGITAL (PRD: split button) */}
+          {/* Dua tombol bayar: TUNAI dan DIGITAL (PRD: split button)
+              DIGITAL (QRIS) hanya untuk paket Pro/Enterprise — paket FREE
+              dilayani dengan pembayaran tunai. */}
           <div className="flex gap-2">
             <button
               onClick={() => { if (items.length > 0) setCashModal(true); }}
@@ -1683,13 +1694,19 @@ export default function KasirPage() {
             </button>
             <button
               onClick={handleDigitalCheckout}
-              disabled={items.length === 0 || paying}
+              disabled={items.length === 0 || paying || isFreePlan}
+              title={isFreePlan ? "Pembayaran QRIS/digital hanya untuk paket Pro & Enterprise" : undefined}
               className="flex-1 py-3 bg-brand-yellow border-2 border-brand-black font-black text-sm disabled:opacity-40 hover:bg-yellow-300 active:translate-y-0.5 transition-all"
               style={{ boxShadow: items.length > 0 ? "3px 3px 0 #0A0A0A" : "none" }}
             >
               {paying ? "Memproses..." : "DIGITAL"}
             </button>
           </div>
+          {isFreePlan && (
+            <p className="text-[10px] font-mono text-brand-black/40 text-center border border-dashed border-brand-black/30 px-2 py-1">
+              💳 Pembayaran QRIS/digital untuk paket <b>Pro & Enterprise</b> — <a href="/upgrade?plan=pro" className="underline font-bold">upgrade sekarang</a>
+            </p>
+          )}
           <p className="text-[10px] font-mono text-brand-black/30 text-center">
             Total: {formatCurrency(getTotal())}
           </p>

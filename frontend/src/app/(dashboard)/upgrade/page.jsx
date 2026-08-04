@@ -35,22 +35,29 @@ function loadSnap() {
   });
 }
 
+// Harga harus sinkron dengan backend (SubscriptionController::PRICES)
 const PRICES = {
-  pro:        { monthly: 250000, yearly: 200000 },
-  enterprise: { monthly: 799000, yearly: 649000 },
+  pro:        { monthly: 129000, yearly: 100000 },
+  enterprise: { monthly: 499000, yearly: 399000 },
 };
 
 const PLAN_LABELS = { pro: "Pro", enterprise: "Enterprise" };
 
 const PLAN_FEATURES = {
   pro: [
-    "Hingga 5 outlet",
-    "Produk tidak terbatas",
-    "Laporan kustom & export (PDF/Excel)",
+    "Produk & kategori tidak terbatas",
+    "Transaksi tak terbatas",
     "AI Assistant tak terbatas",
-    "Integrasi QRIS & e-wallet",
-    "Manajemen karyawan & absen",
+    "Laporan lengkap & export (PDF/Excel)",
+    "Pembayaran QRIS, e-wallet & transfer bank (Midtrans)",
     "Support via WhatsApp & email",
+  ],
+  enterprise: [
+    "Semua fitur Paket Pro",
+    "Pengguna tidak terbatas",
+    "Prioritas support & pendampingan",
+    "Manajemen & laporan lintas cabang",
+    "Akses API & integrasi kustom",
   ],
 };
 

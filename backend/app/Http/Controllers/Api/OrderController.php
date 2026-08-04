@@ -140,28 +140,13 @@ class OrderController extends Controller
             // ↑ Nomor HP customer untuk kirim struk WA, boleh kosong
         ]);
 
-        // ----- CEK LIMIT TRANSAKSI BULANAN (FREE PLAN) -----
-        $user = $request->user();
-        $plan = $user->subscription_plan ?? 'free';
-        if ($plan === 'free') {
-            $monthlyCount = Order::where('user_id', $user->id)
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->count();
-            if ($monthlyCount >= 10) {
-                return response()->json([
-                    'message' => 'Paket FREE hanya bisa membuat 10 transaksi per bulan. Upgrade ke Pro untuk transaksi tak terbatas.',
-                    'limit_reached' => true,
-                ], 422);
-            }
-        }
-
         // ----- WAJIB ADA SHIFT AKTIF -----
         // Setiap transaksi HARUS terjadi di dalam shift yang sedang berjalan,
         // supaya rekonsiliasi kas saat tutup shift selalu akurat.
+        // Shift bersifat per-tenant (dipakai bersama semua kasir), jadi tidak
+        // difilter per-user — TenantScope otomatis membatasi ke tenant ini.
         // (Frontend juga sudah memblokir, ini lapisan pengaman di backend.)
-        $shift = Shift::where('user_id', $request->user()->id)
-            ->where('status', 'open')
+        $shift = Shift::where('status', 'open')
             ->latest('opened_at')
             ->first();
 

@@ -22,14 +22,15 @@ const PLAN_COLORS = {
 const PLAN_FEATURES = {
   free: [
     "1 outlet / toko",
-    "Maks. 3 kategori produk",
-    "Maks. 5 produk",
-    "Maks. 10 transaksi/bulan",
-    "Laporan harian & bulanan",
+    "Maks. 15 kategori produk",
+    "Maks. 50 produk",
+    "Transaksi tanpa batas",
+    "5 prompt AI Assistant /bulan",
+    "Pembayaran tunai",
   ],
   pro: [
     "Hingga 5 outlet",
-    "Maks. 10 kategori & 30 produk",
+    "Produk & kategori tidak terbatas",
     "Transaksi tak terbatas",
     "Laporan kustom & export (PDF/Excel)",
     "AI Assistant tak terbatas",
@@ -119,7 +120,7 @@ export default function ProfilePage() {
 
   if (!mounted) return null;
 
-  const plan        = user?.subscription_plan ?? "free";
+  const plan        = user?.effective_plan ?? user?.subscription_plan ?? "free";
   const role        = user?.role ?? "kasir";
   const features    = PLAN_FEATURES[plan] ?? PLAN_FEATURES.free;
   const hasActiveSub = plan !== "free" || (sub && sub.expires_at);

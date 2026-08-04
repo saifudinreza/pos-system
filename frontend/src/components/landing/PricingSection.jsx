@@ -19,37 +19,36 @@ import Link from "next/link";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
 // Data paket harga — tiap objek = satu paket
+// Harga harus sinkron dengan backend (SubscriptionController::PRICES)
 const PLANS = [
   {
     name:        "Free",
     price:       { monthly: 0, yearly: 0 },
-    description: "Pas untuk toko kecil & warung yang baru mulai digital.",
+    description: "Gratis selamanya — bisa langsung dipakai toko kecil & warung untuk operasional harian.",
     highlighted: false,
     features:    [
-      "1 outlet / toko",
-      "Maks. 3 kategori produk",
-      "Maks. 5 produk",
-      "Maks. 10 transaksi/bulan",
+      "Maks. 50 produk",
+      "Transaksi tak terbatas",
       "Kasir & manajemen pesanan",
+      "Shift & rekonsiliasi kas",
       "Laporan harian & bulanan",
+      "5 prompt AI/bulan (trial)",
     ],
-    missing:     ["AI Assistant", "Laporan kustom & export", "Transaksi tak terbatas"],
+    missing:     ["Pembayaran QRIS/digital", "Export laporan PDF/Excel", "AI Assistant tak terbatas"],
     cta:         "Mulai Gratis",
     ctaHref:     "/register?plan=free",
   },
   {
     name:        "Pro",
-    price:       { monthly: 250000, yearly: 200000 },
-    description: "Untuk bisnis berkembang yang butuh fitur lengkap.",
+    price:       { monthly: 129000, yearly: 100000 },
+    description: "Untuk bisnis berkembang yang butuh pembayaran digital & laporan lengkap.",
     highlighted: true,
     features:    [
-      "Hingga 5 outlet",
-      "Maks. 10 kategori produk",
-      "Maks. 30 produk",
+      "Produk & kategori tidak terbatas",
       "Transaksi tak terbatas",
-      "Laporan kustom & export (PDF/Excel)",
+      "Laporan lengkap & export (PDF/Excel)",
       "AI Assistant tak terbatas",
-      "Integrasi QRIS & e-wallet",
+      "Pembayaran QRIS, e-wallet & transfer bank",
       "Support via WhatsApp & email",
     ],
     missing:     [],
@@ -58,18 +57,16 @@ const PLANS = [
   },
   {
     name:        "Enterprise",
-    price:       { monthly: 799000, yearly: 649000 },
+    price:       { monthly: 499000, yearly: 399000 },
     description: "Solusi lengkap untuk chain restoran, minimarket, atau franchise.",
     highlighted: false,
     features:    [
-      "Outlet tidak terbatas",
-      "Kategori & produk tidak terbatas",
-      "Transaksi tidak terbatas",
-      "API & integrasi kustom",
-      "Dedicated account manager",
-      "SLA & uptime guarantee",
+      "Semua fitur Paket Pro",
+      "Pengguna tidak terbatas",
+      "Laporan & dashboard lintas cabang",
+      "Akses API & integrasi kustom",
+      "Prioritas support & pendampingan",
       "Training tim on-site",
-      "Laporan & dashboard kustom",
     ],
     missing:     [],
     cta:         "Upgrade ke Enterprise",
@@ -238,7 +235,7 @@ export default function PricingSection() {
               Tahunan
               {/* Badge hemat — insentif memilih tahunan */}
               <span className="bg-green-400 text-green-900 text-[10px] font-black px-1.5 py-0.5 border border-green-600">
-                -25%
+                HEMAT
               </span>
             </button>
           </div>

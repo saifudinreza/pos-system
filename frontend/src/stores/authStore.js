@@ -133,19 +133,21 @@ const useAuthStore = create((set, get) => ({
 
   isDeveloper: () => get().user?.role === "developer",
 
+  // AI tersedia untuk semua staff (admin/kasir/developer) — kuota diatur
+  // per plan oleh backend: FREE = 5 prompt/bulan, Pro/Enterprise = tak terbatas.
   canAccessAI: () => {
     const user = get().user;
     if (!user) return false;
-    if (user.role === "developer" || user.role === "admin") return true;
-    const plan = user.subscription_plan ?? "free";
-    return plan === "pro" || plan === "enterprise";
+    return ["admin", "kasir", "developer"].includes(user.role);
   },
 
+  // Plan efektif — kasir mengikuti plan admin tenant-nya.
+  // Backend sudah mengirim `effective_plan` via /me (login/register).
   getEffectivePlan: () => {
     const user = get().user;
     if (!user) return "free";
     if (user.role === "developer") return "enterprise";
-    return user.subscription_plan ?? "free";
+    return user.effective_plan ?? user.subscription_plan ?? "free";
   },
 }));
 

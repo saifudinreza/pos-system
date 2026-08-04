@@ -9,10 +9,9 @@
 // kasir klik produk → masuk keranjang → checkout → order terbuat
 //
 // Relasi:
-//   - cartStore → dibaca oleh CartPanel.jsx (tampilkan isi keranjang)
-//   - cartStore → dibaca oleh ProductGrid.jsx (tombol tambah ke keranjang)
-//   - cartStore → dipakai oleh PaymentModal.jsx untuk buat order + transaksi
-//   - cartStore → setelah checkout sukses, keranjang dikosongkan (clearCart)
+//   - cartStore → dipakai langsung oleh halaman /kasir (grid produk, keranjang,
+//     modal bayar) dan /dashboard — semua komponen sudah di-inline di halaman
+//   - setelah checkout sukses, keranjang dikosongkan (clearCart)
 //
 // Rumus harga:
 //   subtotal = Σ (item.price × item.quantity)

@@ -229,7 +229,12 @@ $notification = new Notification(); // baru verifikasi — SDK panggil API pakai
 - Alur daftar → pilih paket → dashboard, siap dipakai calon pelanggan asli
 
 ### Subscription & Billing (SaaS Model)
-- 3 paket: **Free** (1 outlet, batas produk/transaksi), **Pro**, **Enterprise** (fitur & outlet tak terbatas)
+- 3 paket dengan harga **terpusat di backend** (`SubscriptionController::PRICES`) — frontend membaca angka yang sama saat initiate, jadi tidak mungkin mis-match:
+  - **Free** (Rp 0): 1 outlet, maks. 50 produk & 15 kategori, transaksi tanpa batas, 5 prompt AI/bulan, pembayaran tunai saja (tanpa QRIS/digital, tanpa export PDF/Excel)
+  - **Pro** — Rp 129.000/bulan (Rp 100.000/bulan jika bayar tahunan): produk/kategori unlimited, transaksi tak terbatas, AI Assistant unlimited, export laporan PDF/Excel, QRIS & e-wallet
+  - **Enterprise** — Rp 499.000/bulan (Rp 399.000/bulan jika bayar tahunan): semua fitur Pro + outlet unlimited, API & integrasi kustom, account manager, SLA
+- **Enforcement berlapis**: backend memblokir (QRIS free → 422 `plan_required`, export free → 403, AI free > 5/bulan → 429 `limit_reached`), frontend juga memblokir/menyembunyikan tombolnya
+- **Kasir mengikuti plan admin tenant-nya** (`effective_plan` di response `/me`) — bukan plan kolom user sendiri
 - Upgrade paket dibayar langsung via **Midtrans Snap** (bulanan/tahunan, harga tahunan diskon)
 - Webhook otomatis aktivasi paket + upgrade role user begitu pembayaran `settlement`
 - User bisa batalkan transaksi pending sendiri; developer bisa monitor semua tenant, ubah plan, atau suspend akun dari panel khusus
@@ -262,7 +267,7 @@ $notification = new Notification(); // baru verifikasi — SDK panggil API pakai
 - Backend inject katalog & stok produk lengkap sebagai konteks AI (bukan cuma ringkasan)
 - 3 mode: analisis penjualan, prediksi stok habis, rekomendasi bundling
 - Badge provider aktif: Groq / FALLBACK OpenRouter
-- Limit harian dengan warning banner
+- **Kuota bulanan per paket** (dihitung per bulan kalender): Free = 5 prompt/bulan (badge peringatan saat sisa tipis), Pro/Enterprise = tak terbatas — tersedia untuk admin & kasir
 
 ### Laporan (`/reports`)
 - Filter: hari ini, 7 hari, 30 hari, custom range
@@ -290,7 +295,7 @@ $notification = new Notification(); // baru verifikasi — SDK panggil API pakai
 | Pesanan & Transaksi | — | ✅ | ✅ | ✅ |
 | Dashboard & Laporan | — | — | ✅ | ✅ |
 | Konfigurasi Midtrans | — | — | ✅ | ✅ |
-| AI Assistant | — | — | ✅ | ✅ |
+| AI Assistant | — | ✅ | ✅ | ✅ |
 | AI Monitoring | — | — | ✅ | ✅ |
 | User Management | — | — | — | ✅ |
 | Kelola Tenant & Subscription (semua toko) | — | — | — | ✅ |
@@ -301,7 +306,7 @@ $notification = new Notification(); // baru verifikasi — SDK panggil API pakai
 
 Diuji menggunakan **TestSprite** — AI testing agent yang menjalankan test end-to-end di browser nyata.
 
-**Hasil: 20/20 test PASSED** ✅
+**Hasil TestSprite: 20/20 test PASSED** ✅
 
 | Test Flow | Verdict |
 |---|:---:|
@@ -313,6 +318,8 @@ Diuji menggunakan **TestSprite** — AI testing agent yang menjalankan test end-
 | Edge: tombol bayar disabled saat cart kosong | ✅ PASSED |
 | Search produk real-time | ✅ PASSED |
 | Riwayat shift | ✅ PASSED |
+
+**PHPUnit (backend): 20/20 test PASSED** ✅ — `php artisan test` di folder `backend/` (memakai SQLite :memory:, termasuk test isolasi tenant AI/report, shift per-tenant, gating plan Free vs Pro, dan sinkronisasi harga paket).
 
 ---
 

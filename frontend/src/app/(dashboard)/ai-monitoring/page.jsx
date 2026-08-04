@@ -195,7 +195,7 @@ export default function AiMonitoringPage() {
         </div>
         <div className="flex items-center gap-2">
           <div className="rounded-md text-[10px] font-mono bg-brand-black/5 border border-brand-black/10 px-3 py-1.5">
-            Limit/hari: <span className="font-black">{config.daily_limit}</span> req ·{" "}
+            Limit/bulan: <span className="font-black">{config.free_monthly_limit}</span> req ·{" "}
             Token alert: <span className="font-black">{config.token_alert_threshold.toLocaleString()}</span>
           </div>
           <button
@@ -230,7 +230,9 @@ export default function AiMonitoringPage() {
           <StatCard label="User Aktif"      value={summary.today.active_users}          sub="user pakai AI"     Icon={IcoUsers} />
           <StatCard
             label="Sisa Kuota Rata"
-            value={`${config.daily_limit - Math.round(summary.today.requests / Math.max(1, summary.today.active_users))}/${config.daily_limit}`}
+            value={users_today.filter((u) => u.limit !== null).length > 0
+              ? `${Math.round(users_today.filter((u) => u.limit !== null).reduce((acc, u) => acc + (u.remaining ?? 0), 0) / users_today.filter((u) => u.limit !== null).length)}/${config.free_monthly_limit}`
+              : "∞"}
             sub="per user (rata-rata)"
             Icon={IcoShield}
           />
@@ -342,9 +344,9 @@ export default function AiMonitoringPage() {
       </Section>
 
       {/* ── Per-User Usage ── */}
-      <Section title="Penggunaan Per User — Hari Ini" Icon={IcoUsers}>
+      <Section title="Penggunaan Per User — Bulan Ini" Icon={IcoUsers}>
         {users_today.length === 0 ? (
-          <p className="text-xs text-brand-black/30 font-mono">Belum ada user yang memakai AI hari ini.</p>
+          <p className="text-xs text-brand-black/30 font-mono">Belum ada user yang memakai AI bulan ini.</p>
         ) : (
           <div className="space-y-2">
             {users_today.map((u, i) => (

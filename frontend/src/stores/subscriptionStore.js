@@ -3,6 +3,8 @@ import api from "@/lib/axios";
 
 // ============================================================
 // Subscription Plans definition (frontend config)
+// Harga bersumber dari backend SubscriptionController::PRICES —
+// jaga agar selalu sinkron saat ada perubahan.
 // ============================================================
 export const PLANS = {
   free: {
@@ -13,48 +15,66 @@ export const PLANS = {
     features: {
       max_products: 50,
       max_users: 2,
-      ai_assistant: false,
+      ai_assistant: true,
+      ai_monthly_limit: 5,
       reports_download: false,
-      analytics_charts: false,
+      analytics_charts: true,
       multi_branch: false,
       priority_support: false,
       api_access: false,
     },
-    limits: { products: "Maks. 50 produk", users: "Maks. 2 pengguna" },
+    limits: {
+      products: "Maks. 50 produk",
+      users: "Maks. 2 pengguna",
+      ai: "5 prompt AI/bulan",
+      transactions: "Transaksi tak terbatas",
+    },
   },
   pro: {
     id: "pro",
     name: "Pro",
-    price: 299000,
+    price: 129000,
     color: "yellow",
     features: {
       max_products: -1,
       max_users: 10,
       ai_assistant: true,
+      ai_monthly_limit: null,
       reports_download: true,
       analytics_charts: true,
       multi_branch: false,
       priority_support: true,
       api_access: false,
     },
-    limits: { products: "Produk tidak terbatas", users: "Maks. 10 pengguna" },
+    limits: {
+      products: "Produk tidak terbatas",
+      users: "Maks. 10 pengguna",
+      ai: "AI Assistant tak terbatas",
+      transactions: "Transaksi tak terbatas",
+    },
   },
   enterprise: {
     id: "enterprise",
     name: "Enterprise",
-    price: 799000,
+    price: 499000,
     color: "black",
     features: {
       max_products: -1,
       max_users: -1,
       ai_assistant: true,
+      ai_monthly_limit: null,
       reports_download: true,
       analytics_charts: true,
       multi_branch: true,
       priority_support: true,
       api_access: true,
     },
-    limits: { products: "Produk tidak terbatas", users: "Pengguna tidak terbatas" },
+    limits: {
+      products: "Produk tidak terbatas",
+      users: "Pengguna tidak terbatas",
+      ai: "AI Assistant tak terbatas",
+      transactions: "Transaksi tak terbatas",
+    },
   },
 };
 

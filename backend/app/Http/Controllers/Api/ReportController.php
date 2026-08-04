@@ -70,6 +70,8 @@ class ReportController extends Controller
             ->values();
 
         // ===== CHART DATA — penjualan per periode =====
+        // Label diformat di PHP (bukan SQL) supaya query portabel
+        // (SQLite tidak punya DATE_FORMAT/MONTHNAME, hanya DATE/MONTH).
         if ($period === 'monthly') {
             $year      = $request->get('year', now()->year);
             $chartData = Transaction::where('status', 'settlement')
@@ -77,26 +79,36 @@ class ReportController extends Controller
                 ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
                 ->selectRaw('
                     MONTH(paid_at) as period,
-                    MONTHNAME(paid_at) as label,
                     COUNT(*) as total_transactions,
                     SUM(amount) as total_revenue
                 ')
-                ->groupBy('period', 'label')
+                ->groupBy('period')
                 ->orderBy('period')
-                ->get();
+                ->get()
+                ->map(fn($r) => [
+                    'period'             => (int) $r->period,
+                    'label'              => \Illuminate\Support\Carbon::create()->month($r->period)->translatedFormat('F'),
+                    'total_transactions' => (int) $r->total_transactions,
+                    'total_revenue'      => (float) $r->total_revenue,
+                ]);
         } else {
             $chartData = Transaction::where('status', 'settlement')
                 ->whereBetween('paid_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
                 ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
                 ->selectRaw('
                     DATE(paid_at) as period,
-                    DATE_FORMAT(paid_at, "%d %b") as label,
                     COUNT(*) as total_transactions,
                     SUM(amount) as total_revenue
                 ')
-                ->groupBy('period', 'label')
+                ->groupBy('period')
                 ->orderBy('period')
-                ->get();
+                ->get()
+                ->map(fn($r) => [
+                    'period'             => $r->period,
+                    'label'              => \Illuminate\Support\Carbon::parse($r->period)->format('d M'),
+                    'total_transactions' => (int) $r->total_transactions,
+                    'total_revenue'      => (float) $r->total_revenue,
+                ]);
         }
 
         // ===== TOP PRODUCTS — produk terlaris =====
@@ -227,10 +239,21 @@ class ReportController extends Controller
         $dateTo   = $request->get('date_to', now()->toDateString());
         $format   = $request->get('format', 'pdf');
 
-        // Ambil data untuk laporan
+        // Export PDF/Excel hanya untuk Pro & Enterprise
+        if ($this->getEffectivePlan($request->user()) === 'free') {
+            return response()->json([
+                'message'       => 'Export laporan (PDF/Excel) hanya tersedia untuk paket Pro & Enterprise. Upgrade untuk mengaktifkannya.',
+                'plan_required' => 'pro',
+            ], 403);
+        }
+
+        $tenantId = $request->user()->tenant_id;
+
+        // Ambil data untuk laporan — wajib filter tenant (Transaction tidak punya tenant_id)
         $transactions = Transaction::with('order.user')
             ->where('status', 'settlement')
             ->whereBetween('paid_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
             ->latest('paid_at')
             ->get();
 
@@ -268,6 +291,14 @@ class ReportController extends Controller
     // =============================================================
     public function downloadStock(Request $request)
     {
+        // Export PDF/Excel hanya untuk Pro & Enterprise
+        if ($this->getEffectivePlan($request->user()) === 'free') {
+            return response()->json([
+                'message'       => 'Export laporan (PDF/Excel) hanya tersedia untuk paket Pro & Enterprise. Upgrade untuk mengaktifkannya.',
+                'plan_required' => 'pro',
+            ], 403);
+        }
+
         $format   = $request->get('format', 'pdf');
 
         $products = Product::with('category')

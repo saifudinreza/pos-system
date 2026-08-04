@@ -11,9 +11,11 @@
 //
 // Relasi:
 //   - aiStore → pakai aiService untuk kirim query ke backend
-//   - aiStore → dibaca oleh AIChatBubble.jsx (tampilkan riwayat chat)
-//   - aiStore → dibaca oleh AIQuickPrompts.jsx (tombol cepat kirim pertanyaan)
-//   - aiStore → AITypingIndicator.jsx tampil saat isLoading = true
+//   - aiStore → dibaca oleh AISidebar.jsx (panel chat di layout dashboard)
+//
+// Kuota AI:
+//   - Paket FREE: 5 prompt/bulan (dihitung backend per bulan kalender)
+//   - Paket Pro/Enterprise: tak terbatas (limit = null)
 //
 // Tipe query yang didukung backend:
 //   "sales_analysis" → aiService.query()
@@ -54,8 +56,8 @@ const useAiStore = create((set) => ({
   // Jumlah total token yang terpakai dalam sesi ini
   totalTokensUsed: 0,
 
-  // Kuota harian
-  dailyUsage: { used: 0, remaining: 10, limit: 10 },
+  // Kuota AI (per bulan kalender; null = tak terbatas untuk Pro/Enterprise)
+  dailyUsage: { used: 0, remaining: null, limit: null },
   limitReached: false,
   usageWarning: false,
 
@@ -63,7 +65,7 @@ const useAiStore = create((set) => ({
   // ACTIONS
   // ============================================================
 
-  // --- FETCH KUOTA HARIAN ---
+  // --- FETCH KUOTA AI ---
   fetchUsage: async () => {
     try {
       const data = await aiService.getUsageToday();
@@ -114,7 +116,7 @@ const useAiStore = create((set) => ({
           : {
               ...state.dailyUsage,
               used:      state.dailyUsage.used + 1,
-              remaining: Math.max(0, state.dailyUsage.remaining - 1),
+              remaining: state.dailyUsage.limit === null ? null : Math.max(0, (state.dailyUsage.remaining ?? 0) - 1),
             },
         limitReached: usageUpdate ? usageUpdate.remaining === 0 : state.dailyUsage.remaining <= 1,
         usageWarning: usageUpdate ? (usageUpdate.warning === true) : false,
@@ -274,7 +276,7 @@ const useAiStore = create((set) => ({
       totalTokensUsed: 0,
     }),
     // note: limitReached dan dailyUsage sengaja tidak di-reset di sini
-    // karena limit adalah per-hari, bukan per-sesi
+    // karena limit adalah per-bulan, bukan per-sesi
 
   // --- BERSIHKAN ERROR ---
   clearError: () => set({ error: null }),

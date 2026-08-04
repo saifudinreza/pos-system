@@ -28,14 +28,6 @@ import { NextResponse } from "next/server";
 // "/" = landing page, "/login" = form login, "/register" = form daftar
 const PUBLIC_ROUTES = ["/", "/login", "/register"];
 
-// Catatan: halaman di bawah ini butuh login dan tidak di-redirect
-// saat user sudah login (berbeda dengan PUBLIC_ROUTES yang di-redirect ke dashboard)
-const PROTECTED_ONLY = [
-  "/dashboard", "/profile", "/upgrade", "/kasir",
-  "/products", "/categories", "/orders", "/transactions",
-  "/reports", "/users", "/dev"
-];
-
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 

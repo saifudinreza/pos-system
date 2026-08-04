@@ -17,8 +17,8 @@ use Midtrans\Transaction;
 class SubscriptionController extends Controller
 {
     const PRICES = [
-        'pro'        => ['monthly' => 250000, 'yearly' => 200000],
-        'enterprise' => ['monthly' => 799000, 'yearly' => 649000],
+        'pro'        => ['monthly' => 129000, 'yearly' => 100000],
+        'enterprise' => ['monthly' => 499000, 'yearly' => 399000],
     ];
 
     public function __construct()

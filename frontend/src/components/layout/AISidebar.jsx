@@ -149,9 +149,13 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
   };
 
   // Warna bar kuota: hijau → kuning → merah
-  const remaining  = dailyUsage.remaining;
-  const usageRatio = dailyUsage.used / dailyUsage.limit;
-  const barColor   = usageRatio >= 1 ? "bg-red-500" : usageRatio >= 0.7 ? "bg-amber-400" : "bg-green-400";
+  // limit null (Pro/Enterprise) = tak terbatas, bar tidak ditampilkan
+  const unlimited    = dailyUsage.limit === null || dailyUsage.limit === undefined;
+  const remaining    = dailyUsage.remaining;
+  const usageRatio   = unlimited ? 0 : dailyUsage.used / dailyUsage.limit;
+  const barColor     = usageRatio >= 1 ? "bg-red-500" : usageRatio >= 0.7 ? "bg-amber-400" : "bg-green-400";
+  const periodLabel  = unlimited ? "AI Assistant" : "Sisa kuota AI bulan ini";
+  const periodValue  = unlimited ? "Tak terbatas" : `${remaining}/${dailyUsage.limit}`;
 
   const panelContent = (
     <aside className="h-full w-80 lg:w-96 bg-white border-l-2 border-brand-black flex flex-col overflow-hidden">
@@ -199,17 +203,19 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
       {/* Usage counter bar */}
       <div className="px-3 py-2 border-b border-brand-black/10 bg-brand-black/5 shrink-0">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-bold text-brand-black/60">Sisa chat hari ini</span>
-          <span className={`text-[10px] font-black font-mono ${limitReached ? "text-red-500" : "text-brand-black"}`}>
-            {remaining}/{dailyUsage.limit}
+          <span className="text-[10px] font-bold text-brand-black/60">{periodLabel}</span>
+          <span className={`text-[10px] font-black font-mono ${limitReached ? "text-red-500" : unlimited ? "text-green-600" : "text-brand-black"}`}>
+            {periodValue}
           </span>
         </div>
-        <div className="h-1 bg-brand-black/10 rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-300 ${barColor}`}
-            style={{ width: `${Math.max(0, (remaining / dailyUsage.limit) * 100)}%` }}
-          />
-        </div>
+        {!unlimited && (
+          <div className="h-1 bg-brand-black/10 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${barColor}`}
+              style={{ width: `${Math.max(0, (remaining / dailyUsage.limit) * 100)}%` }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Warning banner — mendekati limit */}
@@ -230,7 +236,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
           <div className="flex items-start gap-2">
             <BlockIcon className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
             <p className="text-xs font-bold text-red-800 leading-snug">
-              Batas chat AI harian sudah habis ({dailyUsage.limit}/{dailyUsage.limit}). Coba lagi besok!
+              Kuota AI bulanan paket FREE sudah habis. Upgrade ke Pro untuk AI tak terbatas!
             </p>
           </div>
         </div>
@@ -283,7 +289,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder={limitReached ? "Kuota harian habis. Coba lagi besok." : "Tanya ke AI..."}
+            placeholder={limitReached ? "Kuota AI bulanan habis. Upgrade ke Pro." : "Tanya ke AI..."}
             rows={2}
             disabled={isLoading || limitReached}
             className="flex-1 text-xs font-medium resize-none border-2 border-brand-black rounded-md px-2.5 py-2 outline-none focus:border-brand-yellow placeholder:text-brand-black/25 disabled:opacity-50 bg-white"

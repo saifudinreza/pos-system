@@ -151,8 +151,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/dev/subscriptions/{userId}/toggle',     [SubscriptionController::class, 'devToggleStatus']);
     });
 
-    // ----- AI ASSISTANT (admin & developer saja — pro/enterprise subscribers) -----
-    Route::middleware('role:admin,developer')->group(function () {
+    // ----- AI ASSISTANT (admin, kasir & developer — kuota diatur per plan:
+    // free = 5 prompt/bulan, pro/enterprise = tak terbatas) -----
+    Route::middleware('role:admin,kasir,developer')->group(function () {
         Route::get('/ai/usage-today',    [AiController::class, 'usageToday']);
         Route::post('/ai/query',         [AiController::class, 'query']);
         Route::post('/ai/predict-stock', [AiController::class, 'predictStock']);

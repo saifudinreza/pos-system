@@ -38,7 +38,11 @@ Role hierarki: `user` < `kasir` < `admin` < `developer` (lihat tabel hak akses d
 - Alur daftar → pilih paket → dashboard.
 
 ### 5.2 Subscription & Billing
-- 3 paket: Free (1 outlet, batas produk/transaksi), Pro, Enterprise (fitur & outlet tak terbatas).
+- 3 paket dengan harga terpusat di backend (`SubscriptionController::PRICES`):
+  - **Free (Rp 0)**: 1 outlet, maks. 50 produk & 15 kategori, transaksi tanpa batas, 5 prompt AI/bulan, pembayaran tunai saja.
+  - **Pro**: Rp 129.000/bulan (Rp 100.000/bulan jika tahunan) — produk/kategori unlimited, AI unlimited, export PDF/Excel, QRIS & e-wallet.
+  - **Enterprise**: Rp 499.000/bulan (Rp 399.000/bulan jika tahunan) — semua fitur Pro + outlet unlimited, API & integrasi kustom, account manager, SLA.
+- Enforcement berlapis: backend memblokir fitur premium untuk paket Free (QRIS → 422, export → 403, AI habis → 429), frontend juga memblokir/menyembunyikan tombol.
 - Upgrade paket dibayar via Midtrans Snap (bulanan/tahunan, harga tahunan diskon).
 - Webhook otomatis mengaktifkan paket + upgrade role user saat status `settlement`.
 - User bisa membatalkan transaksi pending miliknya sendiri.
@@ -71,7 +75,7 @@ Role hierarki: `user` < `kasir` < `admin` < `developer` (lihat tabel hak akses d
 - Backend mengirim data 3 periode sekaligus (hari ini/minggu ini/bulan ini, dihitung via `whereBetween`) plus katalog & stok produk penuh di setiap request, supaya AI tidak salah label periode dan bisa jawab soal stok tanpa endpoint terpisah.
 - 3 mode: analisis penjualan, prediksi stok habis, rekomendasi bundling.
 - Dual-provider: Groq (primer, LLaMA 3.3 70B) → OpenRouter (fallback otomatis via circuit breaker, cooldown 65 detik saat Groq rate-limited). Badge menunjukkan provider aktif.
-- Limit harian pemakaian dengan warning banner.
+- Kuota bulanan per paket (per bulan kalender): Free = 5 prompt/bulan, Pro/Enterprise = tak terbatas; tersedia untuk admin & kasir (kasir mengikuti plan admin tenant via `effective_plan`).
 
 ### 5.7 Laporan (`/reports`)
 - Filter: hari ini, 7 hari, 30 hari, custom range.
@@ -97,7 +101,7 @@ Role hierarki: `user` < `kasir` < `admin` < `developer` (lihat tabel hak akses d
 | Pesanan & Transaksi | — | ✅ | ✅ | ✅ |
 | Dashboard & Laporan | — | — | ✅ | ✅ |
 | Konfigurasi Midtrans | — | — | ✅ | ✅ |
-| AI Assistant | — | — | ✅ | ✅ |
+| AI Assistant | — | ✅ | ✅ | ✅ |
 | AI Monitoring | — | — | ✅ | ✅ |
 | User Management | — | — | — | ✅ |
 | Kelola Tenant & Subscription (semua toko) | — | — | — | ✅ |

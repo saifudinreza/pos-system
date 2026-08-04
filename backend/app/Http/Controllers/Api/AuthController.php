@@ -216,6 +216,8 @@ class AuthController extends Controller
             'phone'                 => $user->phone,
             'is_active'             => $user->is_active,
             'subscription_plan'     => $user->subscription_plan ?? 'free',
+            // Plan efektif — kasir mengikuti plan admin tenant-nya
+            'effective_plan'        => $this->getEffectivePlan($user),
             'created_at'            => $user->created_at->format('d M Y'),
         ];
     }

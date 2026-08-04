@@ -26,12 +26,17 @@ abstract class Controller
     /** Returns [readLimit (int|null), limits array] for products */
     protected function productReadLimits(string $plan): ?int
     {
-        return ['free' => 5, 'pro' => 30, 'enterprise' => null][$plan] ?? 5;
+        $limits = ['free' => 50, 'pro' => null, 'enterprise' => null];
+
+        // array_key_exists, bukan ?? — karena null (unlimited) adalah nilai valid
+        return array_key_exists($plan, $limits) ? $limits[$plan] : 50;
     }
 
     /** Returns read limit (int|null) for categories */
     protected function categoryReadLimits(string $plan): ?int
     {
-        return ['free' => 3, 'pro' => 10, 'enterprise' => null][$plan] ?? 3;
+        $limits = ['free' => 15, 'pro' => null, 'enterprise' => null];
+
+        return array_key_exists($plan, $limits) ? $limits[$plan] : 15;
     }
 }
