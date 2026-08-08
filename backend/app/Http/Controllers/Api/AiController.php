@@ -21,9 +21,10 @@ class AiController extends Controller
     public function __construct(private GroqService $groq) {}
 
     /**
-     * Limit kuota AI untuk user yang sedang login.
-     * FREE = 5 prompt/bulan (trial), PRO/Enterprise = tak terbatas (null),
-     * developer = tak terbatas. Kasir mengikuti plan admin tenant-nya.
+     * Limit kuota AI BULANAN untuk user yang sedang login.
+     * FREE = 5 prompt/bulan (trial). Pro/Enterprise = null (tidak dibatasi
+     * per bulan — mereka memakai kuota harian, lihat dailyLimit()).
+     * developer = null (tak terbatas). Kasir mengikuti plan admin tenant-nya.
      */
     private function monthlyLimit(): ?int
     {
@@ -38,7 +39,38 @@ class AiController extends Controller
         return $plan === 'free' ? (int) config('ai.free_monthly_limit', 5) : null;
     }
 
-    /** Limit untuk user tertentu (dipakai monitoring statistik). */
+    /**
+     * Limit kuota AI HARIAN untuk user yang sedang login.
+     * FREE = null (tetap pakai kuota bulanan), Pro = 10/hari,
+     * Enterprise = 50/hari, developer = null (tak terbatas).
+     * null = unlimited — jangan pakai ?? untuk fallback!
+     */
+    private function dailyLimit(): ?int
+    {
+        return $this->dailyLimitFor(auth()->user());
+    }
+
+    /** Versi per-user (dipakai halaman monitoring di stats()). */
+    private function dailyLimitFor(?User $user): ?int
+    {
+        if (! $user || $user->role === 'developer') {
+            return null;
+        }
+
+        $plan = $this->getEffectivePlan($user);
+
+        if ($plan === 'enterprise') {
+            return (int) config('ai.enterprise_daily_limit', 50);
+        }
+
+        if ($plan === 'pro') {
+            return (int) config('ai.pro_daily_limit', 10);
+        }
+
+        return null;
+    }
+
+    /** Limit yang BERLAKU untuk user tertentu (dipakai monitoring statistik). */
     private function limitForUser(User $user): ?int
     {
         if ($user->role === 'developer') {
@@ -47,7 +79,15 @@ class AiController extends Controller
 
         $plan = $this->getEffectivePlan($user);
 
-        return $plan === 'free' ? (int) config('ai.free_monthly_limit', 5) : null;
+        if ($plan === 'free') {
+            return (int) config('ai.free_monthly_limit', 5);
+        }
+
+        if ($plan === 'enterprise') {
+            return (int) config('ai.enterprise_daily_limit', 50);
+        }
+
+        return (int) config('ai.pro_daily_limit', 10);
     }
 
     private function warningThresholdPct(): int
@@ -61,9 +101,14 @@ class AiController extends Controller
     // =============================================================
     public function usageToday(): JsonResponse
     {
-        $limit     = $this->monthlyLimit();
-        $used      = $this->currentUsage();
-        $remaining = $limit === null ? null : max(0, $limit - $used);
+        $dailyLimit   = $this->dailyLimit();
+        $monthlyLimit = $this->monthlyLimit();
+
+        // Free pakai kuota bulanan, Pro/Enterprise pakai kuota harian
+        $isDaily    = $dailyLimit !== null;
+        $limit      = $dailyLimit ?? $monthlyLimit;
+        $used       = $isDaily ? $this->todayUsage() : $this->currentUsage();
+        $remaining  = $limit === null ? null : max(0, $limit - $used);
 
         $warningAt = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
         $isWarning = $remaining !== null && $remaining > 0 && $remaining <= $warningAt;
@@ -73,6 +118,7 @@ class AiController extends Controller
             'remaining' => $remaining,
             'limit'     => $limit,
             'warning'   => $isWarning,
+            'period'    => $isDaily ? 'daily' : 'monthly',
         ]);
     }
 
@@ -176,10 +222,7 @@ class AiController extends Controller
             'provider'    => $result['provider'],
         ]);
 
-        $usageAfter = $this->currentUsage();
-        $limit      = $this->monthlyLimit();
-        $remaining  = $limit === null ? null : max(0, $limit - $usageAfter);
-        $warningAt  = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
+        $usage = $this->usagePayload();
 
         return response()->json([
             'message' => 'AI berhasil menganalisis data penjualan.',
@@ -190,12 +233,7 @@ class AiController extends Controller
                 'provider'    => $result['provider'],
                 'model'       => $result['model'],
             ],
-            'usage' => [
-                'used'      => $usageAfter,
-                'remaining' => $remaining,
-                'limit'     => $limit,
-                'warning'   => $remaining !== null && $remaining > 0 && $remaining <= $warningAt,
-            ],
+            'usage' => $usage,
         ], 200);
     }
 
@@ -260,10 +298,7 @@ class AiController extends Controller
             'provider'    => $result['provider'],
         ]);
 
-        $usageAfter = $this->currentUsage();
-        $limit      = $this->monthlyLimit();
-        $remaining  = $limit === null ? null : max(0, $limit - $usageAfter);
-        $warningAt  = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
+        $usage = $this->usagePayload();
 
         return response()->json([
             'message' => 'AI berhasil memprediksi stok.',
@@ -274,12 +309,7 @@ class AiController extends Controller
                 'provider'    => $result['provider'],
                 'model'       => $result['model'],
             ],
-            'usage' => [
-                'used'      => $usageAfter,
-                'remaining' => $remaining,
-                'limit'     => $limit,
-                'warning'   => $remaining !== null && $remaining > 0 && $remaining <= $warningAt,
-            ],
+            'usage' => $usage,
         ], 200);
     }
 
@@ -347,10 +377,7 @@ class AiController extends Controller
             'provider'    => $result['provider'],
         ]);
 
-        $usageAfter = $this->currentUsage();
-        $limit      = $this->monthlyLimit();
-        $remaining  = $limit === null ? null : max(0, $limit - $usageAfter);
-        $warningAt  = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
+        $usage = $this->usagePayload();
 
         return response()->json([
             'message' => 'AI berhasil memberikan rekomendasi.',
@@ -361,12 +388,7 @@ class AiController extends Controller
                 'provider'    => $result['provider'],
                 'model'       => $result['model'],
             ],
-            'usage' => [
-                'used'      => $usageAfter,
-                'remaining' => $remaining,
-                'limit'     => $limit,
-                'warning'   => $remaining !== null && $remaining > 0 && $remaining <= $warningAt,
-            ],
+            'usage' => $usage,
         ], 200);
     }
 
@@ -435,7 +457,7 @@ class AiController extends Controller
             'today' => [
                 'requests'         => AiQueryLog::whereDate('created_at', $today)->tap($scopeFn)->count(),
                 'tokens'           => $todayTokens,
-                'active_users'     => AiChatUsage::where('usage_date', $today)->tap($scopeFn)->count(),
+                'active_users'     => AiChatUsage::whereDate('usage_date', $today)->tap($scopeFn)->count(),
                 'high_token_usage' => $todayTokens >= $tokenAlert,
             ],
             'week' => [
@@ -469,27 +491,29 @@ class AiController extends Controller
 
         $monthStart = now()->startOfMonth();
         $usersToday = AiChatUsage::with('user')
-            ->where('usage_date', $today)
+            ->whereDate('usage_date', $today)
             ->tap($scopeFn)
             ->orderByDesc('count')
             ->get()
             ->map(function ($u) {
-                $monthlyUsed = $u->user
+                // Pro/Enterprise memakai kuota HARIAN → used = pemakaian hari ini;
+                // Free memakai kuota BULANAN → used = total sejak awal bulan.
+                $isDailyPlan = $u->user && $this->dailyLimitFor($u->user) !== null;
+                $used        = $u->user && ! $isDailyPlan
                     ? (int) AiChatUsage::where('user_id', $u->user_id)
-                        ->where('usage_date', '>=', now()->startOfMonth())
-                        ->tap(fn($q) => $q->whereNotNull('user_id'))
+                        ->whereDate('usage_date', '>=', now()->startOfMonth())
                         ->sum('count')
-                    : $u->count;
+                    : (int) $u->count;
                 $userLimit   = $u->user ? $this->limitForUser($u->user) : null;
-                $remaining   = $userLimit === null ? null : max(0, $userLimit - $monthlyUsed);
+                $remaining   = $userLimit === null ? null : max(0, $userLimit - $used);
 
                 return [
                     'user'       => $u->user->name ?? 'Unknown',
-                    'used'       => $monthlyUsed,
+                    'used'       => $used,
                     'remaining'  => $remaining,
                     'limit'      => $userLimit,
-                    'pct'        => $userLimit > 0 ? round($monthlyUsed / $userLimit * 100) : null,
-                    'near_limit' => $userLimit !== null && ($userLimit - $monthlyUsed) <= (int) ceil($userLimit * $this->warningThresholdPct() / 100),
+                    'pct'        => $userLimit > 0 ? round($used / $userLimit * 100) : null,
+                    'near_limit' => $userLimit !== null && ($userLimit - $used) <= (int) ceil($userLimit * $this->warningThresholdPct() / 100),
                 ];
             });
 
@@ -525,15 +549,28 @@ class AiController extends Controller
 
     private function checkAndIncrementUsage(): bool
     {
-        $limit = $this->monthlyLimit();
+        $dailyLimit   = $this->dailyLimit();
+        $monthlyLimit = $this->monthlyLimit();
 
-        $usage = AiChatUsage::firstOrCreate(
-            ['user_id' => auth()->user()->id, 'usage_date' => today()],
-            ['count' => 0]
-        );
+        $usage = AiChatUsage::whereDate('usage_date', today())
+            ->where('user_id', auth()->user()->id)
+            ->first();
 
-        // Paket PRO/Enterprise (limit null) = tak terbatas, tetap dicatat untuk monitoring.
-        if ($limit !== null && $this->currentUsage() >= $limit) {
+        if (! $usage) {
+            $usage = AiChatUsage::create([
+                'user_id'    => auth()->user()->id,
+                'usage_date' => today()->toDateString(),
+                'count'      => 0,
+            ]);
+        }
+
+        // Lapis 1: kuota HARIAN (Pro/Enterprise). Free tidak dibatasi per hari.
+        if ($dailyLimit !== null && $this->todayUsage() >= $dailyLimit) {
+            return false;
+        }
+
+        // Lapis 2: kuota BULANAN (Free = 5/bulan). Pro/Enterprise tak terbatas.
+        if ($monthlyLimit !== null && $this->currentUsage() >= $monthlyLimit) {
             return false;
         }
 
@@ -545,14 +582,45 @@ class AiController extends Controller
     private function currentUsage(): int
     {
         return (int) (AiChatUsage::where('user_id', auth()->user()->id)
-            ->where('usage_date', '>=', now()->startOfMonth()->toDateString())
+            ->whereDate('usage_date', '>=', now()->startOfMonth())
             ->sum('count') ?? 0);
+    }
+
+    /** Total prompt yang terpakai HARI INI (semua tipe endpoint AI). */
+    private function todayUsage(): int
+    {
+        return (int) (AiChatUsage::where('user_id', auth()->user()->id)
+            ->whereDate('usage_date', today())
+            ->sum('count') ?? 0);
+    }
+
+    /** Payload kuota yang dikirim ke frontend setelah sebuah query sukses. */
+    private function usagePayload(): array
+    {
+        $dailyLimit = $this->dailyLimit();
+        $limit      = $dailyLimit ?? $this->monthlyLimit();
+        $used       = $dailyLimit !== null ? $this->todayUsage() : $this->currentUsage();
+        $remaining  = $limit === null ? null : max(0, $limit - $used);
+        $warningAt  = $limit === null ? 0 : (int) ceil($limit * $this->warningThresholdPct() / 100);
+
+        return [
+            'used'      => $used,
+            'remaining' => $remaining,
+            'limit'     => $limit,
+            'warning'   => $remaining !== null && $remaining > 0 && $remaining <= $warningAt,
+        ];
     }
 
     private function limitReachedResponse(): JsonResponse
     {
+        $dailyLimit = $this->dailyLimit();
+
+        $message = $dailyLimit !== null
+            ? 'Kuota harian AI sudah habis. Coba lagi besok, atau upgrade paket Enterprise untuk jatah lebih besar.'
+            : 'Kuota AI bulanan untuk paket FREE sudah habis. Upgrade ke Pro untuk jatah AI lebih besar.';
+
         return response()->json([
-            'message'       => 'Kuota AI bulanan untuk paket FREE sudah habis. Upgrade ke Pro untuk AI tak terbatas.',
+            'message'       => $message,
             'limit_reached' => true,
         ], 429);
     }

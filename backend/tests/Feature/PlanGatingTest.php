@@ -115,7 +115,7 @@ class PlanGatingTest extends TestCase
         $this->getJson('/api/reports/stock/download')->assertStatus(403)->assertJsonPath('plan_required', 'pro');
     }
 
-    // ── Kuota AI — FREE 5/bulan, PRO unlimited, kasir ikut plan admin tenant ──
+    // ── Kuota AI — FREE 5/bulan, PRO 10/hari, Enterprise 50/hari, kasir ikut plan admin tenant ──
 
     public function test_ai_usage_today_free_plan_shows_monthly_limit(): void
     {
@@ -131,10 +131,11 @@ class PlanGatingTest extends TestCase
         $response->assertOk()
             ->assertJsonPath('used', 2)
             ->assertJsonPath('limit', 5)
-            ->assertJsonPath('remaining', 3);
+            ->assertJsonPath('remaining', 3)
+            ->assertJsonPath('period', 'monthly');
     }
 
-    public function test_ai_usage_today_pro_plan_is_unlimited(): void
+    public function test_ai_usage_today_pro_plan_shows_daily_limit(): void
     {
         $tenant = $this->makeTenant('Toko A');
         $admin  = $this->makeUser($tenant, 'admin', 'pro');
@@ -143,8 +144,9 @@ class PlanGatingTest extends TestCase
 
         $this->getJson('/api/ai/usage-today')
             ->assertOk()
-            ->assertJsonPath('limit', null)
-            ->assertJsonPath('remaining', null);
+            ->assertJsonPath('limit', 10)
+            ->assertJsonPath('remaining', 10)
+            ->assertJsonPath('period', 'daily');
     }
 
     public function test_kasir_follows_tenant_admin_plan(): void
@@ -155,10 +157,11 @@ class PlanGatingTest extends TestCase
 
         Sanctum::actingAs($kasir);
 
-        // Kasir plan-nya "free", tapi tenant admin-nya Pro → AI harus unlimited
+        // Kasir plan-nya "free", tapi tenant admin-nya Pro → kasir ikut kuota harian Pro
         $this->getJson('/api/ai/usage-today')
             ->assertOk()
-            ->assertJsonPath('limit', null);
+            ->assertJsonPath('limit', 10)
+            ->assertJsonPath('period', 'daily');
     }
 
     public function test_ai_query_blocked_after_monthly_limit_reached(): void
@@ -174,6 +177,55 @@ class PlanGatingTest extends TestCase
         $response = $this->postJson('/api/ai/query', ['query' => 'analisis']);
 
         $response->assertStatus(429)->assertJsonPath('limit_reached', true);
+    }
+
+    public function test_ai_query_blocked_after_pro_daily_limit_reached(): void
+    {
+        $tenant = $this->makeTenant('Toko A');
+        $admin  = $this->makeUser($tenant, 'admin', 'pro');
+
+        // Sudah pakai 10 prompt hari ini (limit pro = 10/hari)
+        AiChatUsage::create(['user_id' => $admin->id, 'usage_date' => today(), 'count' => 10]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->postJson('/api/ai/query', ['query' => 'analisis']);
+
+        $response->assertStatus(429)->assertJsonPath('limit_reached', true);
+    }
+
+    public function test_ai_usage_today_enterprise_plan_shows_daily_limit(): void
+    {
+        $tenant = $this->makeTenant('Toko A');
+        $admin  = $this->makeUser($tenant, 'admin', 'enterprise');
+
+        Sanctum::actingAs($admin);
+
+        $this->getJson('/api/ai/usage-today')
+            ->assertOk()
+            ->assertJsonPath('limit', 50)
+            ->assertJsonPath('period', 'daily');
+    }
+
+    public function test_ai_stats_users_today_uses_daily_usage_for_pro_plan(): void
+    {
+        $tenant = $this->makeTenant('Toko A');
+        $admin  = $this->makeUser($tenant, 'admin', 'pro');
+
+        // 10 prompt hari ini + 5 prompt 2 hari lalu → monitoring harus pakai
+        // kuota HARIAN (used=10, limit=10), bukan total bulanan (15).
+        AiChatUsage::create(['user_id' => $admin->id, 'usage_date' => today(), 'count' => 10]);
+        AiChatUsage::create(['user_id' => $admin->id, 'usage_date' => today()->subDays(2), 'count' => 5]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/ai/stats');
+
+        $response->assertOk()
+            ->assertJsonPath('users_today.0.used', 10)
+            ->assertJsonPath('users_today.0.limit', 10)
+            ->assertJsonPath('users_today.0.remaining', 0)
+            ->assertJsonPath('users_today.0.pct', 100);
     }
 
     // ── Read limit produk & kategori — FREE 50/15, PRO unlimited ──

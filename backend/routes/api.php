@@ -152,12 +152,17 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // ----- AI ASSISTANT (admin, kasir & developer — kuota diatur per plan:
-    // free = 5 prompt/bulan, pro/enterprise = tak terbatas) -----
+    // free = 5 prompt/bulan, pro = 10 prompt/hari, enterprise = 50 prompt/hari.
+    // throttle:10,1 = max 10 request AI per MENIT per user (anti-burst/anti-script) -----
     Route::middleware('role:admin,kasir,developer')->group(function () {
         Route::get('/ai/usage-today',    [AiController::class, 'usageToday']);
-        Route::post('/ai/query',         [AiController::class, 'query']);
-        Route::post('/ai/predict-stock', [AiController::class, 'predictStock']);
-        Route::post('/ai/recommend',     [AiController::class, 'recommend']);
+
+        // usage-today sengaja TIDAK ikut throttle — sidebar memanggilnya tiap dibuka
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::post('/ai/query',         [AiController::class, 'query']);
+            Route::post('/ai/predict-stock', [AiController::class, 'predictStock']);
+            Route::post('/ai/recommend',     [AiController::class, 'recommend']);
+        });
     });
 });
 

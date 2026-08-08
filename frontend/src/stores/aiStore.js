@@ -15,7 +15,10 @@
 //
 // Kuota AI:
 //   - Paket FREE: 5 prompt/bulan (dihitung backend per bulan kalender)
-//   - Paket Pro/Enterprise: tak terbatas (limit = null)
+//   - Paket Pro: 10 prompt/hari (Pro_DAILY_LIMIT), Enterprise: 50 prompt/hari
+//   - developer: tak terbatas (limit = null)
+// Backend mengirim field "period" = "daily" | "monthly" supaya UI tahu
+// label kuota yang sedang berlaku untuk user ini.
 //
 // Tipe query yang didukung backend:
 //   "sales_analysis" → aiService.query()
@@ -56,8 +59,8 @@ const useAiStore = create((set) => ({
   // Jumlah total token yang terpakai dalam sesi ini
   totalTokensUsed: 0,
 
-  // Kuota AI (per bulan kalender; null = tak terbatas untuk Pro/Enterprise)
-  dailyUsage: { used: 0, remaining: null, limit: null },
+  // Kuota AI (per bulan untuk Free, per hari untuk Pro/Enterprise; null = tak terbatas)
+  dailyUsage: { used: 0, remaining: null, limit: null, period: "monthly" },
   limitReached: false,
   usageWarning: false,
 
@@ -276,7 +279,7 @@ const useAiStore = create((set) => ({
       totalTokensUsed: 0,
     }),
     // note: limitReached dan dailyUsage sengaja tidak di-reset di sini
-    // karena limit adalah per-bulan, bukan per-sesi
+    // karena limit adalah per-bulan (Free) atau per-hari (Pro/Enterprise), bukan per-sesi
 
   // --- BERSIHKAN ERROR ---
   clearError: () => set({ error: null }),

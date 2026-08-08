@@ -13,6 +13,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | AI Daily Request Limit — Paket Pro & Enterprise
+    |--------------------------------------------------------------------------
+    | Jumlah maksimum prompt AI per HARI (per user) untuk paket berbayar.
+    | Free tidak memakai ini (tetap pakai kuota bulanan di atas).
+    | Atur via PRO_DAILY_LIMIT / ENTERPRISE_DAILY_LIMIT di .env
+    */
+    'pro_daily_limit'        => (int) env('PRO_DAILY_LIMIT', 10),
+    'enterprise_daily_limit' => (int) env('ENTERPRISE_DAILY_LIMIT', 50),
+
+    /*
+    |--------------------------------------------------------------------------
+    | AI Daily Request Limit — Paket Pro & Enterprise
+    |--------------------------------------------------------------------------
+    | Jumlah maksimum prompt AI per HARI (per user) untuk paket berbayar.
+    | Free tidak memakai ini (tetap pakai kuota bulanan di atas).
+    | Atur via PRO_DAILY_LIMIT / ENTERPRISE_DAILY_LIMIT di .env
+    */
+
+    'pro_daily_limit' => (int) env('PRO_DAILY_LIMIT', 10),
+    'enterprise_daily_limit' => (int) env('ENTERPRISE_DAILY_LIMIT', 50),
+
+    /*
+    |--------------------------------------------------------------------------
     | Warning Threshold (persentase)
     |--------------------------------------------------------------------------
     | Persentase sisa kuota di mana user mulai mendapat peringatan.

@@ -47,13 +47,14 @@ const PLAN_FEATURES = {
   pro: [
     "Produk & kategori tidak terbatas",
     "Transaksi tak terbatas",
-    "AI Assistant tak terbatas",
+    "AI Assistant 10× prompt/hari",
     "Laporan lengkap & export (PDF/Excel)",
     "Pembayaran QRIS, e-wallet & transfer bank (Midtrans)",
     "Support via WhatsApp & email",
   ],
   enterprise: [
     "Semua fitur Paket Pro",
+    "AI Assistant 50× prompt/hari",
     "Pengguna tidak terbatas",
     "Prioritas support & pendampingan",
     "Manajemen & laporan lintas cabang",

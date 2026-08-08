@@ -154,7 +154,8 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
   const remaining    = dailyUsage.remaining;
   const usageRatio   = unlimited ? 0 : dailyUsage.used / dailyUsage.limit;
   const barColor     = usageRatio >= 1 ? "bg-red-500" : usageRatio >= 0.7 ? "bg-amber-400" : "bg-green-400";
-  const periodLabel  = unlimited ? "AI Assistant" : "Sisa kuota AI bulan ini";
+  const isDaily      = dailyUsage.period === "daily";
+  const periodLabel  = unlimited ? "AI Assistant" : isDaily ? "Sisa kuota AI hari ini" : "Sisa kuota AI bulan ini";
   const periodValue  = unlimited ? "Tak terbatas" : `${remaining}/${dailyUsage.limit}`;
 
   const panelContent = (
@@ -236,7 +237,9 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
           <div className="flex items-start gap-2">
             <BlockIcon className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
             <p className="text-xs font-bold text-red-800 leading-snug">
-              Kuota AI bulanan paket FREE sudah habis. Upgrade ke Pro untuk AI tak terbatas!
+              {isDaily
+                ? "Kuota harian AI sudah habis. Coba lagi besok."
+                : "Kuota AI bulanan paket FREE sudah habis. Upgrade ke Pro untuk AI tak terbatas!"}
             </p>
           </div>
         </div>

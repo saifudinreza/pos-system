@@ -49,7 +49,7 @@ export const PLANS = {
     limits: {
       products: "Produk tidak terbatas",
       users: "Maks. 10 pengguna",
-      ai: "AI Assistant tak terbatas",
+      ai: "10 prompt AI/hari",
       transactions: "Transaksi tak terbatas",
     },
   },
@@ -72,7 +72,7 @@ export const PLANS = {
     limits: {
       products: "Produk tidak terbatas",
       users: "Pengguna tidak terbatas",
-      ai: "AI Assistant tak terbatas",
+      ai: "50 prompt AI/hari",
       transactions: "Transaksi tak terbatas",
     },
   },
