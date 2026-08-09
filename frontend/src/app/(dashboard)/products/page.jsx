@@ -162,6 +162,20 @@ export default function ProductsPage() {
     { key: "category",  label: "Kategori", render: (v) => v?.name ?? <span className="text-brand-black/30">-</span> },
     { key: "price",     label: "Harga",    render: (v) => <span className="font-mono font-bold">{formatCurrency(v)}</span> },
     {
+      key: "cost",
+      label: "Modal",
+      render: (v, row) => (
+        <div>
+          <p className="font-mono font-bold">{v ? formatCurrency(v) : <span className="text-brand-black/30">—</span>}</p>
+          {v > 0 && row.price > 0 && (
+            <p className="text-[10px] font-black text-green-600 font-mono">
+              +{Math.round(((row.price - v) / v) * 100)}% margin
+            </p>
+          )}
+        </div>
+      ),
+    },
+    {
       key: "stock", label: "Stok",
       render: (v, row) => (
         <div className="flex items-center gap-2">

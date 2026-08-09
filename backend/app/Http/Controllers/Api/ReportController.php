@@ -66,6 +66,20 @@ class ReportController extends Controller
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->sum('order_items.quantity');
 
+        // ===== COGS & PROFIT =====
+        // Modal terjual = jumlah item × harga modal saat transaksi (snapshot).
+        // Item tanpa cost (produk lama / belum diisi) dihitung 0.
+        $totalCogs = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', 'paid')
+            ->when($tenantId, fn($q) => $q->where('orders.tenant_id', $tenantId))
+            ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->selectRaw('COALESCE(SUM(order_items.quantity * order_items.cost), 0) as cogs')
+            ->value('cogs');
+
+        $totalRevenue = (float) ($summary->total_revenue ?? 0);
+        $grossProfit  = $totalRevenue - (float) $totalCogs;
+        $profitMargin = $totalRevenue > 0 ? (float) round(($grossProfit / $totalRevenue) * 100, 1) : 0.0;
+
         $totalCustomers = Order::where('status', 'paid')
             ->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->distinct('user_id')
@@ -137,12 +151,22 @@ class ReportController extends Controller
                 products.name,
                 products.sku,
                 SUM(order_items.quantity) as total_quantity,
-                SUM(order_items.subtotal) as total_revenue
+                SUM(order_items.subtotal) as total_revenue,
+                COALESCE(SUM(order_items.quantity * order_items.cost), 0) as total_cogs
             ')
             ->groupBy('products.id', 'products.name', 'products.sku')
             ->orderByDesc('total_quantity')
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(fn($p) => [
+                'id'             => $p->id,
+                'name'           => $p->name,
+                'sku'            => $p->sku,
+                'total_quantity' => (int) $p->total_quantity,
+                'total_revenue'  => (float) $p->total_revenue,
+                'total_cogs'     => (float) $p->total_cogs,
+                'profit'         => (float) $p->total_revenue - (float) $p->total_cogs,
+            ]);
 
         // ===== RECENT TRANSACTIONS =====
         $recentTransactions = Transaction::with('order.user')
@@ -167,11 +191,14 @@ class ReportController extends Controller
                 'date_to'             => $dateTo,
                 'summary'             => [
                     'total_transactions' => $summary->total_transactions ?? 0,
-                    'total_revenue'      => $summary->total_revenue ?? 0,
+                    'total_revenue'      => $totalRevenue,
                     'avg_transaction'    => round($summary->avg_transaction ?? 0, 2),
                     'total_orders'       => $totalOrders,
                     'total_items'        => (int) $totalItems,
                     'total_customers'    => $totalCustomers,
+                    'total_cogs'         => round((float) $totalCogs, 2),
+                    'gross_profit'       => round($grossProfit, 2),
+                    'profit_margin'      => $profitMargin,
                 ],
                 'chart_data'          => $chartData,
                 'top_products'        => $topProducts,

@@ -317,6 +317,33 @@ export default function ReportsPage() {
             </div>
           )}
 
+          {/* Profit Cards — COGS, Laba Kotor, Margin (produk harus punya Harga Modal) */}
+          {sales?.summary && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <StatCard
+                label="Harga Pokok (COGS)"
+                value={formatCurrency(sales.summary.total_cogs ?? 0)}
+                icon={<Package size={20} />}
+                color="black"
+                sub="modal barang terjual"
+              />
+              <StatCard
+                label="Laba Kotor"
+                value={formatCurrency(sales.summary.gross_profit ?? 0)}
+                icon={<TrendingUp size={20} />}
+                color="green"
+                sub="revenue − COGS"
+              />
+              <StatCard
+                label="Margin Laba"
+                value={`${sales.summary.profit_margin ?? 0}%`}
+                icon={<Receipt size={20} />}
+                color="yellow"
+                sub="dari total pendapatan"
+              />
+            </div>
+          )}
+
           {/* Tren Penjualan — Line Chart */}
           {chartData.length > 0 && (
             <NeoCard noPad>

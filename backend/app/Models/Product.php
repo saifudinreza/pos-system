@@ -17,6 +17,7 @@ class Product extends Model
         'sku',
         'description',
         'price',
+        'cost',
         'stock',
         'stock_alert',
         'image',
@@ -27,6 +28,7 @@ class Product extends Model
     {
         return [
             'price'       => 'decimal:2',
+            'cost'        => 'decimal:2',
             'is_active'   => 'boolean',
             'stock'       => 'integer',
             'stock_alert' => 'integer',

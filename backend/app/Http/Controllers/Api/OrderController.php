@@ -207,6 +207,9 @@ class OrderController extends Controller
                     'price'      => $product->price,
                     // ↑ Snapshot harga saat ini — penting!
                     // Kalau harga produk berubah besok, harga di order ini tetap
+                    'cost'       => $product->cost,
+                    // ↑ Snapshot harga modal (COGS) — dipakai laporan profit.
+                    // Null kalau produk belum diisi cost-nya.
                     'subtotal'   => $itemSubtotal,
                     // Snapshot stok untuk pencatatan ledger
                     'before_stock' => $product->stock,
