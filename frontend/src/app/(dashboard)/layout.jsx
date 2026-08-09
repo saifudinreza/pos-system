@@ -50,7 +50,7 @@ export default function DashboardLayout({ children }) {
     setMounted(true);
   }, [hydrateFromStorage]);
 
-  const plan   = user?.subscription_plan ?? "free";
+  const plan   = user?.effective_plan ?? user?.subscription_plan ?? "free";
   const role   = user?.role ?? "kasir";
   const showAI = mounted && (
     role === "developer" ||

@@ -37,7 +37,7 @@ export default function Navbar({ onMenuToggle }) {
 
   const pageTitle  = PAGE_TITLES[pathname] ?? "KasirAI";
   const isDev         = user?.role === "developer";
-  const effectivePlan = isDev ? "developer" : (user?.subscription_plan ?? "free");
+  const effectivePlan = isDev ? "developer" : (user?.effective_plan ?? user?.subscription_plan ?? "free");
   const planBadge     = PLAN_BADGE[effectivePlan] ?? PLAN_BADGE.free;
 
   const handleLogout = async () => {

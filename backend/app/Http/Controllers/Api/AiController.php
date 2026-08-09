@@ -551,31 +551,53 @@ class AiController extends Controller
     {
         $dailyLimit   = $this->dailyLimit();
         $monthlyLimit = $this->monthlyLimit();
+        $userId       = auth()->user()->id;
 
-        $usage = AiChatUsage::whereDate('usage_date', today())
-            ->where('user_id', auth()->user()->id)
-            ->first();
+        // Semua cek & increment dibungkus DB::transaction + lockForUpdate:
+        // request paralel mengantri di baris usage hari ini, jadi dua request
+        // tidak bisa sama-sama lolos cek kuota (sebelumnya bisa tembus limit
+        // dan kadang kena error unique violation saat bikin baris bersamaan).
+        return DB::transaction(function () use ($userId, $dailyLimit, $monthlyLimit) {
+            $usage = AiChatUsage::where('user_id', $userId)
+                ->whereDate('usage_date', today())
+                ->lockForUpdate()
+                ->first();
 
-        if (! $usage) {
-            $usage = AiChatUsage::create([
-                'user_id'    => auth()->user()->id,
-                'usage_date' => today()->toDateString(),
-                'count'      => 0,
-            ]);
-        }
+            if (! $usage) {
+                try {
+                    $usage = AiChatUsage::create([
+                        'user_id'    => $userId,
+                        'usage_date' => today()->toDateString(),
+                        'count'      => 0,
+                    ]);
+                } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                    // Request paralel lebih dulu bikin barisnya → ambil & lock lagi
+                    $usage = AiChatUsage::where('user_id', $userId)
+                        ->whereDate('usage_date', today())
+                        ->lockForUpdate()
+                        ->firstOrFail();
+                }
+            }
 
-        // Lapis 1: kuota HARIAN (Pro/Enterprise). Free tidak dibatasi per hari.
-        if ($dailyLimit !== null && $this->todayUsage() >= $dailyLimit) {
-            return false;
-        }
+            // Baca ulang setelah lock — pemakaian paling baru ikut terhitung
+            $todayUsed = (int) $usage->count;
+            $monthUsed = (int) AiChatUsage::where('user_id', $userId)
+                ->whereDate('usage_date', '>=', now()->startOfMonth())
+                ->sum('count');
 
-        // Lapis 2: kuota BULANAN (Free = 5/bulan). Pro/Enterprise tak terbatas.
-        if ($monthlyLimit !== null && $this->currentUsage() >= $monthlyLimit) {
-            return false;
-        }
+            // Lapis 1: kuota HARIAN (Pro/Enterprise). Free tidak dibatasi per hari.
+            if ($dailyLimit !== null && $todayUsed >= $dailyLimit) {
+                return false;
+            }
 
-        $usage->increment('count');
-        return true;
+            // Lapis 2: kuota BULANAN (Free = 5/bulan). Pro/Enterprise tak terbatas.
+            if ($monthlyLimit !== null && $monthUsed >= $monthlyLimit) {
+                return false;
+            }
+
+            $usage->increment('count');
+            return true;
+        });
     }
 
     /** Total prompt yang terpakai bulan ini (menjumlah semua baris usage harian). */

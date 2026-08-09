@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Banknote, Receipt, Package, Users,
-  AlertTriangle, TrendingUp, MonitorCheck, Plus, CheckCircle2,
+  AlertTriangle, TrendingUp, MonitorCheck, Plus, CheckCircle2, Sparkles, RefreshCw,
 } from "lucide-react";
 import StatCard         from "@/components/dashboard/StatCard";
 import SalesChart       from "@/components/dashboard/SalesChart";
@@ -14,6 +14,7 @@ import NeoButton            from "@/components/ui/NeoButton";
 import NeoBadge             from "@/components/ui/NeoBadge";
 import reportService        from "@/services/reportService";
 import orderService         from "@/services/orderService";
+import insightService       from "@/services/insightService";
 import { formatCurrency, formatDateTime, getOrderStatusConfig } from "@/lib/utils";
 
 export default function DashboardPage() {
@@ -25,6 +26,12 @@ export default function DashboardPage() {
   const [orders,       setOrders]       = useState([]);
   const [todayOrders,  setTodayOrders]  = useState(0);
   const [loading,      setLoading]      = useState(true);
+  const [forecast,     setForecast]     = useState(null);
+  const [forecastLoading, setForecastLoading] = useState(true);
+  const [insights,     setInsights]     = useState([]);
+  const [insightsLoading, setInsightsLoading] = useState(true);
+  const [insightsGeneratedAt, setInsightsGeneratedAt] = useState(null);
+  const [generatingInsights, setGeneratingInsights] = useState(false);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -75,7 +82,34 @@ export default function DashboardPage() {
       }
     };
     fetchAll();
+
+    // Forecast & insight dimuat terpisah (punya state loading sendiri)
+    reportService.getForecast()
+      .then(setForecast)
+      .catch(() => {})
+      .finally(() => setForecastLoading(false));
+
+    insightService.getInsights()
+      .then((res) => {
+        setInsights(res?.data ?? []);
+        setInsightsGeneratedAt(res?.generated_at ?? null);
+      })
+      .catch(() => {})
+      .finally(() => setInsightsLoading(false));
   }, []);
+
+  const handleGenerateInsights = async () => {
+    setGeneratingInsights(true);
+    try {
+      const res = await insightService.generateInsights();
+      setInsights(res?.data ?? []);
+      setInsightsGeneratedAt(res?.generated_at ?? null);
+    } catch (err) {
+      alert("Gagal membuat wawasan AI. Coba lagi sebentar.");
+    } finally {
+      setGeneratingInsights(false);
+    }
+  };
 
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
@@ -137,6 +171,96 @@ export default function DashboardPage() {
           </Link>
         </div>
       )}
+
+      {/* ── Wawasan KasirAI (AI Business Insight) ── */}
+      <NeoCard noPad className="slide-up">
+        <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2">
+            <Sparkles size={18} className="text-brand-black shrink-0" />
+            <div>
+              <h3 className="font-black text-sm font-grotesk">Wawasan KasirAI</h3>
+              <p className="text-xs text-brand-black/40">
+                Insight otomatis dari data bisnismu
+                {insightsGeneratedAt && ` · diperbarui ${insightsGeneratedAt}`}
+              </p>
+            </div>
+          </div>
+          <NeoButton size="sm" variant="secondary" onClick={handleGenerateInsights} disabled={generatingInsights}>
+            <RefreshCw size={13} className={`${generatingInsights ? "animate-spin" : ""} inline mr-1`} />
+            {insights.length > 0 ? "Perbarui" : "Generate"}
+          </NeoButton>
+        </div>
+        <div className="p-4">
+          {insightsLoading ? (
+            <div className="h-[140px] skeleton" />
+          ) : insights.length === 0 ? (
+            <div className="text-center py-6 space-y-2">
+              <p className="text-sm font-bold text-brand-black/60">Belum ada wawasan AI.</p>
+              <p className="text-xs text-brand-black/40 max-w-md mx-auto">
+                Klik tombol Generate — KasirAI akan menganalisis penjualan, stok, dan pelangganmu dari data asli toko.
+              </p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {insights.map((ins) => (
+                <div
+                  key={ins.id}
+                  className="border-2 border-brand-black/15 p-4 rounded-md hover:border-brand-black/40 transition-colors"
+                >
+                  <p className="text-[10px] font-black uppercase tracking-wider text-brand-black/40 mb-1">
+                    {ins.type === "sales" ? "Penjualan" : ins.type === "stock" ? "Stok" : "Pelanggan"}
+                  </p>
+                  <p className="font-black text-sm mb-1">{ins.title}</p>
+                  <p className="text-xs text-brand-black/60 leading-relaxed">{ins.body}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </NeoCard>
+
+      {/* ── Forecast Penjualan 7 Hari ── */}
+      <NeoCard noPad className="slide-up">
+        <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between">
+          <div>
+            <h3 className="font-black text-sm font-grotesk">Forecast 7 Hari</h3>
+            <p className="text-xs text-brand-black/40">
+              Prediksi dari pola penjualanmu
+              {forecast && ` · keyakinan ${forecast.confidence} · dari ${forecast.based_on_days} hari data`}
+            </p>
+          </div>
+          <span className="font-black text-sm font-mono">
+            {forecastLoading ? "—" : formatCurrency(forecast?.total ?? 0)}
+          </span>
+        </div>
+        <div className="p-4">
+          {forecastLoading ? (
+            <div className="h-[140px] skeleton" />
+          ) : (
+            <div className="flex items-end gap-2 h-[140px]">
+              {(forecast?.days ?? []).map((d, i) => {
+                const max = Math.max(...(forecast?.days.map((x) => x.predicted) ?? [1]), 1);
+                return (
+                  <div key={d.date} className="flex-1 flex flex-col items-center gap-1 min-w-0 h-full justify-end">
+                    <span className="text-[9px] font-mono font-bold text-brand-black/60 truncate w-full text-center">
+                      {formatCurrency(d.predicted).replace(/\.\d+.*$/, "")}
+                    </span>
+                    <div
+                      className="w-full bg-brand-yellow border-2 border-brand-black transition-all"
+                      style={{
+                        height: `${Math.max(10, (d.predicted / max) * 100)}%`,
+                        boxShadow: "1px 1px 0 #0A0A0A",
+                      }}
+                      title={`${d.weekday} ${formatCurrency(d.predicted)}`}
+                    />
+                    <span className="text-[10px] font-bold text-brand-black/50 capitalize">{d.weekday.slice(0, 3)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </NeoCard>
 
       {/* ── 4 Stat Cards (sesuai PRD: Revenue/Orders/Stok/Customer) ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-stretch">

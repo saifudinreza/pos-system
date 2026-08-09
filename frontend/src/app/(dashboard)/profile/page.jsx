@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import useAuthStore from "@/stores/authStore";
 import subscriptionService from "@/services/subscriptionService";
+import { PLANS } from "@/stores/subscriptionStore";
 import NeoButton from "@/components/ui/NeoButton";
 import NeoInput  from "@/components/ui/NeoInput";
 import { getErrorMessage } from "@/lib/utils";
@@ -382,7 +383,7 @@ export default function ProfilePage() {
               {/* Pro card */}
               <div className="border-2 border-brand-black p-4 space-y-3" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
                 <div className="flex items-center justify-between">
-                  <span className="font-black text-sm">Pro — Rp250.000/bln</span>
+                  <span className="font-black text-sm">Pro — Rp{PLANS.pro.price.toLocaleString("id-ID")}/bln</span>
                   <span className="text-xs font-mono bg-brand-yellow px-2 py-0.5 font-bold border border-brand-black">Populer</span>
                 </div>
                 <ul className="space-y-1">
@@ -400,7 +401,7 @@ export default function ProfilePage() {
 
               {/* Enterprise card */}
               <div className="border-2 border-brand-black p-4 space-y-3 bg-brand-black text-white" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
-                <span className="font-black text-sm">Enterprise — Rp799.000/bln</span>
+                <span className="font-black text-sm">Enterprise — Rp{PLANS.enterprise.price.toLocaleString("id-ID")}/bln</span>
                 <ul className="space-y-1">
                   {PLAN_FEATURES.enterprise.slice(0, 3).map((f) => (
                     <li key={f} className="flex items-start gap-1.5 text-xs text-white/60">

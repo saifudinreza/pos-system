@@ -58,6 +58,21 @@ export function useProducts(initialFilters = {}) {
     fetchProducts();
   }, [fetchProducts]);
 
+  // --- SINKRONISASI FILTER AWAL (misal search yang di-debounce) ---
+  // useProducts({ search: x }) — kalau x berubah, state filter harus ikut.
+  // Sebelumnya initialFilters hanya dibaca SEKALI saat mount, jadi
+  // pencarian produk di halaman tidak pernah berfungsi.
+  useEffect(() => {
+    setFilters((prev) => {
+      const merged  = { ...prev, ...initialFilters };
+      const changed = Object.keys(initialFilters).some(
+        (key) => prev[key] !== initialFilters[key]
+      );
+      return changed ? { ...merged, page: 1 } : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(initialFilters)]);
+
   // --- GANTI FILTER ---
   // Reset ke halaman 1 setiap ganti filter (agar tidak stuck di halaman yang salah)
   const updateFilters = (newFilters) => {

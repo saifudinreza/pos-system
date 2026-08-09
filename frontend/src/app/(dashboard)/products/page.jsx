@@ -15,7 +15,7 @@ import { formatCurrency, getErrorMessage } from "@/lib/utils";
 
 const EMPTY_FORM = {
   name: "", sku: "", description: "",
-  price: "", stock: "", stock_alert: "5",
+  price: "", cost: "", stock: "", stock_alert: "5",
   category_id: "", is_active: true, image: null,
 };
 
@@ -56,7 +56,7 @@ export default function ProductsPage() {
     setForm(data
       ? {
           name: data.name, sku: data.sku, description: data.description ?? "",
-          price: data.price, stock: data.stock, stock_alert: data.stock_alert ?? "5",
+          price: data.price, cost: data.cost ?? "", stock: data.stock, stock_alert: data.stock_alert ?? "5",
           category_id: data.category_id ?? data.category?.id ?? "",
           is_active: data.is_active, image: null,
         }
@@ -95,6 +95,7 @@ export default function ProductsPage() {
       const payload = {
         ...form,
         price: Number(form.price),
+        cost: form.cost === "" ? null : Number(form.cost),
         stock: Number(form.stock),
         stock_alert: Number(form.stock_alert),
       };
@@ -335,10 +336,13 @@ export default function ProductsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <NeoInput label="Harga (Rp) *" id="prod-price" type="number" required min="0"
+          <div className="grid grid-cols-4 gap-3">
+            <NeoInput label="Harga Jual (Rp) *" id="prod-price" type="number" required min="0"
               value={form.price} onChange={handleFieldChange("price")}
               placeholder="5000" />
+            <NeoInput label="Harga Modal (Rp)" id="prod-cost" type="number" min="0"
+              value={form.cost} onChange={handleFieldChange("cost")}
+              placeholder="4500" />
             <NeoInput label="Stok *" id="prod-stock" type="number" required min="0"
               value={form.stock} onChange={handleFieldChange("stock")}
               placeholder="100" />

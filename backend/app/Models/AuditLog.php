@@ -2,26 +2,36 @@
 
 namespace App\Models;
 
+use App\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class AiQueryLog extends Model
+class AuditLog extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'tenant_id',
         'user_id',
-        'type',
-        'query',
-        'response',
-        'tokens_used',
-        'provider',
+        'action',
+        'entity_type',
+        'entity_id',
+        'before',
+        'after',
+        'ip_address',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new TenantScope);
+    }
 
     protected function casts(): array
     {
         return [
-            'tokens_used' => 'integer',
+            'before'    => 'array',
+            'after'     => 'array',
+            'entity_id' => 'integer',
         ];
     }
 
@@ -30,7 +40,5 @@ class AiQueryLog extends Model
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
-        // ↑ Log ini dibuat oleh user mana
-        // Akses: $log->user->name
     }
 }

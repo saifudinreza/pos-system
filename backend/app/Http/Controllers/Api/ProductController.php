@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryMovement;
 use App\Models\Product;
+use App\Services\InventoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -148,6 +150,7 @@ class ProductController extends Controller
             'sku'          => ['required', 'string', \Illuminate\Validation\Rule::unique('products', 'sku')->where('tenant_id', $request->user()->tenant_id)],
             'description'  => ['nullable', 'string'],
             'price'        => ['required', 'numeric', 'min:0'],
+            'cost'         => ['nullable', 'numeric', 'min:0'],
             'stock'        => ['required', 'integer', 'min:0'],
             'stock_alert'  => ['nullable', 'integer', 'min:0'],
             'image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -164,6 +167,11 @@ class ProductController extends Controller
         $product = Product::create(array_merge($validated, [
             'tenant_id' => $request->user()->tenant_id,
         ]));
+
+        \App\Services\AuditLogService::log('created', 'product', $product->id, null, [
+            'name' => $product->name, 'price' => $product->price,
+            'cost' => $product->cost, 'stock' => $product->stock,
+        ]);
 
         // Hapus cache list produk karena ada produk baru
         Cache::forget('products_all');
@@ -199,6 +207,7 @@ class ProductController extends Controller
             'sku'          => ['sometimes', 'string', \Illuminate\Validation\Rule::unique('products', 'sku')->where('tenant_id', $product->tenant_id)->ignore($id)],
             'description'  => ['nullable', 'string'],
             'price'        => ['sometimes', 'numeric', 'min:0'],
+            'cost'         => ['nullable', 'numeric', 'min:0'],
             'stock'        => ['sometimes', 'integer', 'min:0'],
             'stock_alert'  => ['nullable', 'integer', 'min:0'],
             'image'        => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
@@ -216,6 +225,14 @@ class ProductController extends Controller
         }
 
         $product->update($validated);
+
+        \App\Services\AuditLogService::log('updated', 'product', $product->id, [
+            'name' => $product->getOriginal('name'), 'price' => $product->getOriginal('price'),
+            'cost' => $product->getOriginal('cost'), 'stock' => $product->getOriginal('stock'),
+        ], [
+            'name' => $product->name, 'price' => $product->price,
+            'cost' => $product->cost, 'stock' => $product->stock,
+        ]);
 
         Cache::forget('products_all');
 
@@ -257,12 +274,101 @@ class ProductController extends Controller
             Storage::disk(PRODUCT_DISK)->delete($product->image);
         }
 
+        \App\Services\AuditLogService::log('deleted', 'product', $product->id, [
+            'name' => $product->name, 'price' => $product->price,
+            'cost' => $product->cost, 'stock' => $product->stock,
+        ], null);
+
         $product->delete();
 
         Cache::forget('products_all');
 
         return response()->json([
             'message' => 'Produk berhasil dihapus.',
+        ], 200);
+    }
+
+    // =============================================================
+    // RESTOCK — tambah stok produk (dengan pencatatan ledger)
+    // POST /api/products/{id}/restock
+    // Body: { "quantity": 20, "note": "Restok dari supplier" }
+    // Role: admin & kasir
+    // =============================================================
+    public function restock(Request $request, int $id): JsonResponse
+    {
+        $product = Product::find($id);
+
+        if (! $product) {
+            return response()->json(['message' => 'Produk tidak ditemukan.'], 404);
+        }
+
+        $validated = $request->validate([
+            'quantity' => ['required', 'integer', 'min:1', 'max:100000'],
+            'note'     => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $beforeStock = $product->stock;
+        $product->increment('stock', $validated['quantity']);
+
+        InventoryService::record(
+            $product->id,
+            $product->tenant_id,
+            'restock',
+            $validated['quantity'],
+            $beforeStock,
+            $beforeStock + $validated['quantity'],
+            null,
+            null,
+            $request->user()->id,
+            $validated['note'] ?? null
+        );
+
+        \App\Services\AuditLogService::log('restock', 'product', $product->id, null, [
+            'stock' => $product->fresh()->stock,
+        ]);
+
+        return response()->json([
+            'message' => 'Stok berhasil ditambahkan.',
+            'data'    => $this->formatProduct($product->fresh()->load('category')),
+        ], 200);
+    }
+
+    // =============================================================
+    // MOVEMENTS — riwayat pergerakan stok satu produk
+    // GET /api/products/{id}/movements
+    // Role: admin & kasir
+    // =============================================================
+    public function movements(int $id): JsonResponse
+    {
+        $product = Product::find($id);
+
+        if (! $product) {
+            return response()->json(['message' => 'Produk tidak ditemukan.'], 404);
+        }
+
+        $movements = InventoryMovement::where('product_id', $product->id)
+            ->with('user:id,name')
+            ->latest()
+            ->paginate(20);
+
+        return response()->json([
+            'message' => 'Riwayat pergerakan stok berhasil diambil.',
+            'data'    => $movements->map(fn($m) => [
+                'id'           => $m->id,
+                'type'         => $m->type,
+                'quantity'     => $m->quantity,
+                'before_stock' => $m->before_stock,
+                'after_stock'  => $m->after_stock,
+                'note'         => $m->note,
+                'user'         => $m->user?->name ?? null,
+                'created_at'   => $m->created_at->format('d M Y H:i'),
+            ]),
+            'meta' => [
+                'current_page' => $movements->currentPage(),
+                'per_page'     => $movements->perPage(),
+                'total'        => $movements->total(),
+                'last_page'    => $movements->lastPage(),
+            ],
         ], 200);
     }
 
@@ -277,6 +383,7 @@ class ProductController extends Controller
             'sku'         => $product->sku,
             'description' => $product->description,
             'price'       => $product->price,
+            'cost'        => $product->cost,
             'stock'       => $product->stock,
             'stock_alert' => $product->stock_alert,
             'is_low_stock' => $product->isLowStock(),

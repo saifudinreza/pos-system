@@ -20,6 +20,7 @@ import {
   CreditCard,      // icon transaksi / subscription
   TrendingUp,      // icon laporan
   Users,           // icon pengguna
+  UsersRound,      // icon pelanggan
   UserCircle,      // icon profil
   BrainCircuit,    // icon AI monitoring
   Building2,       // icon tenant
@@ -46,6 +47,7 @@ const NAV_GROUPS = [
     label: "Laporan & Admin",
     items: [
       { href: "/reports",        Icon: TrendingUp,   label: "Laporan",        roles: ["admin", "developer"] },
+      { href: "/customers",     Icon: UsersRound,   label: "Pelanggan",      roles: ["admin", "developer"] },
       { href: "/ai-monitoring", Icon: BrainCircuit, label: "AI Monitoring",   roles: ["admin", "developer"] },
       { href: "/users",          Icon: Users,        label: "Pengguna",        roles: ["developer"] },
     ],
@@ -108,7 +110,7 @@ export default function Sidebar({ isOpen, onClose }) {
   // Selector (s) => s.user supaya komponen hanya re-render kalau s.user berubah
   const user = useAuthStore((s) => s.user);
   const role = user?.role ?? "kasir";
-  const plan = user?.subscription_plan ?? "free";
+  const plan = user?.effective_plan ?? user?.subscription_plan ?? "free";
 
   // mounted: mencegah hydration mismatch
   // Saat Next.js render di server, localStorage tidak tersedia

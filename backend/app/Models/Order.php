@@ -13,6 +13,7 @@ class Order extends Model
     protected $fillable = [
         'tenant_id',
         'user_id',
+        'customer_id',
         'shift_id',
         'order_number',
         'status',
@@ -42,6 +43,11 @@ class Order extends Model
     public function tenant(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function customer(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo

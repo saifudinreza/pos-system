@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\Shift;
 use App\Models\Transaction;
+use App\Services\InventoryService;
 use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -174,6 +177,15 @@ class OrderController extends Controller
                 // Mencegah 2 user beli produk yang sama secara bersamaan
                 // sehingga stok tidak minus
 
+                // Produk bisa null kalau product_id dari tenant lain (rule
+                // exists: tidak menghormati Global Scope) → jadikan 422
+                // alih-alih error 500.
+                if (! $product) {
+                    throw ValidationException::withMessages([
+                        'items.*.product_id' => 'Produk tidak ditemukan.',
+                    ]);
+                }
+
                 if (! $product->is_active) {
                     throw new \Exception("Produk {$product->name} tidak tersedia.");
                 }
@@ -196,6 +208,9 @@ class OrderController extends Controller
                     // ↑ Snapshot harga saat ini — penting!
                     // Kalau harga produk berubah besok, harga di order ini tetap
                     'subtotal'   => $itemSubtotal,
+                    // Snapshot stok untuk pencatatan ledger
+                    'before_stock' => $product->stock,
+                    'after_stock'  => $product->stock - $item['quantity'],
                 ];
 
                 // Kurangi stok produk
@@ -208,10 +223,20 @@ class OrderController extends Controller
             // ↑ PPN 11%
             $total = $subtotal + $tax;
 
+            // ----- CARI / BUAT PELANGGAN -----
+            // Nomor HP yang diisi kasir otomatis jadi entitas customer
+            // (CRM): kalau sudah pernah belanja dengan nomor itu, order ini
+            // tertaut ke pelanggan yang sama.
+            $customer = Customer::findOrCreateByPhone(
+                $validated['customer_phone'] ?? null,
+                $request->user()->tenant_id
+            );
+
             // ----- BUAT ORDER -----
             $order = Order::create([
                 'tenant_id'      => $request->user()->tenant_id,
                 'user_id'        => $request->user()->id,
+                'customer_id'    => $customer?->id,
                 'shift_id'       => $shift->id,
                 'order_number'   => Order::generateOrderNumber(),
                 'status'         => 'pending',
@@ -226,6 +251,21 @@ class OrderController extends Controller
             $order->items()->createMany($items);
             // ↑ createMany() = insert banyak baris sekaligus lebih efisien
             // dari pada loop insert satu-satu
+
+            // ----- CATAT PERGERAKAN STOK (inventory ledger) -----
+            foreach ($items as $item) {
+                InventoryService::record(
+                    $item['product_id'],
+                    $request->user()->tenant_id,
+                    'sale',
+                    $item['quantity'],
+                    $item['before_stock'],
+                    $item['after_stock'],
+                    'order',
+                    $order->id,
+                    $request->user()->id
+                );
+            }
 
             return $order;
         });
@@ -263,7 +303,18 @@ class OrderController extends Controller
         if ($validated['status'] === 'cancelled' && $order->status !== 'cancelled') {
             DB::transaction(function () use ($order, $validated) {
                 foreach ($order->items as $item) {
+                    $beforeStock = $item->product->stock;
                     $item->product->increment('stock', $item->quantity);
+                    InventoryService::record(
+                        $item->product_id,
+                        $order->tenant_id,
+                        'cancel',
+                        $item->quantity,
+                        $beforeStock,
+                        $beforeStock + $item->quantity,
+                        'order',
+                        $order->id
+                    );
                 }
                 $order->update(['status' => $validated['status']]);
 

@@ -12,12 +12,15 @@ use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\ShiftController;
+use App\Http\Controllers\Api\InsightController;
+use App\Http\Controllers\Api\CustomerController;
 
 // =============================================================
 // PUBLIC ROUTES — tidak perlu login
 // =============================================================
-Route::post('/register',      [AuthController::class, 'register']);
-Route::post('/login',         [AuthController::class, 'login']);
+// throttling: 5 percobaan per menit per IP — anti brute-force password
+Route::post('/register',      [AuthController::class, 'register'])->middleware('throttle:5,1');
+Route::post('/login',         [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/check-tenant',   [AuthController::class, 'checkTenant']);
 
 // Media proxy — serve gambar dari R2/storage tanpa butuh auth
@@ -102,6 +105,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/products',           [ProductController::class, 'store']);
         Route::put('/products/{id}',       [ProductController::class, 'update']);
         Route::delete('/products/{id}',    [ProductController::class, 'destroy']);
+        Route::post('/products/{id}/restock',   [ProductController::class, 'restock']);
+        Route::get('/products/{id}/movements',  [ProductController::class, 'movements']);
 
         // ----- CATEGORIES CRUD -----
         Route::post('/categories',         [CategoryController::class, 'store']);
@@ -117,8 +122,19 @@ Route::middleware('auth:sanctum')->group(function () {
         // ----- REPORTS -----
         Route::get('/reports/sales',           [ReportController::class, 'sales']);
         Route::get('/reports/stock',           [ReportController::class, 'stock']);
+        Route::get('/reports/forecast',        [ReportController::class, 'forecast']);
         Route::get('/reports/sales/download',  [ReportController::class, 'downloadSales']);
         Route::get('/reports/stock/download',  [ReportController::class, 'downloadStock']);
+
+        // ----- AI INSIGHTS -----
+        Route::get('/insights',            [InsightController::class, 'index']);
+        Route::post('/insights/generate',  [InsightController::class, 'generate'])
+            ->middleware('throttle:5,1');
+        // ↑ generate memanggil LLM (ada biaya token) → dibatasi 5x/menit
+
+        // ----- CUSTOMERS -----
+        Route::get('/customers',       [CustomerController::class, 'index']);
+        Route::get('/customers/{id}',  [CustomerController::class, 'show']);
 
         // ----- AI LOGS & STATS -----
         Route::get('/ai/logs',  [AiController::class, 'logs']);

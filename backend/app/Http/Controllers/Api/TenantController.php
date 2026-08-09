@@ -57,6 +57,8 @@ class TenantController extends Controller
 
         $tenant->update($validated);
 
+        \App\Services\AuditLogService::log('updated', 'tenant', $tenant->id, null, $validated);
+
         return response()->json([
             'message' => 'Tenant berhasil diupdate.',
             'data'    => $this->formatTenant($tenant->fresh()->loadCount('users')->load('users')),
@@ -70,9 +72,25 @@ class TenantController extends Controller
         if (! $tenant) return response()->json(['message' => 'Tenant tidak ditemukan.'], 404);
 
         $name = $tenant->name;
-        // Cascade: nullify tenant_id on users (don't delete users, just detach)
-        User::where('tenant_id', $id)->update(['tenant_id' => null]);
+
+        // ⚠️ JANGAN set tenant_id = null pada user — user dengan tenant_id null
+        // dianggap developer (TenantScope melewati filter) → bisa melihat data
+        // SEMUA tenant. Yang benar:
+        // 1. Cabut semua token Sanctum user tenant (langsung logout di semua perangkat)
+        // 2. Nonaktifkan akunnya (is_active = false → tidak bisa login lagi)
+        //    (FK nullOnDelete otomatis akan me-null-kan tenant_id di DB, tapi
+        //    dengan token dicabut + akun nonaktif, user tidak bisa akses apa pun)
+        $users = User::where('tenant_id', $id)->get();
+        foreach ($users as $user) {
+            $user->tokens()->delete();
+            $user->update(['is_active' => false]);
+        }
+
         $tenant->delete();
+
+        \App\Services\AuditLogService::log('deleted', 'tenant', $tenant->id, [
+            'name' => $tenant->name, 'slug' => $tenant->slug,
+        ], null);
 
         return response()->json(['message' => "Tenant \"{$name}\" berhasil dihapus."]);
     }

@@ -139,43 +139,47 @@ function ReceiptModal({ isOpen, data, onClose }) {
   if (!isOpen || !data) return null;
 
   const buildWhatsAppText = () => {
-    const SEP = "-----------------------------";
+    const SEP   = "━━━━━━━━━━━━━━━━━━━━";
+    const store = data.store_name ?? "KasirAI";
     let t = "";
 
-    t += `*STRUK PEMBAYARAN*\n`;
+    t += `*${store}*\n`;
+    t += `Struk Pembelian\n`;
     t += `${SEP}\n`;
-    t += `No. Order : *${data.order_number}*\n`;
-    t += `Tanggal   : ${data.date}\n`;
-    t += `Kasir     : ${data.kasir}\n`;
+    t += `No. Order  : *${data.order_number}*\n`;
+    t += `Tanggal    : ${data.date}\n`;
+    t += `Kasir      : ${data.kasir}\n`;
     t += `${SEP}\n`;
-    t += `*ITEM PESANAN*\n`;
     data.items.forEach((i) => {
       t += `${i.name}\n`;
       t += `  ${i.quantity} x ${formatCurrency(i.price)} = ${formatCurrency(i.price * i.quantity)}\n`;
     });
     t += `${SEP}\n`;
-    t += `Subtotal  : ${formatCurrency(data.subtotal)}\n`;
-    t += `PPN 11%   : ${formatCurrency(data.tax)}\n`;
+    t += `Subtotal    : ${formatCurrency(data.subtotal)}\n`;
+    t += `PPN 11%     : ${formatCurrency(data.tax)}\n`;
     t += `${SEP}\n`;
-    t += `*TOTAL    : ${formatCurrency(data.total)}*\n`;
+    t += `*TOTAL*      : *${formatCurrency(data.total)}*\n`;
     t += `${SEP}\n`;
-    t += `Bayar (${data.payment_method}) : ${formatCurrency(data.cash)}\n`;
-    if (data.change > 0) t += `Kembalian : *${formatCurrency(data.change)}*\n`;
+    t += `Pembayaran  : ${data.payment_method} (Lunas)\n`;
+    t += `Bayar       : ${formatCurrency(data.cash)}\n`;
+    if (data.change > 0) t += `Kembalian   : *${formatCurrency(data.change)}*\n`;
     t += `${SEP}\n`;
-    t += `Terima kasih sudah berbelanja!\n`;
-    t += `Sampai jumpa kembali.`;
+    t += `Terima kasih sudah berbelanja di ${store}.\n`;
+    t += `Sampai jumpa lagi!`;
 
     return t;
   };
 
   const handlePrint = () => {
     const w = window.open("", "_blank", "width=420,height=700");
+    const store = data.store_name ?? "KasirAI";
     const fmt = (n) => new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n);
     w.document.write(`<html><head><title>Struk ${data.order_number}</title>
       <style>body{font-family:monospace;font-size:12px;width:280px;padding:10px;margin:0 auto}
       .c{text-align:center}.b{font-weight:bold}.sep{border-top:1px dashed #000;margin:6px 0}
       .row{display:flex;justify-content:space-between}</style></head><body>
-      <div class="c b" style="font-size:15px">POS SYSTEM</div>
+      <div class="c b" style="font-size:15px">${store}</div>
+      <div class="c">Struk Pembelian</div>
       <div class="sep"></div>
       <div class="row"><span>Order</span><span>${data.order_number}</span></div>
       <div class="row"><span>Kasir</span><span>${data.kasir}</span></div>
@@ -191,7 +195,8 @@ function ReceiptModal({ isOpen, data, onClose }) {
       <div class="row"><span>Bayar (${data.payment_method})</span><span>${fmt(data.cash)}</span></div>
       ${data.change > 0 ? `<div class="row"><span>Kembalian</span><span class="b">${fmt(data.change)}</span></div>` : ""}
       <div class="sep"></div>
-      <div class="c">Terima kasih sudah berbelanja!</div>
+      <div class="c">Terima kasih sudah berbelanja di ${store}!</div>
+      <div class="c">Sampai jumpa lagi.</div>
       <script>window.onload=function(){window.print();window.close()}</script>
       </body></html>`);
     w.document.close();
@@ -227,13 +232,14 @@ function ReceiptModal({ isOpen, data, onClose }) {
         style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
         {/* Header */}
         <div className="px-5 py-4 bg-green-400 border-b-2 border-brand-black text-center shrink-0">
-          <div className="text-4xl mb-1">✅</div>
+          <div className="text-4xl mb-1 font-black text-green-900">✓</div>
           <h3 className="font-black text-xl font-grotesk">PEMBAYARAN SUKSES</h3>
         </div>
         {/* Struk */}
         <div className="flex-1 overflow-y-auto p-5 font-mono text-sm space-y-1 scrollbar-thin">
           <div className="text-center border-b-2 border-dashed border-brand-black/30 pb-3 mb-3">
-            <p className="font-black text-base">POS SYSTEM</p>
+            <p className="font-black text-base">{data.store_name ?? "KasirAI"}</p>
+            <p className="text-xs text-brand-black/50">Struk Pembelian</p>
           </div>
           <div className="flex justify-between text-xs"><span>Order</span><span className="font-bold">{data.order_number}</span></div>
           <div className="flex justify-between text-xs"><span>Kasir</span><span>{data.kasir}</span></div>
@@ -261,7 +267,10 @@ function ReceiptModal({ isOpen, data, onClose }) {
               <span>Kembalian</span><span>{formatCurrency(data.change)}</span>
             </div>
           )}
-          <div className="text-center mt-4 text-xs text-brand-black/40">Terima kasih sudah berbelanja!</div>
+          <div className="text-center mt-4 text-xs text-brand-black/50">
+            Terima kasih sudah berbelanja di {data.store_name ?? "KasirAI"}!
+            <br />Sampai jumpa lagi.
+          </div>
         </div>
         {/* Actions */}
         <div className="p-4 border-t-2 border-brand-black space-y-2 bg-brand-cream shrink-0">
@@ -269,7 +278,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
             <button onClick={handlePrint}
               className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
               style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
-              🖨️ Print Struk
+              Print Struk
             </button>
             <button onClick={handleWhatsApp} disabled={sending}
               className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-green-400 hover:bg-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -280,7 +289,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
           <button onClick={onClose}
             className="w-full py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300"
             style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
-            ✕ Transaksi Baru
+            Transaksi Baru
           </button>
         </div>
       </div>
@@ -1201,6 +1210,7 @@ export default function KasirPage() {
   // ============================================================
   // Buat objek data struk dari order + pilihan bayar
   const buildReceipt = (orderRes, cashAmount, paymentMethod) => ({
+    store_name:     user?.tenant_name ?? "KasirAI",
     order_number:   orderRes.data?.order_number ?? orderRes.order?.order_number ?? "-",
     kasir:          user?.name ?? "Kasir",
     date:           new Date().toLocaleString("id-ID"),

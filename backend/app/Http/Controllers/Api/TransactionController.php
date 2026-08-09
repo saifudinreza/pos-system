@@ -170,6 +170,12 @@ class TransactionController extends Controller
 
         $order = Order::with(['user', 'items.product'])->find($validated['order_id']);
 
+        // Order tidak ketemu (termasuk order milik tenant lain — TenantScope
+        // menyaringnya) → jangan lanjut, kalau tidak error 500.
+        if (! $order) {
+            return response()->json(['message' => 'Order tidak ditemukan.'], 404);
+        }
+
         // Validasi order masih pending
         if (! $order->isPending()) {
             return response()->json([
@@ -285,10 +291,23 @@ class TransactionController extends Controller
         DB::transaction(function () use ($transaction) {
             $transaction->update(['status' => 'cancel']);
 
-            if ($transaction->order) {
-                // Kembalikan stok setiap item
+            if ($transaction->order && $transaction->order->status !== 'cancelled') {
+                // Kembalikan stok setiap item (guard: cek order belum
+                // cancelled — mencegah stok kembung kalau sudah dibatalkan
+                // lewat jalur lain, misal webhook Midtrans yang mendahului)
                 foreach ($transaction->order->items as $item) {
+                    $beforeStock = $item->product->stock;
                     $item->product->increment('stock', $item->quantity);
+                    \App\Services\InventoryService::record(
+                        $item->product_id,
+                        $transaction->order->tenant_id,
+                        'cancel',
+                        $item->quantity,
+                        $beforeStock,
+                        $beforeStock + $item->quantity,
+                        'transaction',
+                        $transaction->id
+                    );
                 }
                 $transaction->order->update(['status' => 'cancelled']);
             }
@@ -355,6 +374,16 @@ class TransactionController extends Controller
                 $fraudStatus,
                 $notification
             ) {
+                // Refund: transaksi yang sudah settlement TIDAK boleh "balik"
+                // jadi pending — kalau tidak, order yang sudah dibayar bisa
+                // terlihat belum lunas & stok/laporan jadi tidak konsisten.
+                // (Refund penuh masih belum didukung — cukup catat saja.)
+                if (in_array($transactionStatus, ['refund', 'partial_refund'])) {
+                    Log::warning('Refund webhook untuk ' . $transaction->midtrans_order_id
+                        . ' (' . $transactionStatus . ') — status dipertahankan: ' . $transaction->status);
+                    return;
+                }
+
                 if ($transactionStatus === 'capture') {
                     // Kartu kredit — cek fraud status
                     $status = $fraudStatus === 'accept' ? 'settlement' : 'deny';
@@ -365,6 +394,17 @@ class TransactionController extends Controller
                     $status = $transactionStatus;
                 } else {
                     $status = 'pending';
+                }
+
+                // ----- IDEMPOTENSI -----
+                // Midtrans bisa mengirim notifikasi yang SAMA lebih dari sekali
+                // (duplikat / retry). Kalau status sudah sama, jangan diproses
+                // lagi — kalau tidak: struk WA terkirim berkali-kali, stok
+                // di-restore dua kali, dan paid_at ter-reset.
+                if ($status === $transaction->status) {
+                    Log::info('Webhook duplikat diabaikan untuk '
+                        . $transaction->midtrans_order_id . ' (status: ' . $status . ')');
+                    return;
                 }
 
                 // Update data transaksi
@@ -378,7 +418,8 @@ class TransactionController extends Controller
                 ]);
 
                 // Kalau pembayaran sukses, update status order jadi paid
-                if ($status === 'settlement') {
+                // (guard: cek order belum paid — mencegah struk WA ganda)
+                if ($status === 'settlement' && $transaction->order->status !== 'paid') {
                     $transaction->order->update(['status' => 'paid']);
                     Log::info('Order ' . $transaction->order->order_number . ' berhasil dibayar.');
                     // Kirim struk digital ke WhatsApp customer (kalau ada nomor HP)
@@ -387,10 +428,23 @@ class TransactionController extends Controller
                 }
 
                 // Kalau gagal/expire, kembalikan stok dan cancel order
-                if (in_array($status, ['cancel', 'deny', 'expire'])) {
+                // (guard: cek order belum cancelled — mencegah stok kembung
+                // kalau order sudah dibatalkan lewat jalur lain sebelumnya)
+                if (in_array($status, ['cancel', 'deny', 'expire']) && $transaction->order->status !== 'cancelled') {
                     foreach ($transaction->order->items as $item) {
+                        $beforeStock = $item->product->stock;
                         $item->product->increment('stock', $item->quantity);
                         // ↑ Kembalikan stok yang tadi sudah dikurangi saat order dibuat
+                        \App\Services\InventoryService::record(
+                            $item->product_id,
+                            $transaction->order->tenant_id,
+                            'cancel',
+                            $item->quantity,
+                            $beforeStock,
+                            $beforeStock + $item->quantity,
+                            'transaction',
+                            $transaction->id
+                        );
                     }
                     $transaction->order->update(['status' => 'cancelled']);
                     Log::info('Order ' . $transaction->order->order_number . ' dibatalkan, stok dikembalikan.');

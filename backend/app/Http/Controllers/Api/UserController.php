@@ -173,6 +173,10 @@ class UserController extends Controller
 
         $user->update(['role' => $validated['role']]);
 
+        \App\Services\AuditLogService::log('role_changed', 'user', $user->id, [
+            'role' => $user->getOriginal('role'),
+        ], ['role' => $validated['role']]);
+
         return response()->json([
             'message' => "Role user \"{$user->name}\" berhasil diubah menjadi {$validated['role']}.",
             'data'    => $this->formatUser($user->fresh()),
@@ -197,6 +201,10 @@ class UserController extends Controller
         }
 
         $user->update(['is_active' => ! $user->is_active]);
+
+        \App\Services\AuditLogService::log($user->is_active ? 'activated' : 'deactivated', 'user', $user->id, null, [
+            'is_active' => $user->is_active,
+        ]);
         $status = $user->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return response()->json([

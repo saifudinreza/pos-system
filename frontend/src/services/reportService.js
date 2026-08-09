@@ -48,6 +48,13 @@ const reportService = {
     return data;
   },
 
+  // --- FORECAST PENJUALAN ---
+  // Prediksi 7 hari ke depan (deterministik dari data, tanpa biaya AI)
+  getForecast: async () => {
+    const { data } = await api.get("/reports/forecast");
+    return data.data;
+  },
+
   // --- UNDUH LAPORAN PENJUALAN ---
   // Backend mengembalikan file (bukan JSON), sehingga perlu responseType: "blob"
   // Analogi: meminta cetak laporan → dapat file fisik, bukan data mentah

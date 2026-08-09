@@ -281,6 +281,10 @@ class SubscriptionController extends Controller
 
         $user->update(['subscription_plan' => $validated['plan']]);
 
+        \App\Services\AuditLogService::log('plan_changed', 'user', $user->id, [
+            'subscription_plan' => $user->getOriginal('subscription_plan'),
+        ], ['subscription_plan' => $validated['plan']]);
+
         if ($validated['plan'] === 'free') {
             Subscription::where('user_id', $userId)->where('status', 'active')
                 ->update(['status' => 'expired', 'expires_at' => now()]);

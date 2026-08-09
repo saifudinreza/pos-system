@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\OrderItem;
+use App\Services\ForecastService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,20 @@ use App\Exports\SalesReportExport;
 
 class ReportController extends Controller
 {
+    // =============================================================
+    // FORECAST — prediksi penjualan 7 hari ke depan (deterministik)
+    // GET /api/reports/forecast
+    // =============================================================
+    public function forecast(Request $request): JsonResponse
+    {
+        $tenantId = $request->user()->tenant_id;
+
+        return response()->json([
+            'message' => 'Forecast penjualan berhasil dihitung.',
+            'data'    => ForecastService::forecastForTenant($tenantId),
+        ], 200);
+    }
+
     // =============================================================
     // SALES REPORT — laporan penjualan
     // GET /api/reports/sales

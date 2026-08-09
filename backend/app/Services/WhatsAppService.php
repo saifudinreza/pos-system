@@ -77,14 +77,18 @@ class WhatsAppService
     // =============================================================
     private function buildReceiptMessage(Order $order): string
     {
-        $appName  = config('app.name', 'KasirAI');
-        $lines    = [];
+        $storeName = $order->tenant?->name ?? config('app.name', 'KasirAI');
+        $cashier   = $order->user?->name ?? '-';
+        $paymentMethod = $this->paymentMethodLabel($order->transaction?->payment_method);
 
-        $lines[] = "🧾 *STRUK PEMBELIAN*";
-        $lines[] = "KasirAI";
+        $lines = [];
+
+        $lines[] = "*{$storeName}*";
+        $lines[] = "Struk Pembelian";
         $lines[] = "━━━━━━━━━━━━━━━━━━━━";
-        $lines[] = "No. Order : *{$order->order_number}*";
-        $lines[] = "Tanggal   : {$order->created_at->format('d M Y, H:i')}";
+        $lines[] = "No. Order  : *{$order->order_number}*";
+        $lines[] = "Tanggal    : {$order->created_at->format('d M Y, H:i')}";
+        $lines[] = "Kasir      : {$cashier}";
         $lines[] = "━━━━━━━━━━━━━━━━━━━━";
 
         // Detail item yang dibeli
@@ -92,26 +96,45 @@ class WhatsAppService
             $productName = $item->product->name ?? $item->product_name ?? '-';
             $subtotal    = number_format($item->subtotal, 0, ',', '.');
             $price       = number_format($item->price, 0, ',', '.');
-            $lines[]     = "▸ {$productName}";
-            $lines[]     = "  {$item->quantity} × Rp {$price} = *Rp {$subtotal}*";
+            $lines[]     = $productName;
+            $lines[]     = "  {$item->quantity} x Rp {$price} = Rp {$subtotal}";
         }
 
         $lines[] = "━━━━━━━━━━━━━━━━━━━━";
 
         // Ringkasan harga
         $subtotal = number_format($order->subtotal, 0, ',', '.');
+        $tax      = number_format($order->tax ?? 0, 0, ',', '.');
         $total    = number_format($order->total,    0, ',', '.');
 
-        $lines[] = "Subtotal  : Rp {$subtotal}";
+        $lines[] = "Subtotal    : Rp {$subtotal}";
+        $lines[] = "PPN 11%     : Rp {$tax}";
         $lines[] = "━━━━━━━━━━━━━━━━━━━━";
-        $lines[] = "*TOTAL    : Rp {$total}*";
+        $lines[] = "*TOTAL*      : *Rp {$total}*";
         $lines[] = "━━━━━━━━━━━━━━━━━━━━";
-        $lines[] = "✅ Pembayaran *LUNAS*";
+        $lines[] = "Pembayaran  : {$paymentMethod} (Lunas)";
         $lines[] = "";
-        $lines[] = "Terima kasih sudah berbelanja! 🙏";
-        $lines[] = "_Powered by KasirAI";
+        $lines[] = "Terima kasih sudah berbelanja di {$storeName}.";
+        $lines[] = "Sampai jumpa lagi!";
+        $lines[] = "_Powered by KasirAI_";
 
         return implode("\n", $lines);
+    }
+
+    // =============================================================
+    // paymentMethodLabel — Terjemahkan kode metode bayar ke label
+    // ramah-customer (dipakai di isi struk)
+    // =============================================================
+    private function paymentMethodLabel(?string $method): string
+    {
+        return match ($method) {
+            'cash'          => 'Tunai',
+            'qris'          => 'QRIS',
+            'bank_transfer' => 'Transfer Bank',
+            'credit_card'   => 'Kartu Kredit',
+            'other'         => 'Lainnya',
+            default         => 'Tunai',
+        };
     }
 
     // =============================================================
