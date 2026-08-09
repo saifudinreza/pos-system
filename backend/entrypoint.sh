@@ -18,7 +18,7 @@ DB_PASSWORD="${DB_PASSWORD}"
 
 CACHE_DRIVER=file
 SESSION_DRIVER=file
-QUEUE_CONNECTION=sync
+QUEUE_CONNECTION=database
 FILESYSTEM_DISK=public
 
 MIDTRANS_SERVER_KEY="${MIDTRANS_SERVER_KEY}"
@@ -76,6 +76,13 @@ echo "✅ Config & routes cached"
 # Jalankan migration
 php artisan migrate --force 2>&1 || echo "⚠️ Migration warning (non-fatal)"
 echo "✅ Laravel ready"
+
+# Jalankan queue worker di background — proyek ini memakai job queue untuk
+# kirim WhatsApp (webhook Midtrans) & panggilan AI (Groq/OpenRouter) supaya
+# tidak menahan worker PHP-FPM. QUEUE_CONNECTION=database memakai tabel `jobs`.
+export QUEUE_CONNECTION=database
+php artisan queue:work --tries=3 --timeout=300 > /var/log/queue-worker.log 2>&1 &
+echo "✅ Queue worker started"
 
 # Start PHP-FPM di background
 php-fpm -D

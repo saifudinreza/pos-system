@@ -172,8 +172,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // throttle:10,1 = max 10 request AI per MENIT per user (anti-burst/anti-script) -----
     Route::middleware('role:admin,kasir,developer')->group(function () {
         Route::get('/ai/usage-today',    [AiController::class, 'usageToday']);
+        Route::get('/ai/jobs/{id}',      [AiController::class, 'jobStatus']);
 
-        // usage-today sengaja TIDAK ikut throttle — sidebar memanggilnya tiap dibuka
+        // usage-today & jobs sengaja TIDAK ikut throttle — sidebar/polling memanggilnya
+        // tiap dibuka, sedangkan POST submit AI tetap di-throttle di bawah.
         Route::middleware('throttle:10,1')->group(function () {
             Route::post('/ai/query',         [AiController::class, 'query']);
             Route::post('/ai/predict-stock', [AiController::class, 'predictStock']);

@@ -10,7 +10,6 @@ use App\Models\Product;
 use App\Models\Shift;
 use App\Models\Transaction;
 use App\Services\InventoryService;
-use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -353,7 +352,7 @@ class OrderController extends Controller
         $order = $order->fresh()->load(['user', 'items.product', 'transaction']);
 
         if ($validated['status'] === 'paid') {
-            app(WhatsAppService::class)->sendReceipt($order);
+            \App\Jobs\SendWhatsAppReceipt::dispatch($order->id);
         }
 
         return response()->json([

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendWhatsAppReceipt;
 use App\Models\Order;
 use App\Models\Tenant;
 use App\Models\Transaction;
-use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -422,9 +422,10 @@ class TransactionController extends Controller
                 if ($status === 'settlement' && $transaction->order->status !== 'paid') {
                     $transaction->order->update(['status' => 'paid']);
                     Log::info('Order ' . $transaction->order->order_number . ' berhasil dibayar.');
-                    // Kirim struk digital ke WhatsApp customer (kalau ada nomor HP)
-                    $order = $transaction->order->load('items.product');
-                    app(WhatsAppService::class)->sendReceipt($order);
+                    // Kirim struk digital ke WhatsApp secara ASYNC (queue job)
+                    // supaya webhook Midtrans balas 200 cepat, tidak menunggu
+                    // waktu respons API Fonnte.
+                    \App\Jobs\SendWhatsAppReceipt::dispatch($transaction->order_id);
                 }
 
                 // Kalau gagal/expire, kembalikan stok dan cancel order

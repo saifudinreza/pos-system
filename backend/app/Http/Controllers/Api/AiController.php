@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ProcessAiJob;
 use App\Models\AiChatUsage;
+use App\Models\AiJob;
 use App\Models\AiQueryLog;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -206,34 +208,68 @@ class AiController extends Controller
 
         $systemPrompt = $this->groq->buildSalesPrompt($salesData);
 
-        try {
-            $result = $this->groq->ask($systemPrompt, $validated['query']);
-        } catch (\Exception $e) {
-            Log::error('AI query error', ['message' => $e->getMessage()]);
-            return response()->json(['message' => 'AI sedang tidak tersedia. Coba beberapa saat lagi.'], 503);
-        }
-
-        AiQueryLog::create([
-            'user_id'     => $request->user()->id,
-            'type'        => 'sales_analysis',
-            'query'       => $validated['query'],
-            'response'    => $result['text'],
-            'tokens_used' => $result['tokens_used'],
-            'provider'    => $result['provider'],
+        // ===== SUBMIT KE QUEUE (async) =====
+        // Prompt di-build DI SINI (masih konteks request + isolasi tenant),
+        // job worker hanya memanggil LLM lalu menulis hasil ke ai_jobs.
+        $aiJob = AiJob::create([
+            'user_id'   => $request->user()->id,
+            'tenant_id' => $tenantId,
+            'type'      => 'sales_analysis',
+            'query'     => $validated['query'],
+            'prompt'    => $systemPrompt,
+            'status'    => 'pending',
         ]);
+
+        ProcessAiJob::dispatch($aiJob->id);
 
         $usage = $this->usagePayload();
 
         return response()->json([
-            'message' => 'AI berhasil menganalisis data penjualan.',
-            'data'    => [
-                'query'       => $validated['query'],
-                'response'    => $result['text'],
-                'tokens_used' => $result['tokens_used'],
-                'provider'    => $result['provider'],
-                'model'       => $result['model'],
-            ],
-            'usage' => $usage,
+            'message' => 'Analisis AI diproses. Poll status via GET /ai/jobs/{id}.',
+            'job_id'  => $aiJob->id,
+            'status'  => 'pending',
+            'usage'   => $usage,
+        ], 202);
+    }
+
+    // =============================================================
+    // JOB STATUS — polling hasil AI yang diproses async
+    // GET /api/ai/jobs/{id}
+    // =============================================================
+    public function jobStatus(Request $request, int $id): JsonResponse
+    {
+        $job = AiJob::find($id);
+
+        if (! $job) {
+            return response()->json(['message' => 'Pekerjaan tidak ditemukan.'], 404);
+        }
+
+        // Hanya pemilik job (atau developer) yang boleh melihat statusnya
+        $user = $request->user();
+        if ($job->user_id !== $user->id && $user->role !== 'developer') {
+            return response()->json(['message' => 'Akses ditolak.'], 403);
+        }
+
+        $data = [
+            'job_id' => $job->id,
+            'status' => $job->status,
+        ];
+
+        if ($job->status === 'completed') {
+            $data['data'] = [
+                'response'    => $job->response,
+                'tokens_used' => $job->tokens_used,
+                'provider'    => $job->provider,
+                'model'       => $job->model,
+            ];
+            $data['usage'] = $this->usagePayload();
+        } elseif ($job->status === 'failed') {
+            $data['error'] = 'AI sedang tidak tersedia. Coba beberapa saat lagi.';
+        }
+
+        return response()->json([
+            'message' => 'Status pekerjaan AI.',
+            'data'    => $data,
         ], 200);
     }
 
@@ -282,35 +318,25 @@ class AiController extends Controller
 
         $systemPrompt = $this->groq->buildStockPrompt($stockData);
 
-        try {
-            $result = $this->groq->ask($systemPrompt, $validated['query']);
-        } catch (\Exception $e) {
-            Log::error('AI predict-stock error', ['message' => $e->getMessage()]);
-            return response()->json(['message' => 'AI sedang tidak tersedia. Coba beberapa saat lagi.'], 503);
-        }
-
-        AiQueryLog::create([
-            'user_id'     => $request->user()->id,
-            'type'        => 'stock_prediction',
-            'query'       => $validated['query'],
-            'response'    => $result['text'],
-            'tokens_used' => $result['tokens_used'],
-            'provider'    => $result['provider'],
+        $aiJob = AiJob::create([
+            'user_id'   => $request->user()->id,
+            'tenant_id' => $tenantId,
+            'type'      => 'stock_prediction',
+            'query'     => $validated['query'],
+            'prompt'    => $systemPrompt,
+            'status'    => 'pending',
         ]);
+
+        ProcessAiJob::dispatch($aiJob->id);
 
         $usage = $this->usagePayload();
 
         return response()->json([
-            'message' => 'AI berhasil memprediksi stok.',
-            'data'    => [
-                'query'       => $validated['query'],
-                'response'    => $result['text'],
-                'tokens_used' => $result['tokens_used'],
-                'provider'    => $result['provider'],
-                'model'       => $result['model'],
-            ],
-            'usage' => $usage,
-        ], 200);
+            'message' => 'Prediksi stok AI diproses. Poll status via GET /ai/jobs/{id}.',
+            'job_id'  => $aiJob->id,
+            'status'  => 'pending',
+            'usage'   => $usage,
+        ], 202);
     }
 
     // =============================================================
@@ -361,35 +387,25 @@ class AiController extends Controller
 
         $systemPrompt = $this->groq->buildRecommendationPrompt($transactionData);
 
-        try {
-            $result = $this->groq->ask($systemPrompt, $validated['query']);
-        } catch (\Exception $e) {
-            Log::error('AI recommend error', ['message' => $e->getMessage()]);
-            return response()->json(['message' => 'AI sedang tidak tersedia. Coba beberapa saat lagi.'], 503);
-        }
-
-        AiQueryLog::create([
-            'user_id'     => $request->user()->id,
-            'type'        => 'recommendation',
-            'query'       => $validated['query'],
-            'response'    => $result['text'],
-            'tokens_used' => $result['tokens_used'],
-            'provider'    => $result['provider'],
+        $aiJob = AiJob::create([
+            'user_id'   => $request->user()->id,
+            'tenant_id' => $tenantId,
+            'type'      => 'recommendation',
+            'query'     => $validated['query'],
+            'prompt'    => $systemPrompt,
+            'status'    => 'pending',
         ]);
+
+        ProcessAiJob::dispatch($aiJob->id);
 
         $usage = $this->usagePayload();
 
         return response()->json([
-            'message' => 'AI berhasil memberikan rekomendasi.',
-            'data'    => [
-                'query'       => $validated['query'],
-                'response'    => $result['text'],
-                'tokens_used' => $result['tokens_used'],
-                'provider'    => $result['provider'],
-                'model'       => $result['model'],
-            ],
-            'usage' => $usage,
-        ], 200);
+            'message' => 'Rekomendasi AI diproses. Poll status via GET /ai/jobs/{id}.',
+            'job_id'  => $aiJob->id,
+            'status'  => 'pending',
+            'usage'   => $usage,
+        ], 202);
     }
 
     // =============================================================

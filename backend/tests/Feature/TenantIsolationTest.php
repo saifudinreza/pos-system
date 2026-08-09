@@ -84,10 +84,17 @@ class TenantIsolationTest extends TestCase
 
         $response = $this->postJson('/api/ai/query', ['query' => 'berapa pendapatan bulan ini?']);
 
-        $response->assertStatus(200);
+        $response->assertStatus(202);
         $this->assertNotNull($capturedPrompt, 'AI prompt tidak pernah dikirim');
         $this->assertStringContainsString('50.000', $capturedPrompt, 'Data tenant A harus ada di prompt');
         $this->assertStringNotContainsString('999.000', $capturedPrompt, 'Data tenant B bocor ke prompt tenant A!');
+
+        // Job diproses sync dalam test → hasilnya sudah 'completed'
+        $jobId = $response->json('job_id');
+        $this->getJson("/api/ai/jobs/{$jobId}")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'completed')
+            ->assertJsonPath('data.data.response', 'analisis selesai');
     }
 
     // ── AI LOGS — admin tenant hanya lihat log user tenant sendiri ──

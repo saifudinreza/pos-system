@@ -10,7 +10,7 @@
 - Git: working tree bersih (semua sudah commit & push)
   - `835f8ef feat:Product Cost & Profit`
   - `9659aac feat:add admin customer list`
-- Backend: **44 test PHPUnit lulus** (sqlite `:memory:`)
+- Backend: **50 test PHPUnit lulus** (sqlite `:memory:`)
 - Frontend: `npm run build` sukses
 
 ---
@@ -75,6 +75,23 @@
 - Bonus fix: kalkulasi badge "Hemat" ikut dibenahi (per bulan / vs bulanan) —
   dulu bakal jadi angka negatif dengan harga baru.
 
+### 7. Job Queue (mulai dari roadmap skalabilitas)
+- `SendWhatsAppReceipt` job — kirim struk WA jadi **async** dari webhook
+  Midtrans (`TransactionController::webhook()`) & `OrderController::updateStatus()`.
+  Webhook balas 200 cepat tanpa menunggu respons API Fonnte.
+- `ProcessAiJob` + tabel `ai_jobs` — panggilan LLM (Groq/OpenRouter) dipindah
+  dari request chat ke queue worker. Endpoint AI (`/ai/query`, `/ai/predict-stock`,
+  `/ai/recommend`) kini **202 + `job_id`**, frontend mem-poll
+  `GET /api/ai/jobs/{id}` sampai `completed`/`failed`. **Prompt tetap dibangun
+  di controller** (masih konteks `auth()` → isolasi tenant aman); job hanya
+  memanggil LLM & menulis hasil — tidak ada query database tenant di worker.
+- Frontend `aiService.js` meng-poll job di balik layar → `aiStore`/`AISidebar`
+  **tidak berubah sama sekali** (tetap menunggu satu promise).
+- Queue worker: `entrypoint.sh` Railway sekarang set `QUEUE_CONNECTION=database`
+  + jalan `php artisan queue:work` di background.
+- Test: `QueueJobTest` (6 test) — job LLM sukses/gagal, polling 202→completed,
+  403 antarnaya, dispatch WhatsApp on paid, dan job mengimplement `ShouldQueue`.
+
 ---
 
 ## TODO — Belum dikerjakan (lanjutkan dari sini)
@@ -88,5 +105,8 @@
 
 ### Catatan skalabilitas (sudah terdokumentasi di CLAUDE.md, belum dikerjakan)
 2. Redis untuk CACHE_STORE / QUEUE_CONNECTION / SESSION_DRIVER (saat ini `database`).
-3. Job queue untuk kirim WhatsApp & panggilan AI (saat ini sinkron di webhook/request).
+3. ~~Job queue untuk kirim WhatsApp & panggilan AI (saat ini sinkron di webhook/request)~~ ✅
+   **SUDAH dikerjakan** — batch job queue selesai (lihat §7 di "Fitur yang SUDAH dikerjakan").
+   Tersisa: InsightService masih memanggil Groq sinkron saat generate (opsional, sudah ada
+   fallback templated), dan AI chat async perlu Redis kalau mau dua worker non-blocking.
 4. Rate limiting global di `bootstrap/app.php` (saat ini hanya throttle per-route).
