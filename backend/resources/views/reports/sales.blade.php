@@ -27,6 +27,9 @@
                 <th>Customer</th>
                 <th>Metode Bayar</th>
                 <th>Total</th>
+                <th>COGS</th>
+                <th>Laba</th>
+                <th>Margin</th>
                 <th>Tanggal</th>
             </tr>
         </thead>
@@ -38,6 +41,9 @@
                 <td>{{ $t->order->user->name }}</td>
                 <td>{{ $t->payment_method ?? '-' }}</td>
                 <td>Rp {{ number_format($t->amount, 0, ',', '.') }}</td>
+                <td>Rp {{ number_format($t->cogs, 0, ',', '.') }}</td>
+                <td>Rp {{ number_format($t->profit, 0, ',', '.') }}</td>
+                <td>{{ $t->margin }}%</td>
                 <td>{{ $t->paid_at->format('d M Y H:i') }}</td>
             </tr>
             @endforeach
@@ -45,7 +51,10 @@
     </table>
 
     <p class="total">
-        Total Revenue: Rp {{ number_format($total_revenue, 0, ',', '.') }}
+        Total Revenue: Rp {{ number_format($summary['total_revenue'], 0, ',', '.') }} &nbsp;|&nbsp;
+        Total COGS: Rp {{ number_format($summary['total_cogs'], 0, ',', '.') }} &nbsp;|&nbsp;
+        Laba Kotor: Rp {{ number_format($summary['gross_profit'], 0, ',', '.') }} &nbsp;|&nbsp;
+        Margin: {{ $summary['profit_margin'] }}%
     </p>
 
     <p class="footer">Digenerate pada: {{ $generated_at }}</p>

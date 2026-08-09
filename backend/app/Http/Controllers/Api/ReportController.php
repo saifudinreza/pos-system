@@ -292,35 +292,52 @@ class ReportController extends Controller
         $tenantId = $request->user()->tenant_id;
 
         // Ambil data untuk laporan — wajib filter tenant (Transaction tidak punya tenant_id)
-        $transactions = Transaction::with('order.user')
+        // order.items ikut di-load supaya COGS per transaksi bisa dihitung dari snapshot
+        // `order_items.cost` (produk lama tanpa cost dihitung 0).
+        $transactions = Transaction::with(['order.user', 'order.items'])
             ->where('status', 'settlement')
             ->whereBetween('paid_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
             ->latest('paid_at')
             ->get();
 
+        $transactions = $transactions->map(function ($t) {
+            $cogs       = (float) $t->order?->items?->sum(fn($i) => (float) $i->quantity * (float) $i->cost) ?? 0.0;
+            $t->cogs    = $cogs;
+            $t->profit  = (float) $t->amount - $cogs;
+            $t->margin  = (float) $t->amount > 0 ? round(($t->profit / (float) $t->amount) * 100, 1) : 0.0;
+            return $t;
+        });
+
         $totalRevenue = $transactions->sum('amount');
+        $totalCogs    = $transactions->sum('cogs');
+        $grossProfit  = $totalRevenue - $totalCogs;
+        $profitMargin = $totalRevenue > 0 ? round(($grossProfit / $totalRevenue) * 100, 1) : 0.0;
+
+        $summary = [
+            'total_revenue' => round($totalRevenue, 2),
+            'total_cogs'    => round($totalCogs, 2),
+            'gross_profit'  => round($grossProfit, 2),
+            'profit_margin' => $profitMargin,
+        ];
 
         if ($format === 'excel') {
             // ===== DOWNLOAD EXCEL =====
             return Excel::download(
-                new SalesReportExport($transactions, $dateFrom, $dateTo),
+                new SalesReportExport($transactions, $dateFrom, $dateTo, $summary),
                 'laporan-penjualan-' . $dateFrom . '-' . $dateTo . '.xlsx'
             );
-            // ↑ Pakai class Export terpisah — kita buat setelah ini
         }
 
         // ===== DOWNLOAD PDF =====
         $pdf = Pdf::loadView('reports.sales', [
-            'transactions' => $transactions,
-            'date_from'    => $dateFrom,
-            'date_to'      => $dateTo,
-            'total_revenue' => $totalRevenue,
-            'generated_at' => now()->format('d M Y H:i'),
+            'transactions'  => $transactions,
+            'date_from'     => $dateFrom,
+            'date_to'       => $dateTo,
+            'summary'       => $summary,
+            'generated_at'  => now()->format('d M Y H:i'),
         ])
             ->setPaper('a4', 'portrait');
-        // ↑ loadView() = render blade template jadi PDF
-        // Kita perlu buat blade template-nya juga
 
         return $pdf->download('laporan-penjualan-' . $dateFrom . '-' . $dateTo . '.pdf');
         // ↑ download() = langsung trigger download di browser

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exports\SalesReportExport;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -156,5 +157,98 @@ class ProfitReportTest extends TestCase
             ->assertStatus(200)
             ->assertJsonPath('data.summary.total_cogs', 0)
             ->assertJsonPath('data.summary.gross_profit', 0);
+    }
+
+    public function test_pdf_sales_view_includes_cogs_and_profit_summary(): void
+    {
+        $tenant  = $this->makeTenant('Toko PDF');
+        $admin   = $this->makeUser($tenant);
+        $product = $this->makeProduct($tenant, 10000, 7000);
+        $this->openShift($tenant, $admin);
+
+        Sanctum::actingAs($admin);
+
+        $orderRes = $this->postJson('/api/orders', [
+            'items' => [['product_id' => $product->id, 'quantity' => 3]],
+        ])->assertStatus(201);
+        $this->settleOrder(Order::find($orderRes->json('data.id')), 30000);
+
+        // Replikasi enrich dari ReportController::downloadSales()
+        $transactions = Transaction::with(['order.user', 'order.items'])
+            ->where('status', 'settlement')
+            ->get()
+            ->map(function ($t) {
+                $cogs      = (float) $t->order?->items?->sum(fn($i) => (float) $i->quantity * (float) $i->cost) ?? 0.0;
+                $t->cogs   = $cogs;
+                $t->profit = (float) $t->amount - $cogs;
+                $t->margin = (float) $t->amount > 0 ? round(($t->profit / (float) $t->amount) * 100, 1) : 0.0;
+                return $t;
+            });
+
+        $totalRevenue = $transactions->sum('amount');
+        $totalCogs    = $transactions->sum('cogs');
+        $grossProfit  = $totalRevenue - $totalCogs;
+        $profitMargin = $totalRevenue > 0 ? round(($grossProfit / $totalRevenue) * 100, 1) : 0.0;
+
+        $html = view('reports.sales', [
+            'transactions' => $transactions,
+            'date_from'    => now()->toDateString(),
+            'date_to'      => now()->toDateString(),
+            'summary'      => [
+                'total_revenue' => round($totalRevenue, 2),
+                'total_cogs'    => round($totalCogs, 2),
+                'gross_profit'  => round($grossProfit, 2),
+                'profit_margin' => $profitMargin,
+            ],
+            'generated_at' => now()->format('d M Y H:i'),
+        ])->render();
+
+        $this->assertStringContainsString('Total COGS', $html);
+        $this->assertStringContainsString('Laba Kotor', $html);
+        $this->assertStringContainsString('Margin: 30%', $html);
+        $this->assertStringContainsString('Rp 21.000', $html);
+        $this->assertStringContainsString('Rp 9.000', $html);
+    }
+
+    public function test_sales_excel_export_includes_cogs_and_profit_columns(): void
+    {
+        $tenant  = $this->makeTenant('Toko Excel');
+        $admin   = $this->makeUser($tenant);
+        $product = $this->makeProduct($tenant, 10000, 7000);
+        $this->openShift($tenant, $admin);
+
+        Sanctum::actingAs($admin);
+
+        $orderRes = $this->postJson('/api/orders', [
+            'items' => [['product_id' => $product->id, 'quantity' => 3]],
+        ])->assertStatus(201);
+        $this->settleOrder(Order::find($orderRes->json('data.id')), 30000);
+
+        $transactions = Transaction::with(['order.user', 'order.items'])
+            ->where('status', 'settlement')
+            ->get()
+            ->map(function ($t) {
+                $cogs      = (float) $t->order?->items?->sum(fn($i) => (float) $i->quantity * (float) $i->cost) ?? 0.0;
+                $t->cogs   = $cogs;
+                $t->profit = (float) $t->amount - $cogs;
+                $t->margin = (float) $t->amount > 0 ? round(($t->profit / (float) $t->amount) * 100, 1) : 0.0;
+                return $t;
+            });
+
+        $export = new SalesReportExport($transactions, now()->toDateString(), now()->toDateString(), [
+            'total_revenue' => 30000,
+            'total_cogs'    => 21000,
+            'gross_profit'  => 9000,
+            'profit_margin' => 30,
+        ]);
+
+        $this->assertContains('COGS (Rp)', $export->headings());
+        $this->assertContains('Laba (Rp)', $export->headings());
+
+        $rows = $export->collection();
+        $this->assertTrue($rows->contains(fn($row) => in_array('RINGKASAN', $row, true)));
+        $this->assertTrue($rows->contains(fn($row) => in_array('Total COGS', $row, true)));
+        $this->assertTrue($rows->contains(fn($row) => in_array(21000, $row, true)));
+        $this->assertTrue($rows->contains(fn($row) => in_array('30%', $row, true)));
     }
 }

@@ -40,7 +40,7 @@ const PLANS = [
   },
   {
     name:        "Pro",
-    price:       { monthly: 129000, yearly: 100000 },
+    price:       { monthly: 129000, yearly: 1290000 },
     description: "Untuk bisnis berkembang yang butuh pembayaran digital & laporan lengkap.",
     highlighted: true,
     features:    [
@@ -57,7 +57,7 @@ const PLANS = [
   },
   {
     name:        "Enterprise",
-    price:       { monthly: 499000, yearly: 399000 },
+    price:       { monthly: 499000, yearly: 4990000 },
     description: "Solusi lengkap untuk chain restoran, minimarket, atau franchise.",
     highlighted: false,
     features:    [
@@ -136,7 +136,7 @@ const PricingCard = ({ plan, billing }) => {
             <span className="text-sm font-semibold text-brand-black/60">/bulan</span>
             {billing === "yearly" && (
               <div className="mt-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 inline-block">
-                Hemat {formatRupiah(plan.price.monthly - price)}/bln
+                Hemat {formatRupiah(Math.round((plan.price.monthly * 12 - plan.price.yearly) / 12))}/bln
               </div>
             )}
           </>

@@ -37,8 +37,8 @@ function loadSnap() {
 
 // Harga harus sinkron dengan backend (SubscriptionController::PRICES)
 const PRICES = {
-  pro:        { monthly: 129000, yearly: 100000 },
-  enterprise: { monthly: 499000, yearly: 399000 },
+  pro:        { monthly: 129000, yearly: 1290000 },
+  enterprise: { monthly: 499000, yearly: 4990000 },
 };
 
 const PLAN_LABELS = { pro: "Pro", enterprise: "Enterprise" };
@@ -203,7 +203,7 @@ function UpgradeContent() {
               <p className="text-xs font-semibold text-brand-black/60">/{billing === "monthly" ? "bulan" : "tahun"}</p>
               {billing === "yearly" && (
                 <p className="text-xs font-bold text-green-700 mt-1">
-                  Hemat {formatCurrency((PRICES[plan].monthly * 12) - (currentPrice * 12))} vs bulanan
+                  Hemat {formatCurrency((PRICES[plan].monthly * 12) - PRICES[plan].yearly)} vs bulanan
                 </p>
               )}
             </div>

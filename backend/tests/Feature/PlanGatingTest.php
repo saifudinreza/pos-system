@@ -273,8 +273,8 @@ class PlanGatingTest extends TestCase
     public function test_subscription_prices_match_new_plans(): void
     {
         $this->assertSame([
-            'pro'        => ['monthly' => 129000, 'yearly' => 100000],
-            'enterprise' => ['monthly' => 499000, 'yearly' => 399000],
+            'pro'        => ['monthly' => 129000, 'yearly' => 1290000],
+            'enterprise' => ['monthly' => 499000, 'yearly' => 4990000],
         ], SubscriptionController::PRICES);
     }
 }

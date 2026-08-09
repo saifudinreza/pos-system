@@ -10,7 +10,7 @@
 - Git: working tree bersih (semua sudah commit & push)
   - `835f8ef feat:Product Cost & Profit`
   - `9659aac feat:add admin customer list`
-- Backend: **42 test PHPUnit lulus** (sqlite `:memory:`)
+- Backend: **44 test PHPUnit lulus** (sqlite `:memory:`)
 - Frontend: `npm run build` sukses
 
 ---
@@ -60,40 +60,33 @@
   `top_products` menyertakan `total_cogs` & `profit`.
 - Frontend: kolom "Modal" + badge margin % di halaman produk; kartu
   COGS / Laba Kotor / Margin di halaman laporan.
-- Test: `ProfitReportTest` (4 test).
+- **Export PDF & Excel kini memuat COGS/profit**: `ReportController::downloadSales()`
+  eager-load `order.items`, hitung `cogs`/`profit`/`margin` per transaksi, kirim
+  `summary` (total_revenue/cogs/gross_profit/margin) ke blade `reports.sales`
+  (kolom baru + baris ringkasan) dan `SalesReportExport` (kolom COGS/Laba/Margin
+  + blok RINGKASAN di bawah data). Test: `ProfitReportTest` kini 6 test.
+
+### 6. Harga yearly diperbaiki
+- `SubscriptionController::PRICES`: yearly Pro & Enterprise dulunya **lebih
+  murah dari bulanan** (`100000 < 129000`). Diverifikasi user → keputusan:
+  **yearly = monthly × 10 (2 bulan gratis)** → pro `1290000`, enterprise `4990000`.
+- Sinkron semua tempat: backend `PRICES` + `PlanGatingTest::test_subscription_prices_match_new_plans`
+  + landing `PricingSection` + `upgrade/page.jsx`.
+- Bonus fix: kalkulasi badge "Hemat" ikut dibenahi (per bulan / vs bulanan) —
+  dulu bakal jadi angka negatif dengan harga baru.
 
 ---
 
 ## TODO — Belum dikerjakan (lanjutkan dari sini)
 
-### Urgent / jelas
-1. **Export PDF/Excel laporan penjualan belum memuat COGS & profit.**
-   `ReportController::downloadSales()` hanya mengirim transaksi + revenue.
-   Tambahkan ringkasan COGS/laba kotor/margin ke blade `reports.sales` dan
-   `SalesReportExport` (Excel).
-
-2. **Cleanup duplikasi konfigurasi** di `backend/config/ai.php`:
-   key `pro_daily_limit` & `enterprise_daily_limit` ditulis **2 kali**
-   (baris 22-23 dan 34-35). Yang pertama dead config (di-overwrite oleh
-   yang kedua). Hapus blok duplikat, satu blok sudah cukup.
-
 ### Perlu validasi bisnis
-3. **Harga Pro yearly kemungkinan salah ketik** — `SubscriptionController::PRICES`:
-   `'pro' => ['monthly' => 129000, 'yearly' => 100000]` → 1 tahun hanya 100rb
-   (jauh di bawah 1 bulan). Enterprise juga aneh: `499000/bln vs 399000/thn`.
-   Kalau ini promo yang disengaja, abaikan. Kalau typo (harusnya 1.290.000 /
-   4.990.000), perbaiki **backend PRICES + frontend `subscriptionStore PLANS` +
-   landing `PricingSection` + `upgrade/page.jsx` + `profile/page.jsx` sekaligus**
-   (aturan: jangan ubah satu tempat tanpa sinkron tempat lain).
-
-### Belum sempat / perlu plan asli
-4. **Poin P0 lain dari plan awal** — sesi sebelumnya berjalan berdasarkan daftar
+1. **Poin P0 lain dari plan awal** — sesi sebelumnya berjalan berdasarkan daftar
    prioritas user yang tidak tersimpan. Kalau masih ada sisa P0/P1, tempel ulang
    daftarnya supaya bisa diteruskan. Fitur yang sudah dikerjakan sejauh ini adalah
    batch P0: inventory ledger, audit log, CRM customer, AI insight/forecast,
-   product cost & profit.
+   product cost & profit, export COGS/profit, & harga yearly.
 
 ### Catatan skalabilitas (sudah terdokumentasi di CLAUDE.md, belum dikerjakan)
-5. Redis untuk CACHE_STORE / QUEUE_CONNECTION / SESSION_DRIVER (saat ini `database`).
-6. Job queue untuk kirim WhatsApp & panggilan AI (saat ini sinkron di webhook/request).
-7. Rate limiting global di `bootstrap/app.php` (saat ini hanya throttle per-route).
+2. Redis untuk CACHE_STORE / QUEUE_CONNECTION / SESSION_DRIVER (saat ini `database`).
+3. Job queue untuk kirim WhatsApp & panggilan AI (saat ini sinkron di webhook/request).
+4. Rate limiting global di `bootstrap/app.php` (saat ini hanya throttle per-route).
