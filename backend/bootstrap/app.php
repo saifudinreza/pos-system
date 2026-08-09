@@ -25,6 +25,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
 
+        // Rate limiting GLOBAL di semua route /api/* — memakai named limiter 'api'
+        // yang didefinisikan di AppServiceProvider::configureRateLimiting().
+        // Throttle per-route (login 5,1 / AI 10,1 / insight 5,1) tetap berjalan di atasnya.
+        $middleware->throttleApi('api');
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

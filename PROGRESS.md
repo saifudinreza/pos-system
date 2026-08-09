@@ -10,7 +10,7 @@
 - Git: working tree bersih (semua sudah commit & push)
   - `835f8ef feat:Product Cost & Profit`
   - `9659aac feat:add admin customer list`
-- Backend: **50 test PHPUnit lulus** (sqlite `:memory:`)
+- Backend: **55 test PHPUnit lulus** (sqlite `:memory:`)
 - Frontend: `npm run build` sukses
 
 ---
@@ -92,6 +92,21 @@
 - Test: `QueueJobTest` (6 test) — job LLM sukses/gagal, polling 202→completed,
   403 antarnaya, dispatch WhatsApp on paid, dan job mengimplement `ShouldQueue`.
 
+### 8. Rate limiting global (semua route /api)
+- **bootstrap/app.php**: `$middleware->throttleApi('api')` → throttle global untuk
+  semua route API, di samping throttle per-route yang ada (login 5,1 — AI 10,1 —
+  insight 5,1).
+- **Limiter `api`** di `AppServiceProvider::configureRateLimiting()`:
+  - User login → **120 req/menit** per user.
+  - Route publik → **60 req/menit per IP**.
+  - **Exempt (Limit::none)**: `webhook/*` (Midtrans & retry), `media/*` (browser
+    load banyak gambar paralel), `ai/jobs/*` & `ai/usage-today` (frontend polling
+    2 detik — sengaja tanpa throttle di design).
+- Frontend sudah tangani 429 via interceptor `axios.js` (toast, tanpa logout).
+- Test: `RateLimitGlobalTest` (5 test) — limiter terdaftar, exemption webhook/
+  media/polling, 429 setelah >120 request per user, login tetap 5,1, media lolos
+  di burst.
+
 ---
 
 ## TODO — Belum dikerjakan (lanjutkan dari sini)
@@ -109,4 +124,5 @@
    **SUDAH dikerjakan** — batch job queue selesai (lihat §7 di "Fitur yang SUDAH dikerjakan").
    Tersisa: InsightService masih memanggil Groq sinkron saat generate (opsional, sudah ada
    fallback templated), dan AI chat async perlu Redis kalau mau dua worker non-blocking.
-4. Rate limiting global di `bootstrap/app.php` (saat ini hanya throttle per-route).
+4. ~~Rate limiting global di `bootstrap/app.php` (saat ini hanya throttle per-route).~~ ✅
+   **SUDAH dikerjakan** — §8 di "Fitur yang SUDAH dikerjakan".
