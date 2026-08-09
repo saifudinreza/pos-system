@@ -322,6 +322,75 @@ class TransactionController extends Controller
     }
 
     // =============================================================
+    // PAY CASH — tandai order sebagai lunas tunai (tanpa Midtrans)
+    // POST /api/transactions/cash
+    // Body: { "order_id": 5, "amount_tendered": 50000 }
+    // Role: admin & kasir
+    // =============================================================
+    public function payCash(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'order_id'        => ['required', 'exists:orders,id'],
+            'amount_tendered' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $order = Order::with(['items.product'])->find($validated['order_id']);
+
+        if (! $order) {
+            return response()->json(['message' => 'Order tidak ditemukan.'], 404);
+        }
+
+        if (! $order->isPending()) {
+            return response()->json([
+                'message' => 'Order ini sudah diproses atau dibatalkan.',
+                'status'  => $order->status,
+            ], 422);
+        }
+
+        // Cek apakah sudah ada transaksi pending untuk order ini — jika ada, selesaikan
+        $transaction = Transaction::where('order_id', $order->id)->first();
+
+        DB::transaction(function () use ($order, $transaction, $validated) {
+            $midtransOrderId = $order->order_number . '-' . time();
+
+            if ($transaction) {
+                // Update transaksi yang sudah ada
+                $transaction->update([
+                    'status'         => 'settlement',
+                    'payment_method' => 'cash',
+                    'paid_at'        => now(),
+                ]);
+            } else {
+                // Buat transaksi baru langsung settlement
+                Transaction::create([
+                    'order_id'          => $order->id,
+                    'midtrans_order_id' => $midtransOrderId,
+                    'status'            => 'settlement',
+                    'payment_method'    => 'cash',
+                    'amount'            => $order->total,
+                    'paid_at'           => now(),
+                ]);
+            }
+
+            // Update status order menjadi paid
+            $order->update(['status' => 'paid']);
+        });
+
+        $order->load('user');
+        $finalTransaction = Transaction::where('order_id', $order->id)->with('order.user')->first();
+
+        $kembalian = isset($validated['amount_tendered'])
+            ? max(0, (float) $validated['amount_tendered'] - (float) $order->total)
+            : 0;
+
+        return response()->json([
+            'message'   => 'Pembayaran tunai berhasil.',
+            'kembalian' => $kembalian,
+            'data'      => $this->formatTransaction($finalTransaction),
+        ], 200);
+    }
+
+    // =============================================================
     // WEBHOOK — dipanggil otomatis oleh server Midtrans
     // POST /api/webhook/midtrans
     // TIDAK perlu token — keamanan via signature key Midtrans

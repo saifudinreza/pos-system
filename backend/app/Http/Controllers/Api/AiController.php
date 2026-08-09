@@ -16,7 +16,7 @@ use App\Services\GroqService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+
 
 class AiController extends Controller
 {
@@ -30,7 +30,7 @@ class AiController extends Controller
      */
     private function monthlyLimit(): ?int
     {
-        $user = auth()->user();
+        $user = request()->user();
 
         if (! $user || $user->role === 'developer') {
             return null;
@@ -49,7 +49,7 @@ class AiController extends Controller
      */
     private function dailyLimit(): ?int
     {
-        return $this->dailyLimitFor(auth()->user());
+        return $this->dailyLimitFor(request()->user());
     }
 
     /** Versi per-user (dipakai halaman monitoring di stats()). */
@@ -457,7 +457,7 @@ class AiController extends Controller
 
         // Admin hanya melihat data user dalam tenant-nya sendiri;
         // developer (tenant_id null) melihat semua tenant.
-        $tenantId = auth()->user()->tenant_id;
+        $tenantId = request()->user()->tenant_id;
         $scopeFn  = function ($q) use ($tenantId) {
             $q->whereHas('user', function ($u) use ($tenantId) {
                 $u->where('role', '!=', 'developer');
@@ -567,7 +567,7 @@ class AiController extends Controller
     {
         $dailyLimit   = $this->dailyLimit();
         $monthlyLimit = $this->monthlyLimit();
-        $userId       = auth()->user()->id;
+        $userId       = request()->user()->id;
 
         // Semua cek & increment dibungkus DB::transaction + lockForUpdate:
         // request paralel mengantri di baris usage hari ini, jadi dua request
@@ -619,7 +619,7 @@ class AiController extends Controller
     /** Total prompt yang terpakai bulan ini (menjumlah semua baris usage harian). */
     private function currentUsage(): int
     {
-        return (int) (AiChatUsage::where('user_id', auth()->user()->id)
+        return (int) (AiChatUsage::where('user_id', request()->user()->id)
             ->whereDate('usage_date', '>=', now()->startOfMonth())
             ->sum('count') ?? 0);
     }
@@ -627,7 +627,7 @@ class AiController extends Controller
     /** Total prompt yang terpakai HARI INI (semua tipe endpoint AI). */
     private function todayUsage(): int
     {
-        return (int) (AiChatUsage::where('user_id', auth()->user()->id)
+        return (int) (AiChatUsage::where('user_id', request()->user()->id)
             ->whereDate('usage_date', today())
             ->sum('count') ?? 0);
     }

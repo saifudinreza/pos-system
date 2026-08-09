@@ -87,6 +87,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/orders/{id}/status',               [OrderController::class, 'updateStatus']);
         Route::get('/transactions',                       [TransactionController::class, 'index']);
         Route::patch('/transactions/{id}/cancel',         [TransactionController::class, 'cancelTransaction']);
+        Route::post('/transactions/cash',                 [TransactionController::class, 'payCash']);
+        // ↑ Pembayaran tunai langsung settlement (tanpa Midtrans) — untuk kasir POS
 
         // ----- SHIFT MANAGEMENT -----
         Route::get('/shifts',                             [ShiftController::class, 'index']);
