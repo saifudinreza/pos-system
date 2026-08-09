@@ -145,7 +145,10 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'phpredis'),
+        // Client Redis: pakai predis (pure-PHP) karena image Docker php:8.4-fpm
+        // di repo ini TIDAK meng-install ekstensi phpredis. predispredis sudah
+        // ada di composer.json → Redis jalan tanpa tambahan ekstensi.
+        'client' => env('REDIS_CLIENT', 'predis'),
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),

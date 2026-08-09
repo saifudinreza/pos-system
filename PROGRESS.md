@@ -10,7 +10,7 @@
 - Git: working tree bersih (semua sudah commit & push)
   - `835f8ef feat:Product Cost & Profit`
   - `9659aac feat:add admin customer list`
-- Backend: **55 test PHPUnit lulus** (sqlite `:memory:`)
+- Backend: **57 test PHPUnit lulus** (sqlite `:memory:`)
 - Frontend: `npm run build` sukses
 
 ---
@@ -107,6 +107,18 @@
   media/polling, 429 setelah >120 request per user, login tetap 5,1, media lolos
   di burst.
 
+### 9. Redis support (opsional, fallback aman)
+- **Client predis** (pure-PHP) sebagai default — Dockerfile `php:8.4-fpm` tidak
+  meng-install ekstensi phpredis; `predis/predis` sudah ada di composer.
+- `config/database.php`: `REDIS_CLIENT` default `phpredis` → `predis`.
+- `entrypoint.sh`: kalau `REDIS_URL` di-set (Railway plugin Redis) →
+  `CACHE_STORE`/`SESSION_DRIVER`/`QUEUE_CONNECTION` otomatis ke `redis`;
+  kalau kosong → fallback database/file (perilaku lama, tidak ada perubahan).
+- `.env.example`: blok Redis opsional ditambahkan.
+- Test: `RedisConfigTest` (2 test) — default client predis & fallback non-redis.
+- ⚠️ Belum dideploy pakai Redis sungguhan — tinggal add plugin Redis di Railway
+  (isi env `REDIS_URL`) lalu redeploy; sisanya otomatis dari entrypoint.
+
 ---
 
 ## TODO — Belum dikerjakan (lanjutkan dari sini)
@@ -119,7 +131,10 @@
    product cost & profit, export COGS/profit, & harga yearly.
 
 ### Catatan skalabilitas (sudah terdokumentasi di CLAUDE.md, belum dikerjakan)
-2. Redis untuk CACHE_STORE / QUEUE_CONNECTION / SESSION_DRIVER (saat ini `database`).
+2. ~~Redis untuk CACHE_STORE / QUEUE_CONNECTION / SESSION_DRIVER (saat ini `database`).~~ ✅
+   **SUDAH dikerjakan (kode + fallback)** — §9. Tinggal deploy: add Redis plugin
+   di Railway, isi env `REDIS_URL`, redeploy. Tanpa `REDIS_URL` tetap jalan
+   database/file.
 3. ~~Job queue untuk kirim WhatsApp & panggilan AI (saat ini sinkron di webhook/request)~~ ✅
    **SUDAH dikerjakan** — batch job queue selesai (lihat §7 di "Fitur yang SUDAH dikerjakan").
    Tersisa: InsightService masih memanggil Groq sinkron saat generate (opsional, sudah ada

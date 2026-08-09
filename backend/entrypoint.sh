@@ -16,9 +16,22 @@ DB_DATABASE="${DB_DATABASE}"
 DB_USERNAME="${DB_USERNAME}"
 DB_PASSWORD="${DB_PASSWORD}"
 
-CACHE_DRIVER=file
-SESSION_DRIVER=file
-QUEUE_CONNECTION=database
+CACHE_STORE="${CACHE_STORE:-database}"
+SESSION_DRIVER="${SESSION_DRIVER:-file}"
+QUEUE_CONNECTION="${QUEUE_CONNECTION:-database}"
+
+# ── Redis (opsional): kalau REDIS_URL di-set (Railway plugin Redis), pindahkan
+#    cache / queue / session ke Redis. Tanpa REDIS_URL → fallback aman ke
+#    database/file (perilaku lama). Client predis (pure-PHP, tanpa ekstensi redis).
+if [ -n "${REDIS_URL}" ]; then
+    CACHE_STORE="${CACHE_STORE_REDIS:-redis}"
+    SESSION_DRIVER="${SESSION_DRIVER_REDIS:-redis}"
+    QUEUE_CONNECTION="${QUEUE_CONNECTION_REDIS:-redis}"
+    REDIS_CLIENT="${REDIS_CLIENT:-predis}"
+    echo "�o. Redis REDIS_URL terdeteksi -> cache/session/queue ke Redis"
+else
+    echo "�o. REDIS_URL kosong -> fallback cache/session/file & queue database"
+fi
 FILESYSTEM_DISK=public
 
 MIDTRANS_SERVER_KEY="${MIDTRANS_SERVER_KEY}"
@@ -44,6 +57,12 @@ R2_SECRET_ACCESS_KEY="${R2_SECRET_ACCESS_KEY}"
 R2_BUCKET="${R2_BUCKET}"
 R2_ENDPOINT="${R2_ENDPOINT}"
 R2_PUBLIC_URL="${R2_PUBLIC_URL}"
+
+REDIS_URL="${REDIS_URL}"
+REDIS_HOST="${REDIS_HOST}"
+REDIS_PORT="${REDIS_PORT:-6379}"
+REDIS_PASSWORD="${REDIS_PASSWORD}"
+REDIS_CLIENT="${REDIS_CLIENT:-predis}"
 EOF
 
 echo "✅ .env created"
@@ -79,8 +98,8 @@ echo "✅ Laravel ready"
 
 # Jalankan queue worker di background — proyek ini memakai job queue untuk
 # kirim WhatsApp (webhook Midtrans) & panggilan AI (Groq/OpenRouter) supaya
-# tidak menahan worker PHP-FPM. QUEUE_CONNECTION=database memakai tabel `jobs`.
-export QUEUE_CONNECTION=database
+# tidak menahan worker PHP-FPM. Connection mengikuti QUEUE_CONNECTION dari .env
+# (database, atau redis kalau REDIS_URL tersedia).
 php artisan queue:work --tries=3 --timeout=300 > /var/log/queue-worker.log 2>&1 &
 echo "✅ Queue worker started"
 
