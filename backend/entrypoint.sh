@@ -1,6 +1,23 @@
 #!/bin/bash
 set -e
 
+# ── Redis (opsional): kalau REDIS_URL di-set (Railway plugin Redis), pindahkan
+#    cache / queue / session ke Redis. Tanpa REDIS_URL → fallback aman ke
+#    database/file (perilaku lama). Client predis (pure-PHP, tanpa ekstensi redis).
+#    Dihitung DI LUAR heredoc .env — logic shell tidak boleh masuk ke file .env.
+CACHE_STORE_FINAL="${CACHE_STORE:-database}"
+SESSION_DRIVER_FINAL="${SESSION_DRIVER:-file}"
+QUEUE_CONNECTION_FINAL="${QUEUE_CONNECTION:-database}"
+
+if [ -n "${REDIS_URL}" ]; then
+    CACHE_STORE_FINAL="${CACHE_STORE_REDIS:-redis}"
+    SESSION_DRIVER_FINAL="${SESSION_DRIVER_REDIS:-redis}"
+    QUEUE_CONNECTION_FINAL="${QUEUE_CONNECTION_REDIS:-redis}"
+    echo "✅ Redis REDIS_URL terdeteksi -> cache/session/queue ke Redis"
+else
+    echo "✅ REDIS_URL kosong -> fallback cache/session/file & queue database"
+fi
+
 # Buat .env dari environment variables Railway
 cat > /var/www/html/.env << EOF
 APP_NAME="${APP_NAME:-KasirAI}"
@@ -16,22 +33,9 @@ DB_DATABASE="${DB_DATABASE}"
 DB_USERNAME="${DB_USERNAME}"
 DB_PASSWORD="${DB_PASSWORD}"
 
-CACHE_STORE="${CACHE_STORE:-database}"
-SESSION_DRIVER="${SESSION_DRIVER:-file}"
-QUEUE_CONNECTION="${QUEUE_CONNECTION:-database}"
-
-# ── Redis (opsional): kalau REDIS_URL di-set (Railway plugin Redis), pindahkan
-#    cache / queue / session ke Redis. Tanpa REDIS_URL → fallback aman ke
-#    database/file (perilaku lama). Client predis (pure-PHP, tanpa ekstensi redis).
-if [ -n "${REDIS_URL}" ]; then
-    CACHE_STORE="${CACHE_STORE_REDIS:-redis}"
-    SESSION_DRIVER="${SESSION_DRIVER_REDIS:-redis}"
-    QUEUE_CONNECTION="${QUEUE_CONNECTION_REDIS:-redis}"
-    REDIS_CLIENT="${REDIS_CLIENT:-predis}"
-    echo "�o. Redis REDIS_URL terdeteksi -> cache/session/queue ke Redis"
-else
-    echo "�o. REDIS_URL kosong -> fallback cache/session/file & queue database"
-fi
+CACHE_STORE="${CACHE_STORE_FINAL}"
+SESSION_DRIVER="${SESSION_DRIVER_FINAL}"
+QUEUE_CONNECTION="${QUEUE_CONNECTION_FINAL}"
 FILESYSTEM_DISK=public
 
 MIDTRANS_SERVER_KEY="${MIDTRANS_SERVER_KEY}"
