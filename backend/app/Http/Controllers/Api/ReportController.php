@@ -41,9 +41,16 @@ class ReportController extends Controller
     public function sales(Request $request): JsonResponse
     {
         $period    = $request->get('period', 'daily');
-        $dateFrom  = $request->get('date_from', now()->startOfMonth()->toDateString());
-        $dateTo    = $request->get('date_to', now()->toDateString());
         $tenantId  = $request->user()->tenant_id;
+
+        if ($period === 'monthly') {
+            $year = $request->get('year', now()->year);
+            $dateFrom = "$year-01-01";
+            $dateTo   = "$year-12-31";
+        } else {
+            $dateFrom  = $request->get('date_from', now()->startOfMonth()->toDateString());
+            $dateTo    = $request->get('date_to', now()->toDateString());
+        }
 
         // ===== SUMMARY CARD =====
         $summary = Transaction::where('status', 'settlement')

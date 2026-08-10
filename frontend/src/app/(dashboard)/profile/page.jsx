@@ -274,11 +274,11 @@ export default function ProfilePage() {
                     role="switch"
                     aria-checked={form.midtrans_is_production}
                     onClick={() => setForm((p) => ({ ...p, midtrans_is_production: !p.midtrans_is_production }))}
-                    className={`shrink-0 w-12 h-7 border-2 border-brand-black transition-colors relative ${form.midtrans_is_production ? "bg-brand-yellow" : "bg-white"}`}
+                    className={`shrink-0 w-14 h-8 border-2 border-brand-black transition-colors relative outline-none flex items-center ${form.midtrans_is_production ? "bg-brand-yellow" : "bg-brand-gray"}`}
                     style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
                   >
                     <span
-                      className={`absolute top-0.5 w-5 h-5 bg-brand-black transition-transform ${form.midtrans_is_production ? "translate-x-[22px]" : "translate-x-0.5"}`}
+                      className={`block w-5 h-5 bg-white border-2 border-brand-black transition-transform duration-200 ease-in-out ${form.midtrans_is_production ? "translate-x-7" : "translate-x-1.5"}`}
                     />
                   </button>
                 </div>

@@ -26,6 +26,16 @@ class ForecastService
             ->groupBy('d')
             ->pluck('revenue', 'd');
 
+        $firstOrder = Order::where('tenant_id', $tenantId)->where('status', 'paid')->min('created_at');
+        $daysActive = $firstOrder ? max(1, (int) Carbon::parse($firstOrder)->startOfDay()->diffInDays(now()->startOfDay()) + 1) : 1;
+        $daysActive = min(35, $daysActive);
+
+        $weekdayCount = array_fill(0, 7, 0);
+        for ($i = 0; $i < $daysActive; $i++) {
+            $d = now()->subDays($i)->dayOfWeek;
+            $weekdayCount[$d]++;
+        }
+
         // Kumpulkan revenue per hari-dalam-seminggu (Carbon: 0=Minggu .. 6=Sabtu)
         $perWeekday = array_fill(0, 7, []);
         foreach ($rows as $date => $revenue) {
@@ -35,10 +45,12 @@ class ForecastService
 
         $weekdayAvg = [];
         foreach ($perWeekday as $wd => $revenues) {
-            $weekdayAvg[$wd] = count($revenues) ? array_sum($revenues) / count($revenues) : 0;
+            $c = $weekdayCount[$wd];
+            $weekdayAvg[$wd] = $c > 0 ? array_sum($revenues) / $c : 0;
         }
 
-        $overallAvg = count($rows) ? array_sum($rows->values()->all()) / count($rows) : 0;
+        $totalRevenue = array_sum($rows->values()->all());
+        $overallAvg = $totalRevenue / $daysActive;
 
         $forecast = [];
         for ($i = 1; $i <= $days; $i++) {

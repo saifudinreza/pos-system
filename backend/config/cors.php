@@ -11,19 +11,9 @@ return [
 
     // Domain frontend yang boleh akses API ini
     // Tambahkan domain Vercel kamu di sini
-    'allowed_origins' => [
-        'http://localhost:3000',
-        'https://kasirai.vercel.app',
-        'https://pos-system-seven-rose.vercel.app',
-        'https://sikasirai.com',
-        'https://www.sikasirai.com',
-        env('FRONTEND_URL', 'http://localhost:3000'),
-    ],
+    'allowed_origins' => ['*'],
 
-    'allowed_origins_patterns' => [
-        // Izinkan semua preview deployment Vercel
-        '#^https://.*\.vercel\.app$#',
-    ],
+    'allowed_origins_patterns' => [],
 
     // Header yang boleh dikirim client
     'allowed_headers' => ['*'],

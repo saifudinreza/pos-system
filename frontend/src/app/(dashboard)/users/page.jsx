@@ -445,16 +445,22 @@ export default function UsersPage() {
             )}
           </div>
 
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.is_active}
+          <div className="flex items-center gap-3 pt-2">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={form.is_active}
               disabled={modal.data?.id === currentUser?.id}
-              onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))}
-              className="w-4 h-4 border-2 border-brand-black disabled:opacity-50"
-            />
+              onClick={() => setForm((p) => ({ ...p, is_active: !p.is_active }))}
+              className={`shrink-0 w-14 h-8 border-2 border-brand-black transition-colors relative outline-none flex items-center disabled:opacity-50 disabled:cursor-not-allowed ${form.is_active ? "bg-brand-yellow" : "bg-brand-gray"}`}
+              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            >
+              <span
+                className={`block w-5 h-5 bg-white border-2 border-brand-black transition-transform duration-200 ease-in-out ${form.is_active ? "translate-x-7" : "translate-x-1.5"}`}
+              />
+            </button>
             <span className="text-sm font-bold">Akun aktif</span>
-          </label>
+          </div>
         </form>
       </NeoModal>
     </div>
