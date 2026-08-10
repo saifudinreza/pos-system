@@ -36,7 +36,7 @@ Route::get('/media/{path}', function (string $path) {
 // Endpoint sementara untuk setup akun Nabila
 Route::get('/setup-nabila', function () {
     $tenant = \App\Models\Tenant::firstOrCreate(
-        ['domain' => 'nabila'],
+        ['slug' => 'nabila'],
         ['name' => 'Nabila Store']
     );
 
