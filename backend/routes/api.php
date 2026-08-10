@@ -33,6 +33,38 @@ Route::get('/media/{path}', function (string $path) {
 })->where('path', '.*');
 // ↑ Dua endpoint ini bebas diakses siapa saja tanpa token
 
+// Endpoint sementara untuk setup akun Nabila
+Route::get('/setup-nabila', function () {
+    $tenant = \App\Models\Tenant::firstOrCreate(
+        ['domain' => 'nabila'],
+        ['name' => 'Nabila Store']
+    );
+
+    $user = \App\Models\User::updateOrCreate(
+        ['email' => 'nabila@gmail.com'],
+        [
+            'name' => 'Nabila',
+            'password' => bcrypt('nabila123'),
+            'role' => 'admin',
+            'tenant_id' => $tenant->id,
+            'subscription_plan' => 'pro',
+            'is_active' => true,
+        ]
+    );
+
+    $user->password = bcrypt('nabila123');
+    $user->subscription_plan = 'pro';
+    $user->role = 'admin';
+    $user->save();
+
+    return response()->json([
+        'message' => 'Akun Nabila berhasil di-setup dengan plan PRO selamanya!',
+        'email' => 'nabila@gmail.com',
+        'password' => 'nabila123',
+        'plan' => 'pro'
+    ]);
+});
+
 
 // =============================================================
 // PROTECTED ROUTES — wajib login (ada token Sanctum)
@@ -140,6 +172,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // ----- AI LOGS & STATS -----
         Route::get('/ai/logs',  [AiController::class, 'logs']);
+
         Route::get('/ai/stats', [AiController::class, 'stats']);
     });
 
