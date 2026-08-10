@@ -206,6 +206,7 @@ class TransactionController extends Controller
             ], 200);
         }
 
+        // test
         // ===== BUAT TRANSAKSI KE MIDTRANS =====
         $midtransOrderId = $order->order_number . '-' . time();
         // ↑ Tambah timestamp supaya unik kalau order pernah retry
