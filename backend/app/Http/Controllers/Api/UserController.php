@@ -114,13 +114,30 @@ class UserController extends Controller
             'role'      => ['sometimes', Rule::in(['admin', 'kasir', 'user', 'developer'])],
             'phone'     => ['nullable', 'string', 'max:15'],
             'is_active' => ['sometimes', 'boolean'],
+            // Hanya developer yang bisa memindahkan user antar tenant —
+            // dipakai untuk memperbaiki akun yang tersangkut di tenant salah.
+            'tenant_id' => ['sometimes', 'nullable', 'exists:tenants,id'],
         ]);
+
+        // Guard: tenant_id tidak boleh diubah oleh non-developer
+        if (array_key_exists('tenant_id', $validated) && Auth::user()->role !== 'developer') {
+            return response()->json([
+                'message' => 'Hanya developer yang bisa memindahkan user antar tenant.',
+            ], 403);
+        }
 
         if (isset($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
         }
 
+        $oldTenantId = $user->tenant_id;
         $user->update($validated);
+
+        if (array_key_exists('tenant_id', $validated) && $oldTenantId !== $validated['tenant_id']) {
+            \App\Services\AuditLogService::log('tenant_moved', 'user', $user->id, [
+                'tenant_id' => $oldTenantId,
+            ], ['tenant_id' => $validated['tenant_id']]);
+        }
 
         return response()->json([
             'message' => 'Data user berhasil diupdate.',
