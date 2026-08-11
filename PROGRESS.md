@@ -6,16 +6,30 @@
 
 ## Status Terakhir
 
-- Tanggal: 9 Agustus 2026
+- Tanggal: 11 Agustus 2026
 - Git: working tree bersih (semua sudah commit & push)
-  - `835f8ef feat:Product Cost & Profit`
-  - `9659aac feat:add admin customer list`
-- Backend: **57 test PHPUnit lulus** (sqlite `:memory:`)
-- Frontend: `npm run build` sukses
+  - `0c5392b fix: dukungan pindah tenant user (developer only) & hapus endpoint setup-nabila`
+- Backend: **59 test PHPUnit lulus** (sqlite `:memory:`)
+  - Dihapus `ReproProd500Test` (test debug sisa commit `c12a843` — butuh DB production, selalu merah di CI)
+  - Ditambah `UserTenantMoveTest` (3 test: pindah tenant oleh developer OK, non-developer 403, tenant invalid 422)
+- Frontend: `npm run build` sukses (terakhir diverifikasi 9 Agustus)
 
 ---
 
 ## Fitur yang SUDAH dikerjakan
+
+### 10. Pindah tenant user (fix akun nabila)
+- **Insiden**: produk & kategori akun `nabila@gmail.com` "hilang" di production.
+  Penyebab: endpoint sementara `/setup-nabila` (commit `4c88982`/`ce14000`) memakai
+  `firstOrCreate(['slug'=>'nabila'])` + `updateOrCreate` yang memaksa `tenant_id` user
+  pindah ke tenant baru "Nabila Store" yang kosong (tenant 20), padahal data 20 produk
+  & 6 kategori ada di tenant 2 "maung store". Data tidak pernah hilang — user salah tenant.
+- **Fix kode**: `UserController::update()` kini menerima `tenant_id` (validasi
+  `exists:tenants,id`, hanya developer yang boleh — selain developer → 403), plus audit
+  log `tenant_moved`. Endpoint `/setup-nabila` **dihapus** dari `routes/api.php`.
+- **Eksekusi production** (via API developer): user nabila (id 2) dipindah ke tenant 2,
+  tenant 20 "Nabila Store" dihapus. Terverifikasi: 20 produk + 6 kategori tampil, plan pro.
+- Test: `UserTenantMoveTest` (3 test).
 
 ### 1. Inventory Movement Ledger
 - Tabel `inventory_movements` + `InventoryService::record()`.
