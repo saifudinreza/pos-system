@@ -21,6 +21,8 @@ use App\Http\Controllers\Api\CustomerController;
 // throttling: 5 percobaan per menit per IP — anti brute-force password
 Route::post('/register',      [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/login',         [AuthController::class, 'login'])->middleware('throttle:5,1');
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1');
+Route::post('/reset-password',  [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 Route::get('/check-tenant',   [AuthController::class, 'checkTenant']);
 
 // Media proxy — serve gambar dari R2/storage tanpa butuh auth

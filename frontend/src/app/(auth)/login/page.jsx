@@ -102,6 +102,13 @@ export default function LoginPage() {
               />
             </div>
 
+            {/* Lupa password — link ke halaman minta link reset */}
+            <div className="flex justify-end -mt-2">
+              <Link href="/forgot-password" className="text-xs font-bold text-brand-black/60 hover:text-brand-black underline underline-offset-2 transition-colors">
+                Lupa password?
+              </Link>
+            </div>
+
             {/* Status server */}
             {!serverWarm && (
               <p className="text-[11px] text-brand-black/40 font-mono flex items-center gap-1.5">

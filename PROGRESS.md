@@ -6,17 +6,56 @@
 
 ## Status Terakhir
 
-- Tanggal: 11 Agustus 2026
-- Git: working tree bersih (semua sudah commit & push)
-  - `0c5392b fix: dukungan pindah tenant user (developer only) & hapus endpoint setup-nabila`
-- Backend: **59 test PHPUnit lulus** (sqlite `:memory:`)
-  - Dihapus `ReproProd500Test` (test debug sisa commit `c12a843` — butuh DB production, selalu merah di CI)
-  - Ditambah `UserTenantMoveTest` (3 test: pindah tenant oleh developer OK, non-developer 403, tenant invalid 422)
-- Frontend: `npm run build` sukses (terakhir diverifikasi 9 Agustus)
+- Tanggal: 13 Agustus 2026
+- Git: **belum commit** (fitur forgot password — cek `git status`)
+- Backend: **67 test PHPUnit lulus** (sqlite `:memory:`)
+  - Ditambah `PasswordResetTest` (7 test: kirim email reset ke user terdaftar,
+    email tak terdaftar tetap 200 tanpa kirim, 422 format salah, reset valid
+    mengganti password, token palsu 422, cabut semua sesi lama, token sekali pakai)
+- Frontend: `npm run build` sukses → `/forgot-password` & `/reset-password` terdaftar
 
 ---
 
 ## Fitur yang SUDAH dikerjakan
+
+### 11. Lupa Password (reset via email)
+- **Alur**: login page → "Lupa password?" → `/forgot-password` → isi email →
+  `POST /api/forgot-password` → email berisi link
+  `{FRONTEND_URL}/auth/reset-password?token=...&email=...` (berlaku 60 menit,
+  sekali pakai) → `POST /api/reset-password` → password diganti & semua token
+  Sanctum dicabut (harus login ulang).
+- **Backend**:
+  - `AuthController::forgotPassword()` — pakai `Password::broker()->createToken()`
+    (tabel `password_reset_tokens` sudah ada dari migration bawaan Laravel!),
+    balasan pesan SAMA untuk email terdaftar/tidak (anti user-enumeration).
+  - `AuthController::resetPassword()` — `Password::broker()->reset()` (cek hash
+    token + kadaluarsa 60 menit + hapus token setelah dipakai), `Password::min(8)`,
+    cabut semua token Sanctum user.
+  - ⚠️ **Gotcha nama bentrok**: `Illuminate\Support\Facades\Password` vs
+    `Illuminate\Validation\Rules\Password` sama-sama dipakai — facade di-alias
+    `PasswordBroker` (kalau lupa, PHP fatal error).
+  - `app/Mail/ResetPasswordMail.php` + blade `resources/views/emails/reset-password.blade.php`
+    (desain neobrutal inline, bahasa Indonesia).
+  - Routes `POST /api/forgot-password` & `POST /api/reset-password` — keduanya
+    `throttle:5,1` (anti brute-force, sama seperti login/register).
+  - `config/services.php` → `frontend_url` dari env `FRONTEND_URL`
+    (`.env.example` sudah ada default `https://your-frontend.vercel.app`).
+  - `.env.example`: blok Mail diganti SMTP Gmail (`MAIL_MAILER=smtp`,
+    `MAIL_SCHEME=tls` — Laravel 11 pakai `MAIL_SCHEME`, BUKAN `MAIL_ENCRYPTION`,
+    `smtp.gmail.com:587`, App Password 16 karakter).
+- **Frontend**:
+  - `/forgot-password` (state idle → sending → sent; ajakan cek spam) &
+    `/reset-password` (baca `?token` & `?email`, validasi konfirmasi + min 8,
+    state sukses → link ke login; tampilan "link tidak valid" kalau token
+    kosong).
+  - Login page: link "Lupa password?" di bawah input password.
+  - `authService.js`: `forgotPassword()` & `resetPassword()`.
+  - `middleware.js` PUBLIC_ROUTES: + `"/forgot-password"`, `"/reset-password"`.
+- Test: `PasswordResetTest` (7 test).
+- ⚠️ **Belum aktif di production**: butuh isi `MAIL_*` + `FRONTEND_URL` di .env
+  Railway (backend) — lihat langkah detail di bawah.
+
+---
 
 ### 10. Pindah tenant user (fix akun nabila)
 - **Insiden**: produk & kategori akun `nabila@gmail.com` "hilang" di production.

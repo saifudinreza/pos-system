@@ -82,6 +82,21 @@ const authService = {
     return { token, user, is_new_store: isNewStore, message: data.message };
   },
 
+  // --- FORGOT PASSWORD (minta link reset via email) ---
+  // POST /api/forgot-password
+  // Server selalu balas pesan yang sama, terdaftar atau tidak (anti user-enumeration)
+  forgotPassword: async (email) => {
+    const { data } = await api.post("/forgot-password", { email });
+    return data;
+  },
+
+  // --- RESET PASSWORD (ganti password pakai token dari email) ---
+  // POST /api/reset-password
+  resetPassword: async ({ email, token, password, password_confirmation }) => {
+    const { data } = await api.post("/reset-password", { email, token, password, password_confirmation });
+    return data;
+  },
+
   // --- LOGOUT ---
   // Batalkan token di server (Sanctum hapus token dari DB),
   // lalu bersihkan dari localStorage dan cookie

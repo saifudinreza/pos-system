@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPasswordMail;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Password as PasswordBroker;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
@@ -131,6 +134,81 @@ class AuthController extends Controller
                 'token' => $token,
             ],
         ], 200);
+    }
+
+    // =============================================================
+    // FORGOT PASSWORD — minta link reset lewat email
+    // POST /api/forgot-password
+    // Body: { email }
+    // =============================================================
+    public function forgotPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255'],
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        // Selalu balas pesan yang sama (terdaftar atau tidak) — anti user-enumeration:
+        // orang jahat tidak boleh tahu apakah sebuah email terdaftar di sistem.
+        $message = 'Kalau email kamu terdaftar, link reset password sudah dikirim. Cek kotak masuk (atau folder spam)!';
+
+        if ($user) {
+            // Buat token sekali pakai (otomatis disimpan di tabel password_reset_tokens)
+            $token = PasswordBroker::broker()->createToken($user);
+
+            $frontendUrl = rtrim((string) config('services.frontend_url'), '/');
+            $resetUrl    = $frontendUrl . '/auth/reset-password'
+                . '?token=' . $token
+                . '&email=' . urlencode($user->email);
+
+            Mail::to($user)->send(new ResetPasswordMail($user, $resetUrl));
+        }
+
+        return response()->json(['message' => $message], 200);
+    }
+
+    // =============================================================
+    // RESET PASSWORD — ganti password pakai token dari email
+    // POST /api/reset-password
+    // Body: { email, token, password, password_confirmation }
+    // =============================================================
+    public function resetPassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email'    => ['required', 'string', 'email', 'max:255'],
+            'token'    => ['required', 'string'],
+            'password' => ['required', 'string', 'confirmed', Password::min(8)],
+        ]);
+
+        // Password::broker()->reset():
+        // - cek token valid (ter-hash cocok) & belum kedaluwarsa (60 menit)
+        // - panggil callback untuk ganti password
+        // - otomatis HAPUS token → sekali pakai
+        $status = PasswordBroker::broker()->reset(
+            [
+                'email'                 => $request->email,
+                'token'                 => $request->token,
+                'password'              => $request->password,
+                'password_confirmation' => $request->password_confirmation,
+            ],
+            function (User $user, string $password) {
+                $user->forceFill(['password' => Hash::make($password)])->save();
+                // Cabut semua sesi login lama — user harus login ulang dengan password baru
+                $user->tokens()->delete();
+            }
+        );
+
+        if ($status === PasswordBroker::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Password berhasil diganti. Silakan login dengan password baru.',
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Link reset sudah tidak valid atau sudah kedaluwarsa. Minta link baru di halaman login, ya!',
+            'status'  => $status,
+        ], 422);
     }
 
     // =============================================================

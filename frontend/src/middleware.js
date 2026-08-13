@@ -25,8 +25,9 @@
 import { NextResponse } from "next/server";
 
 // Halaman yang bisa diakses TANPA login
-// "/" = landing page, "/login" = form login, "/register" = form daftar
-const PUBLIC_ROUTES = ["/", "/login", "/register"];
+// "/" = landing page, "/login" = form login, "/register" = form daftar,
+// "/forgot-password" = minta link reset, "/reset-password" = ganti password dari link email
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
