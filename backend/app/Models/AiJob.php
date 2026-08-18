@@ -35,6 +35,9 @@ class AiJob extends Model
         'processed_at',
     ];
 
+    /**
+     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     */
     protected function casts(): array
     {
         return [
@@ -43,6 +46,9 @@ class AiJob extends Model
         ];
     }
 
+    /**
+     * Relasi: job ini di-submit oleh satu user.
+     */
     public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);

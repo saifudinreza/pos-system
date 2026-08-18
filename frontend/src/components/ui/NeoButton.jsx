@@ -4,6 +4,7 @@
 
 import { memo } from "react";
 
+// Varian visual tombol — key dipakai sebagai prop `variant` (fallback: primary)
 const VARIANTS = {
   primary:   "bg-brand-yellow text-brand-black border-brand-black hover:bg-yellow-300",
   secondary: "bg-white text-brand-black border-brand-black hover:bg-gray-50",
@@ -12,12 +13,26 @@ const VARIANTS = {
   ghost:     "bg-transparent text-brand-black border-brand-black/30 hover:border-brand-black",
 };
 
+// Ukuran tombol — key dipakai sebagai prop `size` (fallback: md)
 const SIZES = {
   sm: "px-3 py-1.5 text-xs",
   md: "px-4 py-2 text-sm",
   lg: "px-6 py-3 text-base",
 };
 
+/**
+ * NeoButton — tombol utama neobrutalist (border tebal + shadow offset "ditekan").
+ *
+ * Props:
+ *   children : isi tombol (teks/ikon)
+ *   variant  : primary|secondary|danger|dark|ghost (default: primary)
+ *   size     : sm|md|lg (default: md)
+ *   className: class Tailwind tambahan
+ *   disabled : true → transparan 50%, cursor-not-allowed, tanpa shadow
+ *   type     : atribut `type` (default: "button" — aman di dalam form)
+ *   onClick  : handler klik
+ *   ...props : diteruskan ke <button> (mis. aria-label, title)
+ */
 const NeoButton = memo(function NeoButton({
   children, variant = "primary", size = "md",
   className = "", disabled = false, type = "button",

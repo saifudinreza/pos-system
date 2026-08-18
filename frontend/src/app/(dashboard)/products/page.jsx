@@ -1,5 +1,21 @@
 "use client";
 
+// ============================================================
+// Products Page — CRUD produk + filter & pagination
+//
+// Data yang diambil:
+//   - useProducts hook → GET /api/products (search debounce 500ms,
+//     filter status/kategori/stok rendah, pagination via meta)
+//   - categoryService.getAll({ is_active: true }) → dropdown kategori
+//
+// Fitur: tambah/edit produk (modal), hapus, toggle aktif/nonaktif,
+// generate SKU otomatis dari nama, upload foto (preview lokal),
+// filter stok rendah (dipakai banner "low stock" dari dashboard).
+//
+// Plan gating: kalau paket Free, backend membatasi jumlah produk
+// yang dibaca (meta.is_limited) → banner upgrade ditampilkan.
+// ============================================================
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useProducts }    from "@/hooks/useProducts";
@@ -13,18 +29,27 @@ import NeoModal   from "@/components/ui/NeoModal";
 import NeoInput   from "@/components/ui/NeoInput";
 import { formatCurrency, getErrorMessage } from "@/lib/utils";
 
+// Form kosong sebagai nilai awal modal tambah produk
 const EMPTY_FORM = {
   name: "", sku: "", description: "",
   price: "", cost: "", stock: "", stock_alert: "5",
   category_id: "", is_active: true, image: null,
 };
 
+/**
+ * generateSku — Buat SKU otomatis dari nama produk:
+ * 3 huruf pertama tiap kata (uppercase) + angka acak 3 digit.
+ * Contoh: "Es Teh Manis" → "EST-MAN-123". Kalau nama kosong → "SKU-123".
+ */
 function generateSku(name) {
   const suffix = Math.floor(100 + Math.random() * 900);
   const parts = name.trim().split(/\s+/).filter(Boolean).map((w) => w.slice(0, 3).toUpperCase());
   return parts.length ? parts.join("-") + "-" + suffix : "SKU-" + suffix;
 }
 
+/**
+ * StockBadge — Badge status stok produk: Habis (0) / Menipis (≤ alert) / Normal.
+ */
 function StockBadge({ stock, stockAlert }) {
   if (stock === 0)                          return <NeoBadge color="red">Habis</NeoBadge>;
   if (stock > 0 && stock <= stockAlert)     return <NeoBadge color="orange">Menipis</NeoBadge>;
@@ -32,6 +57,7 @@ function StockBadge({ stock, stockAlert }) {
 }
 
 export default function ProductsPage() {
+  // ── State: pencarian, list produk (via hook), kategori & modal ──
   const [search, setSearch]         = useState("");
   const debouncedSearch             = useDebounce(search, 500);
 
@@ -39,19 +65,24 @@ export default function ProductsPage() {
     useProducts({ search: debouncedSearch });
 
   const [categories,  setCategories] = useState([]);
-  const [modal,       setModal]      = useState({ open: false, data: null });
+  const [modal,       setModal]      = useState({ open: false, data: null }); // data = produk yang diedit (null = tambah baru)
   const [form,        setForm]       = useState(EMPTY_FORM);
-  const [preview,     setPreview]    = useState(null);
+  const [preview,     setPreview]    = useState(null);  // URL preview foto sebelum upload
   const [saving,      setSaving]     = useState(false);
   const [formError,   setFormError]  = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeFilter, setActiveFilter] = useState("all"); // "all" | "low" — filter stok rendah
 
+  // ── Data pendukung: ambil daftar kategori sekali saat halaman dibuka ──
   useEffect(() => {
     categoryService.getAll({ is_active: true })
       .then((res) => setCategories(res.data ?? res))
       .catch(() => {});
   }, []);
 
+  /**
+   * openModal — Buka modal tambah (data=null) atau edit (data=produk).
+   * Form di-pre-fill dari data produk; field yang tidak ada diberi default.
+   */
   const openModal = (data = null) => {
     setForm(data
       ? {
@@ -67,11 +98,16 @@ export default function ProductsPage() {
     setFormError("");
   };
 
+  /** closeModal — Tutup modal & buang preview foto. */
   const closeModal = () => {
     setModal({ open: false, data: null });
     setPreview(null);
   };
 
+  /**
+   * handleImageChange — Simpan File gambar ke form + buat URL preview
+   * lokal via URL.createObjectURL (hanya preview, upload terjadi saat save).
+   */
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -79,14 +115,21 @@ export default function ProductsPage() {
     setPreview(URL.createObjectURL(file));
   };
 
+  /** handleFieldChange — Curried handler untuk input generik per nama field. */
   const handleFieldChange = (field) => (e) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
 
+  /** handleAutoSku — Isi field SKU otomatis dari nama produk saat ini. */
   const handleAutoSku = () => {
     if (!form.name.trim()) return;
     setForm((p) => ({ ...p, sku: generateSku(p.name) }));
   };
 
+  /**
+   * handleSave — Simpan produk (create atau update sesuai modal.data).
+   * Field numerik dikonversi ke Number; cost boleh kosong (null);
+   * kalau tidak ada file gambar, key image dihapus dari payload.
+   */
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -111,12 +154,17 @@ export default function ProductsPage() {
     } finally { setSaving(false); }
   };
 
+  /** handleDelete — Hapus produk dengan konfirmasi dialog. */
   const handleDelete = async (id, name) => {
     if (!confirm(`Hapus produk "${name}"?`)) return;
     try { await deleteProduct(id); }
     catch (err) { alert(getErrorMessage(err)); }
   };
 
+  /**
+   * handleToggleStatus — Aktif/nonaktifkan produk. Backend butuh payload
+   * lengkap pada PUT, jadi field penting dikirim ulang dari data row.
+   */
   const handleToggleStatus = async (row) => {
     try {
       await productService.update(row.id, {
@@ -134,6 +182,10 @@ export default function ProductsPage() {
     }
   };
 
+  /**
+   * handleStockFilter — Toggle filter "stok rendah". Meneruskan query param
+   * low_stock ke useProducts (undefined = filter dihapus).
+   */
   const handleStockFilter = (type) => {
     setActiveFilter(type);
     if (type === "low") {
@@ -143,6 +195,7 @@ export default function ProductsPage() {
     }
   };
 
+  // ── Definisi kolom tabel (dipakai NeoTable) ──
   const columns = [
     {
       key: "name", label: "Produk",
@@ -214,8 +267,10 @@ export default function ProductsPage() {
     },
   ];
 
+  // Label paket untuk teks banner limit plan (harus sinkron dengan backend)
   const PLAN_LABEL = { free: "Free", pro: "Pro", enterprise: "Enterprise" };
 
+  // ── Render: header → banner limit plan → filter → tabel → pagination → modal ──
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">

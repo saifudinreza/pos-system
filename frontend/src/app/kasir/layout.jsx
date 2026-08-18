@@ -1,5 +1,16 @@
 "use client";
 
+// ============================================================
+// KasirLayout — Kerangka halaman POS (mode kasir, tanpa sidebar)
+//
+// Struktur: header tipis (jam, nama user, tombol ke dashboard & logout)
+// + area konten {children} (kasir/page.jsx).
+//
+// Catatan: Midtrans Snap JS TIDAK di-load di layout ini — dimuat on-demand
+// oleh loadMidtransSnap() di kasir/page.jsx dengan data-client-key milik
+// tenant, supaya tidak double-load dengan script inject manual.
+// ============================================================
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -7,6 +18,7 @@ import useAuthStore from "@/stores/authStore";
 import LogoMark from "@/components/brand/LogoMark";
 
 export default function KasirLayout({ children }) {
+  // ── State: hidrasi auth store + guard mounted (cegah mismatch SSR) ──
   const hydrateFromStorage = useAuthStore((s) => s.hydrateFromStorage);
   const { user, logout }   = useAuthStore();
   const router = useRouter();
@@ -17,6 +29,7 @@ export default function KasirLayout({ children }) {
     setMounted(true);
   }, [hydrateFromStorage]);
 
+  /** handleLogout — Logout lalu redirect ke halaman login. */
   const handleLogout = async () => {
     await logout();
     router.push("/login");

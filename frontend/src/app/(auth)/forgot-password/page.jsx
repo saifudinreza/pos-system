@@ -23,10 +23,17 @@ import authService from "@/services/authService";
 import { getErrorMessage } from "@/lib/utils";
 
 export default function ForgotPasswordPage() {
+  // ── State ──
+  // status: idle | sending | sent | error — menggerakkan tampilan form/sukses
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [error, setError] = useState("");
 
+  /**
+   * handleSubmit — Minta link reset via POST /api/forgot-password.
+   * Server selalu balas sukses walau email tidak terdaftar (anti
+   * user-enumeration) — jadi di sini langsung tampilkan state "sent".
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus("sending");
@@ -40,6 +47,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
+  // ── Render: dua kondisi — sudah terkirim (sent) vs form input ──
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4">
       <div className="w-full max-w-md">

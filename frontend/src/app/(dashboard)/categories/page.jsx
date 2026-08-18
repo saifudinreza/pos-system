@@ -28,6 +28,8 @@ import { getErrorMessage } from "@/lib/utils";
 const PLAN_LABEL = { free: "Free", pro: "Pro", enterprise: "Enterprise" };
 
 export default function CategoriesPage() {
+  // ── State ──
+  // planMeta: info limit paket dari backend ({ plan, plan_limit, is_limited, ... })
   const [categories, setCategories] = useState([]);
   const [planMeta,   setPlanMeta]   = useState(null); // { plan, plan_limit, is_limited, total_in_tenant }
   const [isLoading,  setIsLoading]  = useState(false);
@@ -36,6 +38,7 @@ export default function CategoriesPage() {
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState("");
 
+  /** fetchData — Ambil daftar kategori + meta limit paket dari backend. */
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -48,12 +51,14 @@ export default function CategoriesPage() {
 
   useEffect(() => { fetchData(); }, []);
 
+  /** openModal — Buka modal tambah (data=null) atau edit (data=kategori). */
   const openModal = (data = null) => {
     setForm(data ? { name: data.name, is_active: data.is_active } : { name: "", is_active: true });
     setModal({ open: true, data });
     setError("");
   };
 
+  /** handleSave — Simpan kategori (create/update) lalu refresh tabel. */
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -66,12 +71,14 @@ export default function CategoriesPage() {
     finally { setSaving(false); }
   };
 
+  /** handleDelete — Hapus kategori (gagal kalau masih ada produk terkait). */
   const handleDelete = async (id, name) => {
     if (!confirm(`Hapus kategori "${name}"?`)) return;
     try { await categoryService.delete(id); fetchData(); }
     catch (err) { alert(getErrorMessage(err)); }
   };
 
+  // ── Definisi kolom tabel ──
   const columns = [
     { key: "name",      label: "Nama Kategori" },
     { key: "slug",      label: "Slug", render: (v) => <span className="font-mono text-xs text-brand-black/50">{v}</span> },
@@ -87,6 +94,7 @@ export default function CategoriesPage() {
     },
   ];
 
+  // ── Render: header → banner limit plan → tabel → modal tambah/edit ──
   return (
     <div className="space-y-5 rounded-md">
       <div className="flex items-center justify-between">

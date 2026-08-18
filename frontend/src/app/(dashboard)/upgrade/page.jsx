@@ -1,5 +1,20 @@
 "use client";
 
+// ============================================================
+// Upgrade Page — Beli/langganan paket Pro / Enterprise
+//
+// Alur pembayaran (Midtrans Snap):
+//   1. User isi identitas (nama, HP, alamat) + pilih siklus (bulanan/tahunan)
+//   2. POST /api/subscriptions/initiate → backend buat order Midtrans,
+//      dapat snap_token (harga dari backend, lihat PRICES di bawah)
+//   3. Script Snap di-load on-demand (loadSnap) pakai client key dari env
+//   4. window.snap.pay(snapToken) → popup Midtrans
+//   5. Callback: onSuccess → /upgrade/success · onPending → /upgrade/pending
+//      onError → /upgrade/cancel · onClose → reset tombol
+//
+// Aktivasi plan terjadi via webhook Midtrans di backend.
+// ============================================================
+
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CreditCard, User, CheckCircle2, ArrowLeft } from "lucide-react";
@@ -67,23 +82,34 @@ function UpgradeContent() {
   const searchParams = useSearchParams();
   const { user }     = useAuthStore();
 
+  // Paket & siklus dari query string (?plan=pro&cycle=monthly) — default pro/monthly
   const plan  = searchParams.get("plan") ?? "pro";
   const cycle = searchParams.get("cycle") ?? "monthly";
 
   const features = PLAN_FEATURES[plan] ?? PLAN_FEATURES.pro;
 
+  // ── State ──
   const [form, setForm]     = useState({ name: "", phone: "", address: "" });
   const [billing, setBilling] = useState(cycle);
   const [paying,  setPaying]  = useState(false);
   const [snapStep, setSnapStep] = useState("idle"); // idle | loading-script | loading-token | ready
   const [error,   setError]   = useState("");
 
+  // Pre-fill nama & HP dari profil user yang sudah login
   useEffect(() => {
     if (user) setForm((p) => ({ ...p, name: user.name ?? "", phone: user.phone ?? "" }));
   }, [user]);
 
   const currentPrice = PRICES[plan]?.[billing] ?? PRICES.pro.monthly;
 
+  /**
+   * handlePay — Alur lengkap pembayaran:
+   *   1. minta snap_token ke backend (POST /api/subscriptions/initiate)
+   *   2. load script Midtrans Snap (sekali saja, on-demand)
+   *   3. buka popup window.snap.pay() — callback menentukan redirect tujuan
+   * Urutan ini penting: token diambil DULU supaya kalau gagal tidak perlu
+   * memuat script.
+   */
   const handlePay = async (e) => {
     e.preventDefault();
     setPaying(true);
@@ -119,6 +145,7 @@ function UpgradeContent() {
     }
   };
 
+  /** btnLabel — Label tombol bayar yang berubah mengikuti tahap proses. */
   const btnLabel = () => {
     if (!paying) return `Bayar ${formatCurrency(currentPrice)}`;
     if (snapStep === "loading-token")  return "Menyiapkan pembayaran...";
@@ -126,6 +153,7 @@ function UpgradeContent() {
     return "Memproses...";
   };
 
+  // ── Render: form identitas (kiri) + ringkasan paket (kanan) ──
   return (
     <>
 

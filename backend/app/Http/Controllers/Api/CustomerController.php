@@ -7,12 +7,21 @@ use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * CustomerController — CRM ringan: daftar & detail pelanggan.
+ *
+ * Agregat (orders_count, total_spent, last_order_at) dihitung via withCount/
+ * withSum/withMax → tanpa N+1. Isolasi tenant otomatis via TenantScope.
+ */
 class CustomerController extends Controller
 {
     /**
      * Daftar pelanggan — dengan ringkasan jumlah order & total belanja.
      * GET /api/customers
      * Role: admin & developer
+     *
+     * @param Request $request Query: search? (nama atau nomor HP)
+     * @return JsonResponse { message, data, meta: { total } }
      */
     public function index(Request $request): JsonResponse
     {
@@ -50,6 +59,9 @@ class CustomerController extends Controller
     /**
      * Detail satu pelanggan + riwayat order terbaru.
      * GET /api/customers/{id}
+     *
+     * @param int $id ID pelanggan
+     * @return JsonResponse 200 detail / 404
      */
     public function show(int $id): JsonResponse
     {
@@ -91,6 +103,14 @@ class CustomerController extends Controller
         ], 200);
     }
 
+    /**
+     * Format satu pelanggan untuk response daftar.
+     * Semua agregat dibaca dari kolom hasil withCount/withSum/withMax
+     * (fallback ?? 0 kalau tidak di-load).
+     *
+     * @param Customer $customer Pelanggan yang akan diformat
+     * @return array Data pelanggan siap-JSON
+     */
     private function formatCustomer(Customer $customer): array
     {
         return [

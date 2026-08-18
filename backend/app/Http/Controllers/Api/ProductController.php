@@ -16,6 +16,15 @@ use Illuminate\Support\Facades\Storage;
 // Kalau tidak → fallback ke 'public' (local, hilang saat redeploy).
 define('PRODUCT_DISK', !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public');
 
+/**
+ * ProductController — CRUD produk + restock + riwayat pergerakan stok.
+ *
+ * - Gambar produk disimpan ke disk R2 (bila dikonfigurasi) atau fallback
+ *   'public'; URL selalu lewat proxy backend /api/media/{path}.
+ * - Read limit paket (FREE = 50 produk) di-cap di index & store.
+ * - Setiap perubahan stok dicatat ke inventory ledger (InventoryService).
+ * - Cache 'products_all' di-forget tiap mutasi (dipakai bila caching aktif).
+ */
 class ProductController extends Controller
 {
     // =============================================================
@@ -26,6 +35,15 @@ class ProductController extends Controller
     // GET /api/products?is_active=true
     // GET /api/products?page=1&per_page=10
     // =============================================================
+    /**
+     * Daftar produk: search nama/sku, filter kategori/status/stok menipis,
+     * sorting whitelist. FREE di-hard cap ke read limit (tanpa pagination);
+     * Pro/Enterprise pakai pagination normal. Eager load category.
+     *
+     * @param Request $request Query: search?, category_id?, is_active?, low_stock?,
+     *                          sort_by?, sort_order?, page?, per_page?
+     * @return JsonResponse { message, data, meta: { ...pagination, plan, plan_limit, is_limited, total_in_tenant } }
+     */
     public function index(Request $request): JsonResponse
     {
         $query = Product::with('category');
@@ -108,6 +126,12 @@ class ProductController extends Controller
     // SHOW — ambil satu produk by ID
     // GET /api/products/{id}
     // =============================================================
+    /**
+     * Detail satu produk (dengan relasi category).
+     *
+     * @param int $id ID produk
+     * @return JsonResponse 200 detail / 404
+     */
     public function show(int $id): JsonResponse
     {
         $product = Product::with('category')->find($id);
@@ -130,6 +154,14 @@ class ProductController extends Controller
     // POST /api/products
     // Role: admin only
     // =============================================================
+    /**
+     * Tambah produk baru. Gate paket: FREE cap 50 produk (422 limit_reached).
+     * Gambar di-upload ke PRODUCT_DISK; SKU unik per-tenant; audit log 'created'.
+     *
+     * @param Request $request Body: category_id, name, sku, price, stock, cost?,
+     *                          description?, stock_alert?, image?, is_active?
+     * @return JsonResponse 201 / 422 limit paket / 422 validasi
+     */
     public function store(Request $request): JsonResponse
     {
         // ----- CEK LIMIT PAKET -----
@@ -189,6 +221,14 @@ class ProductController extends Controller
     // PUT /api/products/{id}
     // Role: admin only
     // =============================================================
+    /**
+     * Edit produk (partial update via `sometimes`). Kalau ada gambar baru,
+     * gambar lama dihapus dari storage. Audit log 'updated' dengan before/after.
+     *
+     * @param Request $request Body: kategori & field produk (semuanya optional)
+     * @param int     $id      ID produk
+     * @return JsonResponse 200 / 404
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         $product = Product::find($id);
@@ -249,6 +289,14 @@ class ProductController extends Controller
     // DELETE /api/products/{id}
     // Role: admin only
     // =============================================================
+    /**
+     * Hapus produk. Produk yang pernah ada di transaksi TIDAK boleh dihapus
+     * (422 — saran: nonaktifkan saja, supaya histori laporan tetap utuh).
+     * Gambar ikut dihapus; audit log 'deleted'.
+     *
+     * @param int $id ID produk
+     * @return JsonResponse 200 / 404 / 422 pernah ditransaksikan
+     */
     public function destroy(int $id): JsonResponse
     {
         $product = Product::find($id);
@@ -294,6 +342,14 @@ class ProductController extends Controller
     // Body: { "quantity": 20, "note": "Restok dari supplier" }
     // Role: admin & kasir
     // =============================================================
+    /**
+     * Tambah stok produk. Pergerakan dicatat ke inventory ledger (type
+     * 'restock') beserta snapshot before/after stock + audit log.
+     *
+     * @param Request $request Body: { quantity: int min 1, note? }
+     * @param int     $id      ID produk
+     * @return JsonResponse 200 / 404
+     */
     public function restock(Request $request, int $id): JsonResponse
     {
         $product = Product::find($id);
@@ -338,6 +394,13 @@ class ProductController extends Controller
     // GET /api/products/{id}/movements
     // Role: admin & kasir
     // =============================================================
+    /**
+     * Riwayat pergerakan stok satu produk (pagination 20, terbaru dulu).
+     * Eager load user (hanya id+name) → tanpa N+1.
+     *
+     * @param int $id ID produk
+     * @return JsonResponse { message, data, meta pagination }
+     */
     public function movements(int $id): JsonResponse
     {
         $product = Product::find($id);
@@ -375,6 +438,14 @@ class ProductController extends Controller
     // =============================================================
     // HELPER — format data produk untuk response
     // =============================================================
+    /**
+     * Format produk untuk response. URL gambar selalu lewat proxy backend
+     * (/api/media/...) — URL R2 tidak pernah diekspos. Relasi category dibaca
+     * hanya kalau sudah di-load (relationLoaded).
+     *
+     * @param Product $product Produk yang akan diformat
+     * @return array Data produk siap-JSON
+     */
     private function formatProduct(Product $product): array
     {
         return [

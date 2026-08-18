@@ -80,9 +80,18 @@ const PLANS = [
 const formatRupiah = (num) =>
   "Rp " + num.toLocaleString("id-ID");
 
+/**
+ * PricingCard — satu kartu paket harga (lihat header file).
+ *
+ * Props:
+ *   plan   : objek dari PLANS (name, price {monthly, yearly}, features, ...)
+ *   billing: "monthly" | "yearly" — menentukan harga yang ditampilkan
+ */
 // --- PricingCard: satu kartu paket harga ---
 const PricingCard = ({ plan, billing }) => {
+  // Harga aktif mengikuti toggle billing (bulanan vs tahunan)
   const price = billing === "monthly" ? plan.price.monthly : plan.price.yearly;
+  // Paket GRATIS = harga 0 di bulanan (independen dari toggle billing)
   const isFree = price === 0 && plan.price.monthly === 0;
 
   return (
@@ -134,6 +143,8 @@ const PricingCard = ({ plan, billing }) => {
               {formatRupiah(price)}
             </span>
             <span className="text-sm font-semibold text-brand-black/60">/bulan</span>
+            {/* Badge "Hemat": selisih (monthly × 12 − yearly) dibagi 12 → nilai per bulan
+                yang dihemat dibandingkan membayar bulanan */}
             {billing === "yearly" && (
               <div className="mt-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 inline-block">
                 Hemat {formatRupiah(Math.round((plan.price.monthly * 12 - plan.price.yearly) / 12))}/bln
@@ -175,6 +186,10 @@ const PricingCard = ({ plan, billing }) => {
   );
 };
 
+/**
+ * PricingSection — daftar paket harga dengan toggle bulanan/tahunan
+ * (lihat header file). State internal: `billing`.
+ */
 export default function PricingSection() {
   // State toggle bulanan vs tahunan
   // Analogi: seperti tombol pilih ukuran di toko — S, M, L

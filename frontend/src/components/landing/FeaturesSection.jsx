@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
+// Daftar fitur — tiap objek = satu kartu (ikon, judul, deskripsi, tag)
 const FEATURES = [
   {
     Icon:        MonitorCheck,
@@ -70,6 +71,11 @@ const FEATURES = [
   },
 ];
 
+/**
+ * FeatureCard — satu kartu fitur (ikon, tag, judul, deskripsi).
+ * Props: Icon, title, description, tag, tagColor, iconBg, iconColor?
+ * Semua field berasal dari satu objek di FEATURES (di-spread saat render).
+ */
 const FeatureCard = ({ Icon, title, description, tag, tagColor, iconBg, iconColor = "text-brand-black" }) => (
   <div
     className="h-full bg-white border-3 border-brand-black p-6 flex flex-col gap-4 group transition-all duration-150 hover:-translate-x-1 hover:-translate-y-1"
@@ -100,6 +106,10 @@ const FeatureCard = ({ Icon, title, description, tag, tagColor, iconBg, iconColo
   </div>
 );
 
+/**
+ * FeaturesSection — grid fitur dengan animasi stagger saat scroll
+ * (lihat header file). Tanpa props; konten dari konstanta FEATURES.
+ */
 export default function FeaturesSection() {
   return (
     <section id="fitur" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray overflow-hidden">
@@ -132,6 +142,7 @@ export default function FeaturesSection() {
         </Reveal>
 
         <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" gap={0.08}>
+          {/* Grid kartu fitur — muncul berurutan (stagger) saat masuk viewport */}
           {FEATURES.map((feature) => (
             <StaggerItem key={feature.title} className="h-full">
               <FeatureCard {...feature} />
@@ -139,6 +150,7 @@ export default function FeaturesSection() {
           ))}
         </Stagger>
 
+        {/* Panel "FITUR UNGGULAN" — sorotan AI dengan contoh pertanyaan */}
         <Reveal delay={0.1}>
           <div
             className="mt-8 bg-brand-black text-white border-3 border-brand-black p-8 flex flex-col sm:flex-row items-center justify-between gap-6"

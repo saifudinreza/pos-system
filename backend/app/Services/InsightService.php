@@ -19,6 +19,15 @@ use Illuminate\Support\Facades\Log;
  */
 class InsightService
 {
+    /**
+     * Generate ulang insight minggu berjalan untuk satu tenant.
+     *
+     * Alur: hitung metrik deterministik → narasi AI (fallback templated) →
+     * hapus insight lama tenant → simpan yang baru. Satu bundle insight
+     * mencakup periode minggu berjalan.
+     *
+     * @return array<int, AiInsight> Daftar AiInsight yang baru dibuat
+     */
     public function generateForTenant(?int $tenantId): array
     {
         $metrics  = $this->computeMetrics($tenantId);
@@ -28,13 +37,13 @@ class InsightService
         AiInsight::where('tenant_id', $tenantId)->delete();
 
         $created = [];
-        foreach ($insights as $ins) {
+        foreach ($insights as $insight) {
             $created[] = AiInsight::create([
                 'tenant_id'    => $tenantId,
-                'type'         => $ins['type'] ?? 'sales',
-                'title'        => $ins['title'],
-                'body'         => $ins['body'],
-                'data'         => $ins['data'] ?? null,
+                'type'         => $insight['type'] ?? 'sales',
+                'title'        => $insight['title'],
+                'body'         => $insight['body'],
+                'data'         => $insight['data'] ?? null,
                 'period_start' => now()->startOfWeek()->toDateString(),
                 'period_end'   => now()->endOfWeek()->toDateString(),
             ]);
@@ -46,6 +55,11 @@ class InsightService
     // ============================================================
     // Metrik deterministik — hitung dari data nyata, bukan AI.
     // ============================================================
+    /**
+     * Hitung semua metrik minggu ini dari data nyata (SQL deterministik).
+     * Bagian ini TIDAK menyentuh LLM — angka yang sama dipakai baik oleh
+     * narasi AI maupun fallback templated.
+     */
     private function computeMetrics(?int $tenantId): array
     {
         $weekStart = now()->startOfWeek();
@@ -73,7 +87,7 @@ class InsightService
             ->where('orders.tenant_id', $tenantId)
             ->where('orders.status', 'paid')
             ->where('orders.created_at', '>=', $weekStart)
-            ->selectRaw('products.name as name, SUM(order_items.quantity) as qty, SUM(order_items.subtotal) as revenue')
+            ->selectRaw('products.name as name, SUM(order_items.quantity) as qty')
             ->groupBy('products.name')
             ->orderByDesc('qty')
             ->first();
@@ -111,6 +125,11 @@ class InsightService
     // Narasi AI — LLM hanya menulis kalimat dari angka yang sudah
     // dihitung. Kalau gagal → fallback templated.
     // ============================================================
+    /**
+     * Minta LLM merangkai kalimat insight dari metrik yang sudah dihitung.
+     * LLM hanya menulis JSON array {type, title, body}; kalau gagal atau
+     * responnya bukan JSON valid → fallback templated (tanpa LLM).
+     */
     private function narrate(array $metrics): array
     {
         $systemPrompt = "Kamu adalah analis bisnis KasirAI untuk toko UMKM Indonesia. Semua angka dalam data sudah dihitung akurat oleh server — TUGASMU HANYA merangkai angka-angka itu menjadi insight yang mudah dipahami pemilik toko. JANGAN menambah angka yang tidak ada di data. JANGAN memberi saran generik yang kosong; selalu kaitkan dengan angka.
@@ -139,6 +158,10 @@ Aturan:
         }
     }
 
+    /**
+     * Ekstrak bagian JSON array dari teks response AI yang mungkin terbungkus
+     * fenced code block atau ada teks lain di sekitarnya.
+     */
     private function extractJson(string $text): string
     {
         // Buang fenced code block kalau model membungkus JSON dengan ```json
@@ -156,10 +179,15 @@ Aturan:
     // ============================================================
     // Fallback tanpa LLM — insight tetap muncul walau AI offline.
     // ============================================================
+    /**
+     * Buat insight tanpa LLM langsung dari metrik (template kalimat).
+     * Dipakai kalau AI gagal/offline, supaya insight tetap muncul di dashboard.
+     */
     private function fallbackInsights(array $m): array
     {
         $insights = [];
 
+        // Format nominal gaya Indonesia: Rp 1.250.000
         $rupiah = fn($n) => 'Rp ' . number_format($n, 0, ',', '.');
 
         if ($m['perubahan_persen'] !== null) {

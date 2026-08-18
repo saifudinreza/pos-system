@@ -101,6 +101,16 @@ const NavItem = ({ href, Icon, label, isActive, badge }) => (
   </Link>
 );
 
+/**
+ * Sidebar — menu navigasi kiri role-based (lihat header file untuk deskripsi).
+ *
+ * Props:
+ *   isOpen  : kontrol tampil di layar MOBILE (slide-in + overlay)
+ *   onClose : menutup sidebar dari tombol ✕ / overlay (mobile)
+ *
+ * Catatan: di desktop (lg+) sidebar selalu tampil statis; `mounted`
+ * mencegah hydration mismatch karena user diambil dari localStorage.
+ */
 export default function Sidebar({ isOpen, onClose }) {
   // usePathname() → string URL saat ini, misal "/dashboard" atau "/products"
   // Dipakai untuk menandai menu mana yang "aktif" (sedang dibuka)

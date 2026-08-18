@@ -6,20 +6,20 @@ use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-// ============================================================
-// WhatsAppService — Kirim struk digital ke WhatsApp customer
-//
-// Menggunakan Fonnte API (fonnte.com):
-//   POST https://api.fonnte.com/send
-//   Header: Authorization: <token>
-//   Body:   { target, message, countryCode }
-//
-// Cara dapat token Fonnte:
-//   1. Daftar di fonnte.com
-//   2. Tambah device (scan QR dengan WA kamu)
-//   3. Copy token dari dashboard
-//   4. Isi FONNTE_TOKEN di .env backend
-// ============================================================
+/**
+ * Pengiriman struk digital ke WhatsApp customer lewat Fonnte API.
+ *
+ * API Fonnte (fonnte.com):
+ *   POST https://api.fonnte.com/send
+ *   Header: Authorization: <token>
+ *   Body:   { target, message, countryCode }
+ *
+ * Cara dapat token Fonnte:
+ *   1. Daftar di fonnte.com
+ *   2. Tambah device (scan QR dengan WA kamu)
+ *   3. Copy token dari dashboard
+ *   4. Isi FONNTE_TOKEN di .env backend
+ */
 class WhatsAppService
 {
     private string $token;
@@ -30,12 +30,12 @@ class WhatsAppService
         $this->token = config('services.fonnte.token', '');
     }
 
-    // =============================================================
-    // sendReceipt — Kirim struk pembayaran ke nomor WA customer
-    //
-    // @param Order $order  — order yang sudah lunas (dengan relasi items.product)
-    // @return bool          — true kalau berhasil kirim, false kalau gagal/tidak dikonfigurasi
-    // =============================================================
+    /**
+     * Kirim struk pembayaran ke nomor WA customer.
+     *
+     * @param Order $order Order yang sudah lunas (dengan relasi items.product)
+     * @return bool true kalau berhasil kirim, false kalau gagal/tidak dikonfigurasi
+     */
     public function sendReceipt(Order $order): bool
     {
         // Jangan kirim kalau tidak ada nomor HP atau token belum dikonfigurasi
@@ -49,6 +49,7 @@ class WhatsAppService
             $response = Http::withHeaders([
                 'Authorization' => $this->token,
             ])->post($this->apiUrl, [
+                // Nomor dinormalisasi ke format internasional (62...) — lihat formatPhone()
                 'target'      => $this->formatPhone($order->customer_phone),
                 'message'     => $message,
                 'countryCode' => '62',   // Indonesia
@@ -68,13 +69,12 @@ class WhatsAppService
         }
     }
 
-    // =============================================================
-    // buildReceiptMessage — Format pesan struk dalam teks WhatsApp
-    //
-    // WhatsApp mendukung formatting sederhana:
-    //   *teks*  = bold
-    //   _teks_  = italic
-    // =============================================================
+    /**
+     * Susun isi pesan struk dalam format teks WhatsApp.
+     *
+     * Formatting WA yang dipakai: *teks* = bold, _teks_ = italic.
+     * Nominal diformat gaya Indonesia (Rp 1.250.000) tanpa desimal.
+     */
     private function buildReceiptMessage(Order $order): string
     {
         $storeName = $order->tenant?->name ?? config('app.name', 'KasirAI');
@@ -121,10 +121,10 @@ class WhatsAppService
         return implode("\n", $lines);
     }
 
-    // =============================================================
-    // paymentMethodLabel — Terjemahkan kode metode bayar ke label
-    // ramah-customer (dipakai di isi struk)
-    // =============================================================
+    /**
+     * Terjemahkan kode metode bayar internal ke label ramah-customer
+     * yang ditampilkan di isi struk (default: Tunai).
+     */
     private function paymentMethodLabel(?string $method): string
     {
         return match ($method) {
@@ -137,15 +137,15 @@ class WhatsAppService
         };
     }
 
-    // =============================================================
-    // formatPhone — Normalisasi nomor HP ke format internasional
-    //
-    // Contoh:
-    //   "08123456789"  → "628123456789"
-    //   "8123456789"   → "628123456789"
-    //   "628123456789" → "628123456789" (sudah benar)
-    //   "+628123456789"→ "628123456789" (hapus tanda +)
-    // =============================================================
+    /**
+     * Normalisasi nomor HP ke format internasional Indonesia (62...).
+     *
+     * Contoh:
+     *   "08123456789"   → "628123456789"
+     *   "8123456789"    → "628123456789"
+     *   "628123456789"  → "628123456789" (sudah benar)
+     *   "+628123456789" → "628123456789" (hapus tanda +)
+     */
     private function formatPhone(string $phone): string
     {
         // Hapus semua karakter non-digit

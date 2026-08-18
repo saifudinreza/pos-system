@@ -1,7 +1,18 @@
 // NeoTable — Tabel data neobrutalist
 // Analogi: seperti buku kas di meja kasir — baris-kolom rapi dengan header tegas
 
+/**
+ * NeoTable — tabel data generik dengan header, loading & empty state.
+ *
+ * Props:
+ *   columns   : [{ key, label, width?, render?(value, row) }]
+ *               - render opsional: untuk cell kustom (badge, tombol, dsb.)
+ *   data      : array baris; dipastikan array via Array.isArray (anti crash)
+ *   isLoading : true → spinner "Memuat data..." di tengah
+ *   emptyText : teks saat data kosong (default: "Tidak ada data")
+ */
 export default function NeoTable({ columns, data, isLoading, emptyText = "Tidak ada data" }) {
+  // Guard: kalau data bukan array (undefined/null dari API), jadikan [] dulu
   const rows = Array.isArray(data) ? data : [];
   return (
     <div className="border-2 border-brand-black overflow-hidden" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
@@ -47,6 +58,7 @@ export default function NeoTable({ columns, data, isLoading, emptyText = "Tidak 
                 >
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3 text-brand-black/80">
+                      {/* Cell kustom via render(value, row); tanpa render → value mentah, fallback "-" */}
                       {col.render ? col.render(row[col.key], row) : (row[col.key] ?? "-")}
                     </td>
                   ))}

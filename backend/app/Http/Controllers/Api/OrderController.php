@@ -15,6 +15,17 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * OrderController — CRUD order & perubahan status.
+ *
+ * Poin penting:
+ * - Semua transaksi WAJIB dalam shift aktif (lapisan pengaman backend;
+ *   frontend juga sudah memblokir).
+ * - Pembuatan order dibungkus DB::transaction + lockForUpdate pada produk
+ *   (anti race stok minus) + pencatatan inventory ledger per item.
+ * - Status paid/cancelled mengirim struk WhatsApp via queue async
+ *   (SendWhatsAppReceipt) dan restore stok untuk pembatalan.
+ */
 class OrderController extends Controller
 {
     // =============================================================
@@ -23,6 +34,13 @@ class OrderController extends Controller
     // GET /api/orders?status=pending
     // GET /api/orders?date_from=2025-01-01&date_to=2025-12-31
     // =============================================================
+    /**
+     * Daftar order dengan filter status, user, dan rentang tanggal.
+     * Eager load user/items.product/transaction → tanpa N+1.
+     *
+     * @param Request $request Query: status?, user_id?, date_from?, date_to?, per_page?
+     * @return JsonResponse { message, data, meta pagination }
+     */
     public function index(Request $request): JsonResponse
     {
         $query = Order::with(['user', 'items.product', 'transaction'])
@@ -71,6 +89,12 @@ class OrderController extends Controller
     // MY ORDERS — riwayat order milik customer yang login
     // GET /api/orders/my/history
     // =============================================================
+    /**
+     * Riwayat order milik user yang sedang login (pagination 10).
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse { message, data, meta pagination }
+     */
     public function myOrders(Request $request): JsonResponse
     {
         $orders = Order::with(['items.product', 'transaction'])
@@ -95,6 +119,13 @@ class OrderController extends Controller
     // SHOW — detail satu order
     // GET /api/orders/{id}
     // =============================================================
+    /**
+     * Detail satu order. Role `user` hanya boleh lihat order miliknya sendiri.
+     *
+     * @param Request $request Request ber-autentikasi
+     * @param int     $id      ID order
+     * @return JsonResponse 200 detail / 403 / 404
+     */
     public function show(Request $request, int $id): JsonResponse
     {
         $order = Order::with(['user', 'items.product', 'transaction'])->find($id);
@@ -131,6 +162,17 @@ class OrderController extends Controller
     //   "notes": "Tolong dibungkus"
     // }
     // =============================================================
+    /**
+     * Buat order dari cart (dalam DB::transaction).
+     *
+     * Alur: validasi → cek shift aktif → lock produk satu per satu (cek stok,
+     * snapshot harga/cost, kurangi stok) → hitung PPN 11% → temukan/buat
+     * customer dari nomor HP → simpan order + items → catat inventory ledger
+     * (sale). Semua gagal → rollback total.
+     *
+     * @param Request $request Body: { items: [{ product_id, quantity }], notes?, customer_phone? }
+     * @return JsonResponse 201 order / 422 shift belum dibuka / 422 stok kurang
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -286,9 +328,24 @@ class OrderController extends Controller
     // PATCH /api/orders/{id}/status
     // Role: admin & kasir
     // =============================================================
+    /**
+     * Ubah status order: pending → paid/cancelled.
+     *
+     * - cancelled: restore stok tiap item (ledger 'cancel'), transaksi pending
+     *   ikut di-cancel.
+     * - paid: tandai paid, buat Transaction settlement untuk tunai kalau
+     *   belum ada settlement, lalu dispatch struk WhatsApp (async).
+     * Kedua jalur dibungkus DB::transaction.
+     *
+     * @param Request $request Body: { status, payment_method? }
+     * @param int     $id      ID order
+     * @return JsonResponse 200 / 404
+     */
     public function updateStatus(Request $request, int $id): JsonResponse
     {
-        $order = Order::find($id);
+        // Eager load items.product — dipakai branch pembatalan (restore stok)
+        // dan di-format ulang lewat fresh()->load() di akhir method.
+        $order = Order::with('items.product')->find($id);
 
         if (! $order) {
             return response()->json([
@@ -364,6 +421,13 @@ class OrderController extends Controller
     // =============================================================
     // HELPER — format data order untuk response
     // =============================================================
+    /**
+     * Format order untuk response. Relasi dibaca hanya kalau sudah di-load
+     * (relationLoaded) → tidak memicu lazy loading tambahan.
+     *
+     * @param Order $order Order yang akan diformat
+     * @return array Data order siap-JSON
+     */
     private function formatOrder(Order $order): array
     {
         return [

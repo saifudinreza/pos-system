@@ -6,10 +6,23 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Klien AI dual-provider: Groq (utama) → OpenRouter (fallback).
+ *
+ * Semua panggilan LLM lewat `ask()`. Kalau Groq kena rate limit (HTTP 429),
+ * flag `groq_rate_limited` diset di cache selama 65 detik dan request
+ * berikutnya otomatis dialihkan ke OpenRouter. Setelah TTL habis, otomatis
+ * kembali mencoba Groq lagi. Service ini juga menyusun prompt sistem untuk
+ * tiap jenis pertanyaan (penjualan, stok, rekomendasi).
+ */
 class GroqService
 {
+    // Kunci cache penanda Groq sedang rate-limited — dipakai juga oleh
+    // getActiveProvider()/getActiveModel() untuk info provider aktif.
     private const GROQ_RATE_LIMIT_KEY = 'groq_rate_limited';
-    private const GROQ_RATE_LIMIT_TTL = 65; // detik — sedikit lebih dari reset window Groq (60s)
+    // Durasi cooldown fallback ke OpenRouter — 65 detik, sedikit di atas
+    // reset window rate limit Groq (60 detik) supaya tidak langsung kena lagi.
+    private const GROQ_RATE_LIMIT_TTL = 65;
 
     private string $groqKey;
     private string $groqModel;
@@ -19,6 +32,10 @@ class GroqService
     private ?string $orModel;
     private ?string $orUrl;
 
+    /**
+     * Baca konfigurasi API dari config/services.php saat service di-resolve.
+     * Key + model Groq dan OpenRouter dibaca di sini sekali, bukan per request.
+     */
     public function __construct()
     {
         $this->groqKey   = config('services.groq.api_key');
@@ -34,8 +51,24 @@ class GroqService
     //          jika Groq rate-limited (429). Setelah TTL habis
     //          (65 detik), otomatis kembali ke Groq.
     // ============================================================
+    /**
+     * Kirim prompt ke LLM dengan urutan provider: Groq → OpenRouter.
+     *
+     * Alur fallback:
+     * 1. Flag cooldown belum aktif → coba Groq dulu.
+     * 2. Kalau Groq balas 429 → set flag cooldown (65 detik) & lanjut ke
+     *    OpenRouter (kalau dikonfigurasi).
+     * 3. Flag cooldown masih aktif → langsung OpenRouter; kalau OpenRouter
+     *    tidak dikonfigurasi → reset flag & coba Groq lagi (kemungkinan kena
+     *    429 lagi, di-tangani lagi di langkah 2).
+     *
+     * @param string $systemPrompt Prompt sistem (konteks toko/data)
+     * @param string $userQuery    Pertanyaan/pesan dari user
+     * @return array{text: string, tokens_used: int, provider: string, model: string}
+     */
     public function ask(string $systemPrompt, string $userQuery): array
     {
+        // Cek flag cooldown dari cache (false = Groq normal)
         $groqRateLimited = Cache::get(self::GROQ_RATE_LIMIT_KEY, false);
 
         if (! $groqRateLimited) {
@@ -43,35 +76,42 @@ class GroqService
                 return $this->callGroq($systemPrompt, $userQuery);
             } catch (\Exception $e) {
                 if ($this->isRateLimitError($e)) {
+                    // Kena rate limit → aktifkan cooldown & langsung pindah ke OpenRouter
                     Log::warning('Groq rate limit hit — switching to OpenRouter for ' . self::GROQ_RATE_LIMIT_TTL . 's');
                     Cache::put(self::GROQ_RATE_LIMIT_KEY, true, self::GROQ_RATE_LIMIT_TTL);
                     if (! empty($this->orKey)) {
                         return $this->callOpenRouter($systemPrompt, $userQuery);
                     }
+                    // Tanpa OpenRouter tidak ada alternatif — biarkan error naik ke pemanggil
                     throw new \Exception('Groq rate limited dan OpenRouter tidak dikonfigurasi.');
                 }
+                // Error selain rate limit → jangan ditutup, lempar apa adanya
                 throw $e;
             }
         }
 
-        // Groq sedang rate-limited → pakai OpenRouter jika tersedia
+        // Groq sedang dalam cooldown → pakai OpenRouter jika tersedia
         Log::info('Groq masih rate-limited, menggunakan OpenRouter');
         if (! empty($this->orKey)) {
             return $this->callOpenRouter($systemPrompt, $userQuery);
         }
-        // Tunggu sampai Groq cooldown habis
+        // OpenRouter tidak ada → reset cooldown & coba Groq lagi sekarang
         Cache::forget(self::GROQ_RATE_LIMIT_KEY);
         return $this->callGroq($systemPrompt, $userQuery);
     }
 
-    // ============================================================
-    // Provider info — untuk ditampilkan di frontend
-    // ============================================================
+    /**
+     * Provider yang sedang aktif dipakai (info untuk frontend).
+     * Mengembalikan 'openrouter' kalau flag cooldown Groq masih aktif.
+     */
     public function getActiveProvider(): string
     {
         return Cache::get(self::GROQ_RATE_LIMIT_KEY, false) ? 'openrouter' : 'groq';
     }
 
+    /**
+     * Nama model aktif: model OpenRouter saat cooldown, model Groq kalau normal.
+     */
     public function getActiveModel(): string
     {
         return Cache::get(self::GROQ_RATE_LIMIT_KEY, false) ? $this->orModel : $this->groqModel;
@@ -80,6 +120,12 @@ class GroqService
     // ============================================================
     // PRIVATE — call Groq
     // ============================================================
+    /**
+     * Panggil Groq API (chat completions).
+     *
+     * @throws \Exception Pesan error berformat `groq_error:{status}:{body}`
+     *                    supaya isRateLimitError() bisa mendeteksi 429.
+     */
     private function callGroq(string $systemPrompt, string $userQuery): array
     {
         $response = Http::timeout(30)
@@ -94,11 +140,13 @@ class GroqService
                 'temperature' => 0.7,
             ]);
 
+        // Status selain 2xx → lempar error berisi status & body (dipakai deteksi 429)
         if (! $response->successful()) {
             Log::error('Groq API error', ['status' => $response->status(), 'body' => $response->body()]);
             throw new \Exception('groq_error:' . $response->status() . ':' . $response->body());
         }
 
+        // Bungkus hasil ke format seragam untuk pemanggil
         $data = $response->json();
 
         return [
@@ -112,6 +160,11 @@ class GroqService
     // ============================================================
     // PRIVATE — call OpenRouter
     // ============================================================
+    /**
+     * Panggil OpenRouter API (chat completions) sebagai fallback.
+     *
+     * @throws \Exception Kalau API key belum dikonfigurasi atau API error.
+     */
     private function callOpenRouter(string $systemPrompt, string $userQuery): array
     {
         if (empty($this->orKey)) {
@@ -120,6 +173,7 @@ class GroqService
 
         $response = Http::timeout(30)
             ->withToken($this->orKey)
+            // Header identitas aplikasi — diminta OpenRouter untuk source tracking
             ->withHeaders([
                 'HTTP-Referer' => config('app.url', 'http://localhost'),
                 'X-Title'      => config('app.name', 'KasirAI'),
@@ -152,18 +206,29 @@ class GroqService
     // ============================================================
     // PRIVATE — deteksi apakah error adalah rate limit
     // ============================================================
+    /**
+     * Deteksi apakah error berasal dari rate limit Groq (HTTP 429).
+     * Memeriksa prefix error kustom `groq_error:429` (dari callGroq) atau
+     * pesan `rate_limit_exceeded` dari respon OpenAI-compatible.
+     */
     private function isRateLimitError(\Exception $e): bool
     {
-        $msg = $e->getMessage();
-        return str_contains($msg, 'groq_error:429') || str_contains($msg, 'rate_limit_exceeded');
+        $message = $e->getMessage();
+        return str_contains($message, 'groq_error:429') || str_contains($message, 'rate_limit_exceeded');
     }
 
     // ============================================================
     // PROMPT BUILDERS
     // ============================================================
 
+    /**
+     * Template prompt sistem dasar yang sama untuk semua jenis prompt AI.
+     * `$storeDataSection` (JSON data toko) disisipkan ke bagian
+     * "Store data context".
+     */
     private function baseSystemPrompt(string $storeDataSection): string
     {
+        // Sisipkan data toko (JSON) ke template prompt dasar
         return "You are KasirAI Assistant, a smart business helper for small to medium retail and cashier businesses. You have access to this store's sales data, product catalog, transaction history, and business reports.
 
 You can help with:
@@ -184,10 +249,17 @@ Store data context:
 {$storeDataSection}";
     }
 
+    /**
+     * Prompt untuk chat analisis penjualan — berisi data 3 periode
+     * (hari_ini/minggu_ini/bulan_ini) + katalog & stok produk, plus aturan
+     * wajib soal periode waktu supaya LLM tidak salah label periode.
+     */
     public function buildSalesPrompt(array $salesData): string
     {
+        // ----- Bagian prompt: data penjualan 3 periode + katalog & stok produk (JSON) -----
         $dataJson = json_encode($salesData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
+        // ----- Bagian prompt: aturan wajib periode waktu & aturan stok/katalog -----
         $extra = "\n\nATURAN WAJIB SOAL PERIODE WAKTU:
 - Data \"penjualan_per_periode\" berisi 3 rentang: hari_ini, minggu_ini, bulan_ini — masing-masing sudah dihitung terpisah dan akurat.
 - Cocokkan periode yang dipakai jawaban PERSIS dengan kata yang diucapkan user: \"hari ini\"/\"hari ini juga\" → pakai hari_ini. \"minggu ini\" → pakai minggu_ini. \"bulan ini\" → pakai bulan_ini.
@@ -202,10 +274,16 @@ ATURAN SOAL STOK & KATALOG PRODUK:
         return $this->baseSystemPrompt($dataJson . $extra);
     }
 
+    /**
+     * Prompt untuk prediksi stok — data per produk (stok, rata penjualan
+     * per hari, estimasi hari) dengan aturan analisis stok untuk LLM.
+     */
     public function buildStockPrompt(array $stockData): string
     {
+        // ----- Bagian prompt: data stok per produk (JSON) -----
         $dataJson = json_encode($stockData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
+        // ----- Bagian prompt: aturan tambahan analisis stok -----
         $extra = "\n\nATURAN TAMBAHAN UNTUK ANALISIS STOK:
 - Kalau rata_per_hari kurang dari 1, penjualan masih sangat sedikit dan estimasi hari tidak perlu disebutkan
 - Fokus analisis pada produk yang statusnya MENIPIS
@@ -214,10 +292,16 @@ ATURAN SOAL STOK & KATALOG PRODUK:
         return $this->baseSystemPrompt($dataJson . $extra);
     }
 
+    /**
+     * Prompt untuk rekomendasi produk — data transaksi (item yang sering
+     * dibeli bersamaan) untuk analisis cross-selling.
+     */
     public function buildRecommendationPrompt(array $transactionData): string
     {
+        // ----- Bagian prompt: data transaksi (JSON) -----
         $dataJson = json_encode($transactionData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
+        // ----- Bagian prompt: arahan fokus cross-selling -----
         $extra = "\n\nFokus pada produk yang paling sering dibeli bersamaan (cross-selling opportunity).";
 
         return $this->baseSystemPrompt($dataJson . $extra);

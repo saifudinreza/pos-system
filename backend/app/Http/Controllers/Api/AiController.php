@@ -18,6 +18,18 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 
+/**
+ * AiController — semua endpoint AI KasirAI (chat, prediksi stok, rekomendasi).
+ *
+ * AI berjalan ASYNC via job queue (ProcessAiJob): controller hanya membangun
+ * prompt (masih dalam konteks auth() → isolasi tenant aman), lalu mengembalikan
+ * 202 + job_id yang dipoll frontend lewat GET /api/ai/jobs/{id}.
+ *
+ * Kuota: FREE = 5 prompt/bulan kalender, Pro = 10/hari, Enterprise = 50/hari,
+ * developer = unlimited (null = nilai valid, jangan pakai ?? untuk fallback).
+ * Cek kuota + increment dibungkus DB::transaction + lockForUpdate supaya
+ * request paralel tidak tembus limit.
+ */
 class AiController extends Controller
 {
     public function __construct(private GroqService $groq) {}
@@ -92,6 +104,10 @@ class AiController extends Controller
         return (int) config('ai.pro_daily_limit', 10);
     }
 
+    /**
+     * Ambang batas warning kuota (persen dari limit).
+     * Dipakai untuk menyalakan flag `warning` di payload usage.
+     */
     private function warningThresholdPct(): int
     {
         return config('ai.warning_threshold_pct', 30);
@@ -101,6 +117,12 @@ class AiController extends Controller
     // USAGE — sisa kuota AI user yang login (dihitung per bulan)
     // GET /api/ai/usage-today
     // =============================================================
+    /**
+     * Sisa kuota AI user yang login.
+     * Free dihitung per bulan, Pro/Enterprise per hari, developer unlimited.
+     *
+     * @return JsonResponse { used, remaining, limit, warning, period }
+     */
     public function usageToday(): JsonResponse
     {
         $dailyLimit   = $this->dailyLimit();
@@ -128,6 +150,17 @@ class AiController extends Controller
     // QUERY — analisis penjualan natural language
     // POST /api/ai/query
     // =============================================================
+    /**
+     * Analisis penjualan natural language (endpoint chat utama).
+     *
+     * Alur: cek kuota → validasi → hitung penjualan 3 periode
+     * (hari_ini/minggu_ini/bulan_ini, whereBetween BUKAN whereMonth) + katalog
+     * & stok produk → bangun prompt → simpan AiJob (pending) → dispatch
+     * ProcessAiJob → balas 202 + job_id.
+     *
+     * @param Request $request Body: { query: string, max 500 }
+     * @return JsonResponse 202 + job_id, atau 429 limit_reached
+     */
     public function query(Request $request): JsonResponse
     {
         if (! $this->checkAndIncrementUsage()) {
@@ -162,6 +195,8 @@ class AiController extends Controller
             $orders = Order::where('status', 'paid')
                 ->whereBetween('created_at', [$start, $end])
                 ->count();
+            // ↑ Order punya TenantScope → filter tenant otomatis di global scope
+            // (berbeda dengan Transaction yang harus di-whereHas manual di atas).
 
             $penjualanPerPeriode[$label] = [
                 'total_revenue' => 'Rp ' . number_format($revenue, 0, ',', '.'),
@@ -236,6 +271,14 @@ class AiController extends Controller
     // JOB STATUS — polling hasil AI yang diproses async
     // GET /api/ai/jobs/{id}
     // =============================================================
+    /**
+     * Status job AI untuk polling frontend.
+     * Hanya pemilik job (atau developer) yang boleh melihat.
+     *
+     * @param Request $request
+     * @param int     $id     ID AiJob
+     * @return JsonResponse Status + hasil (kalau completed) / error (kalau failed)
+     */
     public function jobStatus(Request $request, int $id): JsonResponse
     {
         $job = AiJob::find($id);
@@ -277,6 +320,13 @@ class AiController extends Controller
     // PREDICT STOCK
     // POST /api/ai/predict-stock
     // =============================================================
+    /**
+     * Prediksi stok berbasis penjualan 30 hari terakhir.
+     * Data per produk: stok, alert, terjual 30 hari, estimasi habis.
+     *
+     * @param Request $request Body: { query: string, max 500 }
+     * @return JsonResponse 202 + job_id, atau 429 limit_reached
+     */
     public function predictStock(Request $request): JsonResponse
     {
         if (! $this->checkAndIncrementUsage()) {
@@ -289,15 +339,14 @@ class AiController extends Controller
 
         $tenantId = $request->user()->tenant_id;
 
-        $products = Product::with('category')
-            ->withCount([
-                'orderItems as total_sold_30_days' => function ($q) use ($tenantId) {
-                    $q->join('orders', 'order_items.order_id', '=', 'orders.id')
-                      ->where('orders.status', 'paid')
-                      ->when($tenantId, fn($o) => $o->where('orders.tenant_id', $tenantId))
-                      ->where('orders.created_at', '>=', now()->subDays(30));
-                }
-            ])
+        $products = Product::withCount([
+            'orderItems as total_sold_30_days' => function ($q) use ($tenantId) {
+                $q->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('orders.status', 'paid')
+                    ->when($tenantId, fn($o) => $o->where('orders.tenant_id', $tenantId))
+                    ->where('orders.created_at', '>=', now()->subDays(30));
+            }
+        ])
             ->get()
             ->map(fn($p) => [
                 'nama'              => $p->name,
@@ -343,6 +392,14 @@ class AiController extends Controller
     // RECOMMEND
     // POST /api/ai/recommend
     // =============================================================
+    /**
+     * Rekomendasi produk via analisis pola pembelian (market basket).
+     * Produk yang sering dibeli bersama diorder yang sama difrekuensikan,
+     * opsional difilter ke satu product_id.
+     *
+     * @param Request $request Body: { query: string, product_id?: int }
+     * @return JsonResponse 202 + job_id, atau 429 limit_reached
+     */
     public function recommend(Request $request): JsonResponse
     {
         if (! $this->checkAndIncrementUsage()) {
@@ -412,6 +469,12 @@ class AiController extends Controller
     // LOGS — riwayat query AI
     // GET /api/ai/logs
     // =============================================================
+    /**
+     * Riwayat query AI (pagination 20), hanya user dalam tenant sendiri
+     * (developer melihat semua tenant). Eager load user → tanpa N+1.
+     *
+     * @return JsonResponse Daftar log + meta pagination
+     */
     public function logs(): JsonResponse
     {
         $tenantId = auth()->user()->tenant_id;
@@ -447,6 +510,13 @@ class AiController extends Controller
     // STATS — ringkasan monitoring untuk admin
     // GET /api/ai/stats
     // =============================================================
+    /**
+     * Statistik pemakaian AI untuk halaman monitoring: summary harian/
+     * mingguan/bulanan, per tipe, per provider, per user, dan tren 7 hari.
+     * Scope tenant di-bind lewat $scopeFn (whereHas user non-developer).
+     *
+     * @return JsonResponse summary + breakdown + config limit
+     */
     public function stats(): JsonResponse
     {
         $today      = today();
@@ -469,6 +539,7 @@ class AiController extends Controller
 
         $todayTokens = AiQueryLog::whereDate('created_at', $today)->tap($scopeFn)->sum('tokens_used');
 
+        // ===== SUMMARY: hari ini / minggu ini / bulan ini =====
         $summary = [
             'today' => [
                 'requests'         => AiQueryLog::whereDate('created_at', $today)->tap($scopeFn)->count(),
@@ -486,6 +557,7 @@ class AiController extends Controller
             ],
         ];
 
+        // ===== PEMAKAIAN PER TIPE ENDPOINT (hari ini) =====
         $byType = AiQueryLog::whereDate('created_at', $today)
             ->tap($scopeFn)
             ->selectRaw('type, COUNT(*) as count, SUM(tokens_used) as tokens')
@@ -497,6 +569,7 @@ class AiController extends Controller
                 'tokens' => (int) $r->tokens,
             ]);
 
+        // ===== PEMAKAIAN PER PROVIDER LLM (hari ini) =====
         $byProvider = AiQueryLog::whereDate('created_at', $today)
             ->whereNotNull('provider')
             ->tap($scopeFn)
@@ -505,7 +578,9 @@ class AiController extends Controller
             ->get()
             ->map(fn($r) => ['provider' => $r->provider, 'count' => (int) $r->count]);
 
-        $monthStart = now()->startOfMonth();
+        // ===== PEMAKAIAN PER USER (hari ini) — untuk tabel monitoring =====
+        // Pro/Enterprise memakai kuota HARIAN → used = pemakaian hari ini;
+        // Free memakai kuota BULANAN → used = total sejak awal bulan.
         $usersToday = AiChatUsage::with('user')
             ->whereDate('usage_date', $today)
             ->tap($scopeFn)
@@ -533,6 +608,8 @@ class AiController extends Controller
                 ];
             });
 
+        // ===== TREN 7 HARI TERAKHIR (untuk grafik) =====
+        // DATE(created_at) portabel MySQL & SQLite; label di-format di PHP.
         $dailyTrend = AiQueryLog::where('created_at', '>=', now()->subDays(6)->startOfDay())
             ->tap($scopeFn)
             ->selectRaw('DATE(created_at) as date, COUNT(*) as requests, SUM(tokens_used) as tokens')
@@ -563,6 +640,15 @@ class AiController extends Controller
     // PRIVATE HELPERS
     // =============================================================
 
+    /**
+     * Cek kuota AI (harian & bulanan) lalu increment pemakaian, atomik.
+     *
+     * Alur: lock baris usage hari ini (lockForUpdate) → baca pemakaian terkini
+     * → lapis 1 cek kuota harian (Pro/Enterprise), lapis 2 kuota bulanan
+     * (Free) → kalau masih tersisa, increment count dan return true.
+     *
+     * @return bool true = kuota masih ada & sudah dicatat, false = limit tercapai
+     */
     private function checkAndIncrementUsage(): bool
     {
         $dailyLimit   = $this->dailyLimit();
@@ -649,6 +735,12 @@ class AiController extends Controller
         ];
     }
 
+    /**
+     * Response 429 standar saat kuota habis (limit_reached = true).
+     * Pesan dibedakan: kuota harian (Pro/Enterprise) vs bulanan (FREE).
+     *
+     * @return JsonResponse 429 { message, limit_reached: true }
+     */
     private function limitReachedResponse(): JsonResponse
     {
         $dailyLimit = $this->dailyLimit();

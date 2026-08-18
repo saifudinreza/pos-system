@@ -1,5 +1,21 @@
 "use client";
 
+// ============================================================
+// Reports Page — Laporan penjualan & stok + export PDF/Excel
+//
+// Data yang diambil (per tab):
+//   - Tab "Penjualan": reportService.getSales(params) → summary
+//     (revenue, orders, COGS, laba kotor, margin), chart_data,
+//     top_products · params ditentukan preset: hari ini / 7 / 30 hari /
+//     bulanan (dengan pilihan tahun) / custom (rentang tanggal)
+//   - Tab "Stok": reportService.getStock() → daftar produk + ringkasan
+//     stok (menipis, habis, nilai total)
+//
+// Export PDF/Excel hanya untuk paket Pro/Enterprise — backend juga
+// memblokir (403) kalau Free; tombol disembunyikan via isFreePlan.
+// File di-download via blob (triggerFileDownload dari reportService).
+// ============================================================
+
 import { useState, useEffect, useCallback } from "react";
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
@@ -16,11 +32,13 @@ import NeoButton from "@/components/ui/NeoButton";
 import NeoCard   from "@/components/ui/NeoCard";
 import NeoTable  from "@/components/ui/NeoTable";
 import NeoBadge  from "@/components/ui/NeoBadge";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 // ── Helpers ─────────────────────────────────────────────────────
+// Format tanggal ke string YYYY-MM-DD (untuk query param date_from/date_to)
 const fmtDate = (d) => d.toISOString().split("T")[0];
 const todayStr = () => fmtDate(new Date());
+// n hari kebelakang — +1 supaya "7 hari" berarti 7 entri termasuk hari ini
 const daysAgo  = (n) => { const d = new Date(); d.setDate(d.getDate() - n + 1); return fmtDate(d); };
 
 const PRESETS = [
@@ -32,6 +50,7 @@ const PRESETS = [
 ];
 
 // ── Tooltip ──────────────────────────────────────────────────────
+/** ChartTooltip — Tooltip kustom untuk chart Recharts (neobrutal, konsisten dgn tema). */
 const ChartTooltip = ({ active, payload, label, currency }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -46,16 +65,17 @@ const ChartTooltip = ({ active, payload, label, currency }) => {
 
 // ── Page ─────────────────────────────────────────────────────────
 export default function ReportsPage() {
-  const [tab,          setTab]          = useState("sales");
-  const [preset,       setPreset]       = useState("monthly");
+  // ── State: tab aktif, preset periode, data, loading ──
+  const [tab,          setTab]          = useState("sales");      // "sales" | "stock"
+  const [preset,       setPreset]       = useState("monthly");    // preset periode penjualan
   const [filterYear,   setFilterYear]   = useState(new Date().getFullYear());
-  const [customFrom,   setCustomFrom]   = useState("");
+  const [customFrom,   setCustomFrom]   = useState("");           // rentang custom (preset "custom")
   const [customTo,     setCustomTo]     = useState("");
   const [sales,        setSales]        = useState(null);
   const [stock,        setStock]        = useState([]);
   const [stockSummary, setStockSummary] = useState(null);
   const [loading,      setLoading]      = useState(false);
-  const [denied,       setDenied]       = useState(false);
+  const [denied,       setDenied]       = useState(false);        // 403 → halaman akses ditolak
   const [downloading,  setDownloading]  = useState(false);
 
   // Export PDF/Excel hanya untuk paket Pro/Enterprise (back-end juga memblokir)
@@ -63,7 +83,10 @@ export default function ReportsPage() {
     (s.user?.effective_plan ?? s.user?.subscription_plan ?? "free") === "free"
   );
 
-  // Compute API params from current preset
+  /**
+   * getParams — Ubah preset periode menjadi query params API.
+   * Preset "custom" tanpa tanggal lengkap → null (fetch dibatalkan).
+   */
   const getParams = useCallback(() => {
     switch (preset) {
       case "today":   return { period: "daily",   date_from: todayStr(), date_to: todayStr() };
@@ -77,6 +100,7 @@ export default function ReportsPage() {
     }
   }, [preset, filterYear, customFrom, customTo]);
 
+  /** fetchSales — Ambil data laporan penjualan sesuai params; 403 → tampilan akses ditolak. */
   const fetchSales = useCallback(async () => {
     const params = getParams();
     if (!params) return;
@@ -89,6 +113,7 @@ export default function ReportsPage() {
     } finally { setLoading(false); }
   }, [getParams]);
 
+  /** fetchStock — Ambil laporan stok (daftar produk + ringkasan). */
   const fetchStock = useCallback(async () => {
     setLoading(true);
     try {
@@ -106,6 +131,11 @@ export default function ReportsPage() {
     else fetchStock();
   }, [tab, fetchSales, fetchStock]);
 
+  /**
+   * handleDownload — Unduh laporan PDF/Excel. Backend mengembalikan blob
+   * (responseType blob) → triggerFileDownload membuat <a download> secara
+   * otomatis dan mengekliknya; nama file pakai timestamp biar unik.
+   */
   const handleDownload = async (format = "pdf") => {
     setDownloading(true);
     try {
@@ -119,9 +149,10 @@ export default function ReportsPage() {
     finally { setDownloading(false); }
   };
 
-  // ── Derived chart data ──────────────────────────────────────
+  // ── Derived chart data: data mentah → bentuk yang siap render ──
   const chartData = sales?.chart_data ?? [];
 
+  // Hitung % kontribusi tiap produk dari total qty (dengan fallback 1 biar tak bagi 0)
   const totalQty    = (sales?.top_products ?? []).reduce((s, p) => s + (p.total_quantity ?? 0), 0) || 1;
   const topProds    = (sales?.top_products ?? [])
     .slice(0, 10)
@@ -132,7 +163,7 @@ export default function ReportsPage() {
     }));
   const topBarData  = topProds.map((p) => ({ name: p.name.split(" ").slice(0, 2).join(" "), qty: p.total_quantity ?? 0 }));
 
-  // ── Columns ───────────────────────────────────────────────────
+  // ── Definisi kolom tabel (per jenis data) ──
   const salesChartCols = [
     { key: "label",              label: "Periode" },
     { key: "total_revenue",      label: "Pendapatan",  render: (v) => <span className="font-mono font-bold">{formatCurrency(v)}</span> },
@@ -181,6 +212,7 @@ export default function ReportsPage() {
     }},
   ];
 
+    // ── Render: header + tombol export → tabs → konten per tab ──
   if (denied) return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 page-fade">
       <div className="w-20 h-20 bg-red-100 border-2 border-brand-black flex items-center justify-center"

@@ -4,6 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 
+/**
+ * Base controller untuk semua controller API.
+ *
+ * Berisi helper pembaca plan efektif & limit read produk/kategori per plan.
+ * Limit terpusat di sini supaya gating plan konsisten di semua controller
+ * (free 50/15, pro & enterprise unlimited). Dipakai oleh ProductController,
+ * CategoryController, dll.
+ */
 abstract class Controller
 {
     /**
@@ -12,6 +20,8 @@ abstract class Controller
      */
     protected function getEffectivePlan(User $user): string
     {
+        // Admin/developer memakai plan di akunnya sendiri; kasir & customer
+        // tidak punya subscription → ikut plan admin di tenant yang sama
         if (in_array($user->role, ['admin', 'developer'])) {
             return $user->subscription_plan ?? 'free';
         }
@@ -37,6 +47,7 @@ abstract class Controller
     {
         $limits = ['free' => 15, 'pro' => null, 'enterprise' => null];
 
+        // array_key_exists, bukan ?? — karena null (unlimited) adalah nilai valid
         return array_key_exists($plan, $limits) ? $limits[$plan] : 15;
     }
 }

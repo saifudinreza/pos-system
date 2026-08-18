@@ -1,5 +1,13 @@
 "use client";
 
+// ============================================================
+// Upgrade Pending — Halaman setelah pembayaran Midtrans pending
+//
+// Terjadi saat user memilih VA/transfer lalu menutup popup, atau pembayaran
+// masih diproses bank. Aktivasi otomatis terjadi begitu webhook Midtrans
+// mengonfirmasi pembayaran — user cukup menunggu / memantau lewat Profil.
+// ============================================================
+
 import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Clock, AlertCircle } from "lucide-react";
@@ -10,6 +18,7 @@ function PendingContent() {
   const searchParams = useSearchParams();
   const plan = searchParams.get("plan") ?? "pro";
 
+  // ── Render: kartu status pending + info langkah selanjutnya ──
   return (
     <div className="max-w-lg mx-auto py-16 px-4 text-center page-fade">
       <div className="border-2 border-brand-black bg-white p-10" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>

@@ -1,7 +1,7 @@
 // ============================================================
 // aiService.js — Layanan AI Assistant (powered by Groq + LLaMA)
 //
-// Anali: Ini seperti "konsultan bisnis pintar" yang selalu siap
+// Analogi: Ini seperti "konsultan bisnis pintar" yang selalu siap
 // menjawab pertanyaan soal data toko kita. Dia membaca data
 // penjualan dari database, lalu menjawab dalam bahasa manusia.
 //
@@ -45,6 +45,8 @@ const pollJob = async (jobId) => {
 
     if (job.status === "failed") {
       const err = new Error(job.error ?? "AI tidak dapat menjawab saat ini. Coba lagi.");
+      // Buat err.response palsu berbentuk respons axios, supaya pemanggil
+      // bisa memakai pola err.response?.data?.message seperti error biasa
       err.response = { data: { message: err.message } };
       throw err;
     }
@@ -53,6 +55,7 @@ const pollJob = async (jobId) => {
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 
+  // Batas waktu polling tercapai — job masih belum selesai
   const err = new Error("AI membutuhkan waktu terlalu lama. Coba lagi.");
   err.response = { data: { message: err.message } };
   throw err;
@@ -69,11 +72,19 @@ const aiService = {
     return pollJob(data.job_id);
   },
 
+  // --- PREDIKSI KAPAN STOK HABIS ---
+  // AI menganalisis kecepatan penjualan per produk lalu memperkirakan
+  // kapan stok akan habis. Proses async — polling job di balik layar.
+  // @param {{ query: string }} payload
   predictStock: async (query) => {
     const { data } = await api.post("/ai/predict-stock", { query });
     return pollJob(data.job_id);
   },
 
+  // --- REKOMENDASI PRODUK / STRATEGI ---
+  // Bisa spesifik ke satu produk (productId) atau umum untuk seluruh toko.
+  // @param {string} query
+  // @param {number|null} productId — ID produk spesifik (opsional)
   recommend: async (query, productId = null) => {
     const { data } = await api.post("/ai/recommend", { query, product_id: productId });
     return pollJob(data.job_id);

@@ -6,13 +6,45 @@
 
 ## Status Terakhir
 
-- Tanggal: 13 Agustus 2026
-- Git: **belum commit** (fitur forgot password — cek `git status`)
-- Backend: **67 test PHPUnit lulus** (sqlite `:memory:`)
-  - Ditambah `PasswordResetTest` (7 test: kirim email reset ke user terdaftar,
-    email tak terdaftar tetap 200 tanpa kirim, 422 format salah, reset valid
-    mengganti password, token palsu 422, cabut semua sesi lama, token sekali pakai)
-- Frontend: `npm run build` sukses → `/forgot-password` & `/reset-password` terdaftar
+- Tanggal: 18 Agustus 2026
+- Git: **belum commit** (sesi review & komentari seluruh codebase — cek `git status`)
+- Backend: **69 test PHPUnit lulus** (sqlite `:memory:`)
+  - Ditambah `SalesReportChartTest` (2 test: chart bulanan portabel SQLite/MySQL
+    & isolasi per tenant) — bukti fix `MONTH()` → groupBy PHP.
+- Frontend: `npm run build` sukses (semua route terdaftar, tanpa error)
+
+---
+
+## Fitur yang SUDAH dikerjakan
+
+### 12. Review & komentari seluruh codebase (readability pass)
+- **Semua file backend & frontend di-review dan diberi komentar Bahasa Indonesia**:
+  docblock di tiap class/method/relasi model, komentar inline di logika non-trivial,
+  banner seksi di file besar (routes/api.php, kasir/page.jsx, HeroSection, dst).
+- **Perbaikan efisiensi aman**: eager-load N+1 di `ShiftController::index()`
+  (`withCount`/`withSum`) & `OrderController::updateStatus()`; buang import/query
+  mati (`AiController::stats()` variabel duplikat, `ReportController` import DB
+  & `$year` duplikat); extract helper duplikat di frontend (`persistSession` di
+  authService, `buildProductFormData` di productService); buang dead code di
+  halaman (import/variabel/console.log mati).
+- **Bug fix nyata #1 — unduhan PDF/Excel korup**: interceptor sukses `lib/axios.js`
+  men-`JSON.stringify` SEMUA respons objek, termasuk Blob → file export jadi `"{}"`.
+  Fix: guard `response.config?.responseType === "blob"` → respons biner dilewati.
+- **Bug fix nyata #2 — chart bulanan MySQL-only**: `ReportController::sales()`
+  (`period=monthly`) memakai `MONTH(paid_at)` (MySQL-only, melanggar CLAUDE.md
+  point 9 & bakal error kalau ada test sqlite). Fix: ambil `paid_at, amount`,
+  kelompokkan per bulan di PHP via Carbon (`groupBy` + `sortKeys`), output identik.
+- ⚠️ **Temuan potensial yang TIDAK diubah (perlu validasi bisnis)**:
+  1. `TransactionController::payCash()` mengambil transaksi status APA PUN untuk
+     order — pending QRIS bisa ke-mark settlement cash & reuse midtrans_order_id.
+  2. `ShiftController::open()` hardcode `shift_number => 1` (tidak pernah increment).
+  3. `InsightController::index()` developer tenant null → selalu kosong.
+  4. `ProductController::Cache::forget('products_all')` no-op (index tak pernah cache).
+  5. Frontend `aiStore` fallback kuota `Math.max(0, remaining - 1)` — `remaining = null`
+     (unlimited) jadi 0 di UI.
+  6. `ReportController::sales()` `MONTH()` sudah di-fix (lihat di atas) — sisanya
+     hanya temuan; kalau mau dikerjakan, bahas dulu karena menyentuh alur uang.
+- Test baru: `SalesReportChartTest` (2 test). Total 69 test.
 
 ---
 

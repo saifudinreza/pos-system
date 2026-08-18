@@ -1,5 +1,18 @@
 "use client";
 
+// ============================================================
+// Register Page — Halaman pendaftaran akun baru
+//
+// Alur:
+//   1. User isi form (nama, toko, email, HP, password)
+//   2. Saat mengetik "Nama Toko" → cek ke GET /api/check-tenant
+//      (debounce 500ms): nama toko sudah ada = "bergabung ke toko"
+//      (role Kasir), nama baru = "buat toko sendiri" (role Admin)
+//   3. POST /api/register via authStore.register()
+//   4. Kalau daftar dari landing dengan ?plan=pro|enterprise →
+//      redirect ke /upgrade, selain itu ke /dashboard
+// ============================================================
+
 import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import LogoMark from "@/components/brand/LogoMark";
@@ -9,6 +22,11 @@ import { getErrorMessage } from "@/lib/utils";
 import api from "@/lib/axios";
 
 // ── Input Field component ────────────────────────────────────
+/**
+ * Field — Input form terstandar (label, input, pesan error).
+ * error bisa string biasa atau array (dari validasi Laravel) — array
+ * diambil elemen pertamanya.
+ */
 const Field = ({ name, label, type = "text", placeholder, value, onChange, error, required = true }) => (
   <div className="flex flex-col gap-1.5">
     <label className="text-sm font-bold">
@@ -27,6 +45,11 @@ const Field = ({ name, label, type = "text", placeholder, value, onChange, error
 );
 
 // ── Tenant status indicator ───────────────────────────────────
+/**
+ * TenantStatus — Info real-time di bawah input Nama Toko:
+ *   checking → "memeriksa..." · join → toko ditemukan (bergabung)
+ *   new      → nama baru (buat toko sendiri) · selain itu → null (kosong)
+ */
 function TenantStatus({ status, tenantInfo }) {
   if (status === "checking") return (
     <div className="flex items-center gap-1.5 text-[11px] text-brand-black/40 font-mono mt-1">
@@ -66,6 +89,9 @@ function TenantStatus({ status, tenantInfo }) {
 }
 
 function RegisterForm() {
+  // ── State ──
+  // tenantStatus: null | "checking" | "join" | "new" — hasil cek nama toko
+  // tenantInfo: data tenant kalau nama toko ternyata sudah dipakai
   const { register, isLoading } = useAuthStore();
   const searchParams = useSearchParams();
   const plan = searchParams.get("plan") ?? "free";
@@ -76,6 +102,11 @@ function RegisterForm() {
   const [tenantInfo, setTenantInfo]     = useState(null);
   const debounceRef = useRef(null);
 
+  /**
+   * handleChange — Update form + reset error field yang sedang diketik.
+   * Khusus "store_name": cek ketersediaan tenant via API dengan debounce
+   * 500ms (debounceRef) supaya tidak spam request per keystroke.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -104,8 +135,15 @@ function RegisterForm() {
     }
   };
 
+  // Bersihkan timer debounce kalau komponen di-unmount (hindari setState
+  // setelah komponen hilang dari layar)
   useEffect(() => () => clearTimeout(debounceRef.current), []);
 
+  /**
+   * handleSubmit — Validasi lokal (konfirmasi password cocok) lalu kirim
+   * ke authStore.register(). Kalau daftar karena klik paket berbayar di
+   * landing (?plan=pro|enterprise) → arahkan ke halaman upgrade.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
@@ -131,6 +169,7 @@ function RegisterForm() {
 
   const planLabel = { free: "Free Trial", pro: "Pro", enterprise: "Enterprise" }[plan] ?? "Free";
 
+  // ── Render: form registrasi + indikator tenant ──
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">

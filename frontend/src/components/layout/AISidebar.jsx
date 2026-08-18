@@ -1,13 +1,29 @@
 "use client";
 
+// ============================================================
+// AISidebar — Panel chat "KasirAI Assistant" di sisi kanan
+//
+// Sumber data: aiStore (Zustand) — pesan, loading, kuota harian.
+// Dua mode pemakaian:
+//   - alwaysVisible=true  → panel menetap (dipakai di halaman /kasir)
+//   - alwaysVisible=false → slide-in dari kanan dengan overlay
+//     (dipakai di layout dashboard, di-buka lewat tombol AI)
+//
+// Fitur: quick prompts, bar kuota (hijau/kuning/merah), banner
+// warning & limit, indikator provider aktif (Groq/OpenRouter),
+// badge tokens per pesan AI.
+// ============================================================
+
 import { useState, useRef, useEffect } from "react";
 import useAiStore from "@/stores/aiStore";
 
+// Label & warna badge provider — dipakai di bawah bubble pesan AI
 const PROVIDER_LABEL = {
   groq:        { text: "Groq",        cls: "bg-brand-yellow text-brand-black" },
   openrouter:  { text: "OpenRouter",  cls: "bg-purple-100 text-purple-700" },
 };
 
+// Icon chat (bubble) — dipakai di header panel
 const ChatIcon = ({ className = "" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M12 2a9 9 0 0 1 9 9c0 2.4-.94 4.6-2.48 6.23L20 22l-4.5-1.5A9 9 0 1 1 12 2z"/>
@@ -23,6 +39,7 @@ const SendIcon = ({ className = "" }) => (
   </svg>
 );
 
+// Icon reset percakapan — tombol "Reset" di header
 const ResetIcon = ({ className = "" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
@@ -42,6 +59,7 @@ const BlockIcon = ({ className = "" }) => (
   </svg>
 );
 
+// Ikon per quick prompt — key = teks prompt, value = ikon SVG kecil
 const QUICK_PROMPT_ICONS = {
   "Produk terlaris bulan ini?": (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
@@ -66,6 +84,14 @@ const QUICK_PROMPT_ICONS = {
   ),
 };
 
+/**
+ * MessageBubble — satu gelembung pesan chat.
+ *
+ * msg: { id, role: "user"|"assistant", content, isError?, provider?, tokens_used? }
+ *   - User  → kuning, rata kanan
+ *   - AI    → putih, rata kiri (merah muda kalau isError)
+ *   - provider/tokens_used → badge kecil di bawah bubble AI
+ */
 const MessageBubble = ({ msg }) => {
   const isUser = msg.role === "user";
   const provider = !isUser && msg.provider ? PROVIDER_LABEL[msg.provider] : null;
@@ -98,6 +124,7 @@ const MessageBubble = ({ msg }) => {
   );
 };
 
+// Pertanyaan siap pakai di bawah input — sekali klik langsung terkirim
 const QUICK_PROMPTS = [
   "Produk terlaris bulan ini?",
   "Stok apa yang mau habis?",
@@ -105,6 +132,15 @@ const QUICK_PROMPTS = [
   "Total penjualan hari ini?",
 ];
 
+/**
+ * AISidebar — panel chat AI Assistant (lihat header file untuk deskripsi).
+ *
+ * Props:
+ *   isOpen        : kontrol tampil (mode slide-in)
+ *   onClose       : tutup panel (mode slide-in)
+ *   alwaysVisible : true → panel menetap tanpa overlay/tombol ✕
+ *   isDev         : true → tampil badge "DEV" (mode developer)
+ */
 export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDev = false }) {
   const [input, setInput] = useState("");
   const bottomRef = useRef(null);
@@ -113,6 +149,8 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
     dailyUsage, limitReached, usageWarning, fetchUsage,
   } = useAiStore();
 
+  // Provider aktif = provider dari pesan AI TERAKHIR yang punya info provider.
+  // Ini cara tahu apakah saat ini jalan normal (Groq) atau fallback (OpenRouter).
   const lastAiMsg      = [...messages].reverse().find((m) => m.role === "assistant" && m.provider);
   const activeProvider = lastAiMsg?.provider ?? "groq";
   const isOpenRouter   = activeProvider === "openrouter";
@@ -122,6 +160,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
     fetchUsage();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-scroll ke pesan terbaru setiap ada pesan baru
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -133,10 +172,13 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
     try { await sendQuery(q); } catch {}
   };
 
+  // Enter = kirim; Shift+Enter = baris baru
   const handleKey = (e) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
+  // Quick prompt: isi input dulu, lalu kirim otomatis.
+  // Jeda 50ms supaya state input sempat ter-render sebelum kirim.
   const handleQuickPrompt = (q) => {
     if (limitReached) return;
     setInput(q);
@@ -158,6 +200,8 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
   const periodLabel  = unlimited ? "AI Assistant" : isDaily ? "Sisa kuota AI hari ini" : "Sisa kuota AI bulan ini";
   const periodValue  = unlimited ? "Tak terbatas" : `${remaining}/${dailyUsage.limit}`;
 
+  // Konten panel dipisah jadi variabel supaya bisa dipakai di dua mode
+  // (dibungkus overlay + translate-x di mode slide-in, atau polos di mode selalu-visible)
   const panelContent = (
     <aside className="h-full w-80 lg:w-96 bg-white border-l-2 border-brand-black flex flex-col overflow-hidden">
       {/* Header */}

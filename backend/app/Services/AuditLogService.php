@@ -12,6 +12,19 @@ use Illuminate\Support\Facades\Log;
  */
 class AuditLogService
 {
+    /**
+     * Catat satu kejadian audit (perubahan produk, harga, role, plan, setting tenant).
+     *
+     * Dipanggil dari controller SETELAH aksi utama berhasil. Kegagalan menulis
+     * audit log tidak boleh menggagalkan operasi utama — cukup dicatat di log
+     * aplikasi (try/catch).
+     *
+     * @param string $action         Nama aksi, mis. 'product_updated', 'role_changed'
+     * @param string|null $entityType Tipe entitas terkait (product, user, tenant, ...)
+     * @param int|string|null $entityId ID entitas yang diubah
+     * @param mixed $before          Snapshot data sebelum perubahan (untuk diff)
+     * @param mixed $after           Snapshot data sesudah perubahan
+     */
     public static function log(
         string $action,
         ?string $entityType = null,
@@ -21,6 +34,7 @@ class AuditLogService
     ): void {
         try {
             AuditLog::create([
+                // Konteks user dari session; null kalau aksi tanpa login (mis. webhook)
                 'tenant_id'   => auth()->id() ? auth()->user()->tenant_id : null,
                 'user_id'     => auth()->id(),
                 'action'      => $action,

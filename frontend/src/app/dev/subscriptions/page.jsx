@@ -1,5 +1,19 @@
 "use client";
 
+// ============================================================
+// Dev · Manajemen Subscriptions — Kelola langganan semua user
+//
+// Data: subscriptionStore.fetchSubscriptions() → daftar subscription +
+// statistik agregat (total/aktif/free/pro/enterprise/MRR)
+//
+// Aksi: ubah plan user (modal radio), tangguhkan / aktifkan langganan.
+// Akun developer (is_developer) terkunci — tidak bisa diubah.
+// Aksi langsung mengubah plan aktif user; harga plan dari
+// subscriptionStore PLANS (harus sinkron dengan PRICES di backend).
+//
+// Akses via /dev/* — hanya developer (PIN / email developer).
+// ============================================================
+
 import { useState, useEffect } from "react";
 import useSubscriptionStore, { PLANS } from "@/stores/subscriptionStore";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -79,6 +93,10 @@ const STATUS_BADGE = {
 };
 
 // ── StatCard ────────────────────────────────────────────────
+/**
+ * StatCard — Kartu statistik ringkas: label, nilai besar, sub-teks opsional.
+ * accent menentukan warna border/shadow/ikon (default: putih transparan).
+ */
 function StatCard({ label, value, sub, accent, Icon }) {
   return (
     <div
@@ -104,18 +122,20 @@ function StatCard({ label, value, sub, accent, Icon }) {
 }
 
 export default function SubscriptionsPage() {
+  // ── State ──
   const { subscriptions, stats, isLoading, error, fetchSubscriptions, updatePlan, toggleStatus } =
     useSubscriptionStore();
 
   const [search,     setSearch]     = useState("");
   const [filterPlan, setFilterPlan] = useState("");
-  const [editModal,  setEditModal]  = useState(null);
-  const [newPlan,    setNewPlan]    = useState("");
+  const [editModal,  setEditModal]  = useState(null);  // subscription yang sedang diedit
+  const [newPlan,    setNewPlan]    = useState("");    // plan pilihan di modal
   const [saving,     setSaving]     = useState(false);
-  const [toggling,   setToggling]   = useState(null);
+  const [toggling,   setToggling]   = useState(null);  // id subscription yang statusnya diubah
 
   useEffect(() => { fetchSubscriptions(); }, [fetchSubscriptions]);
 
+  // Filter client-side: cocokkan search (nama/email) + filter plan
   const filtered = subscriptions.filter((s) => {
     const matchSearch = !search ||
       s.user_name.toLowerCase().includes(search.toLowerCase()) ||
@@ -124,8 +144,10 @@ export default function SubscriptionsPage() {
     return matchSearch && matchPlan;
   });
 
+  /** handleEdit — Buka modal ubah plan, pre-fill dengan plan saat ini. */
   const handleEdit = (sub) => { setEditModal(sub); setNewPlan(sub.plan); };
 
+  /** handleSavePlan — Simpan plan baru user via store (updatePlan). */
   const handleSavePlan = async () => {
     if (!editModal || !newPlan) return;
     setSaving(true);
@@ -139,6 +161,7 @@ export default function SubscriptionsPage() {
     }
   };
 
+  /** handleToggle — Tangguhkan / aktifkan langganan user via store. */
   const handleToggle = async (sub) => {
     setToggling(sub.id);
     try { await toggleStatus(sub.id); }
@@ -146,6 +169,7 @@ export default function SubscriptionsPage() {
     finally { setToggling(null); }
   };
 
+  // ── Render: header → stats → revenue per plan → filter → tabel → matrix → modal ──
   return (
     <div className="space-y-6 page-fade">
 

@@ -1,5 +1,19 @@
 "use client";
 
+// ============================================================
+// Dashboard Page — Halaman utama setelah login
+//
+// Data yang ditampilkan (diambil dari 4 endpoint):
+//   - reportService.getSales({ period: "daily" }) → summary & chart bulan ini
+//   - reportService.getStock()                    → kondisi stok (low stock)
+//   - orderService.getAll({ per_page: 10 })       → 10 transaksi terbaru
+//   - reportService.getForecast()                 → prediksi penjualan 7 hari
+//   - insightService.getInsights()                → wawasan AI (generate manual)
+//
+// Loading dipecah: data utama (summary/stok/order) satu batch,
+// forecast & insight dimuat terpisah dengan state loading sendiri.
+// ============================================================
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
@@ -18,6 +32,10 @@ import insightService       from "@/services/insightService";
 import { formatCurrency, formatDateTime, getOrderStatusConfig } from "@/lib/utils";
 
 export default function DashboardPage() {
+  // ── State ──
+  // summary: ringkasan penjualan bulan ini · weekly: chart 7 hari terakhir
+  // topProds: 5 produk terlaris · stock: produk stok menipis
+  // orders: transaksi terbaru · forecast/insights: blok AI (loading sendiri)
   const [summary,      setSummary]      = useState(null);
   const [weekly,       setWeekly]       = useState([]);
   const [topProds,     setTopProds]     = useState([]);
@@ -34,6 +52,11 @@ export default function DashboardPage() {
   const [generatingInsights, setGeneratingInsights] = useState(false);
 
   useEffect(() => {
+    /**
+     * fetchAll — Ambil data dashboard utama dalam satu batch (Promise.allSettled
+     * supaya satu kegagalan tidak menggagalkan yang lain). Period "daily" dikirim
+     * tapi summary yang dipakai tetap ringkasan bulan berjalan dari backend.
+     */
     const fetchAll = async () => {
       setLoading(true);
       try {
@@ -98,6 +121,12 @@ export default function DashboardPage() {
       .finally(() => setInsightsLoading(false));
   }, []);
 
+  /**
+   * handleGenerateInsights — Panggil POST /api/insights/generate agar AI
+   * menganalisis penjualan/stok/pelanggan dan menulis wawasan baru.
+   * Kalau gagal (mis. LLM offline) backend sudah punya fallback templated,
+   * tapi tetap kasih notifikasi supaya user tahu.
+   */
   const handleGenerateInsights = async () => {
     setGeneratingInsights(true);
     try {
@@ -115,8 +144,10 @@ export default function DashboardPage() {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 
+  // Placeholder bar untuk skeleton loading tabel
   const SkeletonBar = () => <div className="h-8 skeleton w-full" />;
 
+  // ── Render: header → alert stok → wawasan AI → forecast → kartu → chart → tabel → aksi cepat ──
   return (
     <div className="space-y-6 page-fade">
 

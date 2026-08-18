@@ -16,8 +16,11 @@ use App\Http\Controllers\Api\InsightController;
 use App\Http\Controllers\Api\CustomerController;
 
 // =============================================================
-// PUBLIC ROUTES — tidak perlu login
+// ============ PUBLIC (TANPA LOGIN) ============
 // =============================================================
+// Route di bawah ini bebas diakses siapa saja tanpa token Sanctum.
+
+// ---------- AUTH (login/register/reset password) ----------
 // throttling: 5 percobaan per menit per IP — anti brute-force password
 Route::post('/register',      [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/login',         [AuthController::class, 'login'])->middleware('throttle:5,1');
@@ -25,6 +28,7 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->midd
 Route::post('/reset-password',  [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 Route::get('/check-tenant',   [AuthController::class, 'checkTenant']);
 
+// ---------- MEDIA PROXY ----------
 // Media proxy — serve gambar dari R2/storage tanpa butuh auth
 Route::get('/media/{path}', function (string $path) {
     $disk = !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public';
@@ -33,46 +37,48 @@ Route::get('/media/{path}', function (string $path) {
     }
     return \Illuminate\Support\Facades\Storage::disk($disk)->response($path);
 })->where('path', '.*');
-// ↑ Dua endpoint ini bebas diakses siapa saja tanpa token
+// ↑ Endpoint ini bebas diakses siapa saja tanpa token (URL R2 tidak pernah
+//   diekspos langsung ke browser — gambar produk selalu lewat proxy ini)
 
 
 // =============================================================
-// PROTECTED ROUTES — wajib login (ada token Sanctum)
+// ============ PROTECTED (WAJIB LOGIN) ============
 // =============================================================
 Route::middleware('auth:sanctum')->group(function () {
     // ↑ Semua route di dalam sini wajib kirim header:
     // Authorization: Bearer {token}
     // Kalau tidak ada token → otomatis return 401
 
-    // ----- AUTH -----
+    // ============ AUTH ============
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me',      [AuthController::class, 'me']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+    // ↑ /me = ambil data user yang sedang login
 
-    // ----- SUBSCRIPTION -----
+    // ============ SUBSCRIPTION ============
+    // Kelola langganan plan (status, initiate pembayaran Midtrans, batal pending)
     Route::get('/subscription',          [SubscriptionController::class, 'status']);
     Route::post('/subscription/initiate', [SubscriptionController::class, 'initiate']);
     Route::post('/subscription/cancel-pending', [SubscriptionController::class, 'cancelPending']);
-    // ↑ /me = ambil data user yang sedang login
 
 
-    // ----- PRODUCTS (semua role bisa lihat) -----
+    // ============ KATALOG (produk & kategori — semua role bisa lihat) ============
+    // ----- PRODUCTS -----
     Route::get('/products',        [ProductController::class, 'index']);
     Route::get('/products/{id}',   [ProductController::class, 'show']);
     // ↑ Customer dan kasir perlu lihat daftar produk
 
-
-    // ----- CATEGORIES (semua role bisa lihat) -----
+    // ----- CATEGORIES -----
     Route::get('/categories',      [CategoryController::class, 'index']);
     Route::get('/categories/{id}', [CategoryController::class, 'show']);
 
 
-    // ----- ORDERS (customer & kasir bisa buat order) -----
+    // ============ ORDER & TRANSAKSI (customer & kasir) ============
+    // ----- ORDERS -----
     Route::post('/orders',              [OrderController::class, 'store']);
     Route::get('/orders/{id}',          [OrderController::class, 'show']);
     Route::get('/orders/my/history',    [OrderController::class, 'myOrders']);
     // ↑ Customer lihat riwayat order sendiri
-
 
     // ----- TRANSACTIONS -----
     Route::post('/transactions',           [TransactionController::class, 'create']);
@@ -81,10 +87,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // ↑ Customer lihat riwayat pembayaran sendiri
 
 
-    // =============================================================
-    // KASIR ROUTES — kasir, admin & developer bisa akses
-    // =============================================================
+    // ============ KASIR (POS) — kasir, admin & developer ============
     Route::middleware('role:admin,kasir,developer')->group(function () {
+        // ----- ORDER & PEMBAYARAN -----
         Route::get('/orders',                              [OrderController::class, 'index']);
         Route::patch('/orders/{id}/status',               [OrderController::class, 'updateStatus']);
         Route::get('/transactions',                       [TransactionController::class, 'index']);
@@ -101,9 +106,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 
-    // =============================================================
-    // ADMIN + KASIR + DEVELOPER — CRUD produk & kategori (dengan limit per plan)
-    // =============================================================
+    // ============ CRUD PRODUK & KATEGORI (admin, kasir & developer) ============
+    // Write operation — dengan limit baca per plan (free 50/15, pro/enterprise unlimited)
     Route::middleware('role:admin,kasir,developer')->group(function () {
         // ----- PRODUCTS CRUD -----
         Route::post('/products',           [ProductController::class, 'store']);
@@ -111,6 +115,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/products/{id}',    [ProductController::class, 'destroy']);
         Route::post('/products/{id}/restock',   [ProductController::class, 'restock']);
         Route::get('/products/{id}/movements',  [ProductController::class, 'movements']);
+        // ↑ movements = riwayat ledger pergerakan stok produk
 
         // ----- CATEGORIES CRUD -----
         Route::post('/categories',         [CategoryController::class, 'store']);
@@ -119,9 +124,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     });
 
-    // =============================================================
-    // ADMIN + DEVELOPER — laporan & AI logs
-    // =============================================================
+
+    // ============ LAPORAN, INSIGHT & CUSTOMER (admin & developer) ============
     Route::middleware('role:admin,developer')->group(function () {
         // ----- REPORTS -----
         Route::get('/reports/sales',           [ReportController::class, 'sales']);
@@ -129,6 +133,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/reports/forecast',        [ReportController::class, 'forecast']);
         Route::get('/reports/sales/download',  [ReportController::class, 'downloadSales']);
         Route::get('/reports/stock/download',  [ReportController::class, 'downloadStock']);
+        // ↑ download = export PDF & Excel (gated: plan free dapat 403)
 
         // ----- AI INSIGHTS -----
         Route::get('/insights',            [InsightController::class, 'index']);
@@ -136,20 +141,18 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('throttle:5,1');
         // ↑ generate memanggil LLM (ada biaya token) → dibatasi 5x/menit
 
-        // ----- CUSTOMERS -----
+        // ----- CUSTOMERS (CRM) -----
         Route::get('/customers',       [CustomerController::class, 'index']);
         Route::get('/customers/{id}',  [CustomerController::class, 'show']);
 
         // ----- AI LOGS & STATS -----
         Route::get('/ai/logs',  [AiController::class, 'logs']);
-
         Route::get('/ai/stats', [AiController::class, 'stats']);
     });
 
 
-    // =============================================================
-    // DEVELOPER ONLY ROUTES — hanya developer yang bisa akses
-    // =============================================================
+    // ============ DEVELOPER ONLY ============
+    // Manajemen user, tenant & subscription lintas tenant — hanya developer
     Route::middleware('role:developer')->group(function () {
         // ----- USER MANAGEMENT -----
         Route::get('/users',                [UserController::class, 'index']);
@@ -172,9 +175,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/dev/subscriptions/{userId}/toggle',     [SubscriptionController::class, 'devToggleStatus']);
     });
 
-    // ----- AI ASSISTANT (admin, kasir & developer — kuota diatur per plan:
-    // free = 5 prompt/bulan, pro = 10 prompt/hari, enterprise = 50 prompt/hari.
-    // throttle:10,1 = max 10 request AI per MENIT per user (anti-burst/anti-script) -----
+
+    // ============ AI ASSISTANT (admin, kasir & developer) ============
+    // Kuota diatur per plan: free = 5 prompt/bulan, pro = 10 prompt/hari,
+    // enterprise = 50 prompt/hari. throttle:10,1 = max 10 request AI per
+    // MENIT per user (anti-burst/anti-script).
     Route::middleware('role:admin,kasir,developer')->group(function () {
         Route::get('/ai/usage-today',    [AiController::class, 'usageToday']);
         Route::get('/ai/jobs/{id}',      [AiController::class, 'jobStatus']);
@@ -191,7 +196,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 // =============================================================
-// WEBHOOK — dipanggil Midtrans dari server mereka
+// ============ WEBHOOK (dipanggil server Midtrans) ============
 // =============================================================
 Route::post('/webhook/midtrans',              [TransactionController::class,  'webhook']);
 Route::post('/webhook/midtrans-subscription', [SubscriptionController::class, 'webhook']);

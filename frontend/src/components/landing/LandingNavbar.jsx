@@ -36,6 +36,11 @@ const NAV_LINKS = [
   { label: "Harga",   href: "#harga" },
 ];
 
+/**
+ * LandingNavbar — navbar sticky landing page (lihat header file).
+ * Tanpa props; state internal: menuOpen (hamburger mobile) &
+ * scrolled (efek background saat halaman digulir > 20px).
+ */
 export default function LandingNavbar() {
   // State untuk menu mobile (buka/tutup hamburger)
   // Analogi: seperti saklar lampu — true = nyala (menu terbuka), false = mati (menu tertutup)

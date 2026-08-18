@@ -23,6 +23,26 @@
 import api from "@/lib/axios";
 import { buildQueryString } from "@/lib/utils";
 
+// --- HELPER: UBAH OBJEK PAYLOAD → FORM-DATA (upload gambar) ---
+// Dipakai create() dan update() — logikanya identik, disatukan di sini
+//
+// PENTING: boolean harus dikonversi ke "1"/"0" di FormData karena
+// Laravel validation `boolean` menolak string "true"/"false"
+// tapi menerima "1"/"0" (FormData selalu mengirim string).
+//
+// Opsi { method } dipakai untuk method spoofing Laravel (_method=PUT)
+// karena PHP tidak bisa baca multipart dari PUT secara native.
+const buildProductFormData = (payload, { method } = {}) => {
+  const form = new FormData();
+  if (method) form.append("_method", method);
+  Object.entries(payload).forEach(([key, val]) => {
+    if (val !== null && val !== undefined) {
+      form.append(key, typeof val === "boolean" ? (val ? "1" : "0") : val);
+    }
+  });
+  return form;
+};
+
 const productService = {
 
   // --- DAFTAR PRODUK (dengan filter & pagination) ---
@@ -67,16 +87,7 @@ const productService = {
     // Jika ada file gambar, ubah ke FormData
     // Analogi: paket biasa dikirim amplop biasa, paket besar pakai kardus
     if (payload.image instanceof File) {
-      const form = new FormData();
-      Object.entries(payload).forEach(([key, val]) => {
-        if (val !== null && val !== undefined) {
-          // PENTING: boolean harus dikonversi ke "1"/"0" di FormData
-          // Laravel validation `boolean` menolak string "true"/"false"
-          // tapi menerima "1"/"0" — karena FormData selalu kirim string
-          form.append(key, typeof val === "boolean" ? (val ? "1" : "0") : val);
-        }
-      });
-      body = form;
+      body = buildProductFormData(payload);
       // Hapus Content-Type header agar browser/axios set multipart + boundary otomatis
       config = { headers: { "Content-Type": undefined } };
     }
@@ -99,15 +110,7 @@ const productService = {
     if (payload.image instanceof File) {
       // Gunakan POST + _method=PUT (Laravel method spoofing)
       // karena multipart/form-data tidak bisa dikirim via PUT di beberapa server
-      const form = new FormData();
-      form.append("_method", "PUT");
-      Object.entries(payload).forEach(([key, val]) => {
-        if (val !== null && val !== undefined) {
-          // Sama seperti create: boolean → "1"/"0" agar Laravel validation lolos
-          form.append(key, typeof val === "boolean" ? (val ? "1" : "0") : val);
-        }
-      });
-      body = form;
+      body = buildProductFormData(payload, { method: "PUT" });
       config = { headers: { "Content-Type": undefined } };
       const { data } = await api.post(`/products/${id}`, body, config);
       return data;

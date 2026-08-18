@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\Password as PasswordBroker;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
+/**
+ * AuthController — autentikasi & profil: register, login, logout, reset
+ * password via email, dan update profil (termasuk konfigurasi Midtrans
+ * per-tenant untuk admin/developer).
+ *
+ * Catatan: Password reset memakai facade `Password` yang di-alias `PasswordBroker`
+ * karena nama bentrok dengan `Illuminate\Validation\Rules\Password`.
+ */
 class AuthController extends Controller
 {
     // =============================================================
@@ -21,6 +29,14 @@ class AuthController extends Controller
     // POST /api/register
     // Body: { name, email, password, phone?, store_name? }
     // =============================================================
+    /**
+     * Daftar akun baru. Kalau nama toko sudah ada, user bergabung ke tenant
+     * itu sebagai kasir; kalau belum ada, tenant baru dibuat dan user jadi
+     * admin. Balas 201 + token Sanctum.
+     *
+     * @param Request $request Data registrasi ter-validasi
+     * @return JsonResponse 201 { message, data: { user, token, is_new_store } }
+     */
     public function register(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -76,7 +92,13 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // GET /api/check-tenant?name=xxx — cek apakah nama toko sudah terdaftar
+    /**
+     * Cek ketersediaan nama toko (dipakai form register untuk auto-suggest).
+     * GET /api/check-tenant?name=xxx
+     *
+     * @param Request $request Query param `name` (min 2 karakter)
+     * @return JsonResponse { exists, tenant: { name, member_count } | null }
+     */
     public function checkTenant(Request $request): JsonResponse
     {
         $name = trim($request->query('name', ''));
@@ -104,6 +126,13 @@ class AuthController extends Controller
     // LOGIN
     // POST /api/login
     // =============================================================
+    /**
+     * Login dengan email & password. Semua token lama dihapus (one device),
+     * lalu token baru dibuat. Akun nonaktif ditolak dengan 403.
+     *
+     * @param Request $request Body: { email, password }
+     * @return JsonResponse 200 { message, data: { user, token } } / 401 / 403
+     */
     public function login(Request $request): JsonResponse
     {
         $request->validate([
@@ -141,6 +170,13 @@ class AuthController extends Controller
     // POST /api/forgot-password
     // Body: { email }
     // =============================================================
+    /**
+     * Kirim email berisi link reset password (token sekali pakai, 60 menit).
+     * Balasan identik untuk email terdaftar/tdk → anti user-enumeration.
+     *
+     * @param Request $request Body: { email }
+     * @return JsonResponse 200 { message }
+     */
     public function forgotPassword(Request $request): JsonResponse
     {
         $request->validate([
@@ -173,6 +209,13 @@ class AuthController extends Controller
     // POST /api/reset-password
     // Body: { email, token, password, password_confirmation }
     // =============================================================
+    /**
+     * Ganti password memakai token dari email. Token valid 60 menit & sekali
+     * pakai; semua token Sanctum user dicabut (harus login ulang).
+     *
+     * @param Request $request Body: { email, token, password, password_confirmation }
+     * @return JsonResponse 200 sukses / 422 token tidak valid
+     */
     public function resetPassword(Request $request): JsonResponse
     {
         $request->validate([
@@ -215,6 +258,12 @@ class AuthController extends Controller
     // LOGOUT
     // POST /api/logout
     // =============================================================
+    /**
+     * Logout: hapus token Sanctum yang sedang dipakai.
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse 200 { message }
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
@@ -228,6 +277,12 @@ class AuthController extends Controller
     // ME — ambil data user yang sedang login
     // GET /api/me
     // =============================================================
+    /**
+     * Data user yang sedang login (dengan info tenant & plan efektif).
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse 200 { data: formatUser(user) }
+     */
     public function me(Request $request): JsonResponse
     {
         return response()->json([
@@ -239,6 +294,15 @@ class AuthController extends Controller
     // UPDATE PROFILE
     // PUT /api/profile
     // =============================================================
+    /**
+     * Update profil user. Field user (name/phone) berlaku untuk semua role;
+     * info toko + key Midtrans hanya untuk admin/developer — kasir yang
+     * mengirim field tersebut diabaikan (silent).
+     *
+     * @param Request $request Body: name?, phone?, store_name?, store_description?,
+     *                          midtrans_server_key?, midtrans_client_key?, midtrans_is_production?
+     * @return JsonResponse 200 { message, data: formatUser(user) }
+     */
     public function updateProfile(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -278,6 +342,14 @@ class AuthController extends Controller
     // =============================================================
     // HELPER
     // =============================================================
+    /**
+     * Format data user untuk response (whitelist field, tanpa data sensitif
+     * seperti password/hash). Key Midtrans server TIDAK pernah dikirim —
+     * hanya flag `midtrans_configured`.
+     *
+     * @param User $user User yang akan diformat
+     * @return array Data user siap-JSON
+     */
     private function formatUser(User $user): array
     {
         return [

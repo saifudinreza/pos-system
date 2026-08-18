@@ -1,4 +1,11 @@
-// Halaman 404 — ditampilkan saat URL tidak ditemukan
+// ============================================================
+// not-found.jsx — Halaman 404 (URL tidak ditemukan)
+//
+// Analogi: "ruang tunggu" gedung — user yang nyasar ke halaman
+// yang tidak ada diarahkan ke sini, lengkap dengan tombol
+// kembali ke beranda. Desain neobrutal sesuai design system.
+// ============================================================
+
 import Link from "next/link";
 
 export default function NotFound() {

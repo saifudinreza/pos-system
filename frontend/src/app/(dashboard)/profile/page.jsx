@@ -1,5 +1,19 @@
 "use client";
 
+// ============================================================
+// Profile Page — Profil akun + status langganan + konfigurasi
+//
+// Data yang diambil:
+//   - fetchCurrentUser() (authStore) → data user (nama, tenant, plan)
+//   - subscriptionService.getStatus() → status & pending subscription
+//
+// Kolom kiri  : form profil (nama, HP, info toko, key Midtrans — admin saja)
+// Kolom kanan : status langganan (aktif / menunggu bayar / free + kartu upgrade)
+//
+// Midtrans keys diisi per-tenant; server key disembunyikan (input password,
+// tidak pernah ditampilkan balik). Subscription pending bisa dibatalkan.
+// ============================================================
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -48,6 +62,9 @@ const PLAN_FEATURES = {
 };
 
 export default function ProfilePage() {
+  // ── State ──
+  // sub/pending: status langganan dari backend · form: field profil (di-fill
+  // dari user setelah fetchCurrentUser selesai)
   const router  = useRouter();
   const { user, setUser, fetchCurrentUser } = useAuthStore();
 
@@ -60,11 +77,14 @@ export default function ProfilePage() {
   const [success,   setSuccess]   = useState(false);
   const [mounted,   setMounted]   = useState(false);
 
+  // Hidrasi auth store sekali saat halaman dibuka (ambil user terbaru dari backend)
   useEffect(() => {
     setMounted(true);
     fetchCurrentUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Isi form dari data user — jalan ulang setiap user berubah
+  // (mis. usai fetchCurrentUser / usai simpan profil)
   useEffect(() => {
     if (user) {
       setForm({
@@ -79,6 +99,7 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  /** loadSubscriptionStatus — Ambil status & pending subscription dari backend. */
   const loadSubscriptionStatus = () => {
     subscriptionService.getStatus()
       .then((d) => { setSub(d.subscription); setPending(d.pending); })
@@ -89,6 +110,7 @@ export default function ProfilePage() {
     loadSubscriptionStatus();
   }, []);
 
+  /** handleCancelPending — Batalkan transaksi subscription yang masih pending. */
   const handleCancelPending = async () => {
     if (!confirm("Batalkan transaksi pembayaran ini?")) return;
     setCancelling(true);
@@ -102,6 +124,11 @@ export default function ProfilePage() {
     }
   };
 
+  /**
+   * handleSave — Simpan perubahan profil via subscriptionService.updateProfile.
+   * Response berisi user terbaru → setUser di store + fetchCurrentUser ulang
+   * supaya UI (role/plan) langsung sinkron. Banner sukses hilang setelah 3 detik.
+   */
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -122,9 +149,11 @@ export default function ProfilePage() {
 
   if (!mounted) return null;
 
+  // ── Nilai turunan: plan, role, fitur yang ditampilkan ──
   const plan        = user?.effective_plan ?? user?.subscription_plan ?? "free";
   const role        = user?.role ?? "kasir";
   const features    = PLAN_FEATURES[plan] ?? PLAN_FEATURES.free;
+  // Subscription dianggap aktif kalau plan berbayar ATAU backend kirim expires_at
   const hasActiveSub = plan !== "free" || (sub && sub.expires_at);
   const canEditStore = role === "admin" || role === "developer";
 

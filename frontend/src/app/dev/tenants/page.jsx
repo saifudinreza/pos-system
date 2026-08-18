@@ -1,5 +1,16 @@
 "use client";
 
+// ============================================================
+// Dev · Manage Tenant — Daftar & kelola semua tenant (multi-tenant)
+//
+// Data: tenantService.getAll({ search }) → daftar tenant + user per tenant
+// Aksi: edit profil tenant (nama/deskripsi/aktif), hapus tenant (semua
+// datanya ikut terhapus; user dilepas, tidak dihapus), ubah role user
+// (kasir ↔ admin) lintas tenant.
+//
+// Akses via /dev/* — hanya developer (PIN / email developer).
+// ============================================================
+
 import { useState, useEffect } from "react";
 import tenantService from "@/services/tenantService";
 import userService   from "@/services/userService";
@@ -42,6 +53,7 @@ const IcoChevron = (p) => (
 );
 
 export default function TenantsPage() {
+  // ── State ──
   const [tenants,   setTenants]   = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [search,    setSearch]    = useState("");
@@ -54,6 +66,7 @@ export default function TenantsPage() {
   const [err,       setErr]       = useState("");
   const [roleChanging, setRoleChanging] = useState(null); // user id sedang diubah rolenya
 
+  /** fetchData — Ambil daftar tenant; auto-refresh setiap search berubah. */
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -65,12 +78,14 @@ export default function TenantsPage() {
 
   useEffect(() => { fetchData(); }, [search]);
 
+  /** openEdit — Isi form dari data tenant lalu buka modal edit. */
   const openEdit = (tenant) => {
     setForm({ name: tenant.name, description: tenant.description ?? "", is_active: tenant.is_active });
     setEditModal({ open: true, data: tenant });
     setErr("");
   };
 
+  /** handleSave — Update profil tenant lalu refresh daftar. */
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -82,6 +97,7 @@ export default function TenantsPage() {
     finally { setSaving(false); }
   };
 
+  /** handleDelete — Hapus tenant permanen (dari modal konfirmasi). */
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -92,6 +108,10 @@ export default function TenantsPage() {
     finally { setDeleting(false); }
   };
 
+  /**
+   * handleRoleChange — Ubah role user di tenant mana pun (kasir ↔ admin).
+   * Setelah sukses, update state tenants lokal tanpa perlu fetch ulang.
+   */
   const handleRoleChange = async (userId, userName, newRole, tenantId) => {
     if (!confirm(`Ubah role "${userName}" menjadi ${newRole}?`)) return;
     setRoleChanging(userId);

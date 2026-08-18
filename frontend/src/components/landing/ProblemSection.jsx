@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
+// Daftar "rasa sakit" (pain points) — tiap objek = satu kartu
 const PAINS = [
   {
     Icon: NotebookPen,
@@ -61,6 +62,10 @@ const PAINS = [
   },
 ];
 
+/**
+ * ProblemSection — grid "masalah manual" dengan animasi stagger
+ * (lihat header file). Tanpa props; konten dari konstanta PAINS.
+ */
 export default function ProblemSection() {
   return (
     <section id="masalah" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-cream overflow-hidden">

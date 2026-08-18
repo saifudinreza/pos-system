@@ -8,9 +8,23 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * TenantController — manajemen tenant (dev tools, developer-only).
+ *
+ * Semua endpoint dev-* tanpa tenant scope (developer butuh melihat lintas
+ * tenant). Hapus tenant TIDAK boleh me-null-kan tenant_id user (user dengan
+ * tenant_id null dianggap developer → bisa lihat semua data); yang benar:
+ * cabut semua token + nonaktifkan akun, lalu FK nullOnDelete menangani sisanya.
+ */
 class TenantController extends Controller
 {
-    // GET /api/dev/tenants
+    /**
+     * Daftar semua tenant + anggotanya (select field penting saja) + jumlah user.
+     * GET /api/dev/tenants
+     *
+     * @param Request $request Query: search?
+     * @return JsonResponse { message, data }
+     */
     public function index(Request $request): JsonResponse
     {
         $query = Tenant::withCount('users')
@@ -28,7 +42,13 @@ class TenantController extends Controller
         ]);
     }
 
-    // GET /api/dev/tenants/{id}
+    /**
+     * Detail satu tenant + user & users_count.
+     * GET /api/dev/tenants/{id}
+     *
+     * @param int $id ID tenant
+     * @return JsonResponse 200 / 404
+     */
     public function show(int $id): JsonResponse
     {
         $tenant = Tenant::withCount('users')
@@ -43,7 +63,14 @@ class TenantController extends Controller
         ]);
     }
 
-    // PUT /api/dev/tenants/{id}
+    /**
+     * Update data tenant (name/description/is_active). Audit log 'updated'.
+     * PUT /api/dev/tenants/{id}
+     *
+     * @param Request $request Body: name?, description?, is_active?
+     * @param int     $id      ID tenant
+     * @return JsonResponse 200 / 404
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         $tenant = Tenant::find($id);
@@ -65,7 +92,17 @@ class TenantController extends Controller
         ]);
     }
 
-    // DELETE /api/dev/tenants/{id}
+    /**
+     * Hapus tenant beserta semua user-nya (aman & amanah):
+     * 1) cabut semua token Sanctum (logout semua perangkat),
+     * 2) nonaktifkan akun (is_active = false → tidak bisa login).
+     * tenant_id user dibiarkan di-null-kan oleh FK nullOnDelete — TIDAK
+     * di-set manual karena user dengan tenant_id null dianggap developer.
+     * DELETE /api/dev/tenants/{id}
+     *
+     * @param int $id ID tenant
+     * @return JsonResponse 200 / 404
+     */
     public function destroy(int $id): JsonResponse
     {
         $tenant = Tenant::find($id);
@@ -95,6 +132,12 @@ class TenantController extends Controller
         return response()->json(['message' => "Tenant \"{$name}\" berhasil dihapus."]);
     }
 
+    /**
+     * Format tenant untuk response (whitelist field + users terpilih).
+     *
+     * @param Tenant $tenant Tenant yang akan diformat
+     * @return array Data tenant siap-JSON
+     */
     private function formatTenant(Tenant $tenant): array
     {
         return [

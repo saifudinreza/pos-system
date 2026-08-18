@@ -1,8 +1,18 @@
 "use client";
 
+// ============================================================
+// Navbar — bar atas halaman dashboard
+//
+// Isi: judul halaman (dipetakan dari pathname via PAGE_TITLES),
+// badge plan & role user, nama user, dan tombol Keluar.
+// Sumber data: authStore (Zustand). Badge plan menampilkan
+// effective_plan — role developer selalu ditampilkan sebagai "DEV".
+// ============================================================
+
 import { useRouter, usePathname } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 
+// Judul per halaman — key = pathname, dipakai sebagai heading navbar
 const PAGE_TITLES = {
   "/dashboard":    "Dashboard",
   "/products":     "Produk",
@@ -16,6 +26,7 @@ const PAGE_TITLES = {
   "/upgrade":      "Upgrade Plan",
 };
 
+// Badge plan — label + warna untuk tiap paket langganan
 const PLAN_BADGE = {
   free:       { label: "FREE",       cls: "bg-white/80 text-brand-black/60 border-brand-black/20" },
   pro:        { label: "PRO",        cls: "bg-brand-yellow text-brand-black border-brand-black" },
@@ -23,6 +34,7 @@ const PLAN_BADGE = {
   developer:  { label: "DEV",        cls: "bg-brand-yellow text-brand-black border-brand-black" },
 };
 
+// Warna badge role user — dipakai di samping badge plan
 const ROLE_COLORS = {
   admin:     "bg-brand-yellow text-brand-black border-brand-black",
   kasir:     "bg-brand-black text-white border-brand-black",
@@ -30,16 +42,25 @@ const ROLE_COLORS = {
   developer: "bg-brand-black text-brand-yellow border-brand-black",
 };
 
+/**
+ * Navbar — bar atas dashboard (lihat header file untuk deskripsi).
+ *
+ * Props:
+ *   onMenuToggle : membuka sidebar di layar mobile (tombol hamburger ☰)
+ */
 export default function Navbar({ onMenuToggle }) {
   const router   = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
 
-  const pageTitle  = PAGE_TITLES[pathname] ?? "KasirAI";
-  const isDev         = user?.role === "developer";
+  // Judul halaman dari pathname saat ini; fallback nama brand
+  const pageTitle    = PAGE_TITLES[pathname] ?? "KasirAI";
+  const isDev        = user?.role === "developer";
+  // Developer selalu tampil sebagai plan "developer"; selain itu pakai effective_plan
   const effectivePlan = isDev ? "developer" : (user?.effective_plan ?? user?.subscription_plan ?? "free");
   const planBadge     = PLAN_BADGE[effectivePlan] ?? PLAN_BADGE.free;
 
+  // Logout lalu arahkan kembali ke halaman login
   const handleLogout = async () => {
     await logout();
     router.push("/login");

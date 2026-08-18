@@ -55,11 +55,16 @@ const TESTIMONIALS = [
   },
 ];
 
+/**
+ * StarRating — deretan 5 bintang (★). Bintang terisi = warna kuning.
+ * Props: count — jumlah bintang terisi (0–5).
+ */
 // --- StarRating: bintang rating ---
 // Analogi: seperti bintang di Google Maps
 const StarRating = ({ count }) => (
   <div className="flex gap-0.5">
     {Array.from({ length: 5 }).map((_, i) => (
+      // Bintang ke-i terisi kalau i < count (indeks 0-based)
       <span key={i} className={i < count ? "text-brand-yellow" : "text-brand-black/20"}>
         ★
       </span>
@@ -67,6 +72,10 @@ const StarRating = ({ count }) => (
   </div>
 );
 
+/**
+ * Avatar — lingkaran dengan inisial nama pengguna (tanpa gambar).
+ * Props: initials — 1–2 huruf (mis. "BS", "SR").
+ */
 // --- Avatar: lingkaran dengan inisial nama ---
 // Analogi: seperti foto profil yang digantikan huruf depan nama
 const Avatar = ({ initials }) => (
@@ -78,6 +87,11 @@ const Avatar = ({ initials }) => (
   </div>
 );
 
+/**
+ * TestimonialCard — satu kartu testimoni (rating + kutipan + profil).
+ * Props: t — objek dari TESTIMONIALS (name, role, location, avatar,
+ * rating, quote, highlight).
+ */
 // --- TestimonialCard: satu kartu testimoni ---
 const TestimonialCard = ({ t }) => (
   <div
@@ -113,6 +127,10 @@ const TestimonialCard = ({ t }) => (
   </div>
 );
 
+/**
+ * TestimonialsSection — grid testimoni + rating agregat + logo industri
+ * (lihat header file). Tanpa props; data statis di TESTIMONIALS.
+ */
 export default function TestimonialsSection() {
   return (
     <section id="testimoni" className="py-20 px-4 sm:px-6">

@@ -18,6 +18,15 @@
 const YELLOW = "#FFE500"; // brand-yellow
 const BLACK  = "#0A0A0A"; // brand-black
 
+/**
+ * LogoMark — SVG logo KasirAI ("K" dalam kotak + takik balon chat).
+ *
+ * Props:
+ *   size     : ukuran logo dalam px (default: 36)
+ *   className: class Tailwind tambahan (mis. efek hover rotate)
+ *   title    : teks aria-label & <title> (default: "KasirAI")
+ *   ...props : diteruskan ke elemen <svg>
+ */
 export default function LogoMark({ size = 36, className = "", title = "KasirAI", ...props }) {
   return (
     <svg

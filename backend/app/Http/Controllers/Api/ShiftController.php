@@ -8,10 +8,24 @@ use App\Models\Order;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
+/**
+ * ShiftController — buka/tutup shift & laporan shift.
+ *
+ * Shift bersifat PER-TENANT, bukan per-user: satu shift aktif dipakai bersama
+ * semua kasir dalam tenant yang sama (TenantScope otomatis membatasi query).
+ * Transaksi diblokir di luar jam shift (realtime enforcement berbasis
+ * start_time/end_time, termasuk shift yang melewati tengah malam).
+ */
 class ShiftController extends Controller
 {
+    /**
+     * Shift aktif tenant + info window jam operasional.
+     * GET /api/shifts/current
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse { message, data: shift|null, within_window }
+     */
     public function current(Request $request): JsonResponse
     {
         // Cek shift aktif milik tenant (bukan per-user) — semua kasir share 1 shift
@@ -53,6 +67,15 @@ class ShiftController extends Controller
         ], 200);
     }
 
+    /**
+     * Buka shift baru. Hanya boleh satu shift open per tenant (422 kalau
+     * masih ada). Waktu simpan dengan format H:i:s.
+     * POST /api/shifts/open
+     *
+     * @param Request $request Body: shift_name, start_time, end_time, opening_balance,
+     *                          opening_note?, opening_denominations?
+     * @return JsonResponse 201 / 422 masih ada shift aktif
+     */
     public function open(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -92,6 +115,18 @@ class ShiftController extends Controller
         ], 201);
     }
 
+    /**
+     * Tutup shift: hitung expected balance & selisih kas.
+     *
+     * Rumus: expected = modal awal + penjualan tunai (settlement) − petty cash;
+     * selisih = uang fisik (closing_balance) − expected (minus = kurang).
+     * PATCH /api/shifts/{id}/close
+     *
+     * @param Request $request Body: closing_balance, closing_denominations?, petty_cash?,
+     *                          petty_cash_note?, notes?, verified_by?
+     * @param int     $id      ID shift
+     * @return JsonResponse 200 / 404 / 422 sudah ditutup
+     */
     public function close(Request $request, int $id): JsonResponse
     {
         $shift = Shift::find($id);
@@ -103,8 +138,6 @@ class ShiftController extends Controller
         if ($shift->status === 'closed') {
             return response()->json(['message' => 'Shift ini sudah ditutup.'], 422);
         }
-
-
 
         $validated = $request->validate([
             'closing_balance'       => ['required', 'numeric', 'min:0'],
@@ -150,6 +183,16 @@ class ShiftController extends Controller
         ], 200);
     }
 
+    /**
+     * Laporan detail shift: ringkasan order, sales summary (gross/tax/net),
+     * void, breakdown pembayaran, kelompok tunai vs non-tunai, dan daftar
+     * order paid. Eager load items.product/transaction/user → tanpa N+1.
+     * GET /api/shifts/{id}/report
+     *
+     * @param Request $request Request ber-autentikasi
+     * @param int     $id      ID shift
+     * @return JsonResponse { message, data: { shift, summary, sales_summary, payment_groups, cash_summary, payment_breakdown, orders } }
+     */
     public function report(Request $request, int $id): JsonResponse
     {
         $shift = Shift::with('user')->find($id);
@@ -253,19 +296,29 @@ class ShiftController extends Controller
         ], 200);
     }
 
+    /**
+     * Daftar shift (pagination 20, terbaru dulu) + agregat order/sales per shift.
+     * Agregat dihitung via withCount/withSum (subselect join) — bukan 2 query
+     * per shift seperti sebelumnya (fix N+1).
+     * GET /api/shifts
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse { message, data, meta pagination }
+     */
     public function index(Request $request): JsonResponse
     {
         $shifts = Shift::with('user')
+            ->withCount('orders as order_count')
+            ->withSum(['orders as total_sales' => fn($q) => $q->where('status', 'paid')], 'total')
             ->latest('opened_at')
             ->paginate(20);
 
-        $shifts->getCollection()->transform(function ($shift) {
-            $orderCount = Order::where('shift_id', $shift->id)->count();
-            $totalSales = Order::where('shift_id', $shift->id)
-                ->where('status', 'paid')
-                ->sum('total');
-            return $this->formatShift($shift, $orderCount, $totalSales);
-        });
+        // Format tiap shift memakai agregat yang sudah di-load di query di atas
+        $shifts->getCollection()->transform(fn($shift) => $this->formatShift(
+            $shift,
+            (int) $shift->order_count,
+            (float) ($shift->total_sales ?? 0)
+        ));
 
         return response()->json([
             'message' => 'Daftar shift berhasil diambil.',
@@ -279,6 +332,15 @@ class ShiftController extends Controller
         ], 200);
     }
 
+    /**
+     * Format shift untuk response (whitelist field). Waktu ditampilkan
+     * HH:MM; relasi user dibaca hanya kalau sudah di-load.
+     *
+     * @param Shift $shift      Shift yang akan diformat
+     * @param int   $orderCount Jumlah order (dari withCount atau hitungan manual)
+     * @param float $totalSales Total penjualan paid (dari withSum atau hitungan manual)
+     * @return array Data shift siap-JSON
+     */
     private function formatShift(Shift $shift, int $orderCount = 0, float $totalSales = 0): array
     {
         return [

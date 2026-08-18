@@ -20,6 +20,17 @@ const EASE = [0.22, 0.61, 0.36, 1];
 // ------------------------------------------------------------
 // Reveal — bungkus apa saja agar fade + slide-up saat masuk viewport
 // ------------------------------------------------------------
+/**
+ * Reveal — fade + slide-up saat elemen masuk viewport.
+ *
+ * Props:
+ *   children: isi yang di-animasi
+ *   as      : tag render (default "div"); "h2", "section", dsb.
+ *   delay   : tunda animasi (detik)
+ *   y / x   : jarak geser awal dalam px (reduced-motion → fade saja)
+ *   once    : true → animasi hanya sekali
+ *   className/style/...rest : diteruskan ke tag
+ */
 export function Reveal({
   children,
   as = "div",
@@ -55,6 +66,14 @@ export function Reveal({
 //   speed > 0  → elemen "tertinggal" (bergerak ke atas saat scroll)
 // Dimatikan otomatis saat reduced-motion.
 // ------------------------------------------------------------
+/**
+ * Parallax — elemen bergeser mengikuti scroll (kesan kedalaman).
+ *
+ * Props:
+ *   speed : kekuatan geser (default 0.3) — makin besar makin kencang
+ *   as    : tag render (default "div")
+ *   ...   : className/style diteruskan; gerakan via `y` (framer motion)
+ */
 export function Parallax({
   children,
   speed = 0.3,
@@ -88,6 +107,14 @@ export function Parallax({
 // Stagger — container yang memunculkan anak-anaknya berurutan
 // Pakai bareng <StaggerItem> di dalamnya.
 // ------------------------------------------------------------
+/**
+ * Stagger — container animasi berurutan (stagger children).
+ * Harus dipakai bersama <StaggerItem> sebagai anak langsung.
+ *
+ * Props:
+ *   gap : jeda antar anak dalam detik (default 0.1)
+ *   once: true → animasi hanya sekali
+ */
 export function Stagger({
   children,
   as = "div",
@@ -116,6 +143,12 @@ export function Stagger({
   );
 }
 
+/**
+ * StaggerItem — satu anak dari <Stagger> yang muncul berurutan.
+ *
+ * Props:
+ *   y : jarak slide-up awal dalam px (default 24; reduced-motion → fade)
+ */
 export function StaggerItem({ children, as = "div", y = 24, className, style, ...rest }) {
   const reduce = useReducedMotion();
   const Tag = motion[as] || motion.div;

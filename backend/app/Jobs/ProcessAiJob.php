@@ -19,29 +19,42 @@ class ProcessAiJob implements ShouldQueue
 {
     use Queueable;
 
+    /** Jumlah maksimal percobaan eksekusi job (retry otomatis oleh queue). */
     public int $tries = 2;
+    /** Batas waktu eksekusi per percobaan (detik) — LLM butuh waktu. */
     public int $timeout = 90;
 
+    /** ID baris ai_jobs yang akan diproses oleh worker. */
     private int $aiJobId;
 
+    /**
+     * @param int $aiJobId ID baris di tabel `ai_jobs` (dibuat oleh AiController)
+     */
     public function __construct(int $aiJobId)
     {
         $this->aiJobId = $aiJobId;
     }
 
+    /**
+     * Eksekusi utama job: panggil LLM, simpan hasil/error ke baris ai_jobs,
+     * dan tulis log query AI.
+     */
     public function handle(GroqService $groq): void
     {
         $job = AiJob::find($this->aiJobId);
 
+        // Job sudah terhapus (mis. dibersihkan) → tidak ada yang diproses
         if (! $job) {
             return;
         }
 
+        // Tandai sedang diproses supaya frontend (polling) tahu statusnya
         $job->update(['status' => 'processing', 'processed_at' => now()]);
 
         try {
             $result = $groq->ask($job->prompt, $job->query);
 
+            // Simpan hasil LLM ke baris job — frontend mem-poll status ini
             $job->update([
                 'status'      => 'completed',
                 'response'    => $result['text'],
@@ -68,6 +81,7 @@ class ProcessAiJob implements ShouldQueue
                 'message'   => $e->getMessage(),
             ]);
 
+            // Simpan pesan error di baris job agar frontend bisa menampilkannya
             $job->update([
                 'status'       => 'failed',
                 'error'        => $e->getMessage(),
@@ -76,7 +90,10 @@ class ProcessAiJob implements ShouldQueue
         }
     }
 
-    /** Sukses job tidak perlu di-retry penuh untuk error LLM sederhana. */
+    /**
+     * Dipanggil saat job gagal permanen (retry habis).
+     * Error LLM sederhana ditangani di handle() — di sini cukup dicatat di log.
+     */
     public function failed(\Throwable $e): void
     {
         Log::error('AI job failed permanently', [

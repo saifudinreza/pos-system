@@ -1,5 +1,19 @@
 "use client";
 
+// ============================================================
+// AI Monitoring — Dashboard penggunaan LLM (admin/developer)
+//
+// Data yang diambil: aiService.getStats() → GET /api/ai/stats
+//   - summary: requests/tokens hari ini, minggu, bulan
+//   - by_type: pemakaian per tipe query (analisis/prediksi/rekomendasi)
+//   - by_provider: Groq (primary) vs OpenRouter (fallback) — fallback
+//     aktif menandakan Groq sedang/pernah rate-limited
+//   - users_today: pemakaian per user + sisa kuota (limit bulanan)
+//   - daily_trend: tren 7 hari terakhir · config: limit & threshold alert
+//
+// Kartu berwarna merah (alert) saat token hari ini melebihi threshold.
+// ============================================================
+
 import { useEffect, useState } from "react";
 import aiService from "@/services/aiService";
 
@@ -114,6 +128,7 @@ function Section({ title, Icon, children, className = "" }) {
 }
 
 // ── UsageBar ─────────────────────────────────────────────────
+/** UsageBar — Bar pemakaian kuota: hijau <70%, kuning ≥70%, merah 100%. */
 function UsageBar({ used, limit, nearLimit }) {
   const pct   = limit > 0 ? Math.min(100, Math.round(used / limit * 100)) : 0;
   const color = pct >= 100 ? "bg-red-500" : pct >= 70 ? "bg-amber-400" : "bg-emerald-400";
@@ -130,11 +145,13 @@ function UsageBar({ used, limit, nearLimit }) {
 }
 
 export default function AiMonitoringPage() {
+  // ── State: statistik, loading, error, waktu refresh terakhir ──
   const [stats,       setStats]       = useState(null);
   const [loading,     setLoading]     = useState(true);
   const [error,       setError]       = useState(null);
   const [lastRefresh, setLastRefresh] = useState(null);
 
+  /** fetchStats — Ambil statistik penggunaan AI dari backend. */
   const fetchStats = async () => {
     try {
       setLoading(true);

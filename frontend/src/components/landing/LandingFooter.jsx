@@ -1,3 +1,16 @@
+// ============================================================
+// LandingFooter — footer landing page (gelap, aksen kuning)
+//
+// Isi dari atas ke bawah:
+//   - Accent bar kuning tipis
+//   - CTA strip: "Ada pertanyaan?" → tombol Email & WhatsApp
+//   - Grid utama: brand column (logo, tagline, kontak, sosmed)
+//     + 3 grup link (Produk, Dukungan, Legal)
+//   - Bottom bar: copyright, status sistem, versi
+//
+// Kontak & sosmed dikonfigurasi lewat konstanta CONTACT di bawah.
+// ============================================================
+
 import LogoMark from "@/components/brand/LogoMark";
 
 // ─── Contact & social config — ganti sesuai data bisnis kamu ────
@@ -37,7 +50,7 @@ const IconMapPin = () => (
   </svg>
 );
 
-// ─── Footer link groups ──────────────────────────────────────────
+// ─── Footer link groups — judul + daftar anchor ─────────────────
 const LINK_GROUPS = [
   {
     title: "Produk",
@@ -64,6 +77,10 @@ const LINK_GROUPS = [
   },
 ];
 
+/**
+ * LandingFooter — footer landing page (lihat header file untuk struktur).
+ * Tanpa props — konten statis dari konstanta CONTACT & LINK_GROUPS.
+ */
 export default function LandingFooter() {
   return (
     <footer className="bg-brand-black text-white">

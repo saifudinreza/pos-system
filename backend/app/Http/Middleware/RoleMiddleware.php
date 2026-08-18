@@ -6,11 +6,19 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Middleware RoleMiddleware — membatasi akses route berdasarkan role user.
+ *
+ * Dipasang via alias 'role' (didaftarkan di bootstrap/app.php). Bisa menerima
+ * satu atau lebih role, contoh: role:admin atau role:admin,kasir.
+ * Urutan cek: belum login (401) → role tidak cocok (403) → akun nonaktif (403).
+ */
 class RoleMiddleware
 {
     /**
-     * Handle an incoming request.
+     * Handle request: cek autentikasi, role, dan status aktif user.
      *
+     * @param string ...$roles daftar role yang diizinkan (bisa lebih dari satu)
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {

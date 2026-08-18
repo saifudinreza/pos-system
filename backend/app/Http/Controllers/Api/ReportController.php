@@ -10,17 +10,33 @@ use App\Models\OrderItem;
 use App\Services\ForecastService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SalesReportExport;
 
+/**
+ * ReportController — laporan penjualan, stok, forecast, dan export PDF/Excel.
+ *
+ * - Transaction TIDAK punya tenant_id → semua query transaksi wajib filter
+ *   manual via whereHas('order', tenant_id) (kecuali Order/Product yang
+ *   otomatis oleh TenantScope).
+ * - Query agregat & chart portabel MySQL/SQLite: label diformat di PHP via
+ *   Carbon, bukan DATE_FORMAT/MONTHNAME.
+ * - Export PDF/Excel hanya untuk Pro & Enterprise (free → 403 plan_required).
+ */
 class ReportController extends Controller
 {
     // =============================================================
     // FORECAST — prediksi penjualan 7 hari ke depan (deterministik)
     // GET /api/reports/forecast
     // =============================================================
+    /**
+     * Prediksi penjualan 7 hari ke depan (deterministik, tanpa LLM) —
+     * dihitung ForecastService dari rata-rata per hari-of-week 35 hari lalu.
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse { message, data: hasil forecast }
+     */
     public function forecast(Request $request): JsonResponse
     {
         $tenantId = $request->user()->tenant_id;
@@ -38,6 +54,17 @@ class ReportController extends Controller
     // GET /api/reports/sales?period=monthly&year=2026
     // GET /api/reports/sales?date_from=2026-01-01&date_to=2026-05-31
     // =============================================================
+    /**
+     * Laporan penjualan lengkap: summary (revenue/COGS/profit), chart data
+     * harian/bulanan, top 10 produk, transaksi terbaru, breakdown metode
+     * pembayaran.
+     *
+     * Bagian: (1) rentang tanggal, (2) summary card, (3) COGS & profit,
+     * (4) chart data, (5) top products, (6) recent transactions.
+     *
+     * @param Request $request Query: period? (daily|monthly), year?, date_from?, date_to?
+     * @return JsonResponse { message, data: { period, date_from, date_to, summary, chart_data, top_products, recent_transactions, payment_breakdown } }
+     */
     public function sales(Request $request): JsonResponse
     {
         $period    = $request->get('period', 'daily');
@@ -106,27 +133,26 @@ class ReportController extends Controller
             ->values();
 
         // ===== CHART DATA — penjualan per periode =====
-        // Label diformat di PHP (bukan SQL) supaya query portabel
-        // (SQLite tidak punya DATE_FORMAT/MONTHNAME, hanya DATE/MONTH).
+        // Label & bulan diformat di PHP (bukan SQL) supaya query portabel
+        // (SQLite tidak punya DATE_FORMAT/MONTHNAME/MONTH — aturan CLAUDE.md point 9).
         if ($period === 'monthly') {
-            $year      = $request->get('year', now()->year);
+            // $year sudah di-set di awal method (rentang tanggal bulanan)
+            // Ambil semua transaksi settlement di tahun itu, lalu kelompokkan
+            // per bulan di PHP via Carbon — outputnya identik dengan GROUP BY SQL.
             $chartData = Transaction::where('status', 'settlement')
                 ->whereYear('paid_at', $year)
                 ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
-                ->selectRaw('
-                    MONTH(paid_at) as period,
-                    COUNT(*) as total_transactions,
-                    SUM(amount) as total_revenue
-                ')
-                ->groupBy('period')
-                ->orderBy('period')
+                ->selectRaw('paid_at, amount')
                 ->get()
-                ->map(fn($r) => [
-                    'period'             => (int) $r->period,
-                    'label'              => \Illuminate\Support\Carbon::create()->month($r->period)->translatedFormat('F'),
-                    'total_transactions' => (int) $r->total_transactions,
-                    'total_revenue'      => (float) $r->total_revenue,
-                ]);
+                ->groupBy(fn($t) => (int) \Illuminate\Support\Carbon::parse($t->paid_at)->month)
+                ->map(fn($rows, $month) => [
+                    'period'             => $month,
+                    'label'              => \Illuminate\Support\Carbon::create()->month($month)->translatedFormat('F'),
+                    'total_transactions' => $rows->count(),
+                    'total_revenue'      => (float) $rows->sum('amount'),
+                ])
+                ->sortKeys()
+                ->values();
         } else {
             $chartData = Transaction::where('status', 'settlement')
                 ->whereBetween('paid_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
@@ -220,6 +246,14 @@ class ReportController extends Controller
     // GET /api/reports/stock
     // GET /api/reports/stock?category_id=1&low_stock=true
     // =============================================================
+    /**
+     * Laporan stok: daftar produk (urut stok menaik) + total terjual +
+     * summary stok (low stock, out of stock, nilai stok). Eager load category
+     * + withCount penjualan → tanpa N+1.
+     *
+     * @param Request $request Query: category_id?, low_stock?
+     * @return JsonResponse { message, data: { summary, products } }
+     */
     public function stock(Request $request): JsonResponse
     {
         $query = Product::with('category')
@@ -282,6 +316,15 @@ class ReportController extends Controller
     // GET /api/reports/sales/download?format=pdf
     // GET /api/reports/sales/download?format=excel
     // =============================================================
+    /**
+     * Download laporan penjualan (PDF via DomPDF / Excel via Maatwebsite).
+     * Gate paket: free → 403 plan_required=pro.
+     * COGS/profit per transaksi dihitung dari snapshot `order_items.cost`
+     * (produk tanpa cost dihitung 0).
+     *
+     * @param Request $request Query: date_from?, date_to?, format? (pdf|excel)
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse Download file
+     */
     public function downloadSales(Request $request)
     {
         $dateFrom = $request->get('date_from', now()->startOfMonth()->toDateString());
@@ -355,6 +398,12 @@ class ReportController extends Controller
     // DOWNLOAD STOCK — download laporan stok sebagai PDF/Excel
     // GET /api/reports/stock/download?format=pdf
     // =============================================================
+    /**
+     * Download laporan stok (PDF/Excel). Gate paket: free → 403 plan_required.
+     *
+     * @param Request $request Query: format? (pdf|excel)
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse Download file
+     */
     public function downloadStock(Request $request)
     {
         // Export PDF/Excel hanya untuk Pro & Enterprise

@@ -64,6 +64,12 @@ const EMPTY_PROD = {
 };
 
 // ── CashPaymentModal — Input nominal tunai + hitung kembalian ──────────────
+/**
+ * CashPaymentModal — Modal pembayaran tunai: kasir memasukkan nominal uang
+ * yang diterima, sistem menghitung kembalian (dan menolak tombol proses
+ * kalau uang kurang). Ada tombol quick amount (uang pas, bulatkan ke 5rb, dst).
+ * onConfirm(cashAmount) dipanggil setelah nominal cukup.
+ */
 function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
   const [cashInput, setCashInput] = useState("");
   const cash    = parseFloat(cashInput) || 0;
@@ -134,10 +140,19 @@ function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
 }
 
 // ── ReceiptModal — Struk setelah pembayaran sukses ────────────────────────
+/**
+ * ReceiptModal — Struk digital setelah pembayaran sukses: tampilan struk,
+ * tombol print (buka window terpisah + window.print()), dan kirim struk
+ * via WhatsApp ke nomor customer (Fonnte, proxied lewat backend).
+ */
 function ReceiptModal({ isOpen, data, onClose }) {
   const [sending, setSending] = useState(false);
   if (!isOpen || !data) return null;
 
+  /**
+   * buildWhatsAppText — Susun teks struk berformat WhatsApp (bold via *).
+   * Struk disusun baris demi baris supaya rapi di tampilan chat.
+   */
   const buildWhatsAppText = () => {
     const SEP   = "━━━━━━━━━━━━━━━━━━━━";
     const store = data.store_name ?? "KasirAI";
@@ -170,6 +185,10 @@ function ReceiptModal({ isOpen, data, onClose }) {
     return t;
   };
 
+  /**
+   * handlePrint — Cetak struk: buka jendela baru, tulis HTML struk polos
+   * (monospace, mirip struk thermal), lalu auto window.print() + close.
+   */
   const handlePrint = () => {
     const w = window.open("", "_blank", "width=420,height=700");
     const store = data.store_name ?? "KasirAI";
@@ -202,6 +221,11 @@ function ReceiptModal({ isOpen, data, onClose }) {
     w.document.close();
   };
 
+  /**
+   * handleWhatsApp — Kirim struk ke WhatsApp customer via endpoint proxy
+   * /api/send-whatsapp (backend pegang token Fonnte, tidak pernah ke browser).
+   * Nomor dinormalisasi: hanya digit, kosong → peringatan.
+   */
   const handleWhatsApp = async () => {
     const phone = (data.customer_phone ?? "").replace(/\D/g, "");
     if (!phone) return alert("Nomor HP customer belum diisi di kolom No. HP.");
@@ -297,10 +321,21 @@ function ReceiptModal({ isOpen, data, onClose }) {
   );
 }
 
+/**
+ * QuickProductPanel — Panel slide-over kelola produk dari halaman kasir.
+ *
+ * Tiga mode (editTarget):
+ *   null → LIST VIEW (daftar produk + search) · {} → form tambah
+ *   {id} → form edit produk yang ada
+ *
+ * Pencarian pakai useDebounce 400ms; produk yang disimpan/ dihapus
+ * memicu onProductSaved() agar grid kasir ikut di-refresh.
+ */
 function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
+  // ── State panel ──
   const [list,       setList]      = useState([]);     // daftar produk
   const [loading,    setLoading]   = useState(false);
-  const [editTarget, setEdit]      = useState(null);   // null=list, {}=baru, {id}=edit
+  const [editTarget, setEditTarget] = useState(null);   // null=list, {}=baru, {id}=edit
   const [form,       setForm]      = useState(EMPTY_PROD);
   const [preview,    setPreview]   = useState(null);   // URL preview gambar yang dipilih
   const [saving,     setSaving]    = useState(false);
@@ -323,8 +358,9 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
   // editTarget === null: hanya refresh kalau sedang di mode list (bukan form)
   useEffect(() => { if (isOpen && editTarget === null) loadList(); }, [isOpen, debouncedS]);
 
+  // ── Handlers panel ──
   // Buka form tambah produk baru
-  const openNew = () => { setForm(EMPTY_PROD); setPreview(null); setEdit({}); setFormErr(""); };
+  const openNew = () => { setForm(EMPTY_PROD); setPreview(null); setEditTarget({}); setFormErr(""); };
 
   // Buka form edit produk yang sudah ada
   // Pre-fill form dengan data produk yang dipilih
@@ -337,12 +373,12 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
     });
     // Tampilkan preview gambar yang sudah ada (image_url sudah full URL dari backend)
     setPreview(p.image_url ?? null);
-    setEdit(p);
+    setEditTarget(p);
     setFormErr("");
   };
 
   // Kembali ke list dan refresh
-  const backToList = () => { setEdit(null); setPreview(null); loadList(); };
+  const backToList = () => { setEditTarget(null); setPreview(null); loadList(); };
 
   // Handle pilih gambar — buat URL preview lokal dari File object
   const handleImg = (e) => {
@@ -653,7 +689,11 @@ const CartItem = ({ item, onAdd, onRemove, onDelete }) => (
 const RUPIAH = [100000, 50000, 20000, 10000, 5000, 2000, 1000, 500, 200, 100];
 
 // ── DenominationCounter — hitung total uang laci dari rincian pecahan ──
-// value: objek { "100000": qty, ... }; onChange(nextObj, total)
+/**
+ * DenominationCounter — Input jumlah lembar/koin per pecahan Rupiah.
+ * value: objek { "100000": qty, ... }; onChange(nextObj, total) dipanggil
+ * setiap ada perubahan — total dihitung ulang dari seluruh pecahan.
+ */
 function DenominationCounter({ value, onChange }) {
   const counts = value || {};
   const setQty = (denom, raw) => {
@@ -688,35 +728,48 @@ function DenominationCounter({ value, onChange }) {
 }
 
 // ── ShiftOpenModal — Modal buka shift baru ──
+/**
+ * ShiftOpenModal — Form buka shift baru: nama shift (dengan preset Pagi/
+ * Siang/Malam), jam mulai–selesai, rincian uang laci (modal awal), dan
+ * catatan opsional. onConfirm(payload) dipanggil saat tombol "Buka Shift".
+ */
 function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
+  // ── State form ──
   const [shiftName, setShiftName] = useState("Pagi");
   const [startTime, setStartTime] = useState("07:00");
   const [endTime,   setEndTime]   = useState("16:00");
-  const [denoms, setDenoms] = useState({});
-  const [total, setTotal] = useState(0);
+  const [denoms, setDenoms] = useState({});   // rincian pecahan modal awal
+  const [total, setTotal] = useState(0);      // total modal awal (dari pecahan)
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
   if (!isOpen) return null;
 
+  // Preset jam kerja umum — klik langsung mengisi nama + jam
   const SHIFT_PRESETS = [
     { label: "Pagi",  start: "07:00", end: "16:00" },
     { label: "Siang", start: "12:00", end: "21:00" },
     { label: "Malam", start: "17:00", end: "23:59" },
   ];
 
+  /** applyPreset — Isi form dari preset shift (nama + jam mulai/selesai). */
   const applyPreset = (preset) => {
     setShiftName(preset.label);
     setStartTime(preset.start);
     setEndTime(preset.end);
   };
 
+  /** reset — Kembalikan semua field ke nilai awal. */
   const reset = () => {
     setShiftName("Pagi"); setStartTime("07:00"); setEndTime("16:00");
     setDenoms({}); setTotal(0); setNote(""); setErr("");
   };
 
+  /**
+   * handleOpen — Validasi form lalu kirim payload buka shift ke backend.
+   * opening_denominations hanya dikirim kalau ada rincian pecahan diisi.
+   */
   const handleOpen = async () => {
     if (!shiftName.trim()) { setErr("Nama shift wajib diisi."); return; }
     if (!startTime || !endTime) { setErr("Jam mulai dan selesai wajib diisi."); return; }
@@ -827,6 +880,13 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
 }
 
 // ── ShiftCloseModal — Modal tutup shift (klerek lengkap) ──────────────
+/**
+ * ShiftCloseModal — Form penutupan shift: kasir mencatat saldo fisik laci
+ * (rincian pecahan), pengeluaran kas kecil, dan verifikasi. Sistem menghitung
+ * selisih = uang fisik − (Modal Awal + Penjualan Tunai − Kas Kecil).
+ * onConfirm(payload) → backend; error ditampilkan bila pencatatan ditolak
+ * (mis. masih ada transaksi belum sinkron).
+ */
 function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
   const [closingDenoms, setClosingDenoms] = useState({});
   const [closingTotal, setClosingTotal] = useState(0);   // = saldo fisik laci
@@ -852,11 +912,16 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
   // Selisih = uang fisik − seharusnya  (minus = kurang/shortage, plus = lebih/overage)
   const variance = closingTotal - expected;
 
+  /** reset — Kosongkan semua field setelah sukses / saat ditutup. */
   const reset = () => {
     setClosingDenoms({}); setClosingTotal(0); setPettyCash(""); setPettyNote("");
     setNotes(""); setVerifiedBy(""); setErr("");
   };
 
+  /**
+   * handleClose — Kirim data penutupan ke backend. Field kosong dikirim
+   * sebagai undefined (backend menerapkan default-nya sendiri).
+   */
   const handleClose = async () => {
     setLoading(true); setErr("");
     try {
@@ -1080,6 +1145,10 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
 }
 
 // ── ShiftHistoryModal — Riwayat shift ─────────────────────────
+/**
+ * ShiftHistoryModal — Daftar riwayat shift tenant (nama, jam, order, total).
+ * Klik salah satu shift → onSelectShift(shift) untuk membuka detailnya.
+ */
 function ShiftHistoryModal({ isOpen, onClose, shifts, onSelectShift }) {
   if (!isOpen) return null;
 
@@ -1208,7 +1277,11 @@ export default function KasirPage() {
   // getOrderPayload() mengubah items keranjang ke format backend:
   //   [{ product_id: 1, quantity: 2 }, { product_id: 3, quantity: 1 }]
   // ============================================================
-  // Buat objek data struk dari order + pilihan bayar
+  // ── Checkout (tunai & digital) ──
+  /**
+   * buildReceipt — Susun objek data struk dari hasil create order + pilihan
+   * pembayaran. Dipakai showReceipt() untuk mengisi ReceiptModal.
+   */
   const buildReceipt = (orderRes, cashAmount, paymentMethod) => ({
     store_name:     user?.tenant_name ?? "KasirAI",
     order_number:   orderRes.data?.order_number ?? orderRes.order?.order_number ?? "-",
@@ -1224,6 +1297,7 @@ export default function KasirPage() {
     customer_phone: customerPhone,
   });
 
+  /** showReceipt — Tampilkan struk lalu bersihkan keranjang & field input. */
   const showReceipt = (data) => {
     setReceiptData(data);
     setReceiptOpen(true);
@@ -1233,7 +1307,10 @@ export default function KasirPage() {
     setCartVisible(false);
   };
 
-  // Checkout tunai: buat order → tandai paid → tampilkan struk
+  /**
+   * handleCashCheckout — Checkout tunai: blokir bila shift belum dibuka atau
+   * di luar jam shift → buat order → tandai paid → tampilkan struk.
+   */
   const handleCashCheckout = async (cashAmount) => {
     if (!currentShift) {
       alert("Kamu harus membuka shift terlebih dahulu sebelum bertransaksi.");
@@ -1260,7 +1337,11 @@ export default function KasirPage() {
     } finally { setPaying(false); }
   };
 
-  // Load snap.js Midtrans secara dinamis dengan client key milik tenant
+  /**
+   * loadMidtransSnap — Muat script Snap JS dari Midtrans secara dinamis
+   * (sekali saja per halaman) dengan data-client-key milik tenant.
+   * Mengembalikan Promise yang resolve saat script siap.
+   */
   const loadMidtransSnap = (clientKey) => new Promise((resolve, reject) => {
     if (window.snap) return resolve();
     const existing = document.getElementById("midtrans-snap-js");
@@ -1274,7 +1355,12 @@ export default function KasirPage() {
     document.body.appendChild(script);
   });
 
-  // Checkout digital: buat order → buat transaksi → buka Midtrans Snap
+  /**
+   * handleDigitalCheckout — Checkout QRIS/digital via Midtrans Snap.
+   * Pra-kondisi: keranjang terisi, shift aktif & dalam jam, plan ≥ Pro,
+   * client key Midtrans sudah dikonfigurasi tenant. Snapshot struk dibuat
+   * dari hasil create order; window.snap.pay memutuskan redirect akhir.
+   */
   const handleDigitalCheckout = async () => {
     if (items.length === 0) return alert("Keranjang masih kosong!");
     if (!currentShift) {
@@ -1327,6 +1413,11 @@ export default function KasirPage() {
   };
 
   // ── Shift Functions ──
+  /**
+   * loadCurrentShift — Ambil shift aktif tenant + status jam kerja
+   * (within_window). Dipanggil saat halaman dibuka dan setelah
+   * checkout / buka-tutup shift.
+   */
   const loadCurrentShift = async () => {
     setShiftLoading(true);
     try {
@@ -1345,12 +1436,17 @@ export default function KasirPage() {
     }
   };
 
+  /** handleOpenShift — Buka shift baru (payload dari ShiftOpenModal). */
   const handleOpenShift = async (payload) => {
     const res = await shiftService.open(payload);
     setCurrentShift(res.data);
     setShiftOpenModal(false);
   };
 
+  /**
+   * handleCloseShift — Tutup shift + beri konfirmasi hasil rekonsiliasi kas
+   * ke kasir, lalu muat ulang status shift.
+   */
   const handleCloseShift = async (payload) => {
     const res = await shiftService.close(currentShift.id, payload);
     setShiftCloseModal(false);
@@ -1369,6 +1465,10 @@ export default function KasirPage() {
     loadCurrentShift();
   };
 
+  /**
+   * openCloseModal — Ambil laporan shift terkini lalu buka modal tutup shift.
+   * Laporan (laci tunai + ringkasan) jadi basis rekonsiliasi.
+   */
   const openCloseModal = async () => {
     setCloseReportLoading(true);
     try {
@@ -1382,6 +1482,7 @@ export default function KasirPage() {
     }
   };
 
+  /** openShiftHistory — Ambil semua riwayat shift lalu buka modal daftarnya. */
   const openShiftHistory = async () => {
     try {
       const res = await shiftService.getAll();
@@ -1392,6 +1493,7 @@ export default function KasirPage() {
     }
   };
 
+  /** viewShiftReport — Buka detail laporan shift tertentu dari riwayat. */
   const viewShiftReport = async (shift) => {
     setShiftHistoryModal(false);
     setCloseReportLoading(true);

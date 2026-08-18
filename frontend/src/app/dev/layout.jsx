@@ -1,5 +1,18 @@
 "use client";
 
+// ============================================================
+// DevLayout — Kerangka halaman Developer Portal (khusus developer)
+//
+// Akses dikunci DUA lapis:
+//   1. Role/email developer (DEV_EMAIL) → langsung lolos
+//   2. Selain itu harus memasukkan PIN (NEXT_PUBLIC_DEV_PIN, fallback
+//      demo) — PIN yang benar disimpan ke sessionStorage agar tidak perlu
+//      ulang selama sesi browser masih hidup
+//
+// Struktur: topbar (status + logout) + sidenav kiri (menu dev)
+// + area konten {children}.
+// ============================================================
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
@@ -19,6 +32,7 @@ export default function DevLayout({ children }) {
   // Developer PIN (stored in env — fallback for demo)
   const DEV_PIN = process.env.NEXT_PUBLIC_DEV_PIN ?? "kasiradev2025";
 
+  // Hydrate auth + cek apakah PIN sudah diverifikasi sesi ini
   useEffect(() => {
     hydrateFromStorage();
     setMounted(true);
@@ -27,6 +41,7 @@ export default function DevLayout({ children }) {
     if (verified === "1") setPinVerified(true);
   }, [hydrateFromStorage]);
 
+  /** handlePinSubmit — Validasi PIN; benar → tandai verified di session. */
   const handlePinSubmit = (e) => {
     e.preventDefault();
     if (pinInput === DEV_PIN || user?.email === DEV_EMAIL) {

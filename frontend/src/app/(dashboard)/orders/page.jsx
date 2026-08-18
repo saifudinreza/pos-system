@@ -1,5 +1,20 @@
 "use client";
 
+// ============================================================
+// Orders Page — Daftar pesanan + detail + aksi status
+//
+// Data yang diambil:
+//   - useOrders hook → GET /api/orders (filter status & rentang tanggal,
+//     pagination via meta)
+//   - orderService.getById(id) → detail satu order (modal)
+//
+// Aksi per status:
+//   pending   → tandai lunas (updateStatus "paid") atau batalkan ("cancelled")
+//   paid      → void (butuh PIN admin via prompt)
+// Aksi di-route ke OrderController::updateStatus() di backend yang juga
+// mencatat inventory movement & mengirim struk WhatsApp (async job).
+// ============================================================
+
 import { useState } from "react";
 import { useOrders }   from "@/hooks/useOrders";
 import orderService    from "@/services/orderService";
@@ -7,9 +22,13 @@ import NeoTable  from "@/components/ui/NeoTable";
 import NeoBadge  from "@/components/ui/NeoBadge";
 import NeoButton from "@/components/ui/NeoButton";
 import NeoModal  from "@/components/ui/NeoModal";
-import useAuthStore from "@/stores/authStore";
 import { formatCurrency, formatDateTime, getOrderStatusConfig, getErrorMessage } from "@/lib/utils";
 
+/**
+ * OrderDetailModal — Modal detail satu order: info pelanggan, item,
+ * subtotal/PPN/total, catatan, dan tombol aksi sesuai status.
+ * onVoid(id, status) & onMarkPaid(id) dioper dari halaman utama.
+ */
 function OrderDetailModal({ order, onClose, onVoid, onMarkPaid }) {
   if (!order) return null;
   const status = getOrderStatusConfig(order.status);
@@ -114,12 +133,14 @@ function OrderDetailModal({ order, onClose, onVoid, onMarkPaid }) {
 }
 
 export default function OrdersPage() {
-  const { orders, meta, isLoading, filters, updateFilters, goToPage, updateStatus } = useOrders();
-  const user = useAuthStore((s) => s.user);
-  const isAdmin = user?.role === "admin";
+  const { orders, meta, isLoading, updateFilters, goToPage, updateStatus } = useOrders();
   const [detailOrder, setDetailOrder] = useState(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
+  /**
+   * openDetail — Ambil detail lengkap order (GET /api/orders/{id}) lalu
+   * tampilkan di modal. Response bisa berbentuk { data } atau langsung objek.
+   */
   const openDetail = async (id) => {
     setLoadingDetail(true);
     try {
@@ -129,6 +150,7 @@ export default function OrdersPage() {
     finally { setLoadingDetail(false); }
   };
 
+  /** handleMarkPaid — Tandai order pending menjadi lunas (bayar tunai/manual). */
   const handleMarkPaid = async (id) => {
     if (!confirm("Tandai order ini sebagai LUNAS? (Bayar Tunai / Manual)")) return;
     try {
@@ -137,6 +159,10 @@ export default function OrdersPage() {
     } catch (err) { alert(getErrorMessage(err)); }
   };
 
+  /**
+   * handleVoid — Batalkan (cancelled) atau void order. Status "void" butuh
+   * PIN admin yang diminta via prompt; PIN divalidasi di backend.
+   */
   const handleVoid = async (id, status) => {
     if (!confirm(`${status === "void" ? "VOID" : "Batalkan"} order ini? Tindakan tidak dapat dibatalkan.`)) return;
     if (status === "void") {
@@ -149,6 +175,7 @@ export default function OrdersPage() {
     } catch (err) { alert(getErrorMessage(err)); }
   };
 
+  // ── Definisi kolom tabel ──
   const columns = [
     {
       key: "order_number", label: "No. Order",
@@ -182,6 +209,7 @@ export default function OrdersPage() {
     },
   ];
 
+  // ── Render: header → filter status/tanggal → tabel → pagination → modal detail ──
   return (
     <div className="space-y-5 page-fade">
       <div className="flex items-center justify-between flex-wrap gap-3">

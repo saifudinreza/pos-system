@@ -28,17 +28,30 @@
 
 import api from "@/lib/axios";
 
-// Helper: simpan token ke cookie agar middleware.js bisa membacanya
+// --- HELPER: SIMPAN TOKEN KE COOKIE ---
+// Agar middleware.js bisa membacanya
 // max-age=604800 = berlaku 7 hari (dalam detik)
 // SameSite=Lax  = cookie dikirim saat navigasi biasa, tapi tidak di cross-site request
 const setTokenCookie = (token) => {
   document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
 };
 
-// Helper: hapus cookie token (saat logout)
+// --- HELPER: HAPUS COOKIE TOKEN (saat logout) ---
 // Cara hapus cookie: set expires ke masa lalu
 const clearTokenCookie = () => {
   document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+};
+
+// --- HELPER: SIMPAN SESI LOGIN ---
+// Dipakai bersama oleh login() dan register() — kedua tempat penyimpanan
+// (localStorage + cookie) harus selalu sinkron, makanya disatukan di sini
+const persistSession = (token, user) => {
+  if (typeof window === "undefined") return;
+  // localStorage → dibaca axios.js untuk sisipkan header Authorization
+  localStorage.setItem("token", token);
+  localStorage.setItem("user", JSON.stringify(user));
+  // Cookie → dibaca middleware.js untuk route guard
+  if (token) setTokenCookie(token);
 };
 
 const authService = {
@@ -56,13 +69,7 @@ const authService = {
     // Destructure token dan user dari nested data.data
     const token = data.data?.token;
     const user  = data.data?.user;
-    if (typeof window !== "undefined") {
-      // Simpan ke localStorage → dipakai axios untuk header Authorization
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      // Simpan ke cookie → dipakai middleware.js untuk route guard
-      if (token) setTokenCookie(token);
-    }
+    persistSession(token, user);
     return { token, user, message: data.message };
   },
 
@@ -74,11 +81,7 @@ const authService = {
     const token      = data.data?.token;
     const user       = data.data?.user;
     const isNewStore = data.data?.is_new_store ?? true;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      if (token) setTokenCookie(token);
-    }
+    persistSession(token, user);
     return { token, user, is_new_store: isNewStore, message: data.message };
   },
 

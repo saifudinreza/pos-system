@@ -12,13 +12,18 @@
 import api from "@/lib/axios";
 
 const insightService = {
-  // Ambil insight yang sudah tersimpan (tidak memanggil LLM)
+  // --- AMBIL WAWASAN TERSIMPAN ---
+  // Hanya membaca insight terakhir dari database (TIDAK memanggil LLM)
+  // @returns { data: { insight, created_at } }
   getInsights: async () => {
     const { data } = await api.get("/insights");
     return data;
   },
 
-  // Minta AI membuat wawasan baru (memanggil LLM → terbatas 5x/menit)
+  // --- GENERATE WAWASAN BARU ---
+  // Minta AI (Groq/OpenRouter) menulis ulang wawasan dari data terkini.
+  // Dipanggil manual oleh admin — throttle 5 request/menit di backend.
+  // @returns { data: { insight, ... } }
   generateInsights: async () => {
     const { data } = await api.post("/insights/generate");
     return data;

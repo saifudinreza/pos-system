@@ -8,6 +8,12 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 
+/**
+ * AppServiceProvider — registrasi layanan aplikasi.
+ *
+ * Boot: paksa HTTPS di production (Railway) & daftarkan limiter rate global
+ * 'api' yang dipasang di semua route /api/* via bootstrap/app.php.
+ */
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
@@ -33,7 +39,7 @@ class AppServiceProvider extends ServiceProvider
      * Endpoint khusus di-exempt (Limit::none) supaya tidak merusak:
      *  - webhook Midtrans → dipanggil otomatis server Midtrans, bisa paralel & retry
      *  - media proxy     → browser memuat banyak gambar produk sekaligus saat buka katalog
-     *  - polling AI      → frontend men-t'aff polling /ai/jobs/{id} tiap 2 detik
+     *  - polling AI      → frontend mem-poll /ai/jobs/{id} tiap 2 detik
      *                      & sidebar memanggil /ai/usage-today sering; di-design sengaja
      *                      tanpa throttle per-route sebelumnya
      */

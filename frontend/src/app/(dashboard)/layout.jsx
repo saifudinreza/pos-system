@@ -50,6 +50,7 @@ export default function DashboardLayout({ children }) {
     setMounted(true);
   }, [hydrateFromStorage]);
 
+  // ── Nilai turunan: plan & role menentukan fitur yang tampil ──
   const plan   = user?.effective_plan ?? user?.subscription_plan ?? "free";
   const role   = user?.role ?? "kasir";
   const showAI = mounted && (

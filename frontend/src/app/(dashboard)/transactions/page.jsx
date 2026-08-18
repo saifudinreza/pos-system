@@ -1,5 +1,18 @@
 "use client";
 
+// ============================================================
+// Transactions Page — Daftar transaksi Midtrans + detail + batal
+//
+// Data yang diambil:
+//   - transactionService.getAll(filters) → GET /api/transactions
+//     (filter status & rentang tanggal, pagination via meta)
+//   - transactionService.getById(id) → detail satu transaksi (modal)
+//
+// Status Midtrans: settlement (berhasil) / pending / expire / cancel / deny.
+// Transaksi "pending" bisa dibatalkan → backend mem-void order terkait
+// dan mengembalikan stok produk (inventory movement).
+// ============================================================
+
 import { useState, useEffect, useCallback } from "react";
 import transactionService from "@/services/transactionService";
 import NeoTable  from "@/components/ui/NeoTable";
@@ -18,12 +31,19 @@ const STATUS_COLOR = {
 };
 
 // ── Detail modal ────────────────────────────────────────────────
+/**
+ * TransactionDetailModal — Modal detail transaksi: status, nominal,
+ * ID Midtrans, metode bayar, dan order terkait (item + total).
+ * Transaksi pending menampilkan tombol "Batalkan Transaksi".
+ */
 function TransactionDetailModal({ txId, onClose, onCancelled }) {
+  // State lokal modal: data transaksi, loading, error, status pembatalan
   const [tx,         setTx]         = useState(null);
   const [loading,    setLoading]    = useState(true);
   const [cancelling, setCancelling] = useState(false);
   const [error,      setError]      = useState("");
 
+  // Fetch ulang detail setiap kali txId berubah (modal dibuka untuk id lain)
   useEffect(() => {
     if (!txId) return;
     setLoading(true);
@@ -34,6 +54,11 @@ function TransactionDetailModal({ txId, onClose, onCancelled }) {
       .finally(() => setLoading(false));
   }, [txId]);
 
+  /**
+   * handleCancel — Batalkan transaksi pending via POST /api/transactions/{id}/cancel.
+   * Backend mengembalikan stok & membatalkan order; onCancelled() dipanggil
+   * supaya daftar transaksi di halaman ikut di-refresh.
+   */
   const handleCancel = async () => {
     if (!confirm("Batalkan transaksi ini? Stok produk akan dikembalikan dan order akan dibatalkan.")) return;
     setCancelling(true);
@@ -194,14 +219,19 @@ function TransactionDetailModal({ txId, onClose, onCancelled }) {
 
 // ── Main page ────────────────────────────────────────────────────
 export default function TransactionsPage() {
+  // ── State ──
   const [transactions, setTransactions] = useState([]);
   const [meta,         setMeta]         = useState(null);
   const [isLoading,    setIsLoading]    = useState(false);
   const [filters,      setFilters]      = useState({ page: 1, per_page: 10 });
-  const [detailTxId,   setDetailTxId]   = useState(null);
+  const [detailTxId,   setDetailTxId]   = useState(null);   // id transaksi untuk modal detail
 
   const [fetchError, setFetchError] = useState("");
 
+  /**
+   * fetchData — Ambil daftar transaksi sesuai filter. useCallback supaya
+   * useEffect yang bergantung padanya tidak jalan berulang tiap render.
+   */
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setFetchError("");
@@ -217,6 +247,7 @@ export default function TransactionsPage() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  // ── Definisi kolom tabel ──
   const columns = [
     {
       key: "order", label: "No. Order",
@@ -277,6 +308,7 @@ export default function TransactionsPage() {
     },
   ];
 
+  // ── Render: header → filter → tabel → pagination → modal detail ──
   return (
     <div className="space-y-5">
       {/* Header */}

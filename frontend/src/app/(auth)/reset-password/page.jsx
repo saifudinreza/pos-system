@@ -22,6 +22,9 @@ import authService from "@/services/authService";
 import { getErrorMessage } from "@/lib/utils";
 
 function ResetForm() {
+  // ── State ──
+  // token & email diambil dari URL (?token=...&email=...) yang dikirim
+  // lewat link di email — kalau kosong berarti link dibuka manual
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const email = searchParams.get("email") ?? "";
@@ -30,11 +33,19 @@ function ResetForm() {
   const [status, setStatus] = useState("idle"); // idle | submitting | success | error
   const [error, setError]   = useState("");
 
+  /**
+   * handleChange — Update nilai input password; reset pesan error.
+   */
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError("");
   };
 
+  /**
+   * handleSubmit — Validasi lokal (konfirmasi cocok & min 8 karakter) lalu
+   * kirim token + email + password baru ke POST /api/reset-password.
+   * Token sekali pakai — berhasil berarti semua sesi lama dicabut.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -57,6 +68,7 @@ function ResetForm() {
     }
   };
 
+  // ── Render: 3 kondisi — sukses | link tidak valid | form ganti password ──
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4">
       <div className="w-full max-w-md">

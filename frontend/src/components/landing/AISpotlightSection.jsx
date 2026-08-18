@@ -50,7 +50,13 @@ const BENEFITS = [
   },
 ];
 
-// Satu baris chat dalam mock sidebar
+/**
+ * ChatBubble — satu baris chat dalam mock sidebar (lihat header file).
+ *
+ * Props:
+ *   role     : "user" (kuning, rata kanan) | "ai" (gelap, rata kiri)
+ *   children : isi pesan (teks / JSX dengan highlight <b>)
+ */
 function ChatBubble({ role, children }) {
   const isUser = role === "user";
   return (
@@ -78,11 +84,18 @@ function ChatBubble({ role, children }) {
   );
 }
 
+/**
+ * AISpotlightSection — section sorotan AI (lihat header file).
+ * Tanpa props; animasi glow mengikuti scroll via useScroll/useTransform,
+ * dan mati otomatis saat user mengaktifkan reduced-motion.
+ */
 export default function AISpotlightSection() {
   const reduce = useReducedMotion();
   const ref = useRef(null);
 
-  // Sorotan bergerak halus saat scroll
+  // Sorotan bergerak halus saat scroll:
+  // scrollYProgress 0→1 di-mapping ke pergeseran x/y glow (persen).
+  // reduced-motion → offset tetap 0 (tanpa gerak).
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],

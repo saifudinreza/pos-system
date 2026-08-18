@@ -1,5 +1,19 @@
 "use client";
 
+// ============================================================
+// Users Page — Manajemen pengguna dalam tenant (admin/developer)
+//
+// Data yang diambil:
+//   - userService.getAll({ page, per_page, search, role, is_active })
+//     → daftar user + meta pagination (search pakai debounce 500ms)
+//
+// Aksi: tambah/edit user (modal), ubah role (kasir ↔ admin), aktif/nonaktif,
+// hapus permanen (modal konfirmasi). Role developer & akun sendiri
+// dilindungi dari perubahan.
+//
+// Hak akses: halaman diblokir untuk role di bawah admin (403 → "Akses Ditolak").
+// ============================================================
+
 import { useState, useEffect } from "react";
 import { ShieldOff, UserPlus, Trash2 } from "lucide-react";
 import userService    from "@/services/userService";
@@ -29,6 +43,10 @@ const AVATAR_COLORS = [
   "bg-orange-200 text-orange-800",
 ];
 
+/**
+ * UserAvatar — Avatar lingkaran dengan inisial nama (max 2 kata).
+ * Warna dipilih deterministik dari huruf pertama nama.
+ */
 function UserAvatar({ name }) {
   const initials = (name ?? " ")
     .split(" ")
@@ -49,10 +67,11 @@ function UserAvatar({ name }) {
 export default function UsersPage() {
   const currentUser = useAuthStore((s) => s.user);
 
+  // ── State ──
   const [users,     setUsers]     = useState([]);
   const [meta,      setMeta]      = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [denied,    setDenied]    = useState(false);
+  const [denied,    setDenied]    = useState(false);        // 403 → halaman akses ditolak
   const [search,    setSearch]    = useState("");
   const [filters,   setFilters]   = useState({ page: 1, per_page: 15 });
   const [modal,        setModal]        = useState({ open: false, data: null });
@@ -63,6 +82,7 @@ export default function UsersPage() {
   const [formError,    setFormError]    = useState("");
   const debouncedSearch = useDebounce(search, 500);
 
+  /** fetchData — Ambil daftar user sesuai filter + search (debounced). */
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -76,6 +96,7 @@ export default function UsersPage() {
 
   useEffect(() => { fetchData(); }, [filters, debouncedSearch]);
 
+    /** openModal — Buka modal tambah (data=null) atau edit (data=user). */
   const openModal = (data = null) => {
     setForm(data
       ? {
@@ -89,6 +110,10 @@ export default function UsersPage() {
     setFormError("");
   };
 
+  /**
+   * handleSave — Simpan user (create/update). Saat edit, password boleh
+   * dikosongkan (= tidak diubah) → key password dihapus dari payload.
+   */
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -107,6 +132,7 @@ export default function UsersPage() {
     finally { setSaving(false); }
   };
 
+  /** handleDelete — Hapus permanen user (dari modal konfirmasi). */
   const handleDelete = async () => {
     if (!deleteModal.data) return;
     setDeleting(true);
@@ -118,6 +144,7 @@ export default function UsersPage() {
     finally { setDeleting(false); }
   };
 
+  /** handleRoleChange — Ubah role user (kasir ↔ admin) via PATCH; update state lokal. */
   const handleRoleChange = async (id, name, newRole) => {
     if (!confirm(`Ubah role "${name}" menjadi ${newRole}?`)) return;
     try {
@@ -126,6 +153,7 @@ export default function UsersPage() {
     } catch (err) { alert(getErrorMessage(err)); }
   };
 
+  /** handleToggle — Aktif/nonaktifkan akun user (dilarang untuk akun sendiri). */
   const handleToggle = async (id, name, isActive) => {
     if (id === currentUser?.id) {
       alert("Tidak bisa mengubah status akunmu sendiri.");
@@ -146,6 +174,7 @@ export default function UsersPage() {
     aktif:  users.filter((u) => u.is_active).length,
   };
 
+  // ── Definisi kolom tabel ──
   const columns = [
     {
       key: "name", label: "Pengguna",
@@ -228,6 +257,7 @@ export default function UsersPage() {
     },
   ];
 
+    // ── Render: header → statistik role → filter → tabel → pagination → modals ──
   if (denied) return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 page-fade">
       <div className="w-20 h-20 bg-red-100 border-2 border-brand-black flex items-center justify-center"

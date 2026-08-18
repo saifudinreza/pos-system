@@ -16,6 +16,12 @@ use Illuminate\Support\Facades\Log;
 class InventoryService
 {
     /**
+     * Catat satu pergerakan stok ke ledger inventory.
+     *
+     * Service ini HANYA mencatat — perubahan `products.stock` tetap dilakukan
+     * oleh pemanggil (decrement/increment). `before_stock`/`after_stock`
+     * adalah snapshot yang dipakai untuk riwayat pergerakan.
+     *
      * @param int    $productId   produk yang stoknya berubah
      * @param int|null $tenantId  tenant pemilik produk (bisa null di webhook tanpa login)
      * @param string $type        sale | cancel | restock | adjust
@@ -45,7 +51,7 @@ class InventoryService
                 'after_stock'  => $afterStock,
                 'ref_type'     => $refType,
                 'ref_id'       => $refId,
-                'user_id'      => $userId ?? auth()->id(),
+                'user_id'      => $userId ?? auth()->id(), // user dari context request kalau tidak dikirim eksplisit
                 'note'         => $note,
             ]);
         } catch (\Throwable $e) {

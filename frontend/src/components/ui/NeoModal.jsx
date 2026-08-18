@@ -4,6 +4,17 @@
 
 import { useEffect } from "react";
 
+/**
+ * NeoModal — dialog popup (overlay gelap + kotak di tengah layar).
+ *
+ * Props:
+ *   isOpen  : true → tampil; scroll body dikunci selama terbuka
+ *   onClose : dipanggil saat klik overlay / tombol ✕ / (footer)
+ *   title   : judul di header modal
+ *   children: isi body — bisa di-scroll kalau kontennya panjang (max-h 90vh)
+ *   footer  : elemen opsional di baris bawah (biasanya tombol aksi)
+ *   size    : sm|md|lg|xl → lebar maksimal kotak (default: md)
+ */
 export default function NeoModal({ isOpen, onClose, title, children, footer, size = "md" }) {
   // Kunci scroll body saat modal terbuka — supaya background tidak bergerak
   useEffect(() => {

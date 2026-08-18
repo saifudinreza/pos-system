@@ -19,12 +19,16 @@ import { getErrorMessage } from "@/lib/utils";
 import LogoMark from "@/components/brand/LogoMark";
 
 export default function LoginPage() {
+  // ── State ──
+  // form: nilai input email & password · error: pesan gagal login
+  // serverWarm: indikator backend sudah siap dijawab (anti cold start Railway)
   const { login, isLoading } = useAuthStore();
 
   const [form, setForm]         = useState({ email: "", password: "" });
   const [error, setError]       = useState("");
   const [serverWarm, setServerWarm] = useState(false);
 
+  // ── Efek saat halaman terbuka ──
   // Ping backend saat halaman login terbuka supaya Railway "bangun"
   // sebelum user klik tombol Masuk — mengurangi cold start delay
   useEffect(() => {
@@ -33,11 +37,20 @@ export default function LoginPage() {
       .catch(() => setServerWarm(true));
   }, []);
 
+  /**
+   * handleChange — Update nilai input form sesuai field yang diketik.
+   * Error lama di-reset supaya pesan merah hilang begitu user mengetik ulang.
+   */
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError("");
   };
 
+  /**
+   * handleSubmit — Kirim kredensial ke authStore.login().
+   * Berhasil → redirect ke /dashboard (full reload via window.location
+   * supaya middleware auth Next.js ikut re-evaluasi token baru).
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -49,9 +62,10 @@ export default function LoginPage() {
     }
   };
 
+  // ── Render: logo + kartu form + link bantuan ──
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4">
-      {/* Kartu login */}
+      {/* ── Kartu login ── */}
       <div className="w-full max-w-md">
 
         {/* Logo */}

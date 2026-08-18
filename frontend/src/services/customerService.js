@@ -15,13 +15,18 @@ import api from "@/lib/axios";
 import { buildQueryString } from "@/lib/utils";
 
 const customerService = {
-  // Daftar pelanggan — @param {Object} params: { search }
+  // --- DAFTAR PELANGGAN ---
+  // Mengembalikan daftar pelanggan + agregat (total order, total belanja)
+  // @param {Object} params — { search: nama atau nomor HP }
+  // @returns { data: Customer[], ... }
   getAll: async (params = {}) => {
     const { data } = await api.get(`/customers${buildQueryString(params)}`);
     return data;
   },
 
-  // Detail + riwayat order satu pelanggan
+  // --- DETAIL SATU PELANGGAN ---
+  // @param {number} id
+  // @returns { data: { customer, recent_orders } } — termasuk 20 order terbaru
   getById: async (id) => {
     const { data } = await api.get(`/customers/${id}`);
     return data.data;

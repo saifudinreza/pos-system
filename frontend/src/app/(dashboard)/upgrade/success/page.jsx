@@ -1,5 +1,14 @@
 "use client";
 
+// ============================================================
+// Upgrade Success — Halaman setelah pembayaran Midtrans berhasil
+//
+// Aktivasi plan terjadi via WEBHOOK Midtrans di backend (bisa telat
+// beberapa detik). Halaman ini mem-poll fetchCurrentUser() tiap 5 detik
+// (maks 6×) sampai user.subscription_plan cocok dengan plan yang dibeli —
+// baru tombol "Ke Dashboard" aktif.
+// ============================================================
+
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, PartyPopper, ArrowRight, Loader2 } from "lucide-react";
@@ -16,9 +25,16 @@ function SuccessContent() {
   const cycle  = searchParams.get("cycle") ?? "monthly";
   const amount = Number(searchParams.get("amount") ?? 0);
 
+  // ── State: polling aktivasi ──
+  // activating: true selama webhook belum meng-update plan user
   const [activating, setActivating] = useState(true);
   const attemptsRef = useRef(0);
 
+  /**
+   * Polling aktivasi: beri webhook Midtrans ~2 detik head start, lalu cek
+   * fetchCurrentUser() tiap 5 detik. Berhenti kalau plan/role sudah
+   * ter-upgrade ATAU sudah 6 percobaan (~32 detik).
+   */
   useEffect(() => {
     let timer;
 

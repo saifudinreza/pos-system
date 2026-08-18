@@ -4,6 +4,8 @@
 
 import { memo } from "react";
 
+// Palet warna badge — key dipakai sebagai prop `color`, value = class Tailwind
+// (warna teks/background/border sudah dipasangkan per varian)
 const COLORS = {
   yellow:  "bg-brand-yellow text-brand-black border-brand-black",
   black:   "bg-brand-black text-white border-brand-black",
@@ -14,6 +16,15 @@ const COLORS = {
   orange:  "bg-orange-100 text-orange-700 border-orange-500",
 };
 
+/**
+ * NeoBadge — label status kecil neobrutalist (stiker warna di rak toko).
+ *
+ * Props:
+ *   children : teks isi badge
+ *   color    : key dari COLORS — yellow|black|green|red|gray|blue|orange
+ *              (kalau tidak dikenal → fallback gray)
+ *   className: class Tailwind tambahan, ditempel di paling akhir
+ */
 const NeoBadge = memo(function NeoBadge({ children, color = "yellow", className = "" }) {
   return (
     <span

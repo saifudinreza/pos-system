@@ -14,6 +14,15 @@ use Midtrans\Snap;
 use Midtrans\Notification;
 use Midtrans\Transaction;
 
+/**
+ * SubscriptionController — langganan Pro/Enterprise via Midtrans Snap.
+ *
+ * Harga terpusat di PRICES (yearly = monthly × 10, 2 bulan gratis). Snap token
+ * dibuat pakai server key PLATFORM (langganan adalah produk platform, bukan
+ * per-tenant) — berbeda dengan TransactionController yang memakai key per-tenant.
+ * Webhook subscription memakai key yang sama (set di constructor).
+ * Endpoint dev-* khusus role developer (tanpa global scope).
+ */
 class SubscriptionController extends Controller
 {
     const PRICES = [
@@ -22,6 +31,10 @@ class SubscriptionController extends Controller
         'enterprise' => ['monthly' => 499000, 'yearly' => 4990000],
     ];
 
+    /**
+     * Set konfigurasi Midtrans PLATFORM (langganan milik platform,
+     * bukan tenant) — key diambil dari config services.midtrans.
+     */
     public function __construct()
     {
         Config::$serverKey    = config('services.midtrans.server_key');
@@ -30,6 +43,14 @@ class SubscriptionController extends Controller
         Config::$is3ds        = true;
     }
 
+    /**
+     * Status langganan user yang login: plan aktif + subscription active/
+     * pending terbaru.
+     * GET /api/subscription
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse { plan, subscription, pending }
+     */
     // GET /api/subscription — status langganan user yang login
     public function status(Request $request): JsonResponse
     {
@@ -51,7 +72,15 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    // POST /api/subscription/cancel-pending — user batalkan transaksi pending miliknya sendiri
+    /**
+     * Batalkan transaksi langganan pending milik user sendiri. Cancel juga
+     * dilakukan di sisi Midtrans (VA/instruksi bayar langsung nonaktif);
+     * kalau gagal di Midtrans, tetap dilanjutkan (log warning saja).
+     * POST /api/subscription/cancel-pending
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse 200 / 404 tidak ada pending
+     */
     public function cancelPending(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -79,7 +108,15 @@ class SubscriptionController extends Controller
         return response()->json(['message' => 'Transaksi berhasil dibatalkan.']);
     }
 
-    // POST /api/subscription/initiate — buat transaksi Midtrans untuk upgrade
+    /**
+     * Buat transaksi Midtrans untuk upgrade plan: batalkan pending lama,
+     * minta Snap token, simpan Subscription (status pending).
+     * POST /api/subscription/initiate
+     *
+     * @param Request $request Body: plan (pro|enterprise), billing_cycle (monthly|yearly),
+     *                          name, phone?, address?
+     * @return JsonResponse 201 { snap_token, order_id, amount, plan }
+     */
     public function initiate(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -141,7 +178,18 @@ class SubscriptionController extends Controller
         ], 201);
     }
 
-    // POST /api/webhook/midtrans-subscription — webhook Midtrans untuk subscription
+    /**
+     * Webhook Midtrans untuk langganan (order id berprefix SUB-).
+     * POST /api/webhook/midtrans-subscription
+     *
+     * Alur: verifikasi signature via `new Notification()` (SDK, pakai server
+     * key platform dari constructor) → abaikan non-SUB → cari subscription →
+     * dalam DB::transaction: map status Midtrans → update subscription +
+     * expires_at; kalau aktif, upgrade plan user DAN role jadi admin.
+     *
+     * @param Request $request Body notifikasi Midtrans (sudah diverifikasi SDK)
+     * @return JsonResponse 200 OK / 500 error
+     */
     public function webhook(Request $request): JsonResponse
     {
         try {
@@ -204,7 +252,13 @@ class SubscriptionController extends Controller
         }
     }
 
-    // GET /api/dev/subscriptions — semua tenant & status langganan (developer only)
+    /**
+     * Semua tenant & status langganan (dashboard developer).
+     * GET /api/dev/subscriptions
+     * Developer-only — memakai withoutGlobalScopes() agar bisa lintas tenant.
+     *
+     * @return JsonResponse { data, stats: { total, active, free, pro, enterprise } }
+     */
     public function devIndex(): JsonResponse
     {
         $developer = User::withoutGlobalScopes()->where('role', 'developer')->first();
@@ -270,7 +324,14 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    // PATCH /api/dev/subscriptions/{userId}/plan
+    /**
+     * Ubah plan user secara manual (dev tool). Kalau diubah ke free, semua
+     * subscription active di-expire. Audit log 'plan_changed'.
+     * PATCH /api/dev/subscriptions/{userId}/plan
+     *
+     * @param int $userId ID user
+     * @return JsonResponse 200 / 422 developer tidak bisa diubah
+     */
     public function devUpdatePlan(int $userId): JsonResponse
     {
         $validated = request()->validate(['plan' => ['required', 'in:free,pro,enterprise']]);
@@ -294,7 +355,14 @@ class SubscriptionController extends Controller
         return response()->json(['message' => 'Plan berhasil diubah.', 'plan' => $validated['plan']]);
     }
 
-    // PATCH /api/dev/subscriptions/{userId}/toggle — suspend / aktifkan akun
+    /**
+     * Suspend / aktifkan akun user (dev tool). Suspend → subscription active
+     * jadi 'suspended'; aktifkan kembali → 'suspended' balik 'active'.
+     * PATCH /api/dev/subscriptions/{userId}/toggle
+     *
+     * @param int $userId ID user
+     * @return JsonResponse 200 { message, status } / 422 developer
+     */
     public function devToggleStatus(int $userId): JsonResponse
     {
         $user = User::withoutGlobalScopes()->findOrFail($userId);
@@ -320,16 +388,22 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    private function formatSubscription(Subscription $s): array
+    /**
+     * Format satu subscription untuk response (whitelist field).
+     *
+     * @param Subscription $subscription Subscription yang akan diformat
+     * @return array Data subscription siap-JSON
+     */
+    private function formatSubscription(Subscription $subscription): array
     {
         return [
-            'id'           => $s->id,
-            'plan'         => $s->plan,
-            'billing_cycle' => $s->billing_cycle,
-            'amount'       => $s->amount,
-            'status'       => $s->status,
-            'paid_at'      => $s->paid_at?->format('d M Y'),
-            'expires_at'   => $s->expires_at?->format('d M Y'),
+            'id'           => $subscription->id,
+            'plan'         => $subscription->plan,
+            'billing_cycle' => $subscription->billing_cycle,
+            'amount'       => $subscription->amount,
+            'status'       => $subscription->status,
+            'paid_at'      => $subscription->paid_at?->format('d M Y'),
+            'expires_at'   => $subscription->expires_at?->format('d M Y'),
         ];
     }
 }

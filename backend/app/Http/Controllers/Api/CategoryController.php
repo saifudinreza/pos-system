@@ -6,11 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
+/**
+ * CategoryController — CRUD kategori produk per-tenant.
+ *
+ * Isolasi tenant otomatis via TenantScope (tidak ada WHERE tenant_id manual).
+ * Read limit paket dipakai untuk FREE (15 kategori) — lihat Controller::categoryReadLimits().
+ * Slug digenerate otomatis dari model (event creating), tidak perlu dikirim frontend.
+ */
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Daftar kategori + jumlah produk per kategori (withCount), dengan search
+     * dan filter is_active. Paket FREE di-cap ke read limit kategori.
+     *
+     * @param Request $request Query: search?, is_active?
+     * @return JsonResponse { message, data, meta: { plan, plan_limit, is_limited, total_in_tenant } }
      */
     public function index(Request $request): JsonResponse
     {
@@ -54,6 +67,13 @@ class CategoryController extends Controller
     // SHOW — ambil satu kategori by ID beserta produknya
     // GET /api/categories/{id}
     // =============================================================
+    /**
+     * Detail satu kategori + preview 10 produk aktif di dalamnya
+     * (produk di-eager load dengan limit 10 → bukan semua produk).
+     *
+     * @param int $id ID kategori
+     * @return JsonResponse 200 detail / 404 tidak ditemukan
+     */
     public function show(int $id): JsonResponse
     {
         $category = Category::withCount('products')
@@ -93,6 +113,13 @@ class CategoryController extends Controller
     // POST /api/categories
     // Role: admin only
     // =============================================================
+    /**
+     * Tambah kategori baru. Gate paket: FREE cap 15 kategori (422 limit_reached).
+     * Nama kategori harus unik dalam tenant yang sama.
+     *
+     * @param Request $request Body: { name, is_active? }
+     * @return JsonResponse 201 / 422 limit paket
+     */
     public function store(Request $request): JsonResponse
     {
         // ----- CEK LIMIT PAKET -----
@@ -108,7 +135,7 @@ class CategoryController extends Controller
 
         $validated = $request->validate([
             'name'      => ['required', 'string', 'max:255',
-                \Illuminate\Validation\Rule::unique('categories', 'name')->where('tenant_id', $request->user()->tenant_id),
+                Rule::unique('categories', 'name')->where('tenant_id', $request->user()->tenant_id),
             ],
             'is_active' => ['nullable', 'boolean'],
         ]);
@@ -131,7 +158,14 @@ class CategoryController extends Controller
     // PUT /api/categories/{id}
     // Role: admin only
     // =============================================================
-
+    /**
+     * Edit kategori; slug otomatis di-generate ulang kalau nama berubah.
+     * Unik-per-tenant dengan ignore id sendiri.
+     *
+     * @param Request $request Body: name?, is_active?
+     * @param int     $id      ID kategori
+     * @return JsonResponse 200 / 404
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         $category = Category::find($id);
@@ -144,14 +178,14 @@ class CategoryController extends Controller
 
         $validated = $request->validate([
             'name'      => ['sometimes', 'string', 'max:255',
-                \Illuminate\Validation\Rule::unique('categories', 'name')->where('tenant_id', $category->tenant_id)->ignore($id),
+                Rule::unique('categories', 'name')->where('tenant_id', $category->tenant_id)->ignore($id),
             ],
             'is_active' => ['nullable', 'boolean'],
         ]);
 
         // Update slug kalau nama berubah
         if (isset($validated['name'])) {
-            $validated['slug'] = \Illuminate\Support\Str::slug($validated['name']);
+            $validated['slug'] = Str::slug($validated['name']);
             // ↑ Generate ulang slug sesuai nama baru
         }
 
@@ -169,6 +203,13 @@ class CategoryController extends Controller
     // DELETE /api/categories/{id}
     // Role: admin only
     // =============================================================
+    /**
+     * Hapus kategori. Kategori yang masih dipakai produk TIDAK boleh dihapus
+     * (422 + products_count) — integritas relasi terjaga.
+     *
+     * @param int $id ID kategori
+     * @return JsonResponse 200 / 404 / 422 masih punya produk
+     */
     public function destroy(int $id): JsonResponse
     {
         $category = Category::find($id);
@@ -198,6 +239,13 @@ class CategoryController extends Controller
     // =============================================================
     // HELPER — format data kategori untuk response
     // =============================================================
+    /**
+     * Format data kategori untuk response (whitelist field).
+     * products_count fallback ke 0 kalau withCount tidak dipakai.
+     *
+     * @param Category $category Kategori yang akan diformat
+     * @return array Data kategori siap-JSON
+     */
     private function formatCategory(Category $category): array
     {
         return [

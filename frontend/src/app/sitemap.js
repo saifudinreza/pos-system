@@ -1,3 +1,12 @@
+// ============================================================
+// sitemap.js — Peta situs (XML sitemap) untuk SEO
+//
+// Next.js file convention: menghasilkan /sitemap.xml otomatis
+// dari array di bawah. Hanya halaman PUBLIK yang didaftarkan
+// (landing, login, register) — halaman dashboard bersifat privat
+// dan sudah di-block di robots.txt.
+// ============================================================
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sikasirai.com";
 
 export default function sitemap() {

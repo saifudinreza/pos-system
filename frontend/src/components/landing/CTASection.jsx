@@ -17,6 +17,10 @@
 import Link from "next/link";
 import { Reveal } from "./motion";
 
+/**
+ * CTASection — panggilan aksi terakhir sebelum footer (lihat header file).
+ * Tanpa props & state — murni UI statis dalam bungkus animasi Reveal.
+ */
 export default function CTASection() {
   return (
     <section className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray">

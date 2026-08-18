@@ -1,9 +1,27 @@
+// ============================================================
+// layout.jsx — Root layout seluruh aplikasi KasirAI
+//
+// Menyusun kerangka HTML dasar: metadata SEO, font preconnect,
+// structured data (JSON-LD), Google Analytics (GA4), dan
+// Vercel Speed Insights.
+//
+// Catatan:
+//   - GA hanya aktif kalau env NEXT_PUBLIC_GA_MEASUREMENT_ID diisi
+//     (component @next/third-parties di-render kondisional)
+//   - metadataBase & canonical memakai NEXT_PUBLIC_APP_URL
+//     (fallback https://sikasirai.com) — env yang sama dipakai
+//     sitemap/robots/OG image
+//   - og:image di-generate otomatis oleh app/opengraph-image.js
+// ============================================================
+
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
+// ID properti GA4 dari env — di-bake saat build, perlu redeploy kalau diubah
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
+// URL publik aplikasi — dipakai untuk metadataBase, canonical, dan JSON-LD
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://sikasirai.com";
 
 export const metadata = {
@@ -58,6 +76,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // Structured data JSON-LD (Schema.org) — membantu Google memahami
+  // bahwa ini aplikasi SaaS, ditampilkan sebagai rich result
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",

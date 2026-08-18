@@ -74,6 +74,10 @@ const userService = {
     return data;
   },
 
+  // --- GANTI ROLE USER ---
+  // Dipakai halaman manajemen user (admin) untuk upgrade/downgrade role
+  // @param {number} id
+  // @param {"admin" | "kasir" | "user" | "developer"} role
   patchRole: async (id, role) => {
     const { data } = await api.patch(`/users/${id}/role`, { role });
     return data;

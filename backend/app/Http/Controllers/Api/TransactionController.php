@@ -15,8 +15,26 @@ use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
 
+/**
+ * TransactionController — transaksi pembayaran via Midtrans Snap + tunai.
+ *
+ * ⚠️ PAYMENT PER-TENANT: server key diambil dari tenant (ter-enkripsi di DB),
+ * bukan key platform — lihat configureServerKey()/configureServerKeyForTenant().
+ * Paket FREE hanya melayani pembayaran tunai (create() → 422 plan_required=pro).
+ *
+ * ⚠️ WEBHOOK (kritis): urutan WAJIB = cari Transaction+tenant dari order_id
+ * mentah di body → configureServerKeyForTenant() → barulah new Notification().
+ * `new Notification()` memanggil balik API Midtrans memakai Config::$serverKey
+ * yang aktif SAAT ITU — kalau key tenant belum di-set, verifikasi selalu gagal.
+ * Jangan pernah mengubah urutan ini.
+ */
 class TransactionController extends Controller
 {
+    /**
+     * Set konfigurasi Midtrans: mode production/sanitized/3ds + override
+     * notification URL dari env. Server key DITETAPKAN per-request nanti
+     * (configureServerKey / configureServerKeyForTenant) karena per-tenant.
+     */
     public function __construct()
     {
         Config::$isProduction = config('services.midtrans.is_production');
@@ -29,6 +47,13 @@ class TransactionController extends Controller
         }
     }
 
+    /**
+     * Set server key Midtrans sesuai tenant user yang login (untuk endpoint
+     * ber-autentikasi). Fallback ke key platform kalau tenant belum set key;
+     * kalau keduanya kosong → abort 422 (konfigurasi Midtrans belum lengkap).
+     *
+     * @param Request $request Request ber-autentikasi
+     */
     private function configureServerKey(Request $request): void
     {
         $tenant    = $request->user()->tenant;
@@ -42,8 +67,13 @@ class TransactionController extends Controller
         Config::$isProduction = $tenant?->midtransIsProduction() ?? config('services.midtrans.is_production');
     }
 
-    // Versi configureServerKey() untuk webhook — tidak ada user login,
-    // jadi tenant dicari lewat transaksi yang sedang diverifikasi.
+    /**
+     * Versi configureServerKey() untuk webhook — tidak ada user login, jadi
+     * tenant dicari lewat transaksi yang sedang diverifikasi.
+     * WAJIB dipanggil SEBELUM `new Notification()` (lihat docblock kelas).
+     *
+     * @param Tenant|null $tenant Tenant pemilik transaksi (null = pakai key platform)
+     */
     private function configureServerKeyForTenant(?Tenant $tenant): void
     {
         Config::$serverKey    = $tenant?->midtrans_server_key ?? config('services.midtrans.server_key');
@@ -54,6 +84,14 @@ class TransactionController extends Controller
     // INDEX — ambil semua transaksi (admin & kasir)
     // GET /api/transactions
     // =============================================================
+    /**
+     * Daftar transaksi dengan filter status & rentang tanggal. Tenant di-
+     * filter manual via whereHas('order') (Transaction tidak punya tenant_id);
+     * eager load order.user → tanpa N+1.
+     *
+     * @param Request $request Query: status?, date_from?, date_to?, per_page?
+     * @return JsonResponse { message, data, meta pagination }
+     */
     public function index(Request $request): JsonResponse
     {
         $tenantId = $request->user()->tenant_id;
@@ -96,6 +134,14 @@ class TransactionController extends Controller
     // SHOW — detail satu transaksi (include order items)
     // GET /api/transactions/{id}
     // =============================================================
+    /**
+     * Detail satu transaksi + order + user + items.product (eager load).
+     * Role `user` hanya boleh lihat transaksi miliknya.
+     *
+     * @param Request $request Request ber-autentikasi
+     * @param int     $id      ID transaksi
+     * @return JsonResponse 200 / 403 / 404
+     */
     public function show(Request $request, int $id): JsonResponse
     {
         $transaction = Transaction::with('order.user', 'order.items.product')->find($id);
@@ -124,6 +170,12 @@ class TransactionController extends Controller
     // MY TRANSACTIONS — riwayat transaksi milik customer
     // GET /api/transactions/my/history
     // =============================================================
+    /**
+     * Riwayat transaksi milik user yang sedang login (pagination 10).
+     *
+     * @param Request $request Request ber-autentikasi
+     * @return JsonResponse { message, data, meta pagination }
+     */
     public function myTransactions(Request $request): JsonResponse
     {
         $transactions = Transaction::with('order')
@@ -151,8 +203,20 @@ class TransactionController extends Controller
     // POST /api/transactions
     // Body: { "order_id": 2 }
     // =============================================================
+    /**
+     * Buat transaksi Midtrans (Snap) untuk order pending.
+     *
+     * Alur: gate paket (free → 422 plan_required=pro) → set server key tenant
+     * → validasi & cek order (milik sendiri / masih pending) → kalau sudah
+     * ada transaksi pending, kembalikan token lama → susun item_details
+     * (+PPN sebagai item TAX) → minta Snap token → simpan Transaction.
+     *
+     * @param Request $request Body: { order_id: int }
+     * @return JsonResponse 201 { snap_token, data } / 200 token lama / 404 / 422 / 403
+     */
     public function create(Request $request): JsonResponse
     {
+        // ===== GATE PAKET — pembayaran digital hanya Pro/Enterprise =====
         // Pembayaran digital (QRIS/e-wallet/VA) hanya untuk Pro & Enterprise
         // Paket FREE melayani pembayaran tunai saja.
         if ($this->getEffectivePlan($request->user()) === 'free') {
@@ -162,6 +226,7 @@ class TransactionController extends Controller
             ], 422);
         }
 
+        // ===== KONFIGURASI MIDTRANS PER-TENANT =====
         $this->configureServerKey($request);
 
         $validated = $request->validate([
@@ -170,6 +235,7 @@ class TransactionController extends Controller
 
         $order = Order::with(['user', 'items.product'])->find($validated['order_id']);
 
+        // ===== VALIDASI ORDER =====
         // Order tidak ketemu (termasuk order milik tenant lain — TenantScope
         // menyaringnya) → jangan lanjut, kalau tidak error 500.
         if (! $order) {
@@ -193,6 +259,7 @@ class TransactionController extends Controller
             ], 403);
         }
 
+        // ===== TRANSAKSI PENDING YANG SUDAH ADA =====
         // Cek apakah sudah ada transaksi pending untuk order ini
         $existingTransaction = Transaction::where('order_id', $order->id)
             ->where('status', 'pending')
@@ -206,7 +273,6 @@ class TransactionController extends Controller
             ], 200);
         }
 
-        // test
         // ===== BUAT TRANSAKSI KE MIDTRANS =====
         $midtransOrderId = $order->order_number . '-' . time();
         // ↑ Tambah timestamp supaya unik kalau order pernah retry
@@ -275,6 +341,14 @@ class TransactionController extends Controller
     // PATCH /api/transactions/{id}/cancel
     // Role: admin & kasir
     // =============================================================
+    /**
+     * Batalkan transaksi pending: status → cancel, order → cancelled, stok
+     * tiap item dikembalikan (ledger 'cancel'). Guard `order belum cancelled`
+     * mencegah stok kembung kalau webhook mendahului. Dalam DB::transaction.
+     *
+     * @param int $id ID transaksi
+     * @return JsonResponse 200 / 404 / 422 bukan status pending
+     */
     public function cancelTransaction(int $id): JsonResponse
     {
         $transaction = Transaction::with('order.items.product')->find($id);
@@ -328,6 +402,15 @@ class TransactionController extends Controller
     // Body: { "order_id": 5, "amount_tendered": 50000 }
     // Role: admin & kasir
     // =============================================================
+    /**
+     * Bayar tunai (tanpa Midtrans): order → paid, Transaction dibuat langsung
+     * 'settlement' (atau transaksi yang sudah ada di-update ke settlement —
+     * termasuk transaksi Midtrans pending yang akan di-mark lunas tunai).
+     * Kembalian dihitung dari amount_tendered.
+     *
+     * @param Request $request Body: { order_id, amount_tendered? }
+     * @return JsonResponse 200 { message, kembalian, data }
+     */
     public function payCash(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -396,9 +479,25 @@ class TransactionController extends Controller
     // POST /api/webhook/midtrans
     // TIDAK perlu token — keamanan via signature key Midtrans
     // =============================================================
+    /**
+     * Webhook Midtrans (pembayaran order). Tanpa autentikasi — keamanan via
+     * verifikasi signature SDK. Rate limiter global di-exempt untuk route ini.
+     *
+     * Alur (URUTAN WAJIB, jangan diubah):
+     * 1) baca order_id mentah dari body → cari Transaction + tenant-nya;
+     * 2) configureServerKeyForTenant() — `new Notification()` memanggil balik
+     *    API Midtrans memakai Config::$serverKey yang aktif SAAT ITU;
+     * 3) verifikasi `new Notification()` → map status → update transaksi &
+     *    order dalam DB::transaction, dengan idempotensi (duplikat diabaikan)
+     *    dan guard order sudah paid/cancelled (anti struk ganda / stok kembung).
+     *
+     * @param Request $request Body notifikasi Midtrans
+     * @return JsonResponse 200 OK (selalu, agar Midtrans tidak retry) / 500 error
+     */
     public function webhook(Request $request): JsonResponse
     {
         try {
+            // ===== LANGKAH 1 — TEMUKAN TRANSAKSI & TENANT (belum diverifikasi) =====
             // Ambil order_id langsung dari body notifikasi — belum diverifikasi,
             // cuma dipakai untuk tahu transaksi & tenant mana yang bersangkutan,
             // supaya kita tahu server key MANA yang harus dipakai untuk verifikasi.
@@ -414,12 +513,14 @@ class TransactionController extends Controller
                 // ↑ Return 200 tetap supaya Midtrans tidak retry webhook
             }
 
+            // ===== LANGKAH 2 — SET SERVER KEY TENANT =====
             // Set server key sesuai tenant pemilik transaksi ini SEBELUM
             // verifikasi signature — kalau tenant punya Midtrans sendiri,
             // Midtrans menyegel notifikasi pakai server key tenant itu,
             // bukan server key platform.
             $this->configureServerKeyForTenant($transaction->order?->tenant);
 
+            // ===== LANGKAH 3 — VERIFIKASI & UPDATE STATUS =====
             // Verifikasi bahwa request benar-benar dari Midtrans
             $notification = new Notification();
             // ↑ Midtrans SDK otomatis verifikasi signature key
@@ -535,6 +636,13 @@ class TransactionController extends Controller
     // =============================================================
     // HELPER — format data transaksi untuk response
     // =============================================================
+    /**
+     * Format transaksi untuk response. Relasi order/user/items dibaca hanya
+     * kalau sudah di-load (relationLoaded) → tidak memicu lazy loading.
+     *
+     * @param Transaction $transaction Transaksi yang akan diformat
+     * @return array Data transaksi siap-JSON
+     */
     private function formatTransaction(Transaction $transaction): array
     {
         $order = $transaction->relationLoaded('order') ? $transaction->order : null;

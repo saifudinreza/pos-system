@@ -10,21 +10,25 @@ import NeoBadge from "@/components/ui/NeoBadge";
 import { formatCurrency, formatDateTime, getOrderStatusConfig } from "@/lib/utils";
 
 export default function OrderDetailPage() {
+  // ── State: ambil id order dari URL, lalu fetch detail satu kali ──
   const params       = useParams();
   const [order, setOrder]     = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Ambil detail order (GET /api/orders/{id}) — refetch kalau id berubah
   useEffect(() => {
     orderService.getById(params.id)
       .then(setOrder)
       .finally(() => setLoading(false));
   }, [params.id]);
 
+  // ── Guard: loading & not-found sebelum render isi halaman ──
   if (loading) return <div className="p-8 text-center text-brand-black/50">Memuat...</div>;
   if (!order)  return <div className="p-8 text-center text-red-500">Order tidak ditemukan</div>;
 
   const status = getOrderStatusConfig(order.status);
 
+  // ── Render: header order → info pelanggan → daftar item → total ──
   return (
     <div className="space-y-5 max-w-2xl">
       <div className="flex items-center gap-3">

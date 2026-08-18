@@ -41,9 +41,14 @@ const ctaSpring = { type: "spring", stiffness: 460, damping: 14 };
 
 // ======================================================
 // BarChart — Bar animasi yang tumbuh dari bawah saat mount
+//
+// Data statis 7 hari (SEN–MIN); tinggi bar = proporsi pct.
+// Animasi: scaleY dari 0 → pct/100 dengan jeda bertahap
+// (0.1 + index × 0.08s) supaya terasa "mengalir" dari kiri.
 // ======================================================
 const BarChart = () => {
   const [animated, setAnimated] = useState(false);
+  // Data bar: pct = tinggi relatif (persen), isTop = bar tertinggi (TERLARIS)
   const bars = [
     { day: "SEN", pct: 55 },
     { day: "SEL", pct: 42 },
@@ -55,6 +60,7 @@ const BarChart = () => {
   ];
 
   useEffect(() => {
+    // Jeda 400ms setelah mount → baru bar mulai tumbuh
     const t = setTimeout(() => setAnimated(true), 400);
     return () => clearTimeout(t);
   }, []);
@@ -116,6 +122,7 @@ const BarChart = () => {
 //  user bertanya → indikator mengetik → bot menjawab → ulang
 // ======================================================
 const TYPING = "typing";
+// Daftar percakapan yang diputar bergantian (idx berputar modulo panjang)
 const CONVO = [
   {
     q: "Produk apa paling laku minggu ini?",
@@ -146,6 +153,10 @@ const CONVO = [
   },
 ];
 
+/**
+ * TypingDots — 3 titik mengetik yang bergoyang (indikator AI "berpikir").
+ * Animasi repeat:Infinity — setiap titik berdelay 0.18s.
+ */
 const TypingDots = () => (
   <span style={{ display: "inline-flex", gap: "4px", alignItems: "center", padding: "2px 2px" }}>
     {[0, 1, 2].map((i) => (
@@ -162,6 +173,15 @@ const TypingDots = () => (
   </span>
 );
 
+/**
+ * AIChat — simulasi percakapan AI yang berputar terus-menerus.
+ *
+ * Mesin state 3 fase (per pertanyaan di CONVO[idx]):
+ *   phase 1  → tampil pertanyaan user
+ *   phase TYPING → indikator mengetik
+ *   phase 2  → tampil jawaban bot, lalu loop ke pertanyaan berikutnya
+ * Timing (ms): 1400 → 1100 → 2600, lalu ulang.
+ */
 const AIChat = () => {
   // Hero showcase: chat SELALU bergerak, tidak tergantung setting OS (sesuai permintaan)
   const reduce = false;
@@ -253,6 +273,14 @@ const AIChat = () => {
 // ======================================================
 // StampRays — 16 sinar berputar di sekitar stamp LUNAS
 // ======================================================
+/**
+ * StampRays — dekorasi stamp "LUNAS": sinar berputar searah jarum jam
+ * + cincin putus-putus berlawanan arah (kesan "cap keluar dari mesin").
+ *
+ * Props:
+ *   visible: true → opacity 1 (dipicu setelah jeda di HeroStage)
+ *   reduce : true → matikan rotasi (reduced-motion)
+ */
 const StampRays = ({ visible, reduce }) => (
   <>
     {/* Sinar yang berputar searah jarum jam (JS-driven → pasti jalan) */}
@@ -265,6 +293,8 @@ const StampRays = ({ visible, reduce }) => (
       }}
     >
       {Array.from({ length: 18 }, (_, i) => (
+        // Sinar: panjang berselang (18px/12px), warna kuning tiap ke-3,
+        // diputar 20° per sinar mengelilingi tengah stamp
         <div key={i} style={{
           position: "absolute", left: "50%", top: "50%",
           width: "3px", height: i % 2 ? "18px" : "12px",
@@ -290,7 +320,13 @@ const StampRays = ({ visible, reduce }) => (
 // ======================================================
 // OrderTicker — Pesanan masuk berganti tiap 2 detik dengan slide
 // ======================================================
+/**
+ * OrderTicker — ticker pesanan masuk yang berganti tiap 2,2 detik.
+ * Setiap pergantian: key=ticks → motion.div re-mount → slide dari atas.
+ * Data pesanan statis (inv, waktu, nominal, metode bayar).
+ */
 const OrderTicker = () => {
+  // Data ticker — diputar melingkar (modulo) mengikuti interval
   const orders = [
     { inv: "#3829", time: "2 mnt", amt: "Rp 45.000", pay: "QRIS", payBg: "#0066FF", payFg: "#fff" },
     { inv: "#3830", time: "barusan", amt: "Rp 25.000", pay: "Cash", payBg: "#FFE500", payFg: "#0A0A0A" },
@@ -300,6 +336,7 @@ const OrderTicker = () => {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
+    // Interval 2,2 detik: ganti index pesanan + naikkan counter tick
     const t = setInterval(() => {
       setIdx((i) => (i + 1) % orders.length);
       setTick((k) => k + 1);
@@ -344,6 +381,17 @@ const OrderTicker = () => {
 // ======================================================
 // HeroStage — collage kanan, di-scale agar responsif
 // ======================================================
+/**
+ * HeroStage — "stage" collage UI di kanan hero.
+ *
+ * Cara kerja responsif: canvas tetap DESIGN_W×DESIGN_H (520×600),
+ * lalu di-scale proporsional mengikuti lebar container via
+ * ResizeObserver — collage tidak pernah disembunyikan di layar kecil.
+ *
+ * Isi collage (urutan kedalaman 3D dari belakang ke depan):
+ * dekorasi geometris → dashboard window → stamp LUNAS →
+ * order ticker → stock alert → AI chat panel.
+ */
 function HeroStage() {
   // Hero showcase: 3D + animasi SELALU aktif, tidak tergantung setting OS (sesuai permintaan)
   const reduce = false;
@@ -357,7 +405,8 @@ function HeroStage() {
     return () => clearTimeout(t);
   }, []);
 
-  // Scale collage proporsional mengikuti lebar container
+  // Scale collage proporsional mengikuti lebar container:
+  // ResizeObserver memantau lebar konten → scale = min(1, lebar / kanvas)
   useEffect(() => {
     const el = clipRef.current;
     if (!el) return;
@@ -373,6 +422,7 @@ function HeroStage() {
   // Mouse-tilt parallax DIHAPUS (sesuai permintaan: tidak lagi "goyang" saat
   // kena kursor). Animasi otomatis (float, LUNAS, AI chat) tetap jalan.
 
+  // Tinggi wadah = tinggi canvas × scale (biar halaman tidak melompat)
   const scaledH = DESIGN_H * scale;
 
   return (
@@ -409,6 +459,7 @@ function HeroStage() {
           transition={reduce ? undefined : { duration: 8, repeat: Infinity, ease: "easeInOut" }}
           style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
         >
+          {/* ===== Bagian: dekorasi geometris (lapisan paling belakang) ===== */}
           {/* Dekorasi geometris — translateZ negatif → di "belakang", parallax saat tilt */}
           <div style={{
             position: "absolute", width: "130px", height: "130px",
@@ -430,11 +481,11 @@ function HeroStage() {
             boxShadow: "5px 5px 0 #0A0A0A",
           }} />
 
-          {/* Ping dots */}
+          {/* Ping dots — titik berdenyut dekoratif (CSS class hero-ping) */}
           <div className="hero-ping" style={{ top: "38%", left: "30%" }} />
           <div className="hero-ping" style={{ top: "16%", right: "34%" }} />
 
-          {/* ---- Dashboard Window (depth sedang) ---- */}
+          {/* ===== Bagian: Dashboard Window (depth sedang) ===== */}
           <div style={{
             position: "absolute", top: "18px", left: "8px", width: "420px",
             background: "#fff", border: "2.5px solid #0A0A0A",
@@ -500,7 +551,7 @@ function HeroStage() {
                 </div>
               </div>
 
-              {/* Stat Strip */}
+              {/* Stat Strip — 3 kartu ringkas (Revenue, Order, AOV) */}
               <div style={{
                 display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
                 gap: "8px", marginBottom: "16px",
@@ -534,11 +585,12 @@ function HeroStage() {
                 ))}
               </div>
 
+              {/* Chart mingguan — komponen BarChart di atas */}
               <BarChart />
             </div>
           </div>
 
-          {/* ---- LUNAS Stamp ---- */}
+          {/* ===== Bagian: Stamp LUNAS ===== */}
           {/* Outer: jaga kedalaman 3D (translateZ) untuk parallax saat tilt */}
           <div style={{
             position: "absolute", top: "44px", right: "30px",
@@ -589,7 +641,7 @@ function HeroStage() {
             </motion.div>
           </div>
 
-          {/* ---- Order Ticker ---- */}
+          {/* ===== Bagian: Order Ticker ===== */}
           <div style={{
             position: "absolute", right: "-6px", top: "238px", width: "210px",
             background: "#fff", border: "2.5px solid #0A0A0A",
@@ -608,7 +660,7 @@ function HeroStage() {
             <OrderTicker />
           </div>
 
-          {/* ---- Stock Alert ---- */}
+          {/* ===== Bagian: Stock Alert ===== */}
           <div style={{
             position: "absolute", top: "396px", right: "8px", width: "196px",
             background: "#FF6B00", color: "#fff",
@@ -642,7 +694,7 @@ function HeroStage() {
             </div>
           </div>
 
-          {/* ---- AI Chat Panel ---- */}
+          {/* ===== Bagian: AI Chat Panel (lapisan paling depan) ===== */}
           <div style={{
             position: "absolute", top: "452px", left: "0", width: "330px",
             background: "#0A0A0A", color: "#fff",
@@ -705,6 +757,11 @@ function HeroStage() {
 // ======================================================
 // HeroSection — gabungan copy kiri + stage kanan
 // ======================================================
+/**
+ * HeroSection — hero utama landing page (lihat header file).
+ * Tanpa props. Terdiri dari kolom kiri (copy dengan stagger entrance)
+ * dan kolom kanan (HeroStage — collage UI live).
+ */
 export default function HeroSection() {
   // Hero showcase: animasi SELALU aktif, tidak tergantung setting OS (sesuai permintaan)
   const reduce = false;
@@ -715,10 +772,12 @@ export default function HeroSection() {
     target: sectionRef,
     offset: ["start start", "end start"],
   });
+  // Kolom kanan (stage) bergeser lebih cepat dari kolom kiri (copy) → kesan kedalaman
   const stageY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 90]);
   const copyY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 40]);
 
-  // Variants entrance kolom kiri (stagger)
+  // Variants entrance kolom kiri (stagger):
+  // container → orchestrator, item → tiap elemen copy (fade + slide-up 22px)
   const container = {
     hidden: {},
     show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
@@ -747,7 +806,7 @@ export default function HeroSection() {
     <section ref={sectionRef} style={{ position: "relative", zIndex: 1 }}>
       <div className="hero-section-grid">
 
-        {/* ============ LEFT: Copy ============ */}
+        {/* ===== Bagian: kolom kiri (copy) ===== */}
         <motion.div
           variants={container}
           initial="hidden"
@@ -817,7 +876,7 @@ export default function HeroSection() {
             — dan dapat jawaban dalam hitungan detik.
           </motion.p>
 
-          {/* CTA Buttons — hover spring + kilau sweep */}
+          {/* CTA Buttons — hover spring (ctaHover/ctaSpring) + kilau sweep */}
           <motion.div variants={item} style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
             <MotionLink
               href="/register"
@@ -851,7 +910,7 @@ export default function HeroSection() {
             </motion.a>
           </motion.div>
 
-          {/* Proof Stats */}
+          {/* Proof Stats — deretan angka + separator vertikal; null = garis pemisah */}
           <motion.div variants={item} style={{ display: "flex", gap: "28px", marginTop: "48px", alignItems: "center", flexWrap: "wrap" }}>
             {[
               { num: "11%", label: "Pajak otomatis" },
@@ -884,7 +943,7 @@ export default function HeroSection() {
           </motion.div>
         </motion.div>
 
-        {/* ============ RIGHT: Stage ============ */}
+        {/* ===== Bagian: kolom kanan (stage) ===== */}
         <motion.div className="hero-stage" style={{ y: stageY }}>
           <HeroStage />
         </motion.div>

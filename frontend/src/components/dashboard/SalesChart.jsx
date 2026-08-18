@@ -1,11 +1,27 @@
 "use client";
 
+// ============================================================
+// SalesChart — grafik garis penjualan (recharts) di dashboard
+//
+// Props: data = [{ label, total_revenue, order_count? }]
+//   - label        : label sumbu-X (tanggal/hari)
+//   - total_revenue: nilai garis utama (di-format via formatCurrency)
+//   - order_count  : opsional, ditampilkan sebagai info kedua di tooltip
+//
+// Tooltip kustom neobrutalist: revenue besar + jumlah order.
+// Sumbu-Y diformat singkat (1,2jt / 4rb) lewat formatAxisValue.
+// ============================================================
+
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer,
 } from "recharts";
 import { formatCurrency } from "@/lib/utils";
 
+/**
+ * CustomTooltip — tooltip neobrutalist untuk chart.
+ * Recharts memanggilnya dengan payload = array titik yang disentuh.
+ */
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -26,6 +42,17 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
+// Format angka sumbu-Y biar ringkas: 1.200.000 → "1,2jt", 3.500 → "4rb"
+const formatAxisValue = (v) =>
+  v >= 1000000 ? `${(v / 1000000).toFixed(1)}jt` : v >= 1000 ? `${(v / 1000).toFixed(0)}rb` : v;
+
+/**
+ * SalesChart — grafik garis penjualan mingguan/bulanan.
+ *
+ * Props:
+ *   data : [{ label, total_revenue, order_count? }]
+ *          Kalau kosong → placeholder "Belum ada data penjualan".
+ */
 export default function SalesChart({ data = [] }) {
   if (!data.length) {
     return (
@@ -49,7 +76,7 @@ export default function SalesChart({ data = [] }) {
           tick={{ fontSize: 11, fontFamily: "JetBrains Mono, monospace" }}
           axisLine={false}
           tickLine={false}
-          tickFormatter={(v) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}jt` : v >= 1000 ? `${(v / 1000).toFixed(0)}rb` : v}
+          tickFormatter={formatAxisValue}
         />
         <Tooltip content={<CustomTooltip />} />
         <Line

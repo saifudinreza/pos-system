@@ -1,5 +1,16 @@
+// ============================================================
+// HowItWorksSection — "Cara Kerja": 3 langkah memulai KasirAI
+//
+// Layout: kolom kiri (sticky saat scroll) berisi judul + kotak
+// bantuan support; kolom kanan deretan StepCard dengan garis
+// penghubung antar langkah, diakhiri tombol CTA.
+//
+// Server component (tanpa "use client") — konten statis murni.
+// ============================================================
+
 import { UserPlus, LayoutList, Zap } from "lucide-react";
 
+// 3 langkah setup — nomor, judul, deskripsi, ikon, dan poin detail
 const STEPS = [
   {
     number:      "01",
@@ -24,6 +35,13 @@ const STEPS = [
   },
 ];
 
+/**
+ * StepCard — satu langkah "Cara Kerja" (nomor besar + konten + detail).
+ *
+ * Props:
+ *   step  : { number, title, description, Icon, details[] }
+ *   isLast: true → garis penghubung ke langkah berikutnya disembunyikan
+ */
 const StepCard = ({ step, isLast }) => (
   <div className="relative flex flex-col sm:flex-row gap-6 items-start">
     <div className="flex-shrink-0">
@@ -74,6 +92,7 @@ export default function HowItWorksSection() {
       <div className="max-w-6xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-start">
 
+          {/* Kolom kiri — sticky: judul tetap terlihat saat scroll deretan langkah */}
           <div className="lg:sticky lg:top-24">
             <div
               className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-6"
@@ -114,6 +133,7 @@ export default function HowItWorksSection() {
             </div>
           </div>
 
+          {/* Kolom kanan — deretan langkah + CTA */}
           <div className="flex flex-col gap-10">
             {STEPS.map((step, index) => (
               <StepCard

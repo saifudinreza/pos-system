@@ -1,3 +1,20 @@
+// ============================================================
+// subscriptionStore.js — Global state manajemen langganan (dev)
+//
+// Analogi: Ini seperti "papan kontrol langganan" di sisi developer —
+// menyimpan daftar semua subscription tenant, statistik ringkas
+// (total/aktif/free/pro/enterprise/MRR), plus aksi ganti plan
+// dan toggle aktif/nonaktif langganan.
+//
+// Relasi:
+//   - Dipakai di halaman /dev/subscriptions (developer only)
+//   - PLANS diekspor dan dipakai komponen lain (upgrade page,
+//     profile) — jangan diubah tanpa sinkron dengan backend
+//     SubscriptionController::PRICES (lihat CLAUDE.md poin 8)
+//   - Berbeda dari store lain: memanggil api langsung (tidak ada
+//     subscriptionService untuk endpoint /dev/subscriptions)
+// ============================================================
+
 import { create } from "zustand";
 import api from "@/lib/axios";
 
@@ -91,12 +108,13 @@ const calcStats = (subs) => ({
 
 const EMPTY_STATS = { total: 0, active: 0, free: 0, pro: 0, enterprise: 0, mrr: 0 };
 
-const useSubscriptionStore = create((set, get) => ({
+const useSubscriptionStore = create((set) => ({
   subscriptions: [],
   isLoading: false,
   error: null,
   stats: EMPTY_STATS,
 
+  // --- FETCH SEMUA SUBSCRIPTION + HITUNG STATISTIK ---
   fetchSubscriptions: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -115,35 +133,36 @@ const useSubscriptionStore = create((set, get) => ({
     }
   },
 
+  // --- GANTI PLAN USER ---
+  // @param {number} userId
+  // @param {"free" | "pro" | "enterprise"} newPlan
   updatePlan: async (userId, newPlan) => {
-    try {
-      await api.patch(`/dev/subscriptions/${userId}/plan`, { plan: newPlan });
-      set((state) => {
-        const subs = state.subscriptions.map((s) =>
-          s.id === userId ? { ...s, plan: newPlan } : s
-        );
-        return { subscriptions: subs, stats: calcStats(subs) };
-      });
-    } catch (err) {
-      throw err;
-    }
+    await api.patch(`/dev/subscriptions/${userId}/plan`, { plan: newPlan });
+    // Update daftar lokal + statistik tanpa refetch
+    set((state) => {
+      const subs = state.subscriptions.map((s) =>
+        s.id === userId ? { ...s, plan: newPlan } : s
+      );
+      return { subscriptions: subs, stats: calcStats(subs) };
+    });
   },
 
+  // --- TOGGLE AKTIF/NONAKTIF LANGGANAN ---
+  // @param {number} userId
   toggleStatus: async (userId) => {
-    try {
-      const { data } = await api.patch(`/dev/subscriptions/${userId}/toggle`);
-      const newStatus = data.status;
-      set((state) => {
-        const subs = state.subscriptions.map((s) =>
-          s.id === userId ? { ...s, status: newStatus } : s
-        );
-        return { subscriptions: subs, stats: calcStats(subs) };
-      });
-    } catch (err) {
-      throw err;
-    }
+    const { data } = await api.patch(`/dev/subscriptions/${userId}/toggle`);
+    const newStatus = data.status;
+    set((state) => {
+      const subs = state.subscriptions.map((s) =>
+        s.id === userId ? { ...s, status: newStatus } : s
+      );
+      return { subscriptions: subs, stats: calcStats(subs) };
+    });
   },
 
+  // --- CEK FITUR SUATU PLAN ---
+  // @param {string} plan — "free" | "pro" | "enterprise"
+  // @param {string} feature — misal "reports_download", "ai_assistant"
   hasFeature: (plan, feature) => PLANS[plan]?.features[feature] ?? false,
 }));
 

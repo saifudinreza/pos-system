@@ -23,6 +23,7 @@ import NeoModal  from "@/components/ui/NeoModal";
 import { formatCurrency, getOrderStatusConfig } from "@/lib/utils";
 
 // Nomor HP tersimpan format 628xx → tampilkan 08xx untuk dibaca orang
+/** formatPhone — Ubah format nomor HP internal (628xx) jadi tampilan user (08xx). */
 function formatPhone(phone) {
   if (!phone) return "—";
   if (phone.startsWith("62")) return "0" + phone.slice(2);
@@ -30,12 +31,17 @@ function formatPhone(phone) {
 }
 
 export default function CustomersPage() {
+  // ── State ──
   const [customers, setCustomers] = useState([]);
   const [search,    setSearch]    = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [detail,    setDetail]    = useState(null);   // data detail pelanggan
   const [detailLoading, setDetailLoading] = useState(false);
 
+  /**
+   * fetchCustomers — Ambil daftar pelanggan; kalau ada kata kunci search,
+   * dikirim ke backend (nama/HP). Dipanggil saat halaman dibuka & tombol Cari.
+   */
   const fetchCustomers = async () => {
     setIsLoading(true);
     try {
@@ -48,6 +54,11 @@ export default function CustomersPage() {
 
   useEffect(() => { fetchCustomers(); }, []);
 
+  /**
+   * openDetail — Buka modal detail pelanggan. Modal langsung tampil dengan
+   * data dasar (skeleton order), lalu isi riwayat order diambil dari
+   * GET /api/customers/{id}.
+   */
   const openDetail = async (customer) => {
     setDetailLoading(true);
     setDetail({ ...customer, orders: [], summary: null });
@@ -61,6 +72,7 @@ export default function CustomersPage() {
     }
   };
 
+  // ── Definisi kolom tabel ──
   const columns = [
     {
       key: "name",
@@ -93,6 +105,7 @@ export default function CustomersPage() {
     },
   ];
 
+    // ── Render: header + pencarian → tabel → modal detail ──
   return (
     <div className="space-y-5 rounded-md">
       {/* ── Header ── */}
