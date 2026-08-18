@@ -6,12 +6,11 @@
 
 ## Status Terakhir
 
-- Tanggal: 18 Agustus 2026
-- Git: **belum commit** (sesi review & komentari seluruh codebase — cek `git status`)
-- Backend: **69 test PHPUnit lulus** (sqlite `:memory:`)
-  - Ditambah `SalesReportChartTest` (2 test: chart bulanan portabel SQLite/MySQL
-    & isolasi per tenant) — bukti fix `MONTH()` → groupBy PHP.
-- Frontend: `npm run build` sukses (semua route terdaftar, tanpa error)
+- Tanggal: 19 Agustus 2026
+- Database: **100% TERMIGRASI & TERISI (SEEDED) KE TIDB CLOUD!** (Cluster: `kasirai-db`, Host: `gateway01.ap-southeast-1.prod.aws.tidbcloud.com`, SSL Active).
+- Git: Terakhir commit `feat: reconstuct codebase`.
+- Backend Deployment (Sesi Besok): Siap di-deploy ke **Render.com** (Web Service gratis untuk folder `backend`).
+- Frontend: Berjalan di Vercel (`sikasirai.com`), tinggal update `NEXT_PUBLIC_API_URL` begitu Render aktif.
 
 ---
 
