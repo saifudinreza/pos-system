@@ -1,0 +1,75 @@
+# Render Blueprint — kasirai-backend
+# Cara pakai:
+#   1. Push repo ini ke GitHub
+#   2. Render.com → New → Blueprint → pilih repo ini
+#   3. Render membaca render.yaml ini & membuat Web Service otomatis
+#   4. Isi nilai secret (sync: false) di dashboard Render sebelum deploy pertama
+#
+# Catatan:
+#   - Web Service gratis tidur setelah ~15 menit idle (cold start saat traffic naik).
+#   - entrypoint.sh membangun .env dari environment variable Render saat container start.
+services:
+  - type: web
+    name: kasirai-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: Dockerfile
+    plan: free
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: KasirAI
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        sync: false # https://kasirai-backend.onrender.com (hasil deploy)
+      - key: APP_KEY
+        value: base64:CbFlgLGz0M/UKA3uknSMn9Njm/qQMdaZeG6FEl5k4qs=
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false # TiDB Cloud public host (gateway01.ap-southeast-1.prod.aws.tidbcloud.com)
+      - key: DB_PORT
+        sync: false # TiDB Cloud default 4000
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: MYSQL_ATTR_SSL_CA
+        sync: false # kosongkan (""), TLS aktif via VERIFY=false
+      - key: MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
+        value: "false"
+      - key: MIDTRANS_SERVER_KEY
+        sync: false
+      - key: MIDTRANS_CLIENT_KEY
+        sync: false
+      - key: MIDTRANS_IS_PRODUCTION
+        value: "true"
+      - key: GROQ_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: FONNTE_TOKEN
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_PUBLIC_URL
+        sync: false
+      - key: FRONTEND_URL
+        value: https://sikasirai.com
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: sikasirai.com,localhost:3000

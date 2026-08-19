@@ -8,8 +8,8 @@
 
 - Tanggal: 19 Agustus 2026
 - Database: **100% TERMIGRASI & TERISI (SEEDED) KE TIDB CLOUD!** (Cluster: `kasirai-db`, Host: `gateway01.ap-southeast-1.prod.aws.tidbcloud.com`, SSL Active).
-- Git: Terakhir commit `feat: reconstuct codebase`.
-- Backend Deployment (Sesi Besok): Siap di-deploy ke **Render.com** (Web Service gratis untuk folder `backend`).
+- Git: Terakhir commit `docs & config: update database ssl settings and tidb migration progress`.
+- Backend Deployment: **Render.com** (bukan Railway/Fly) — blueprint `render.yaml` + `backend/.dockerignore` + fix entrypoint env sudah siap di repo. Tinggal push & buat service di dashboard Render (langkah detail di bawah).
 - Frontend: Berjalan di Vercel (`sikasirai.com`), tinggal update `NEXT_PUBLIC_API_URL` begitu Render aktif.
 
 ---
@@ -206,6 +206,37 @@
 ---
 
 ## TODO — Belum dikerjakan (lanjutkan dari sini)
+
+### Deploy backend ke Render.com (sesi berjalan)
+- **Sudah disiapkan di repo**:
+  1. `render.yaml` (blueprint) di root — Web Service docker `rootDir: backend`,
+     health check `/up`, env var dengan `sync: false` untuk secret.
+  2. `backend/.dockerignore` — exclude `.env` lokal, `vendor/`, `node_modules/`,
+     `tests/`, dll supaya build context kecil & secret tidak bocor ke image.
+  3. `entrypoint.sh` — ditambah env yang selama ini TERLEWAT: `MYSQL_ATTR_SSL_CA`
+     & `MYSQL_ATTR_SSL_VERIFY_SERVER_CERT` (TiDB Cloud butuh TLS!), `FRONTEND_URL`
+     (default `https://sikasirai.com`), `SANCTUM_STATEFUL_DOMAINS`, blok `MAIL_*`,
+     `FONNTE_TOKEN`, `AI_*` limits, `MIDTRANS_NOTIFICATION_URL`, `APP_LOCALE`,
+     `LOG_LEVEL`.
+  4. Bug fix: `config/database.php` `(bool) env('MYSQL_ATTR_SSL_VERIFY_SERVER_CERT')`
+     → `filter_var(..., FILTER_VALIDATE_BOOLEAN)` — sebelumnya string `"false"` di-.env
+     jadi `true` di PHP (bug nyata, koneksi TiDB bisa gagal verifikasi cert).
+  - Test: 69/69 lolos.
+- **Langkah deploy** (manual di dashboard Render, butuh akun + hubungkan GitHub):
+  1. Push commit ini ke GitHub.
+  2. https://render.com → New → **Blueprint** → pilih repo ini → Render baca `render.yaml`.
+  3. Isi secret env (yang `sync: false`) di dashboard: `APP_URL`
+     (`https://kasirai-backend.onrender.com`), `APP_KEY` (`php artisan key:generate --show`),
+     `DB_HOST` = `gateway01.ap-southeast-1.prod.aws.tidbcloud.com`, `DB_PORT` = `4000`,
+     `DB_DATABASE`/`DB_USERNAME`/`DB_PASSWORD` TiDB, `MIDTRANS_*`, `GROQ_API_KEY`,
+     `OPENROUTER_API_KEY`, `FONNTE_TOKEN`, `MAIL_USERNAME`/`MAIL_PASSWORD`,
+     `R2_*` (akses R2). `MYSQL_ATTR_SSL_CA` biarkan kosong (TLS tanpa verify cert).
+  4. Deploy pertama → tunggu live → test `GET {APP_URL}/up` (200) & `/api/check-tenant`.
+  5. Update `NEXT_PUBLIC_API_URL` di Vercel ke `https://kasirai-backend.onrender.com`
+     (redeploy tanpa cache).
+- ⚠️ Catatan: plan gratis Render tidur setelah ~15 menit idle → cold start; health check
+  `/up` sudah ada (Laravel 11 `health:` di `bootstrap/app.php`). Redis opsional tetap
+  didukung (isi `REDIS_URL` kalau mau).
 
 ### Perlu validasi bisnis
 1. **Poin P0 lain dari plan awal** — sesi sebelumnya berjalan berdasarkan daftar

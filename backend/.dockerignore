@@ -1,0 +1,33 @@
+# Keamanan: .env lokal TIDAK boleh ikut ke build context / image
+.env
+.env.*
+!.env.example
+
+# Dependency (di-install ulang di dalam Dockerfile)
+vendor/
+node_modules/
+
+# Artefak lokal & tools
+.git
+.gitignore
+.github
+.dockerignore
+Dockerfile
+.docker
+
+# Test & dokumentasi
+tests/
+testsprite_tests/
+docs/
+*.md
+
+# Log & cache lokal
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*.php
+
+# File deploy service lain (tidak relevan di image)
+railway.json
+docker-compose.yml
