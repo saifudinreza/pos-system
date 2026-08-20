@@ -25,26 +25,34 @@ class UserSeeder extends Seeder
         );
 
         // 2. Akun Nabila (Admin Toko Maung Store)
-        // Note: Data 20 produk + 6 kategori Nabila ada di tenant 'maung-store' (Tenant ID 2 di production).
-        $tenant = Tenant::where('slug', 'maung-store')
+        // Cari tenant 'Maung Store' (slug: maung-store atau name berisi Maung)
+        $maungTenant = Tenant::where('slug', 'maung-store')
             ->orWhere('name', 'LIKE', '%Maung%')
-            ->orWhere('slug', 'nabila-store')
-            ->first()
-            ?? Tenant::create([
+            ->first();
+
+        if (! $maungTenant) {
+            $maungTenant = Tenant::create([
                 'name'        => 'Maung Store',
                 'slug'        => 'maung-store',
                 'description' => 'Toko Maung Store',
             ]);
+        }
 
+        // Hubungkan/pindahkan user nabila@gmail.com ke tenant Maung Store
         User::updateOrCreate(
             ['email' => 'nabila@gmail.com'],
             [
-                'tenant_id' => $tenant->id,
+                'tenant_id' => $maungTenant->id,
                 'name'      => 'Nabila',
                 'password'  => Hash::make('nabila123'),
                 'role'      => 'admin',
                 'is_active' => true,
             ]
         );
+
+        // 3. Hapus tenant 'Nabila Store' (slug: nabila-store) yang kosong jika ada
+        Tenant::where('slug', 'nabila-store')
+            ->where('id', '!=', $maungTenant->id)
+            ->delete();
     }
 }
