@@ -27,12 +27,12 @@ class UserSeeder extends Seeder
         );
 
         // 2. Akun Nabila (Admin Toko Maung Store)
-        // Cari tenant ID 2 (tenant asli berisi 20 produk & 6 kategori) atau tenant Maung Store
-        $maungTenant = Tenant::find(2)
-            ?? Tenant::whereHas('products')->first()
-            ?? Tenant::where('slug', 'maung-store')
+        // Cari tenant Maung Store atau buat baru
+        $maungTenant = Tenant::where('slug', 'maung-store')
             ->orWhere('name', 'LIKE', '%Maung%')
-            ->first();
+            ->first()
+            ?? Tenant::find(2)
+            ?? Tenant::first();
 
         if (! $maungTenant) {
             $maungTenant = Tenant::create([
@@ -59,13 +59,12 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // Jika ada produk atau kategori yang terikat ke tenant_id 2, konsolidasikan ke $maungTenant->id
-        if ($maungTenant->id !== 2) {
-            Product::withoutGlobalScopes()->where('tenant_id', 2)->update(['tenant_id' => $maungTenant->id]);
-            Category::withoutGlobalScopes()->where('tenant_id', 2)->update(['tenant_id' => $maungTenant->id]);
-        }
+        // 3. Konsolidasikan SEMUA produk dan kategori di database ke tenant Maung Store ini
+        //    (memastikan tidak ada data produk/kategori tersisa di tenant_id lama/lain)
+        Product::withoutGlobalScopes()->update(['tenant_id' => $maungTenant->id]);
+        Category::withoutGlobalScopes()->update(['tenant_id' => $maungTenant->id]);
 
-        // 3. Bersihkan tenant duplikat kosong 'Nabila Store' (slug: nabila-store) jika ada
+        // 4. Bersihkan tenant duplikat kosong 'Nabila Store' (slug: nabila-store) jika ada
         Tenant::where('slug', 'nabila-store')
             ->where('id', '!=', $maungTenant->id)
             ->delete();
