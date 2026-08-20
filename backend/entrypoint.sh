@@ -130,8 +130,9 @@ php artisan config:cache
 php artisan route:cache
 echo "✅ Config & routes cached"
 
-# Jalankan migration
+# Jalankan migration & seeder
 php artisan migrate --force 2>&1 || echo "⚠️ Migration warning (non-fatal)"
+php artisan db:seed --force 2>&1 || echo "⚠️ Seeder warning (non-fatal)"
 echo "✅ Laravel ready"
 
 # Jalankan queue worker di background — proyek ini memakai job queue untuk

@@ -28,14 +28,14 @@ class ForecastService
      * @param int $days     Jumlah hari prediksi ke depan (default 7)
      * @return array{period_start: string, period_end: string, days: array, total: int, confidence: string, based_on_days: int}
      */
-    public static function forecastForTenant(int $tenantId, int $days = 7): array
+    public static function forecastForTenant(?int $tenantId, int $days = 7): array
     {
         // Jendela data: 35 hari terakhir (hari ini + 34 hari ke belakang)
         $start = now()->subDays(34)->startOfDay();
 
         // Revenue per tanggal (hanya order berstatus paid), key = tanggal 'Y-m-d'
         $revenueByDate = Order::query()
-            ->where('tenant_id', $tenantId)
+            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
             ->where('status', 'paid')
             ->where('created_at', '>=', $start)
             ->selectRaw('DATE(created_at) as d, SUM(total) as revenue')
@@ -44,7 +44,10 @@ class ForecastService
 
         // Berapa lama toko sudah aktif (hari sejak order pertama), dibatasi 1..35.
         // Dipakai sebagai penyebut rata-rata supaya hari tanpa penjualan ikut terhitung.
-        $firstOrder = Order::where('tenant_id', $tenantId)->where('status', 'paid')->min('created_at');
+        $firstOrder = Order::query()
+            ->when($tenantId, fn($q) => $q->where('tenant_id', $tenantId))
+            ->where('status', 'paid')
+            ->min('created_at');
         $daysActive = $firstOrder ? max(1, (int) Carbon::parse($firstOrder)->startOfDay()->diffInDays(now()->startOfDay()) + 1) : 1;
         $daysActive = min(35, $daysActive);
 
