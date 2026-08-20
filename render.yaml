@@ -8,11 +8,11 @@
 # Catatan:
 #   - Web Service gratis tidur setelah ~15 menit idle (cold start saat traffic naik).
 #   - entrypoint.sh membangun .env dari environment variable Render saat container start.
-region: singapore
 services:
   - type: web
     name: kasirai-backend
     runtime: docker
+    region: singapore
     rootDir: backend
     dockerfilePath: Dockerfile
     plan: free
