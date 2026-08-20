@@ -24,14 +24,17 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 2. Akun Nabila (Admin Toko Nabila Store)
-        $tenant = Tenant::firstOrCreate(
-            ['slug' => 'nabila-store'],
-            [
-                'name'        => 'Nabila Store',
-                'description' => 'Toko Nabila Store',
-            ]
-        );
+        // 2. Akun Nabila (Admin Toko Maung Store)
+        // Note: Data 20 produk + 6 kategori Nabila ada di tenant 'maung-store' (Tenant ID 2 di production).
+        $tenant = Tenant::where('slug', 'maung-store')
+            ->orWhere('name', 'LIKE', '%Maung%')
+            ->orWhere('slug', 'nabila-store')
+            ->first()
+            ?? Tenant::create([
+                'name'        => 'Maung Store',
+                'slug'        => 'maung-store',
+                'description' => 'Toko Maung Store',
+            ]);
 
         User::updateOrCreate(
             ['email' => 'nabila@gmail.com'],
