@@ -18,8 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // sehingga asset() generate URL http:// → Mixed Content error di browser
         $middleware->trustProxies(at: '*');
 
-        // CORS: izinkan request cross-origin dari frontend (Vercel → Railway)
-        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
+        // CORS: izinkan request cross-origin dari frontend (Vercel → Render)
+        // Pakai middleware custom supaya preflight OPTIONS selalu dibalas dengan benar
+        $middleware->prepend(\App\Http\Middleware\CorsMiddleware::class);
 
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
