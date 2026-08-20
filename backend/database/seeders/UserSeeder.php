@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
+use App\Models\Product;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -25,8 +27,10 @@ class UserSeeder extends Seeder
         );
 
         // 2. Akun Nabila (Admin Toko Maung Store)
-        // Cari tenant 'Maung Store' (slug: maung-store atau name berisi Maung)
-        $maungTenant = Tenant::where('slug', 'maung-store')
+        // Cari tenant ID 2 (tenant asli berisi 20 produk & 6 kategori) atau tenant Maung Store
+        $maungTenant = Tenant::find(2)
+            ?? Tenant::whereHas('products')->first()
+            ?? Tenant::where('slug', 'maung-store')
             ->orWhere('name', 'LIKE', '%Maung%')
             ->first();
 
@@ -36,9 +40,14 @@ class UserSeeder extends Seeder
                 'slug'        => 'maung-store',
                 'description' => 'Toko Maung Store',
             ]);
+        } else {
+            $maungTenant->update([
+                'name' => 'Maung Store',
+                'slug' => 'maung-store',
+            ]);
         }
 
-        // Hubungkan/pindahkan user nabila@gmail.com ke tenant Maung Store
+        // Hubungkan/pindahkan user nabila@gmail.com ke tenant Maung Store ini
         User::updateOrCreate(
             ['email' => 'nabila@gmail.com'],
             [
@@ -50,7 +59,13 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 3. Hapus tenant 'Nabila Store' (slug: nabila-store) yang kosong jika ada
+        // Jika ada produk atau kategori yang terikat ke tenant_id 2, konsolidasikan ke $maungTenant->id
+        if ($maungTenant->id !== 2) {
+            Product::withoutGlobalScopes()->where('tenant_id', 2)->update(['tenant_id' => $maungTenant->id]);
+            Category::withoutGlobalScopes()->where('tenant_id', 2)->update(['tenant_id' => $maungTenant->id]);
+        }
+
+        // 3. Bersihkan tenant duplikat kosong 'Nabila Store' (slug: nabila-store) jika ada
         Tenant::where('slug', 'nabila-store')
             ->where('id', '!=', $maungTenant->id)
             ->delete();
