@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
-use App\Models\Product;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -59,14 +57,13 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // 3. Konsolidasikan SEMUA produk dan kategori di database ke tenant Maung Store ini
-        //    (memastikan tidak ada data produk/kategori tersisa di tenant_id lama/lain)
-        Product::withoutGlobalScopes()->update(['tenant_id' => $maungTenant->id]);
-        Category::withoutGlobalScopes()->update(['tenant_id' => $maungTenant->id]);
-
-        // 4. Bersihkan tenant duplikat kosong 'Nabila Store' (slug: nabila-store) jika ada
+        // 3. Bersihkan tenant duplikat kosong 'Nabila Store' (slug: nabila-store) jika ada
         Tenant::where('slug', 'nabila-store')
             ->where('id', '!=', $maungTenant->id)
             ->delete();
+
+        // Konsolidasi produk & kategori ke tenant ini ditangani oleh
+        // RepairNabilaTenant (dipanggil di akhir DatabaseSeeder) supaya
+        // berjalan SETELAH data Category/Product ada.
     }
 }

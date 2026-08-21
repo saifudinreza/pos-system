@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Tenant;
 use Illuminate\Database\Seeder;
 
 class CategorySeeder extends Seeder
@@ -12,6 +13,14 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
+        // Cari tenant Maung Store (atau tenant pertama)
+        $tenant = Tenant::where('slug', 'maung-store')
+            ->orWhere('name', 'LIKE', '%Maung%')
+            ->first()
+            ?? Tenant::first();
+
+        $tenantId = $tenant?->id;
+
         $categories = [
             'Makanan',
             'Minuman',
@@ -19,14 +28,17 @@ class CategorySeeder extends Seeder
             'Rokok',
             'Kebutuhan Rumah',
         ];
-        // ↑ List kategori — slug otomatis digenerate dari boot() di Model Category
-        // Contoh: "Makanan" → slug "makanan", "Kebutuhan Rumah" → "kebutuhan-rumah"
 
         foreach ($categories as $name) {
-            Category::create([
-                'name' => $name,
-                'is_active' => true,
-            ]);
+            Category::updateOrCreate(
+                [
+                    'name'      => $name,
+                    'tenant_id' => $tenantId,
+                ],
+                [
+                    'is_active' => true,
+                ]
+            );
         }
     }
 }

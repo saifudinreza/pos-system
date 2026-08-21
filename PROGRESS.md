@@ -255,4 +255,31 @@
    Tersisa: InsightService masih memanggil Groq sinkron saat generate (opsional, sudah ada
    fallback templated), dan AI chat async perlu Redis kalau mau dua worker non-blocking.
 4. ~~Rate limiting global di `bootstrap/app.php` (saat ini hanya throttle per-route).~~ ✅
-   **SUDAH dikerjakan** — §8 di "Fitur yang SUDAH dikerjakan".
+    **SUDAH dikerjakan** — §8 di "Fitur yang SUDAH dikerjakan".
+
+---
+
+## 21 Agustus 2026 — Fix: kategori & gambar produk "GONE" di akun nabila (Maung Store)
+
+- **Gejala**: di `nabila@gmail.com` / tenant Maung Store, kategori & gambar produk
+  tidak muncul padahal masih ada di DB/R2.
+- **Akar masalah**: `TenantScope` (`backend/app/Scopes/TenantScope.php`) menyembunyikan
+  seluruh row `products`/`categories` yang `tenant_id`-nya tidak cocok dengan
+  `tenant_id` user login. Riwayat commit menunjukkan tenant toko Nabila berulang kali
+  dibuat/di-rename/re-assign ("Nabila Store" → "Maung Store", lempar `tenant_id` 2),
+  sehingga produk & kategori hasil upload UI **tertinggal di tenant lama (yatim)**.
+  Data tidak terhapus — cuma tidak kelihatan di UI, termasuk gambar R2-nya (karena
+  `image_url` di-generate dari row produk yang tersembunyi).
+- **Fix**:
+  - Tambah command idempoten `php artisan kasirai:repair-nabila`
+    (`backend/app/Console/Commands/RepairNabilaTenant.php`) yang memindahkan produk &
+    kategori **yatim** (milik tenant tanpa user) ke Maung Store, lalu memetakan ulang
+    `product.category_id` ke kategori se-nama di tenant yang sama. Aman di DB
+    multi-tenant (TIDAK memindahkan toko lain yang sah).
+  - Command dipanggil otomatis di akhir `DatabaseSeeder` → self-heal tiap deploy
+    (entrypoint jalan `db:seed --force`).
+  - Hapus konsolidasi rapuh di `UserSeeder` (jalankan sebelum data ada → no-op, dan
+    bisa salah pilih tenant via `Tenant::find(2)`).
+- **Cara terapkan di production sekarang**: deploy ulang (atau `railway run php artisan
+  kasirai:repair-nabila` di container) — kategori & gambar akan kembali tanpa kehilangan
+  file R2.

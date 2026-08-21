@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Console\Commands\RepairNabilaTenant;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -10,8 +11,13 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            // CategorySeeder dan ProductSeeder dihapus
-            // Data produk/kategori dibuat langsung oleh admin tiap tenant
+            CategorySeeder::class,
+            ProductSeeder::class,
         ]);
+
+        // Konsolidasi akhir: pastikan seluruh produk & kategori milik tenant
+        // Maung Store (akun nabila) — memperbaiki data yatim akibat riwayat
+        // pembuatan/penghapusan tenant sebelumnya. Idempoten & aman diulang.
+        $this->call(RepairNabilaTenant::class);
     }
 }
