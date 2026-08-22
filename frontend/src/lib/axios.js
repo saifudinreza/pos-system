@@ -33,7 +33,7 @@ api.interceptors.request.use(
     // Hanya akses localStorage di browser (bukan saat SSR di server Next.js)
     // Analogi: kurir hanya bawa kunci kalau sedang di dunia nyata, bukan di mimpi
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (token) {
         // Sisipkan token Bearer di setiap request
         // Backend Laravel Sanctum membaca header: "Authorization: Bearer {token}"
@@ -72,8 +72,8 @@ api.interceptors.response.use(
         // 401 = Unauthorized: token tidak valid atau sudah expired
         // Hapus SEMUA penyimpanan token (localStorage + cookie) agar middleware
         // tidak redirect loop antara /login ↔ /dashboard
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
         document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
         window.location.href = "/login";
       }

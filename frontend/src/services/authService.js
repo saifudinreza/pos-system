@@ -7,18 +7,20 @@
 //
 // PENTING — Dua tempat penyimpanan token:
 //
-//   1. localStorage  → dibaca oleh axios.js (untuk sisipkan header Authorization)
-//      Contoh: localStorage.setItem("token", "abc123")
+//   1. sessionStorage  → dibaca oleh axios.js (untuk sisipkan header Authorization)
+//      Contoh: sessionStorage.setItem("token", "abc123")
 //      → Dipakai untuk request API ke backend Laravel
+//      → sessionStorage hilang saat tab/browser ditutup → auto logout di bukaan baru
 //
-//   2. Cookie        → dibaca oleh middleware.js (untuk route guard di server)
+//   2. Cookie (sesi)  → dibaca oleh middleware.js (untuk route guard di server)
 //      Contoh: document.cookie = "token=abc123..."
 //      → Dipakai untuk cek apakah user boleh akses halaman tertentu
-//      → Middleware berjalan di server (tidak bisa baca localStorage), makanya pakai cookie
+//      → Middleware berjalan di server (tidak bisa baca sessionStorage), makanya pakai cookie
+//      → Cookie tanpa max-age = cookie sesi, ikut hilang saat browser ditutup
 //
 //   Kedua tempat harus disinkronkan! Jika tidak:
-//   - localStorage ada, cookie tidak ada → API bisa, tapi halaman protected di-redirect ke /login
-//   - Cookie ada, localStorage tidak ada → halaman tidak di-redirect, tapi API request gagal (401)
+//   - sessionStorage ada, cookie tidak ada → API bisa, tapi halaman protected di-redirect ke /login
+//   - Cookie ada, sessionStorage tidak ada → halaman tidak di-redirect, tapi API request gagal (401)
 //
 // Relasi:
 //   - authService ← dipanggil oleh authStore.js (login, register, logout, me)
@@ -30,10 +32,11 @@ import api from "@/lib/axios";
 
 // --- HELPER: SIMPAN TOKEN KE COOKIE ---
 // Agar middleware.js bisa membacanya
-// max-age=604800 = berlaku 7 hari (dalam detik)
+// Tanpa max-age/expires → cookie sesi: otomatis hilang saat browser
+// ditutup, sehingga user harus login ulang di tab baru (sesuai kebutuhan).
 // SameSite=Lax  = cookie dikirim saat navigasi biasa, tapi tidak di cross-site request
 const setTokenCookie = (token) => {
-  document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax`;
+  document.cookie = `token=${token}; path=/; SameSite=Lax`;
 };
 
 // --- HELPER: HAPUS COOKIE TOKEN (saat logout) ---
@@ -44,12 +47,13 @@ const clearTokenCookie = () => {
 
 // --- HELPER: SIMPAN SESI LOGIN ---
 // Dipakai bersama oleh login() dan register() — kedua tempat penyimpanan
-// (localStorage + cookie) harus selalu sinkron, makanya disatukan di sini
+// (sessionStorage + cookie) harus selalu sinkron, makanya disatukan di sini
 const persistSession = (token, user) => {
   if (typeof window === "undefined") return;
-  // localStorage → dibaca axios.js untuk sisipkan header Authorization
-  localStorage.setItem("token", token);
-  localStorage.setItem("user", JSON.stringify(user));
+  // sessionStorage → dibaca axios.js untuk sisipkan header Authorization.
+  // sessionStorage hilang saat tab/browser ditutup → auto logout di tab baru.
+  sessionStorage.setItem("token", token);
+  sessionStorage.setItem("user", JSON.stringify(user));
   // Cookie → dibaca middleware.js untuk route guard
   if (token) setTokenCookie(token);
 };
@@ -111,8 +115,8 @@ const authService = {
       await api.post("/logout");
     } finally {
       if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
         clearTokenCookie();
       }
     }
@@ -127,20 +131,20 @@ const authService = {
     const { data } = await api.get("/me");
     // Fallback ke data langsung kalau tidak ada wrapper
     const user = data.data ?? data;
-    // Update cache localStorage dengan data terbaru dari server
+    // Update cache sessionStorage dengan data terbaru dari server
     if (typeof window !== "undefined") {
-      localStorage.setItem("user", JSON.stringify(user));
+      sessionStorage.setItem("user", JSON.stringify(user));
     }
     return user;
   },
 
-  // --- AMBIL USER DARI LOCALSTORAGE (synchronous, tidak perlu await) ---
+  // --- AMBIL USER DARI SESSIONSTORAGE (synchronous, tidak perlu await) ---
   // Digunakan untuk hydrate state saat pertama kali komponen load
   // Lebih cepat dari request ke server — tampilkan data lama dulu, update nanti
   getStoredUser: () => {
     if (typeof window === "undefined") return null;  // Guard untuk SSR
     try {
-      const raw = localStorage.getItem("user");
+      const raw = sessionStorage.getItem("user");
       return raw ? JSON.parse(raw) : null;
     } catch {
       // Kalau JSON corrupt, anggap tidak ada
@@ -153,7 +157,7 @@ const authService = {
   // untuk skip request ke server kalau token tidak ada
   hasToken: () => {
     if (typeof window === "undefined") return false;
-    return !!localStorage.getItem("token");
+    return !!sessionStorage.getItem("token");
   },
 };
 
