@@ -6,11 +6,18 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Tenant;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 class ProductSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Pulihkan produk dari gambar asli di storage/app/public/products.
+     *
+     * Data produk unggahan asli (nama/ harga/ SKU) hilang dari DB, namun
+     * file gambarnya masih utuh. Seeder ini membangun ulang entri produk
+     * yang menunjuk ke masing-masing gambar tersebut supaya tidak ada
+     * gambar yang terbuang. Detail (nama/ harga/ stok) berupa placeholder
+     * yang bisa diedit lewat UI nanti.
      */
     public function run(): void
     {
@@ -21,154 +28,70 @@ class ProductSeeder extends Seeder
 
         $tenantId = $tenant?->id;
 
-        // Ambil ID kategori yang sudah dibuat di CategorySeeder
-        $makanan  = Category::withoutGlobalScopes()->where('name', 'Makanan')->where('tenant_id', $tenantId)->first()?->id
-            ?? Category::withoutGlobalScopes()->where('name', 'Makanan')->first()?->id;
-        $minuman  = Category::withoutGlobalScopes()->where('name', 'Minuman')->where('tenant_id', $tenantId)->first()?->id
-            ?? Category::withoutGlobalScopes()->where('name', 'Minuman')->first()?->id;
-        $snack    = Category::withoutGlobalScopes()->where('name', 'Snack')->where('tenant_id', $tenantId)->first()?->id
-            ?? Category::withoutGlobalScopes()->where('name', 'Snack')->first()?->id;
-        $rokok    = Category::withoutGlobalScopes()->where('name', 'Rokok')->where('tenant_id', $tenantId)->first()?->id
-            ?? Category::withoutGlobalScopes()->where('name', 'Rokok')->first()?->id;
+        // Kategori yang tersedia (dibuat di CategorySeeder).
+        $categories = Category::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->orderBy('id')
+            ->get();
 
-        $products = [
-            // ===== MAKANAN =====
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $makanan,
-                'name'        => 'Indomie Goreng',
-                'sku'         => 'MKN-001',
-                'description' => 'Mie goreng instan paling laris',
-                'price'       => 3500,
-                'cost'        => 2800,
-                'stock'       => 100,
-                'stock_alert' => 20,
-                'is_active'   => true,
-            ],
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $makanan,
-                'name'        => 'Indomie Kuah Ayam Bawang',
-                'sku'         => 'MKN-002',
-                'description' => 'Mie kuah instan gurih',
-                'price'       => 3500,
-                'cost'        => 2800,
-                'stock'       => 80,
-                'stock_alert' => 20,
-                'is_active'   => true,
-            ],
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $makanan,
-                'name'        => 'Roti Tawar Sari Roti',
-                'sku'         => 'MKN-003',
-                'description' => 'Roti tawar lembut kemasan',
-                'price'       => 15000,
-                'cost'        => 12000,
-                'stock'       => 30,
-                'stock_alert' => 10,
-                'is_active'   => true,
-            ],
+        if ($categories->isEmpty()) {
+            $this->command->warn('Kategori belum ada — jalankan CategorySeeder dulu.');
+            return;
+        }
+        $categoryIds = $categories->pluck('id')->all();
 
-            // ===== MINUMAN =====
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $minuman,
-                'name'        => 'Aqua 600ml',
-                'sku'         => 'MNM-001',
-                'description' => 'Air mineral botol 600ml',
-                'price'       => 4000,
-                'cost'        => 3000,
-                'stock'       => 150,
-                'stock_alert' => 30,
-                'is_active'   => true,
-            ],
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $minuman,
-                'name'        => 'Teh Botol Sosro 450ml',
-                'sku'         => 'MNM-002',
-                'description' => 'Teh manis dalam botol',
-                'price'       => 6000,
-                'cost'        => 4500,
-                'stock'       => 80,
-                'stock_alert' => 20,
-                'is_active'   => true,
-            ],
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $minuman,
-                'name'        => 'Kopi Good Day Mocacinno',
-                'sku'         => 'MNM-003',
-                'description' => 'Kopi sachet siap seduh',
-                'price'       => 2500,
-                'cost'        => 1800,
-                'stock'       => 200,
-                'stock_alert' => 50,
-                'is_active'   => true,
-            ],
+        // Hapus produk placeholder dari seeder lama (tanpa gambar, pakai SKU
+        // standar) agar tidak dobel dengan produk hasil pemulihan.
+        $seederPrefixes = ['MKN-', 'MNM-', 'SNK-', 'RKK-'];
+        Product::withoutGlobalScopes()
+            ->where('tenant_id', $tenantId)
+            ->whereNotNull('sku')
+            ->where(function ($q) use ($seederPrefixes) {
+                foreach ($seederPrefixes as $p) {
+                    $q->orWhere('sku', 'LIKE', $p . '%');
+                }
+            })
+            ->delete();
 
-            // ===== SNACK =====
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $snack,
-                'name'        => 'Chitato Original 68g',
-                'sku'         => 'SNK-001',
-                'description' => 'Keripik kentang rasa original',
-                'price'       => 10000,
-                'cost'        => 8000,
-                'stock'       => 60,
-                'stock_alert' => 15,
-                'is_active'   => true,
-            ],
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $snack,
-                'name'        => 'Oreo Original 133g',
-                'sku'         => 'SNK-002',
-                'description' => 'Biskuit sandwich coklat',
-                'price'       => 8500,
-                'cost'        => 6500,
-                'stock'       => 50,
-                'stock_alert' => 10,
-                'is_active'   => true,
-            ],
+        // Baca semua gambar produk yang masih ada di storage.
+        $disk = Storage::disk('public');
+        $imageFiles = collect($disk->files('products'))
+            ->filter(fn ($f) => in_array(strtolower(pathinfo($f, PATHINFO_EXTENSION)), [
+                'png', 'jpg', 'jpeg', 'webp', 'gif',
+            ]))
+            ->values();
 
-            // ===== ROKOK =====
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $rokok,
-                'name'        => 'Sampoerna Mild 16',
-                'sku'         => 'RKK-001',
-                'description' => 'Rokok mild isi 16 batang',
-                'price'       => 32000,
-                'cost'        => 28000,
-                'stock'       => 40,
-                'stock_alert' => 10,
-                'is_active'   => true,
-            ],
-            [
-                'tenant_id'   => $tenantId,
-                'category_id' => $rokok,
-                'name'        => 'Gudang Garam Surya 12',
-                'sku'         => 'RKK-002',
-                'description' => 'Rokok kretek isi 12 batang',
-                'price'       => 25000,
-                'cost'        => 22000,
-                'stock'       => 35,
-                'stock_alert' => 10,
-                'is_active'   => true,
-            ],
-        ];
+        if ($imageFiles->isEmpty()) {
+            $this->command->warn('Tidak ada gambar di storage/app/public/products — tidak ada yang dipulihkan.');
+            return;
+        }
 
-        foreach ($products as $product) {
+        $created = 0;
+        foreach ($imageFiles as $i => $path) {
+            $sku = 'IMG-' . str_pad($i + 1, 3, '0', STR_PAD_LEFT);
+            $categoryId = $categoryIds[$i % count($categoryIds)];
+
             Product::updateOrCreate(
                 [
-                    'sku'       => $product['sku'],
+                    'sku'       => $sku,
                     'tenant_id' => $tenantId,
                 ],
-                $product
+                [
+                    'tenant_id'   => $tenantId,
+                    'category_id' => $categoryId,
+                    'name'        => 'Produk ' . ($i + 1),
+                    'description' => 'Produk hasil pemulihan dari gambar.',
+                    'price'       => 0,
+                    'cost'        => 0,
+                    'stock'       => 0,
+                    'stock_alert' => 0,
+                    'image'       => $path,
+                    'is_active'   => true,
+                ]
             );
+            $created++;
         }
+
+        $this->command->info("Pemulihan selesai: {$created} produk dibuat dari gambar di storage.");
     }
 }
