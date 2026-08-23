@@ -29,6 +29,14 @@ class CategoryController extends Controller
     {
         $query = Category::withCount('products');
 
+        // ----- FILTER TENANT (khusus developer) -----
+        // Developer biasanya melihat semua tenant. Bila ingin fokus ke satu
+        // tenant, kirim ?tenant_id=xxx — parameter ini DIABAIKAN untuk
+        // non-developer (keamanan: mereka tetap hanya lihat tenant sendiri).
+        if ($request->user()->role === 'developer' && $request->filled('tenant_id')) {
+            $query->where('categories.tenant_id', $request->tenant_id);
+        }
+
         // ----- SEARCH -----
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -44,9 +52,11 @@ class CategoryController extends Controller
         // ----- PLAN-BASED READ LIMIT -----
         $plan      = $this->getEffectivePlan($request->user());
         $readLimit = $this->categoryReadLimits($plan);
+        $isDeveloper = $request->user()->role === 'developer';
         $totalInTenant = (clone $query)->count();
 
-        $categories = $readLimit !== null
+        // Developer bebas melihat semua kategori tanpa cap read-limit
+        $categories = ($readLimit !== null && ! $isDeveloper)
             ? $query->take($readLimit)->get()
             : $query->get();
 

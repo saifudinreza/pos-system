@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\AiChatUsage;
 use App\Models\AiQueryLog;
+use App\Models\Category;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Models\User;
@@ -169,5 +171,66 @@ class TenantIsolationTest extends TestCase
         $response->assertOk();
         $this->assertEquals(50000, (int) $response->json('data.summary.total_revenue'));
         $this->assertEquals(1, (int) $response->json('data.summary.total_transactions'));
+    }
+
+    // ── DEVELOPER TENANT FILTER — produk & kategori bisa difilter per tenant ──
+
+    private function makeProduct(Tenant $tenant, Category $category, string $name, string $sku): Product
+    {
+        return Product::create([
+            'tenant_id'   => $tenant->id,
+            'category_id' => $category->id,
+            'name'        => $name,
+            'sku'         => $sku,
+            'price'       => 1000,
+            'stock'       => 5,
+            'is_active'   => true,
+        ]);
+    }
+
+    public function test_developer_can_filter_products_and_categories_by_tenant(): void
+    {
+        $tenantA = $this->makeTenant('Toko A');
+        $tenantB = $this->makeTenant('Toko B');
+        $dev = User::factory()->create(['tenant_id' => null, 'role' => 'developer']);
+
+        $catA = Category::create(['tenant_id' => $tenantA->id, 'name' => 'Kat A', 'slug' => 'kat-a']);
+        $catB = Category::create(['tenant_id' => $tenantB->id, 'name' => 'Kat B', 'slug' => 'kat-b']);
+        $this->makeProduct($tenantA, $catA, 'Produk A', 'A1');
+        $this->makeProduct($tenantB, $catB, 'Produk B', 'B1');
+
+        Sanctum::actingAs($dev);
+
+        // Tanpa filter → semua data lintas tenant
+        $this->getJson('/api/products')->assertOk()->assertJsonCount(2, 'data');
+        $this->getJson('/api/categories')->assertOk()->assertJsonCount(2, 'data');
+
+        // Filter tenant A → hanya data tenant A
+        $prod = $this->getJson('/api/products?tenant_id=' . $tenantA->id);
+        $prod->assertOk()->assertJsonCount(1, 'data');
+        $prod->assertJsonPath('data.0.name', 'Produk A');
+
+        $cat = $this->getJson('/api/categories?tenant_id=' . $tenantA->id);
+        $cat->assertOk()->assertJsonCount(1, 'data');
+        $cat->assertJsonPath('data.0.name', 'Kat A');
+    }
+
+    public function test_non_developer_cannot_cross_tenant_via_filter(): void
+    {
+        $tenantA = $this->makeTenant('Toko A');
+        $tenantB = $this->makeTenant('Toko B');
+        $adminA  = $this->makeAdmin($tenantA);
+
+        $catA = Category::create(['tenant_id' => $tenantA->id, 'name' => 'Kat A', 'slug' => 'kat-a']);
+        $catB = Category::create(['tenant_id' => $tenantB->id, 'name' => 'Kat B', 'slug' => 'kat-b']);
+        $this->makeProduct($tenantA, $catA, 'Produk A', 'A1');
+        $this->makeProduct($tenantB, $catB, 'Produk B', 'B1');
+
+        Sanctum::actingAs($adminA);
+
+        // Param tenant_id milik tenant lain DIABAIKAN → hanya tenant sendiri
+        $prod = $this->getJson('/api/products?tenant_id=' . $tenantB->id);
+        $prod->assertOk()->assertJsonCount(1, 'data');
+        $prod->assertJsonPath('data.0.name', 'Produk A');
     }
 }

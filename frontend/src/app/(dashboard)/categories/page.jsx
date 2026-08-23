@@ -18,6 +18,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import categoryService from "@/services/categoryService";
+import tenantService    from "@/services/tenantService";
+import { useAuthStore } from "@/stores/authStore";
 import NeoButton from "@/components/ui/NeoButton";
 import NeoTable  from "@/components/ui/NeoTable";
 import NeoBadge  from "@/components/ui/NeoBadge";
@@ -38,18 +40,39 @@ export default function CategoriesPage() {
   const [saving,     setSaving]     = useState(false);
   const [error,      setError]      = useState("");
 
+  // ── Developer: pilih tenant untuk memfilter kategori (lihat 1 tenant saja) ──
+  const isDeveloper     = useAuthStore((s) => s.isDeveloper());
+  const [tenants,       setTenants]       = useState([]);
+  const [selectedTenant, setSelectedTenant] = useState(""); // "" = semua tenant (default developer)
+
   /** fetchData — Ambil daftar kategori + meta limit paket dari backend. */
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const res = await categoryService.getAll();
+      const params = {};
+      if (isDeveloper && selectedTenant) params.tenant_id = selectedTenant;
+      const res = await categoryService.getAll(params);
       setCategories(res.data ?? res);
       if (res.meta) setPlanMeta(res.meta);
     }
     finally { setIsLoading(false); }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  // Ambil daftar tenant (developer) sekali saat halaman dibuka
+  useEffect(() => {
+    if (isDeveloper) {
+      tenantService.getAll()
+        .then((res) => setTenants(res.data ?? []))
+        .catch(() => {});
+    }
+  }, [isDeveloper]);
+
+  useEffect(() => { fetchData(); }, [isDeveloper, selectedTenant]);
+
+  /** handleTenantChange — Ganti tenant yang difilter (developer only). */
+  const handleTenantChange = (e) => {
+    setSelectedTenant(e.target.value);
+  };
 
   /** openModal — Buka modal tambah (data=null) atau edit (data=kategori). */
   const openModal = (data = null) => {
@@ -111,6 +134,23 @@ export default function CategoriesPage() {
         </div>
         <NeoButton className="ml-4 rounded-md" onClick={() => openModal()}>+ Tambah Kategori</NeoButton>
       </div>
+
+      {/* Developer: pilih tenant untuk memfilter kategori */}
+      {isDeveloper && (
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-bold text-brand-black">Tenant</label>
+          <select onChange={handleTenantChange} value={selectedTenant}
+            className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            <option value="">Semua Tenant</option>
+            {tenants.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}{t.is_active === false ? " (nonaktif)" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Plan limit banner */}
       {planMeta?.is_limited && (

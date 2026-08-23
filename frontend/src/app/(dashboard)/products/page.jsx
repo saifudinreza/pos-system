@@ -22,6 +22,8 @@ import { useProducts }    from "@/hooks/useProducts";
 import { useDebounce }    from "@/hooks/useDebounce";
 import categoryService    from "@/services/categoryService";
 import productService     from "@/services/productService";
+import tenantService      from "@/services/tenantService";
+import { useAuthStore }   from "@/stores/authStore";
 import NeoButton  from "@/components/ui/NeoButton";
 import NeoTable   from "@/components/ui/NeoTable";
 import NeoBadge   from "@/components/ui/NeoBadge";
@@ -66,18 +68,41 @@ export default function ProductsPage() {
 
   const [categories,  setCategories] = useState([]);
   const [modal,       setModal]      = useState({ open: false, data: null }); // data = produk yang diedit (null = tambah baru)
+
+  // ── Developer: pilih tenant untuk memfilter produk (lihat 1 tenant saja) ──
+  const isDeveloper    = useAuthStore((s) => s.isDeveloper());
+  const [tenants,      setTenants]      = useState([]);
+  const [selectedTenant, setSelectedTenant] = useState(""); // "" = semua tenant (default developer)
   const [form,        setForm]       = useState(EMPTY_FORM);
   const [preview,     setPreview]    = useState(null);  // URL preview foto sebelum upload
   const [saving,      setSaving]     = useState(false);
   const [formError,   setFormError]  = useState("");
   const [activeFilter, setActiveFilter] = useState("all"); // "all" | "low" — filter stok rendah
 
-  // ── Data pendukung: ambil daftar kategori sekali saat halaman dibuka ──
+  // ── Data pendukung: ambil daftar tenant (developer) + kategori ──
   useEffect(() => {
-    categoryService.getAll({ is_active: true })
+    if (isDeveloper) {
+      tenantService.getAll()
+        .then((res) => setTenants(res.data ?? []))
+        .catch(() => {});
+    }
+  }, [isDeveloper]);
+
+  // Kategori untuk dropdown filter & modal — ikut tenant yang dipilih (developer)
+  useEffect(() => {
+    const params = { is_active: true };
+    if (isDeveloper && selectedTenant) params.tenant_id = selectedTenant;
+    categoryService.getAll(params)
       .then((res) => setCategories(res.data ?? res))
       .catch(() => {});
-  }, []);
+  }, [isDeveloper, selectedTenant]);
+
+  /** handleTenantChange — Ganti tenant yang difilter (developer only). */
+  const handleTenantChange = (e) => {
+    const val = e.target.value;
+    setSelectedTenant(val);
+    updateFilters({ tenant_id: val || undefined, page: 1 });
+  };
 
   /**
    * openModal — Buka modal tambah (data=null) atau edit (data=produk).
@@ -309,6 +334,18 @@ export default function ProductsPage() {
       )}
 
       <div className="flex gap-3 flex-wrap">
+        {isDeveloper && (
+          <select onChange={handleTenantChange} value={selectedTenant}
+            className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            <option value="">Semua Tenant</option>
+            {tenants.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}{t.is_active === false ? " (nonaktif)" : ""}
+              </option>
+            ))}
+          </select>
+        )}
         <input value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari produk atau SKU..."
           className="flex-1 min-w-[200px] px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"

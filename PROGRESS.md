@@ -282,4 +282,28 @@
     bisa salah pilih tenant via `Tenant::find(2)`).
 - **Cara terapkan di production sekarang**: deploy ulang (atau `railway run php artisan
   kasirai:repair-nabila` di container) — kategori & gambar akan kembali tanpa kehilangan
-  file R2.
+   file R2.
+
+---
+
+## 23 Agustus 2026 — Filter tenant di menu Produk & Kategori (akun Developer)
+
+- **Fitur**: akun developer (tenant_id = null, role `developer`) yang sebelumnya melihat
+  SEMUA produk & kategori dari semua tenant sekaligus, kini punya **dropdown pilih
+  tenant** di halaman Produk & Kategori. Pilih satu tenant → hanya produk/kategori
+  tenant itu yang tampil (lebih terorganisir). Default "Semua Tenant" = perilaku lama.
+- **Backend**:
+  - `ProductController::index()` & `CategoryController::index()` menerima query param
+    `tenant_id` yang **hanya dihormati untuk role `developer`** (aman: non-developer
+    tetap terisolasi tenant sendiri via TenantScope, param diabaikan).
+  - Developer kini **bebas read-limit** (tidak kena cap 50/15 produk/kategori seperti
+    plan Free) — dev tools lintas tenant tetap pakai pagination normal.
+- **Frontend**:
+  - `products/page.jsx` & `categories/page.jsx`: selector tenant (`useAuthStore.isDeveloper()`),
+    mengambil daftar via `tenantService.getAll()`. Di Produk, `tenant_id` diteruskan ke
+    `useProducts` (filter) dan ke dropdown kategori (ikut tenant terpilih).
+- **Test**: `TenantIsolationTest` +2 test — developer bisa filter produk/kategori per
+  tenant; non-developer tidak bisa cross-tenant lewat param. Total 6 test lolos.
+- ⚠️ **Catatan**: pembuatan produk/kategori oleh developer tetap `tenant_id = null`
+  (perilaku lama di `store()`) — di luar scope filter ini. Kalau mau developer membuat
+  produk ke tenant tertentu, perlu tambah `tenant_id` di payload `store()` (TODO).

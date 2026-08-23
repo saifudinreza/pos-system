@@ -48,6 +48,15 @@ class ProductController extends Controller
     {
         $query = Product::with('category');
 
+        // ----- FILTER TENANT (khusus developer) -----
+        // Developer (tenant_id = null) biasanya melihat semua tenant. Bila ingin
+        // fokus ke satu tenant, kirim ?tenant_id=xxx — parameter ini DIABAIKAN
+        // untuk non-developer (keamanan: mereka tetap hanya lihat tenant sendiri
+        // via TenantScope, bukan tenant lain).
+        if ($request->user()->role === 'developer' && $request->filled('tenant_id')) {
+            $query->where('products.tenant_id', $request->tenant_id);
+        }
+
         // ----- SEARCH -----
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -82,9 +91,12 @@ class ProductController extends Controller
         // ----- PLAN-BASED READ LIMIT -----
         $plan       = $this->getEffectivePlan($request->user());
         $readLimit  = $this->productReadLimits($plan);
+        $isDeveloper = $request->user()->role === 'developer';
         $totalInTenant = (clone $query)->count();
 
-        if ($readLimit !== null) {
+        // Developer bebas melihat semua produk tanpa cap read-limit
+        // (dev tools lintas tenant) — tetap pakai pagination normal.
+        if ($readLimit !== null && ! $isDeveloper) {
             // Hard cap: return only the first $readLimit products
             $items = $query->take($readLimit)->get();
             return response()->json([
