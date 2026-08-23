@@ -48,6 +48,12 @@ class ProductController extends Controller
     {
         $query = Product::with('category');
 
+        // Developer melihat lintas tenant → eager load relasi tenant supaya
+        // kolom "Tenant" bisa ditampilkan & disortir di frontend.
+        if ($request->user()->role === 'developer') {
+            $query->with('tenant');
+        }
+
         // ----- FILTER TENANT (khusus developer) -----
         // Developer (tenant_id = null) biasanya melihat semua tenant. Bila ingin
         // fokus ke satu tenant, kirim ?tenant_id=xxx — parameter ini DIABAIKAN
@@ -84,7 +90,12 @@ class ProductController extends Controller
         $sortBy    = $request->query('sort_by', 'created_at');
         $sortOrder = $request->query('sort_order', 'desc');
         $allowedSorts = ['name', 'price', 'stock', 'created_at'];
-        if (in_array($sortBy, $allowedSorts)) {
+        // Sortir berdasarkan nama tenant (developer only) via join tabel tenants.
+        if ($sortBy === 'tenant' && $request->user()->role === 'developer') {
+            $query->join('tenants', 'products.tenant_id', '=', 'tenants.id')
+                  ->orderBy('tenants.name', $sortOrder === 'asc' ? 'asc' : 'desc')
+                  ->select('products.*');
+        } elseif (in_array($sortBy, $allowedSorts)) {
             $query->orderBy($sortBy, $sortOrder === 'asc' ? 'asc' : 'desc');
         }
 
@@ -481,6 +492,10 @@ class ProductController extends Controller
             ] : null,
             // ↑ relationLoaded() = cek apakah relasi sudah di-load
             // Mencegah error kalau category tidak di-eager load
+            'tenant'     => $product->relationLoaded('tenant') && $product->tenant ? [
+                'id'   => $product->tenant->id,
+                'name' => $product->tenant->name,
+            ] : null,
             'created_at'  => $product->created_at->format('d M Y'),
         ];
     }

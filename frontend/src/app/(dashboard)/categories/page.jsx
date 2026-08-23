@@ -44,6 +44,7 @@ export default function CategoriesPage() {
   const isDeveloper     = useAuthStore((s) => s.isDeveloper());
   const [tenants,       setTenants]       = useState([]);
   const [selectedTenant, setSelectedTenant] = useState(""); // "" = semua tenant (default developer)
+  const [sort,          setSort]           = useState({ sort_by: "name", sort_order: "asc" });
 
   /** fetchData — Ambil daftar kategori + meta limit paket dari backend. */
   const fetchData = async () => {
@@ -51,6 +52,11 @@ export default function CategoriesPage() {
     try {
       const params = {};
       if (isDeveloper && selectedTenant) params.tenant_id = selectedTenant;
+      // Sortir (developer boleh sortir berdasarkan tenant)
+      if (isDeveloper) {
+        params.sort_by = sort.sort_by;
+        params.sort_order = sort.sort_order;
+      }
       const res = await categoryService.getAll(params);
       setCategories(res.data ?? res);
       if (res.meta) setPlanMeta(res.meta);
@@ -67,11 +73,17 @@ export default function CategoriesPage() {
     }
   }, [isDeveloper]);
 
-  useEffect(() => { fetchData(); }, [isDeveloper, selectedTenant]);
+  useEffect(() => { fetchData(); }, [isDeveloper, selectedTenant, sort]);
 
   /** handleTenantChange — Ganti tenant yang difilter (developer only). */
   const handleTenantChange = (e) => {
     setSelectedTenant(e.target.value);
+  };
+
+  /** handleSortChange — Sortir tabel (developer only, termasuk berdasarkan tenant). */
+  const handleSortChange = (e) => {
+    const [sort_by, sort_order] = e.target.value.split(":");
+    setSort({ sort_by, sort_order });
   };
 
   /** openModal — Buka modal tambah (data=null) atau edit (data=kategori). */
@@ -105,6 +117,10 @@ export default function CategoriesPage() {
   const columns = [
     { key: "name",      label: "Nama Kategori" },
     { key: "slug",      label: "Slug", render: (v) => <span className="font-mono text-xs text-brand-black/50">{v}</span> },
+    ...(isDeveloper ? [{
+      key: "tenant", label: "Tenant",
+      render: (v) => v?.name ?? <span className="text-brand-black/30">-</span>,
+    }] : []),
     { key: "is_active", label: "Status", render: (v) => <NeoBadge color={v ? "green" : "gray"}>{v ? "Aktif" : "Nonaktif"}</NeoBadge> },
     {
       key: "id", label: "Aksi",
@@ -139,18 +155,26 @@ export default function CategoriesPage() {
       {isDeveloper && (
         <div className="flex items-center gap-2">
           <label className="text-sm font-bold text-brand-black">Tenant</label>
-          <select onChange={handleTenantChange} value={selectedTenant}
-            className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
-            <option value="">Semua Tenant</option>
-            {tenants.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}{t.is_active === false ? " (nonaktif)" : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+            <select onChange={handleTenantChange} value={selectedTenant}
+              className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
+              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              <option value="">Semua Tenant</option>
+              {tenants.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}{t.is_active === false ? " (nonaktif)" : ""}
+                </option>
+              ))}
+            </select>
+            <label className="text-sm font-bold text-brand-black">Urut</label>
+            <select onChange={handleSortChange} value={`${sort.sort_by}:${sort.sort_order}`}
+              className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
+              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              <option value="name:asc">Nama A-Z</option>
+              <option value="created_at:desc">Terbaru</option>
+              <option value="tenant:asc">Tenant A-Z</option>
+            </select>
+          </div>
+        )}
 
       {/* Plan limit banner */}
       {planMeta?.is_limited && (

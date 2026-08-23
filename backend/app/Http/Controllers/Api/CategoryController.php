@@ -29,6 +29,12 @@ class CategoryController extends Controller
     {
         $query = Category::withCount('products');
 
+        // Developer melihat lintas tenant → eager load relasi tenant supaya
+        // kolom "Tenant" bisa ditampilkan & disortir di frontend.
+        if ($request->user()->role === 'developer') {
+            $query->with('tenant');
+        }
+
         // ----- FILTER TENANT (khusus developer) -----
         // Developer biasanya melihat semua tenant. Bila ingin fokus ke satu
         // tenant, kirim ?tenant_id=xxx — parameter ini DIABAIKAN untuk
@@ -47,7 +53,20 @@ class CategoryController extends Controller
             $query->where('is_active', filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN));
         }
 
-        $query->orderBy('name', 'asc');
+        // ----- SORTING -----
+        // Default urut nama asc. Developer boleh sortir berdasarkan nama tenant
+        // (via join tabel tenants); non-developer diabaikan untuk keamanan.
+        $sortBy    = $request->query('sort_by', 'name');
+        $sortOrder = $request->query('sort_order', 'asc');
+        if ($sortBy === 'tenant' && $request->user()->role === 'developer') {
+            $query->join('tenants', 'categories.tenant_id', '=', 'tenants.id')
+                  ->orderBy('tenants.name', $sortOrder === 'asc' ? 'asc' : 'desc')
+                  ->select('categories.*');
+        } elseif (in_array($sortBy, ['name', 'created_at'])) {
+            $query->orderBy($sortBy, $sortOrder === 'asc' ? 'asc' : 'desc');
+        } else {
+            $query->orderBy('name', 'asc');
+        }
 
         // ----- PLAN-BASED READ LIMIT -----
         $plan      = $this->getEffectivePlan($request->user());
@@ -263,6 +282,10 @@ class CategoryController extends Controller
             'name'           => $category->name,
             'slug'           => $category->slug,
             'is_active'      => $category->is_active,
+            'tenant'         => $category->relationLoaded('tenant') && $category->tenant ? [
+                'id'   => $category->tenant->id,
+                'name' => $category->tenant->name,
+            ] : null,
             'products_count' => $category->products_count ?? 0,
             // ↑ ?? 0 = fallback ke 0 kalau withCount() tidak dipakai
             'created_at'     => $category->created_at->format('d M Y'),

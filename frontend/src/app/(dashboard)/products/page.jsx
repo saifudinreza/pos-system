@@ -220,6 +220,15 @@ export default function ProductsPage() {
     }
   };
 
+  /**
+   * handleSortChange — Sortir tabel (developer only untuk opsi "Tenant").
+   * Value select berbentuk "sort_by:sort_order".
+   */
+  const handleSortChange = (e) => {
+    const [sort_by, sort_order] = e.target.value.split(":");
+    updateFilters({ sort_by, sort_order, page: 1 });
+  };
+
   // ── Definisi kolom tabel (dipakai NeoTable) ──
   const columns = [
     {
@@ -238,6 +247,10 @@ export default function ProductsPage() {
       ),
     },
     { key: "category",  label: "Kategori", render: (v) => v?.name ?? <span className="text-brand-black/30">-</span> },
+    ...(isDeveloper ? [{
+      key: "tenant", label: "Tenant",
+      render: (v) => v?.name ?? <span className="text-brand-black/30">-</span>,
+    }] : []),
     { key: "price",     label: "Harga",    render: (v) => <span className="font-mono font-bold">{formatCurrency(v)}</span> },
     {
       key: "cost",
@@ -363,6 +376,17 @@ export default function ProductsPage() {
           <option value="">Semua Kategori</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
+        {isDeveloper && (
+          <select onChange={handleSortChange} defaultValue="created_at:desc"
+            className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            <option value="created_at:desc">Terbaru</option>
+            <option value="name:asc">Nama A-Z</option>
+            <option value="price:asc">Harga Terendah</option>
+            <option value="stock:asc">Stok Terendah</option>
+            <option value="tenant:asc">Tenant A-Z</option>
+          </select>
+        )}
       </div>
 
       <div className="flex gap-2">
