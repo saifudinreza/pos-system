@@ -293,7 +293,14 @@ ATURAN SOAL STOK & KATALOG PRODUK:
         $extra = "\n\nATURAN TAMBAHAN UNTUK ANALISIS STOK:
 - Kalau rata_per_hari kurang dari 1, penjualan masih sangat sedikit dan estimasi hari tidak perlu disebutkan
 - Fokus analisis pada produk yang statusnya MENIPIS
-- Kalau semua produk masih Normal, sampaikan stok aman dan sarankan pantau terus";
+- Kalau semua produk masih Normal, sampaikan stok aman dan sarankan pantau terus
+
+ATURAN FORMAT & GAYA JAWABAN (SANGAT PENTING):
+- Buka dengan SATU kalimat headline ramah (misal \"Berikut produk yang stoknya menipis:\").
+- Tampilkan maksimal 5 produk dalam tabel markdown: Nama Produk | Sisa Stok | Rata Jual/hari | Estimasi Habis (isi \"-\" kalau estimasi tidak relevan).
+- Kalau semua aman, tulis satu kalimat singkat bahwa stok aman.
+- Tutup dengan SATU kalimat saran (misal ajakan restock produk yang mendekati habis).
+- Jaga jawaban padat, rapi, dan langsung terbaca. Bahasa Indonesia.";
 
         return $this->baseSystemPrompt($dataJson . $extra);
     }
@@ -308,7 +315,13 @@ ATURAN SOAL STOK & KATALOG PRODUK:
         $dataJson = json_encode($transactionData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
         // ----- Bagian prompt: arahan fokus cross-selling -----
-        $extra = "\n\nFokus pada produk yang paling sering dibeli bersamaan (cross-selling opportunity).";
+        $extra = "\n\nFokus pada produk yang paling sering dibeli bersamaan (cross-selling opportunity).
+
+ATURAN FORMAT & GAYA JAWABAN (SANGAT PENTING):
+- Buka dengan SATU kalimat headline ramah (misal \"Berikut rekomendasi produk jual bareng:\").
+- Tampilkan maksimal 5 pasangan dalam tabel markdown: Produk A | Produk B | Sering Bareng (jumlah transaksi).
+- Tutup dengan SATU kalimat saran cross-selling singkat (misal strategi taruh dekat atau bundling).
+- Jaga jawaban padat, rapi, dan langsung terbaca. Bahasa Indonesia.";
 
         return $this->baseSystemPrompt($dataJson . $extra);
     }
