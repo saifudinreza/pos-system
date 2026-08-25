@@ -56,11 +56,12 @@ class GroqService
      *
      * Alur fallback:
      * 1. Flag cooldown belum aktif → coba Groq dulu.
-     * 2. Kalau Groq balas 429 → set flag cooldown (65 detik) & lanjut ke
-     *    OpenRouter (kalau dikonfigurasi).
+     * 2. Groq gagal dengan error APA PUN (429 rate limit, 404 model tidak
+     *    ditemukan, 401 key invalid, timeout, dll) → langsung fallback ke
+     *    OpenRouter (kalau dikonfigurasi) dan set cooldown singkat supaya
+     *    tidak terus menembak Groq yang bermasalah.
      * 3. Flag cooldown masih aktif → langsung OpenRouter; kalau OpenRouter
-     *    tidak dikonfigurasi → reset flag & coba Groq lagi (kemungkinan kena
-     *    429 lagi, di-tangani lagi di langkah 2).
+     *    tidak dikonfigurasi → reset flag & coba Groq lagi.
      *
      * @param string $systemPrompt Prompt sistem (konteks toko/data)
      * @param string $userQuery    Pertanyaan/pesan dari user
@@ -75,23 +76,21 @@ class GroqService
             try {
                 return $this->callGroq($systemPrompt, $userQuery);
             } catch (\Exception $e) {
-                if ($this->isRateLimitError($e)) {
-                    // Kena rate limit → aktifkan cooldown & langsung pindah ke OpenRouter
-                    Log::warning('Groq rate limit hit, switching to OpenRouter for ' . self::GROQ_RATE_LIMIT_TTL . 's');
+                // Fallback ke OpenRouter pada error Groq APA PUN, bukan cuma 429.
+                // Ini menangani kasus model Groq deprecated/invalid atau key bermasalah
+                // di suatu environment, sehingga AI tetap jalan lewat OpenRouter.
+                if (! empty($this->orKey)) {
+                    Log::warning('Groq gagal (' . $e->getMessage() . '), fallback ke OpenRouter');
                     Cache::put(self::GROQ_RATE_LIMIT_KEY, true, self::GROQ_RATE_LIMIT_TTL);
-                    if (! empty($this->orKey)) {
-                        return $this->callOpenRouter($systemPrompt, $userQuery);
-                    }
-                    // Tanpa OpenRouter tidak ada alternatif, biarkan error naik ke pemanggil
-                    throw new \Exception('Groq rate limited dan OpenRouter tidak dikonfigurasi.');
+                    return $this->callOpenRouter($systemPrompt, $userQuery);
                 }
-                // Error selain rate limit → jangan ditutup, lempar apa adanya
+                // Tanpa OpenRouter tidak ada alternatif, biarkan error naik ke pemanggil
                 throw $e;
             }
         }
 
         // Groq sedang dalam cooldown → pakai OpenRouter jika tersedia
-        Log::info('Groq masih rate-limited, menggunakan OpenRouter');
+        Log::info('Groq tidak aktif/cooldown, menggunakan OpenRouter');
         if (! empty($this->orKey)) {
             return $this->callOpenRouter($systemPrompt, $userQuery);
         }
