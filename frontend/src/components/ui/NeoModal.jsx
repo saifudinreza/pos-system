@@ -23,12 +23,12 @@ export default function NeoModal({ isOpen, onClose, title, children, footer, siz
     return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   // Lacak drag: modal hanya tutup kalau mousedown & mouseup sama-sama di overlay,
   // supaya menyeleksi teks di dalam form (yang menggeser keluar kotak) tidak menutup modal.
   const overlayRef = useRef(null);
   const dragFromOverlay = useRef(false);
+
+  if (!isOpen) return null;
 
   const WIDTH = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" };
 
