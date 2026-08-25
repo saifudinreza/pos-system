@@ -21,7 +21,7 @@ import LogoMark from "@/components/brand/LogoMark";
 export default function LoginPage() {
   // ── State ──
   // form: nilai input email & password · error: pesan gagal login
-  // serverWarm: indikator backend sudah siap dijawab (anti cold start Railway)
+  // serverWarm: indikator backend sudah siap dijawab (anti cold start Render)
   const { login, isLoading } = useAuthStore();
 
   const [form, setForm]         = useState({ email: "", password: "" });
@@ -29,7 +29,7 @@ export default function LoginPage() {
   const [serverWarm, setServerWarm] = useState(false);
 
   // ── Efek saat halaman terbuka ──
-  // Ping backend saat halaman login terbuka supaya Railway "bangun"
+  // Ping backend saat halaman login terbuka supaya Render "bangun"
   // sebelum user klik tombol Masuk, mengurangi cold start delay
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, { method: "GET" })

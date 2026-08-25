@@ -16,7 +16,7 @@
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Railway-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Render-46E3B7?style=for-the-badge&logo=docker&logoColor=white)
 
 </div>
 
@@ -85,8 +85,8 @@ Kebanyakan project bootcamp berhenti di CRUD. KasirAI melangkah lebih jauh ke ar
 | | Platform / Service |
 |---|---|
 | Frontend | **Vercel** + Speed Insights |
-| Backend | **Railway** (Docker + Nginx + PHP-FPM) |
-| Database | **Railway MySQL** |
+| Backend | **Render** (Docker + Nginx + PHP-FPM) |
+| Database | **TiDB Cloud MySQL** |
 | AI Primary | **Groq API**, LLaMA 3.3 70B (gratis & cepat) |
 | AI Fallback | **OpenRouter**, LLaMA 3.1 8B (auto-switch) |
 | Payment | **Midtrans Snap (Production)**, QRIS, GoPay, OVO, VA, kartu kredit |
@@ -405,7 +405,7 @@ npm run dev
 `Midtrans Split Payment (Production)` `WhatsApp API` `PDF & Excel Export`
 `Cloudflare R2 (S3-compatible)` `Backend Media Proxy` `Cloud Storage`
 `Shift Management & Cash Reconciliation` `Realtime Time Enforcement`
-`Role-based Access Control` `E2E Testing (TestSprite)` `Docker` `Vercel` `Railway`
+`Role-based Access Control` `E2E Testing (TestSprite)` `Docker` `Vercel` `Render`
 
 ---
 

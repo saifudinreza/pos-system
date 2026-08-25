@@ -61,7 +61,7 @@ return [
         ],
 
         // Cloudflare R2, S3-compatible storage gratis
-        // Gambar produk disimpan di sini agar tidak hilang saat Railway redeploy
+        // Gambar produk disimpan di sini agar tidak hilang saat Render redeploy
         'r2' => [
             'driver'                  => 's3',
             'key'                     => env('R2_ACCESS_KEY_ID'),

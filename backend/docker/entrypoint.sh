@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "=== KasirAI Backend, Railway Startup ==="
+echo "=== KasirAI Backend, Render Startup ==="
 
 # Buat direktori storage yang dibutuhkan Laravel
 mkdir -p storage/logs \

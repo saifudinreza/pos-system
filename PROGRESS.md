@@ -84,7 +84,7 @@
   - `middleware.js` PUBLIC_ROUTES: + `"/forgot-password"`, `"/reset-password"`.
 - Test: `PasswordResetTest` (7 test).
 -  **Belum aktif di production**: butuh isi `MAIL_*` + `FRONTEND_URL` di .env
-  Railway (backend), lihat langkah detail di bawah.
+  Render (backend), lihat langkah detail di bawah.
 
 ---
 
@@ -171,7 +171,7 @@
   memanggil LLM & menulis hasil, tidak ada query database tenant di worker.
 - Frontend `aiService.js` meng-poll job di balik layar → `aiStore`/`AISidebar`
   **tidak berubah sama sekali** (tetap menunggu satu promise).
-- Queue worker: `entrypoint.sh` Railway sekarang set `QUEUE_CONNECTION=database`
+- Queue worker: `entrypoint.sh` sekarang set `QUEUE_CONNECTION=database`
   + jalan `php artisan queue:work` di background.
 - Test: `QueueJobTest` (6 test), job LLM sukses/gagal, polling 202→completed,
   403 antarnaya, dispatch WhatsApp on paid, dan job mengimplement `ShouldQueue`.
@@ -195,12 +195,12 @@
 - **Client predis** (pure-PHP) sebagai default, Dockerfile `php:8.4-fpm` tidak
   meng-install ekstensi phpredis; `predis/predis` sudah ada di composer.
 - `config/database.php`: `REDIS_CLIENT` default `phpredis` → `predis`.
-- `entrypoint.sh`: kalau `REDIS_URL` di-set (Railway plugin Redis) →
+- `entrypoint.sh`: kalau `REDIS_URL` di-set (Render Redis / eksternal) →
   `CACHE_STORE`/`SESSION_DRIVER`/`QUEUE_CONNECTION` otomatis ke `redis`;
   kalau kosong → fallback database/file (perilaku lama, tidak ada perubahan).
 - `.env.example`: blok Redis opsional ditambahkan.
 - Test: `RedisConfigTest` (2 test), default client predis & fallback non-redis.
--  Belum dideploy pakai Redis sungguhan, tinggal add plugin Redis di Railway
+-  Belum dideploy pakai Redis sungguhan, tinggal add Redis di Render
   (isi env `REDIS_URL`) lalu redeploy; sisanya otomatis dari entrypoint.
 
 ---
@@ -248,7 +248,7 @@
 ### Catatan skalabilitas (sudah terdokumentasi di CLAUDE.md, belum dikerjakan)
 2. ~~Redis untuk CACHE_STORE / QUEUE_CONNECTION / SESSION_DRIVER (saat ini `database`).~~ 
    **SUDAH dikerjakan (kode + fallback)**, §9. Tinggal deploy: add Redis plugin
-   di Railway, isi env `REDIS_URL`, redeploy. Tanpa `REDIS_URL` tetap jalan
+   di Render, isi env `REDIS_URL`, redeploy. Tanpa `REDIS_URL` tetap jalan
    database/file.
 3. ~~Job queue untuk kirim WhatsApp & panggilan AI (saat ini sinkron di webhook/request)~~ 
    **SUDAH dikerjakan**, batch job queue selesai (lihat §7 di "Fitur yang SUDAH dikerjakan").

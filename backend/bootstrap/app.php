@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withCommands()
     ->withMiddleware(function (Middleware $middleware) {
 
-        // Trust semua proxy (Railway, Vercel, Cloudflare, dll)
+        // Trust semua proxy (Render, Vercel, Cloudflare, dll)
         // Tanpa ini Laravel tidak tau request datang via HTTPS reverse proxy
         // sehingga asset() generate URL http:// → Mixed Content error di browser
         $middleware->trustProxies(at: '*');

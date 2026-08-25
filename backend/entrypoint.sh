@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-# ── Redis (opsional): kalau REDIS_URL di-set (Railway plugin Redis), pindahkan
+# ── Redis (opsional): kalau REDIS_URL di-set (Render Redis / eksternal), pindahkan
 #    cache / queue / session ke Redis. Tanpa REDIS_URL → fallback aman ke
 #    database/file (perilaku lama). Client predis (pure-PHP, tanpa ekstensi redis).
 #    Dihitung DI LUAR heredoc .env, logic shell tidak boleh masuk ke file .env.
@@ -18,7 +18,7 @@ else
     echo " REDIS_URL kosong -> fallback cache/session/file & queue database"
 fi
 
-# Buat .env dari environment variables Railway
+# Buat .env dari environment variables Render
 cat > /var/www/html/.env << EOF
 APP_NAME="${APP_NAME:-KasirAI}"
 APP_ENV="${APP_ENV:-production}"
@@ -190,7 +190,7 @@ echo " Starting Nginx on port $PORT"
 # Pastikan symlink sites-enabled ada
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-# Validate Nginx config (tampilkan ke stdout supaya Railway bisa tangkap)
+# Validate Nginx config (tampilkan ke stdout supaya Render bisa tangkap)
 nginx -t 2>&1
 
 # Start Nginx di foreground

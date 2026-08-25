@@ -134,7 +134,7 @@ Ini adalah keputusan arsitektur yang **wajib dipatuhi** saat mengembangkan fitur
 - Cache/queue/session semua `database` driver, belum ada Redis.
 - Tidak ada job queue, kirim WhatsApp & panggilan AI berjalan sinkron di dalam request/webhook, menahan worker PHP-FPM.
 - Belum ada rate limiting/throttle di endpoint manapun (termasuk login & AI).
-- Backend single instance di Railway, cold start saat idle, tidak ada horizontal scaling.
+- Backend single instance di Render, cold start saat idle, tidak ada horizontal scaling.
 
 ## 8. Tech Stack
 
@@ -146,7 +146,7 @@ Ini adalah keputusan arsitektur yang **wajib dipatuhi** saat mengembangkan fitur
 | Payment | Midtrans Snap, production, QRIS/GoPay/OVO/VA/kartu kredit |
 | Storage | Cloudflare R2 (S3-compatible), diproksikan backend |
 | WhatsApp | Fonnte API, dipanggil server-side |
-| Infrastruktur | Frontend di Vercel, backend di Railway (Docker + Nginx + PHP-FPM), DB Railway MySQL |
+| Infrastruktur | Frontend di Vercel, backend di Render (Docker + Nginx + PHP-FPM), DB TiDB Cloud MySQL |
 
 ## 9. Testing & Definition of Done
 

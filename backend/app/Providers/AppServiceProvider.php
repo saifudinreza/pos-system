@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 /**
  * AppServiceProvider, registrasi layanan aplikasi.
  *
- * Boot: paksa HTTPS di production (Railway) & daftarkan limiter rate global
+ * Boot: paksa HTTPS di production (Render) & daftarkan limiter rate global
  * 'api' yang dipasang di semua route /api/* via bootstrap/app.php.
  */
 class AppServiceProvider extends ServiceProvider
@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Paksa semua URL (termasuk asset/gambar) pakai HTTPS di production
-        // Tanpa ini, Railway generate URL http:// → browser blok (Mixed Content)
+        // Tanpa ini, Render generate URL http:// → browser blok (Mixed Content)
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }

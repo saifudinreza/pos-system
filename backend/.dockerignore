@@ -29,5 +29,4 @@ storage/framework/views/*
 bootstrap/cache/*.php
 
 # File deploy service lain (tidak relevan di image)
-railway.json
 docker-compose.yml
