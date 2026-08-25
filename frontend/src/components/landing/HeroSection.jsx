@@ -871,9 +871,9 @@ export default function HeroSection() {
             color: "#222", marginBottom: "36px",
           }}>
             Kelola penjualan, stok, dan laporan di satu layar. Tanya AI Assistant
-            langsung dalam Bahasa Indonesia,{" "}
+            langsung dalam Bahasa Indonesia —{" "}
             <b>&quot;produk apa yang paling laku bulan ini?&quot;</b>{" "}
-           , dan dapat jawaban dalam hitungan detik.
+            — dan dapat jawaban dalam hitungan detik.
           </motion.p>
 
           {/* CTA Buttons, hover spring (ctaHover/ctaSpring) + kilau sweep */}
