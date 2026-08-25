@@ -1,7 +1,7 @@
 // ============================================================
-// utils.js — Kumpulan fungsi bantu (helper functions)
+// utils.js, Kumpulan fungsi bantu (helper functions)
 //
-// Analogi: Ini seperti "kotak peralatan" di bengkel —
+// Analogi: Ini seperti "kotak peralatan" di bengkel,
 // berisi berbagai alat kecil yang sering dipakai di mana-mana.
 // Daripada bawa palu ke setiap ruangan, simpan saja di satu kotak
 // dan panggil saat dibutuhkan.
@@ -45,7 +45,7 @@ export function formatDateTime(dateString) {
 }
 
 // --- GABUNG CLASS TAILWIND ---
-// Analogi: seperti tukang jahit yang pilih bahan — ambil yang ada, buang yang kosong
+// Analogi: seperti tukang jahit yang pilih bahan, ambil yang ada, buang yang kosong
 // Contoh: cn("text-red", isActive && "font-bold") → "text-red font-bold"
 export function cn(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -53,7 +53,7 @@ export function cn(...classes) {
 
 // --- STATUS ORDER → LABEL + WARNA ---
 // Mengembalikan teks dan kelas warna Tailwind sesuai status order
-// Analogi: seperti lampu sinyal lalu lintas — setiap warna punya arti
+// Analogi: seperti lampu sinyal lalu lintas, setiap warna punya arti
 export function getOrderStatusConfig(status) {
   const map = {
     pending:   { label: "Menunggu Bayar", color: "bg-yellow-100 text-yellow-800 border-yellow-300" },
@@ -118,7 +118,7 @@ export function compactNumber(num) {
 }
 
 // --- BUAT QUERY STRING DARI OBJECT ---
-// Analogi: seperti mengisi formulir pencarian — tiap field jadi bagian URL
+// Analogi: seperti mengisi formulir pencarian, tiap field jadi bagian URL
 // Contoh: { page: 1, search: "ayam" } → "?page=1&search=ayam"
 // Nilai kosong (null, undefined, "") otomatis dibuang
 export function buildQueryString(params = {}) {

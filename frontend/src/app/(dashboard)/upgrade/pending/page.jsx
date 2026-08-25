@@ -1,11 +1,11 @@
 "use client";
 
 // ============================================================
-// Upgrade Pending — Halaman setelah pembayaran Midtrans pending
+// Upgrade Pending, Halaman setelah pembayaran Midtrans pending
 //
 // Terjadi saat user memilih VA/transfer lalu menutup popup, atau pembayaran
 // masih diproses bank. Aktivasi otomatis terjadi begitu webhook Midtrans
-// mengonfirmasi pembayaran — user cukup menunggu / memantau lewat Profil.
+// mengonfirmasi pembayaran, user cukup menunggu / memantau lewat Profil.
 // ============================================================
 
 import { Suspense } from "react";
@@ -52,7 +52,7 @@ function PendingContent() {
 
         {/* Demo info Midtrans */}
         <div className="bg-brand-yellow/30 border-2 border-brand-black/20 p-3 mb-6 text-left text-xs font-mono">
-          <p className="font-black text-brand-black mb-1">Midtrans Sandbox — Alur Pending</p>
+          <p className="font-black text-brand-black mb-1">Midtrans Sandbox, Alur Pending</p>
           <p className="text-brand-black/60">Status: <span className="text-yellow-700 font-bold">pending</span></p>
           <p className="text-brand-black/60">User menutup popup tanpa menyelesaikan pembayaran atau memilih VA/transfer</p>
           <p className="text-brand-black/60 mt-1">Webhook akan dikirim Midtrans saat pembayaran berhasil diproses</p>

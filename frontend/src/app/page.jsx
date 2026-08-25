@@ -1,5 +1,5 @@
 // ============================================================
-// page.jsx — Landing Page KasirAI (mode "visual storytelling")
+// page.jsx, Landing Page KasirAI (mode "visual storytelling")
 //
 // Alur cerita (scroll dari atas ke bawah):
 //   1. Hero        → value proposition + entrance bold
@@ -11,7 +11,7 @@
 //   7. Footer      → info & link
 //
 // Catatan teknis:
-//  - Server Component (tanpa 'use client') — animasi dikelola
+//  - Server Component (tanpa 'use client'), animasi dikelola
 //    masing-masing section (client components).
 //  - Section di bawah lipatan (below the fold) di-LAZY LOAD via
 //    next/dynamic agar initial load tetap ringan. Tetap SSR
@@ -47,28 +47,28 @@ const LandingFooter      = dynamic(() => import("@/components/landing/LandingFoo
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-brand-cream overflow-x-hidden">
-      {/* Grid background pattern — tipis */}
+      {/* Grid background pattern, tipis */}
       <div className="bg-grid" aria-hidden="true" />
 
       {/* 1. Navbar sticky */}
       <LandingNavbar />
 
-      {/* 2. Hero — first impression (eager) */}
+      {/* 2. Hero, first impression (eager) */}
       <HeroSection />
 
-      {/* 3. Problem — ribetnya kelola toko manual */}
+      {/* 3. Problem, ribetnya kelola toko manual */}
       <ProblemSection />
 
-      {/* 4. Solution — fitur POS, di-reveal saat scroll */}
+      {/* 4. Solution, fitur POS, di-reveal saat scroll */}
       <FeaturesSection />
 
-      {/* 5. AI Spotlight — pembeda utama (Groq) */}
+      {/* 5. AI Spotlight, pembeda utama (Groq) */}
       <AISpotlightSection />
 
-      {/* 6. Pricing — pilihan paket */}
+      {/* 6. Pricing, pilihan paket */}
       <PricingSection />
 
-      {/* 7. CTA — ajakan login / demo */}
+      {/* 7. CTA, ajakan login / demo */}
       <CTASection />
 
       {/* 8. Footer */}

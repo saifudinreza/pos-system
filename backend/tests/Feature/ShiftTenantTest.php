@@ -107,7 +107,7 @@ class ShiftTenantTest extends TestCase
         $kasirB  = $this->makeUser($tenantB, 'kasir');
         $product = $this->makeProduct($tenantA);
 
-        // Hanya tenant B yang punya shift aktif — kasir A tidak boleh melihatnya
+        // Hanya tenant B yang punya shift aktif, kasir A tidak boleh melihatnya
         $this->openShift($tenantB, $kasirB);
 
         Sanctum::actingAs($kasirA);

@@ -1,7 +1,7 @@
 // ============================================================
-// reportService.js — Layanan laporan penjualan & stok
+// reportService.js, Layanan laporan penjualan & stok
 //
-// Analogi: Ini seperti "akuntan otomatis" —
+// Analogi: Ini seperti "akuntan otomatis",
 // dia tahu semua angka penjualan dan bisa cetak laporan
 // dalam format yang sudah siap dibaca atau diunduh.
 //
@@ -25,8 +25,8 @@ const reportService = {
   //
   // @param {Object} params:
   //   period    : "daily" (per hari) | "monthly" (per bulan)
-  //   year      : tahun (misal 2024) — untuk laporan bulanan
-  //   date_from : "YYYY-MM-DD" — untuk laporan harian
+  //   year      : tahun (misal 2024), untuk laporan bulanan
+  //   date_from : "YYYY-MM-DD", untuk laporan harian
   //   date_to   : "YYYY-MM-DD"
   //
   // @returns:
@@ -40,7 +40,7 @@ const reportService = {
 
   // --- LAPORAN STOK ---
   // Mengembalikan kondisi stok semua produk: stok saat ini, status (rendah/normal)
-  // Analogi: cek isi gudang — mana yang hampir habis, mana yang masih banyak
+  // Analogi: cek isi gudang, mana yang hampir habis, mana yang masih banyak
   //
   // @returns { data: Product[], summary: { total_products, low_stock_count } }
   getStock: async () => {

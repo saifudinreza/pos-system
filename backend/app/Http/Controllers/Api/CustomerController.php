@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * CustomerController — CRM ringan: daftar & detail pelanggan.
+ * CustomerController, CRM ringan: daftar & detail pelanggan.
  *
  * Agregat (orders_count, total_spent, last_order_at) dihitung via withCount/
  * withSum/withMax → tanpa N+1. Isolasi tenant otomatis via TenantScope.
@@ -16,7 +16,7 @@ use Illuminate\Http\JsonResponse;
 class CustomerController extends Controller
 {
     /**
-     * Daftar pelanggan — dengan ringkasan jumlah order & total belanja.
+     * Daftar pelanggan, dengan ringkasan jumlah order & total belanja.
      * GET /api/customers
      * Role: admin & developer
      *

@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// motion.jsx — Helper animasi bersama untuk landing page
+// motion.jsx, Helper animasi bersama untuk landing page
 //
 // Analogi: Ini seperti "kru panggung" yang mengatur kapan tiap
 // elemen masuk frame saat penonton (user) menggulir layar.
@@ -14,14 +14,14 @@
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 
-// Easing khas neobrutalist — tegas tapi tetap halus
+// Easing khas neobrutalist, tegas tapi tetap halus
 const EASE = [0.22, 0.61, 0.36, 1];
 
 // ------------------------------------------------------------
-// Reveal — bungkus apa saja agar fade + slide-up saat masuk viewport
+// Reveal, bungkus apa saja agar fade + slide-up saat masuk viewport
 // ------------------------------------------------------------
 /**
- * Reveal — fade + slide-up saat elemen masuk viewport.
+ * Reveal, fade + slide-up saat elemen masuk viewport.
  *
  * Props:
  *   children: isi yang di-animasi
@@ -61,16 +61,16 @@ export function Reveal({
 }
 
 // ------------------------------------------------------------
-// Parallax — geser elemen mengikuti scroll (kecepatan berbeda
+// Parallax, geser elemen mengikuti scroll (kecepatan berbeda
 // dari konten utama) untuk kesan kedalaman antar-section.
 //   speed > 0  → elemen "tertinggal" (bergerak ke atas saat scroll)
 // Dimatikan otomatis saat reduced-motion.
 // ------------------------------------------------------------
 /**
- * Parallax — elemen bergeser mengikuti scroll (kesan kedalaman).
+ * Parallax, elemen bergeser mengikuti scroll (kesan kedalaman).
  *
  * Props:
- *   speed : kekuatan geser (default 0.3) — makin besar makin kencang
+ *   speed : kekuatan geser (default 0.3), makin besar makin kencang
  *   as    : tag render (default "div")
  *   ...   : className/style diteruskan; gerakan via `y` (framer motion)
  */
@@ -104,11 +104,11 @@ export function Parallax({
 }
 
 // ------------------------------------------------------------
-// Stagger — container yang memunculkan anak-anaknya berurutan
+// Stagger, container yang memunculkan anak-anaknya berurutan
 // Pakai bareng <StaggerItem> di dalamnya.
 // ------------------------------------------------------------
 /**
- * Stagger — container animasi berurutan (stagger children).
+ * Stagger, container animasi berurutan (stagger children).
  * Harus dipakai bersama <StaggerItem> sebagai anak langsung.
  *
  * Props:
@@ -144,7 +144,7 @@ export function Stagger({
 }
 
 /**
- * StaggerItem — satu anak dari <Stagger> yang muncul berurutan.
+ * StaggerItem, satu anak dari <Stagger> yang muncul berurutan.
  *
  * Props:
  *   y : jarak slide-up awal dalam px (default 24; reduced-motion → fade)

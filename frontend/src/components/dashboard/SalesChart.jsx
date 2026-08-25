@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// SalesChart — grafik garis penjualan (recharts) di dashboard
+// SalesChart, grafik garis penjualan (recharts) di dashboard
 //
 // Props: data = [{ label, total_revenue, order_count? }]
 //   - label        : label sumbu-X (tanggal/hari)
@@ -19,7 +19,7 @@ import {
 import { formatCurrency } from "@/lib/utils";
 
 /**
- * CustomTooltip — tooltip neobrutalist untuk chart.
+ * CustomTooltip, tooltip neobrutalist untuk chart.
  * Recharts memanggilnya dengan payload = array titik yang disentuh.
  */
 const CustomTooltip = ({ active, payload, label }) => {
@@ -47,7 +47,7 @@ const formatAxisValue = (v) =>
   v >= 1000000 ? `${(v / 1000000).toFixed(1)}jt` : v >= 1000 ? `${(v / 1000).toFixed(0)}rb` : v;
 
 /**
- * SalesChart — grafik garis penjualan mingguan/bulanan.
+ * SalesChart, grafik garis penjualan mingguan/bulanan.
  *
  * Props:
  *   data : [{ label, total_revenue, order_count? }]

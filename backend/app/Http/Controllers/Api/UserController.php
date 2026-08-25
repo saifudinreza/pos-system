@@ -14,7 +14,7 @@ use Illuminate\Validation\Rules\Password;
 class UserController extends Controller
 {
     // =============================================================
-    // INDEX — ambil semua user
+    // INDEX, ambil semua user
     // Developer: lihat semua user lintas tenant
     // Admin: lihat user dalam tenant sendiri (via TenantScope di User model)
     // =============================================================
@@ -53,7 +53,7 @@ class UserController extends Controller
     }
 
     // =============================================================
-    // SHOW — detail satu user
+    // SHOW, detail satu user
     // =============================================================
     public function show(int $id): JsonResponse
     {
@@ -70,7 +70,7 @@ class UserController extends Controller
     }
 
     // =============================================================
-    // STORE — buat user baru
+    // STORE, buat user baru
     // POST /api/users
     // Developer: bisa buat user tanpa tenant (system user) atau assign ke tenant tertentu
     // =============================================================
@@ -97,7 +97,7 @@ class UserController extends Controller
     }
 
     // =============================================================
-    // UPDATE — edit data user
+    // UPDATE, edit data user
     // =============================================================
     public function update(Request $request, int $id): JsonResponse
     {
@@ -114,7 +114,7 @@ class UserController extends Controller
             'role'      => ['sometimes', Rule::in(['admin', 'kasir', 'user', 'developer'])],
             'phone'     => ['nullable', 'string', 'max:15'],
             'is_active' => ['sometimes', 'boolean'],
-            // Hanya developer yang bisa memindahkan user antar tenant —
+            // Hanya developer yang bisa memindahkan user antar tenant,
             // dipakai untuk memperbaiki akun yang tersangkut di tenant salah.
             'tenant_id' => ['sometimes', 'nullable', 'exists:tenants,id'],
         ]);
@@ -146,7 +146,7 @@ class UserController extends Controller
     }
 
     // =============================================================
-    // DESTROY — hapus permanen user
+    // DESTROY, hapus permanen user
     // DELETE /api/users/{id}
     // =============================================================
     public function destroy(int $id): JsonResponse
@@ -172,7 +172,7 @@ class UserController extends Controller
     }
 
     // =============================================================
-    // PATCH ROLE — ganti role user secara cepat
+    // PATCH ROLE, ganti role user secara cepat
     // PATCH /api/users/{id}/role
     // =============================================================
     public function patchRole(Request $request, int $id): JsonResponse
@@ -201,7 +201,7 @@ class UserController extends Controller
     }
 
     // =============================================================
-    // TOGGLE ACTIVE — aktifkan / nonaktifkan user
+    // TOGGLE ACTIVE, aktifkan / nonaktifkan user
     // =============================================================
     public function toggleActive(int $id): JsonResponse
     {

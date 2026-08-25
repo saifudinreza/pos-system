@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * CorsMiddleware — Middleware CORS custom
+ * CorsMiddleware, Middleware CORS custom
  *
  * Menambahkan header Access-Control-Allow-Origin ke SEMUA respons,
  * dan langsung membalas request OPTIONS (preflight) dengan 204 No Content.
@@ -28,13 +28,13 @@ class CorsMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
-        // Preflight OPTIONS request — browser mengirim ini sebelum request asli
+        // Preflight OPTIONS request, browser mengirim ini sebelum request asli
         // Langsung balas 204 tanpa diteruskan ke Laravel router
         if ($request->isMethod('OPTIONS')) {
             return response('', 204, $this->headers);
         }
 
-        // Request biasa — teruskan ke controller, lalu tambahkan header CORS ke response
+        // Request biasa, teruskan ke controller, lalu tambahkan header CORS ke response
         $response = $next($request);
 
         foreach ($this->headers as $key => $value) {

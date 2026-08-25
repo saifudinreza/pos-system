@@ -7,9 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model Shift — mewakili sesi kerja kasir (Pagi/Siang/Malam).
+ * Model Shift, mewakili sesi kerja kasir (Pagi/Siang/Malam).
  *
- * Tabel: `shifts`. Penting: shift bersifat per-tenant, bukan per-user —
+ * Tabel: `shifts`. Penting: shift bersifat per-tenant, bukan per-user,
  * satu shift aktif dipakai bersama semua kasir dalam tenant yang sama.
  * Transaksi diblokir di luar jam shift (enforcement berbasis start_time/
  * end_time). Global scope TenantScope aktif.
@@ -45,7 +45,7 @@ class Shift extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {
@@ -64,7 +64,7 @@ class Shift extends Model
     }
 
     /**
-     * Daftarkan TenantScope secara global — dipanggil otomatis oleh Eloquent.
+     * Daftarkan TenantScope secara global, dipanggil otomatis oleh Eloquent.
      */
     protected static function booted(): void
     {

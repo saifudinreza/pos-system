@@ -1,17 +1,17 @@
 // ============================================================
-// manifest.js — Web App Manifest (PWA) untuk KasirAI
+// manifest.js, Web App Manifest (PWA) untuk KasirAI
 //
 // Next.js file convention: menghasilkan /manifest.webmanifest
 // yang dipakai browser saat user "Add to Home Screen".
 // Warna mengikuti brand: cream (#FFFBEB) + yellow (#FFE500).
 //
-// ⚠️ Icon di sini (web-app-manifest-*.png) juga harus masuk
-// exclusion matcher middleware.js — sudah ada di daftar.
+//  Icon di sini (web-app-manifest-*.png) juga harus masuk
+// exclusion matcher middleware.js, sudah ada di daftar.
 // ============================================================
 
 export default function manifest() {
   return {
-    name: "KasirAI — Kasir yang Ngerti Bisnis Kamu",
+    name: "KasirAI, Kasir yang Ngerti Bisnis Kamu",
     short_name: "KasirAI",
     description:
       "Kasir POS + AI Assistant untuk kelola penjualan, stok, dan laporan bisnis.",

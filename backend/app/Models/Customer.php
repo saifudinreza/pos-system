@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model Customer — CRM ringan: data pelanggan toko (dihubungkan via nomor HP).
+ * Model Customer, CRM ringan: data pelanggan toko (dihubungkan via nomor HP).
  *
  * Tabel: `customers`. Global scope TenantScope aktif. Nomor HP disimpan
  * ternormalisasi format 62 (lihat normalizePhone()) agar pencocokan pelanggan
@@ -26,7 +26,7 @@ class Customer extends Model
     ];
 
     /**
-     * Daftarkan TenantScope secara global — dipanggil otomatis oleh Eloquent.
+     * Daftarkan TenantScope secara global, dipanggil otomatis oleh Eloquent.
      */
     protected static function booted(): void
     {

@@ -1,10 +1,10 @@
-// NeoBadge — Label status kecil neobrutalist
-// Analogi: seperti stiker warna di rak toko — tiap warna punya arti (merah=habis, hijau=tersedia)
+// NeoBadge, Label status kecil neobrutalist
+// Analogi: seperti stiker warna di rak toko, tiap warna punya arti (merah=habis, hijau=tersedia)
 // React.memo: dipakai di setiap baris tabel, memo mencegah re-render yang tidak perlu
 
 import { memo } from "react";
 
-// Palet warna badge — key dipakai sebagai prop `color`, value = class Tailwind
+// Palet warna badge, key dipakai sebagai prop `color`, value = class Tailwind
 // (warna teks/background/border sudah dipasangkan per varian)
 const COLORS = {
   yellow:  "bg-brand-yellow text-brand-black border-brand-black",
@@ -17,11 +17,11 @@ const COLORS = {
 };
 
 /**
- * NeoBadge — label status kecil neobrutalist (stiker warna di rak toko).
+ * NeoBadge, label status kecil neobrutalist (stiker warna di rak toko).
  *
  * Props:
  *   children : teks isi badge
- *   color    : key dari COLORS — yellow|black|green|red|gray|blue|orange
+ *   color    : key dari COLORS, yellow|black|green|red|gray|blue|orange
  *              (kalau tidak dikenal → fallback gray)
  *   className: class Tailwind tambahan, ditempel di paling akhir
  */

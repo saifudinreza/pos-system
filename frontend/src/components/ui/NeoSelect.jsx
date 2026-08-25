@@ -1,15 +1,15 @@
 "use client";
-// NeoSelect — Dropdown select neobrutalist
-// Analogi: seperti menu pilihan di formulir — border tegas, tidak ada rounded tipis
+// NeoSelect, Dropdown select neobrutalist
+// Analogi: seperti menu pilihan di formulir, border tegas, tidak ada rounded tipis
 
 /**
- * NeoSelect — dropdown select neobrutalist dengan label & error opsional.
+ * NeoSelect, dropdown select neobrutalist dengan label & error opsional.
  *
  * Props:
  *   label    : teks label di atas select (opsional)
- *   error    : pesan error — kalau terisi, border jadi merah
+ *   error    : pesan error, kalau terisi, border jadi merah
  *   className: class Tailwind untuk WRAPPER (flex flex-col)
- *   options  : [{ value, label }] — pilihan dropdown
+ *   options  : [{ value, label }], pilihan dropdown
  *   id       : dihubungkan ke htmlFor label
  *   required : tanda * di label + atribut required
  *   ...props : diteruskan ke <select> (value, onChange, disabled, dsb.)

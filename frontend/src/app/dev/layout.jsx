@@ -1,12 +1,12 @@
 "use client";
 
 // ============================================================
-// DevLayout — Kerangka halaman Developer Portal (khusus developer)
+// DevLayout, Kerangka halaman Developer Portal (khusus developer)
 //
 // Akses dikunci DUA lapis:
 //   1. Role/email developer (DEV_EMAIL) → langsung lolos
 //   2. Selain itu harus memasukkan PIN (NEXT_PUBLIC_DEV_PIN, fallback
-//      demo) — PIN yang benar disimpan ke sessionStorage agar tidak perlu
+//      demo), PIN yang benar disimpan ke sessionStorage agar tidak perlu
 //      ulang selama sesi browser masih hidup
 //
 // Struktur: topbar (status + logout) + sidenav kiri (menu dev)
@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import Link from "next/link";
 
-// Developer-only layout — hanya email developer yang boleh akses
+// Developer-only layout, hanya email developer yang boleh akses
 const DEV_EMAIL = "donojomi@gmail.com";
 
 export default function DevLayout({ children }) {
@@ -29,7 +29,7 @@ export default function DevLayout({ children }) {
   const [pinInput, setPinInput] = useState("");
   const [pinVerified, setPinVerified] = useState(false);
 
-  // Developer PIN (stored in env — fallback for demo)
+  // Developer PIN (stored in env, fallback for demo)
   const DEV_PIN = process.env.NEXT_PUBLIC_DEV_PIN ?? "kasiradev2025";
 
   // Hydrate auth + cek apakah PIN sudah diverifikasi sesi ini
@@ -41,7 +41,7 @@ export default function DevLayout({ children }) {
     if (verified === "1") setPinVerified(true);
   }, [hydrateFromStorage]);
 
-  /** handlePinSubmit — Validasi PIN; benar → tandai verified di session. */
+  /** handlePinSubmit, Validasi PIN; benar → tandai verified di session. */
   const handlePinSubmit = (e) => {
     e.preventDefault();
     if (pinInput === DEV_PIN || user?.email === DEV_EMAIL) {
@@ -68,7 +68,7 @@ export default function DevLayout({ children }) {
               className="inline-block bg-brand-yellow border-2 border-brand-black px-4 py-2 mb-4"
               style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
             >
-              <span className="font-black text-2xl">🔒</span>
+              <span className="font-black text-2xl"></span>
             </div>
             <h1 className="font-black text-xl font-grotesk">Developer Portal</h1>
             <p className="text-sm text-brand-black/50 mt-1">Akses terbatas untuk developer KasirAI</p>
@@ -148,7 +148,7 @@ export default function DevLayout({ children }) {
           <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-3 font-mono">DEV MENU</p>
           <div className="space-y-1">
             {[
-              { href: "/dev/subscriptions", label: "💳 Subscriptions" },
+              { href: "/dev/subscriptions", label: " Subscriptions" },
             ].map((item) => (
               <Link
                 key={item.href}

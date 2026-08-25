@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         // ============================================================
-        // AI INSIGHTS — insight otomatis yang sudah dihasilkan server
+        // AI INSIGHTS, insight otomatis yang sudah dihasilkan server
         // (angka dihitung SQL deterministik, AI hanya merangkai kalimat).
         // Disimpan supaya tidak boros panggil LLM tiap dashboard dibuka.
         // ============================================================
@@ -27,7 +27,7 @@ return new class extends Migration
             $table->index(['tenant_id', 'created_at'], 'insights_tenant_date_idx');
         });
 
-        // Index komposit untuk query laporan periode (tenant + tanggal) —
+        // Index komposit untuk query laporan periode (tenant + tanggal),
         // dipakai ReportController, ForecastService, dan InsightService.
         Schema::table('orders', function (Blueprint $table) {
             $table->index(['tenant_id', 'created_at'], 'orders_tenant_created_idx');

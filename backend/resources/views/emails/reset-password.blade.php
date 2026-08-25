@@ -40,13 +40,13 @@
                                 login → "Lupa password?".
                             </p>
                             <p style="font-size:13px; color:#0A0A0A; line-height:1.6; margin:0;">
-                                Kalau kamu tidak merasa minta reset password, abaikan email ini — password kamu aman.
+                                Kalau kamu tidak merasa minta reset password, abaikan email ini, password kamu aman.
                             </p>
                         </td>
                     </tr>
                     <tr>
                         <td style="background-color:#0A0A0A; padding:12px 28px;">
-                            <p style="margin:0; font-size:11px; color:#FFFFFF; opacity:0.7;">KasirAI — POS untuk UMKM Indonesia</p>
+                            <p style="margin:0; font-size:11px; color:#FFFFFF; opacity:0.7;">KasirAI, POS untuk UMKM Indonesia</p>
                         </td>
                     </tr>
                 </table>

@@ -16,16 +16,16 @@ use Midtrans\Snap;
 use Midtrans\Notification;
 
 /**
- * TransactionController — transaksi pembayaran via Midtrans Snap + tunai.
+ * TransactionController, transaksi pembayaran via Midtrans Snap + tunai.
  *
- * ⚠️ PAYMENT PER-TENANT: server key diambil dari tenant (ter-enkripsi di DB),
- * bukan key platform — lihat configureServerKey()/configureServerKeyForTenant().
+ *  PAYMENT PER-TENANT: server key diambil dari tenant (ter-enkripsi di DB),
+ * bukan key platform, lihat configureServerKey()/configureServerKeyForTenant().
  * Paket FREE hanya melayani pembayaran tunai (create() → 422 plan_required=pro).
  *
- * ⚠️ WEBHOOK (kritis): urutan WAJIB = cari Transaction+tenant dari order_id
+ *  WEBHOOK (kritis): urutan WAJIB = cari Transaction+tenant dari order_id
  * mentah di body → configureServerKeyForTenant() → barulah new Notification().
  * `new Notification()` memanggil balik API Midtrans memakai Config::$serverKey
- * yang aktif SAAT ITU — kalau key tenant belum di-set, verifikasi selalu gagal.
+ * yang aktif SAAT ITU, kalau key tenant belum di-set, verifikasi selalu gagal.
  * Jangan pernah mengubah urutan ini.
  */
 class TransactionController extends Controller
@@ -68,7 +68,7 @@ class TransactionController extends Controller
     }
 
     /**
-     * Versi configureServerKey() untuk webhook — tidak ada user login, jadi
+     * Versi configureServerKey() untuk webhook, tidak ada user login, jadi
      * tenant dicari lewat transaksi yang sedang diverifikasi.
      * WAJIB dipanggil SEBELUM `new Notification()` (lihat docblock kelas).
      *
@@ -81,7 +81,7 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // INDEX — ambil semua transaksi (admin & kasir)
+    // INDEX, ambil semua transaksi (admin & kasir)
     // GET /api/transactions
     // =============================================================
     /**
@@ -131,7 +131,7 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // SHOW — detail satu transaksi (include order items)
+    // SHOW, detail satu transaksi (include order items)
     // GET /api/transactions/{id}
     // =============================================================
     /**
@@ -167,7 +167,7 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // MY TRANSACTIONS — riwayat transaksi milik customer
+    // MY TRANSACTIONS, riwayat transaksi milik customer
     // GET /api/transactions/my/history
     // =============================================================
     /**
@@ -199,7 +199,7 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // CREATE — buat transaksi baru & ambil Snap Token Midtrans
+    // CREATE, buat transaksi baru & ambil Snap Token Midtrans
     // POST /api/transactions
     // Body: { "order_id": 2 }
     // =============================================================
@@ -216,7 +216,7 @@ class TransactionController extends Controller
      */
     public function create(Request $request): JsonResponse
     {
-        // ===== GATE PAKET — pembayaran digital hanya Pro/Enterprise =====
+        // ===== GATE PAKET, pembayaran digital hanya Pro/Enterprise =====
         // Pembayaran digital (QRIS/e-wallet/VA) hanya untuk Pro & Enterprise
         // Paket FREE melayani pembayaran tunai saja.
         if ($this->getEffectivePlan($request->user()) === 'free') {
@@ -236,7 +236,7 @@ class TransactionController extends Controller
         $order = Order::with(['user', 'items.product'])->find($validated['order_id']);
 
         // ===== VALIDASI ORDER =====
-        // Order tidak ketemu (termasuk order milik tenant lain — TenantScope
+        // Order tidak ketemu (termasuk order milik tenant lain, TenantScope
         // menyaringnya) → jangan lanjut, kalau tidak error 500.
         if (! $order) {
             return response()->json(['message' => 'Order tidak ditemukan.'], 404);
@@ -337,7 +337,7 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // CANCEL — batalkan transaksi pending secara manual
+    // CANCEL, batalkan transaksi pending secara manual
     // PATCH /api/transactions/{id}/cancel
     // Role: admin & kasir
     // =============================================================
@@ -368,7 +368,7 @@ class TransactionController extends Controller
 
             if ($transaction->order && $transaction->order->status !== 'cancelled') {
                 // Kembalikan stok setiap item (guard: cek order belum
-                // cancelled — mencegah stok kembung kalau sudah dibatalkan
+                // cancelled, mencegah stok kembung kalau sudah dibatalkan
                 // lewat jalur lain, misal webhook Midtrans yang mendahului)
                 foreach ($transaction->order->items as $item) {
                     $beforeStock = $item->product->stock;
@@ -397,14 +397,14 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // PAY CASH — tandai order sebagai lunas tunai (tanpa Midtrans)
+    // PAY CASH, tandai order sebagai lunas tunai (tanpa Midtrans)
     // POST /api/transactions/cash
     // Body: { "order_id": 5, "amount_tendered": 50000 }
     // Role: admin & kasir
     // =============================================================
     /**
      * Bayar tunai (tanpa Midtrans): order → paid, Transaction dibuat langsung
-     * 'settlement' (atau transaksi yang sudah ada di-update ke settlement —
+     * 'settlement' (atau transaksi yang sudah ada di-update ke settlement,
      * termasuk transaksi Midtrans pending yang akan di-mark lunas tunai).
      * Kembalian dihitung dari amount_tendered.
      *
@@ -431,7 +431,7 @@ class TransactionController extends Controller
             ], 422);
         }
 
-        // Cek apakah sudah ada transaksi pending untuk order ini — jika ada, selesaikan
+        // Cek apakah sudah ada transaksi pending untuk order ini, jika ada, selesaikan
         $transaction = Transaction::where('order_id', $order->id)->first();
 
         DB::transaction(function () use ($order, $transaction, $validated) {
@@ -475,17 +475,17 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // WEBHOOK — dipanggil otomatis oleh server Midtrans
+    // WEBHOOK, dipanggil otomatis oleh server Midtrans
     // POST /api/webhook/midtrans
-    // TIDAK perlu token — keamanan via signature key Midtrans
+    // TIDAK perlu token, keamanan via signature key Midtrans
     // =============================================================
     /**
-     * Webhook Midtrans (pembayaran order). Tanpa autentikasi — keamanan via
+     * Webhook Midtrans (pembayaran order). Tanpa autentikasi, keamanan via
      * verifikasi signature SDK. Rate limiter global di-exempt untuk route ini.
      *
      * Alur (URUTAN WAJIB, jangan diubah):
      * 1) baca order_id mentah dari body → cari Transaction + tenant-nya;
-     * 2) configureServerKeyForTenant() — `new Notification()` memanggil balik
+     * 2) configureServerKeyForTenant(), `new Notification()` memanggil balik
      *    API Midtrans memakai Config::$serverKey yang aktif SAAT ITU;
      * 3) verifikasi `new Notification()` → map status → update transaksi &
      *    order dalam DB::transaction, dengan idempotensi (duplikat diabaikan)
@@ -497,8 +497,8 @@ class TransactionController extends Controller
     public function webhook(Request $request): JsonResponse
     {
         try {
-            // ===== LANGKAH 1 — TEMUKAN TRANSAKSI & TENANT (belum diverifikasi) =====
-            // Ambil order_id langsung dari body notifikasi — belum diverifikasi,
+            // ===== LANGKAH 1, TEMUKAN TRANSAKSI & TENANT (belum diverifikasi) =====
+            // Ambil order_id langsung dari body notifikasi, belum diverifikasi,
             // cuma dipakai untuk tahu transaksi & tenant mana yang bersangkutan,
             // supaya kita tahu server key MANA yang harus dipakai untuk verifikasi.
             $rawOrderId = $request->input('order_id');
@@ -513,14 +513,14 @@ class TransactionController extends Controller
                 // ↑ Return 200 tetap supaya Midtrans tidak retry webhook
             }
 
-            // ===== LANGKAH 2 — SET SERVER KEY TENANT =====
+            // ===== LANGKAH 2, SET SERVER KEY TENANT =====
             // Set server key sesuai tenant pemilik transaksi ini SEBELUM
-            // verifikasi signature — kalau tenant punya Midtrans sendiri,
+            // verifikasi signature, kalau tenant punya Midtrans sendiri,
             // Midtrans menyegel notifikasi pakai server key tenant itu,
             // bukan server key platform.
             $this->configureServerKeyForTenant($transaction->order?->tenant);
 
-            // ===== LANGKAH 3 — VERIFIKASI & UPDATE STATUS =====
+            // ===== LANGKAH 3, VERIFIKASI & UPDATE STATUS =====
             // Verifikasi bahwa request benar-benar dari Midtrans
             $notification = new Notification();
             // ↑ Midtrans SDK otomatis verifikasi signature key
@@ -546,20 +546,20 @@ class TransactionController extends Controller
                 $notification
             ) {
                 // Refund: transaksi yang sudah settlement TIDAK boleh "balik"
-                // jadi pending — kalau tidak, order yang sudah dibayar bisa
+                // jadi pending, kalau tidak, order yang sudah dibayar bisa
                 // terlihat belum lunas & stok/laporan jadi tidak konsisten.
-                // (Refund penuh masih belum didukung — cukup catat saja.)
+                // (Refund penuh masih belum didukung, cukup catat saja.)
                 if (in_array($transactionStatus, ['refund', 'partial_refund'])) {
                     Log::warning('Refund webhook untuk ' . $transaction->midtrans_order_id
-                        . ' (' . $transactionStatus . ') — status dipertahankan: ' . $transaction->status);
+                        . ' (' . $transactionStatus . '), status dipertahankan: ' . $transaction->status);
                     return;
                 }
 
                 if ($transactionStatus === 'capture') {
-                    // Kartu kredit — cek fraud status
+                    // Kartu kredit, cek fraud status
                     $status = $fraudStatus === 'accept' ? 'settlement' : 'deny';
                 } elseif ($transactionStatus === 'settlement') {
-                    // Transfer bank, QRIS, e-wallet — langsung settlement
+                    // Transfer bank, QRIS, e-wallet, langsung settlement
                     $status = 'settlement';
                 } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
                     $status = $transactionStatus;
@@ -570,7 +570,7 @@ class TransactionController extends Controller
                 // ----- IDEMPOTENSI -----
                 // Midtrans bisa mengirim notifikasi yang SAMA lebih dari sekali
                 // (duplikat / retry). Kalau status sudah sama, jangan diproses
-                // lagi — kalau tidak: struk WA terkirim berkali-kali, stok
+                // lagi, kalau tidak: struk WA terkirim berkali-kali, stok
                 // di-restore dua kali, dan paid_at ter-reset.
                 if ($status === $transaction->status) {
                     Log::info('Webhook duplikat diabaikan untuk '
@@ -589,7 +589,7 @@ class TransactionController extends Controller
                 ]);
 
                 // Kalau pembayaran sukses, update status order jadi paid
-                // (guard: cek order belum paid — mencegah struk WA ganda)
+                // (guard: cek order belum paid, mencegah struk WA ganda)
                 if ($status === 'settlement' && $transaction->order->status !== 'paid') {
                     $transaction->order->update(['status' => 'paid']);
                     Log::info('Order ' . $transaction->order->order_number . ' berhasil dibayar.');
@@ -600,7 +600,7 @@ class TransactionController extends Controller
                 }
 
                 // Kalau gagal/expire, kembalikan stok dan cancel order
-                // (guard: cek order belum cancelled — mencegah stok kembung
+                // (guard: cek order belum cancelled, mencegah stok kembung
                 // kalau order sudah dibatalkan lewat jalur lain sebelumnya)
                 if (in_array($status, ['cancel', 'deny', 'expire']) && $transaction->order->status !== 'cancelled') {
                     foreach ($transaction->order->items as $item) {
@@ -634,7 +634,7 @@ class TransactionController extends Controller
     }
 
     // =============================================================
-    // HELPER — format data transaksi untuk response
+    // HELPER, format data transaksi untuk response
     // =============================================================
     /**
      * Format transaksi untuk response. Relasi order/user/items dibaca hanya

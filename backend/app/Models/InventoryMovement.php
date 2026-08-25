@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model InventoryMovement — catatan ledger pergerakan stok (inventory ledger).
+ * Model InventoryMovement, catatan ledger pergerakan stok (inventory ledger).
  *
  * Tabel: `inventory_movements`. Setiap perubahan stok tercatat dengan snapshot
  * before_stock/after_stock plus referensi sumber perubahan (ref_type/ref_id:
@@ -32,7 +32,7 @@ class InventoryMovement extends Model
     ];
 
     /**
-     * Daftarkan TenantScope secara global — dipanggil otomatis oleh Eloquent.
+     * Daftarkan TenantScope secara global, dipanggil otomatis oleh Eloquent.
      */
     protected static function booted(): void
     {
@@ -40,7 +40,7 @@ class InventoryMovement extends Model
     }
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

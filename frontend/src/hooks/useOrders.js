@@ -1,9 +1,9 @@
 "use client";
 
 // ============================================================
-// useOrders.js — Hook untuk data pesanan (orders)
+// useOrders.js, Hook untuk data pesanan (orders)
 //
-// Analogi: Ini seperti "buku pesanan digital" —
+// Analogi: Ini seperti "buku pesanan digital",
 // kasir/admin bisa lihat semua pesanan, filter per status,
 // dan update status pesanan.
 //
@@ -17,7 +17,7 @@ import orderService from "@/services/orderService";
 import { getErrorMessage } from "@/lib/utils";
 
 // @param {Object} initialFilters
-// @param {boolean} myOrdersOnly — jika true, hanya ambil order milik user login
+// @param {boolean} myOrdersOnly, jika true, hanya ambil order milik user login
 export function useOrders(initialFilters = {}, myOrdersOnly = false) {
   const [orders, setOrders]       = useState([]);
   const [meta, setMeta]           = useState(null);

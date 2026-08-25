@@ -1,12 +1,12 @@
 "use client";
 
 // ============================================================
-// AI Monitoring — Dashboard penggunaan LLM (admin/developer)
+// AI Monitoring, Dashboard penggunaan LLM (admin/developer)
 //
 // Data yang diambil: aiService.getStats() → GET /api/ai/stats
 //   - summary: requests/tokens hari ini, minggu, bulan
 //   - by_type: pemakaian per tipe query (analisis/prediksi/rekomendasi)
-//   - by_provider: Groq (primary) vs OpenRouter (fallback) — fallback
+//   - by_provider: Groq (primary) vs OpenRouter (fallback), fallback
 //     aktif menandakan Groq sedang/pernah rate-limited
 //   - users_today: pemakaian per user + sisa kuota (limit bulanan)
 //   - daily_trend: tren 7 hari terakhir · config: limit & threshold alert
@@ -128,7 +128,7 @@ function Section({ title, Icon, children, className = "" }) {
 }
 
 // ── UsageBar ─────────────────────────────────────────────────
-/** UsageBar — Bar pemakaian kuota: hijau <70%, kuning ≥70%, merah 100%. */
+/** UsageBar, Bar pemakaian kuota: hijau <70%, kuning ≥70%, merah 100%. */
 function UsageBar({ used, limit, nearLimit }) {
   const pct   = limit > 0 ? Math.min(100, Math.round(used / limit * 100)) : 0;
   const color = pct >= 100 ? "bg-red-500" : pct >= 70 ? "bg-amber-400" : "bg-emerald-400";
@@ -151,7 +151,7 @@ export default function AiMonitoringPage() {
   const [error,       setError]       = useState(null);
   const [lastRefresh, setLastRefresh] = useState(null);
 
-  /** fetchStats — Ambil statistik penggunaan AI dari backend. */
+  /** fetchStats, Ambil statistik penggunaan AI dari backend. */
   const fetchStats = async () => {
     try {
       setLoading(true);
@@ -207,7 +207,7 @@ export default function AiMonitoringPage() {
           <h1 className="text-2xl font-black font-grotesk text-brand-black">AI Monitoring</h1>
           <p className="text-xs text-brand-black/40 font-mono mt-0.5">
             Dashboard penggunaan LLM · Refresh terakhir:{" "}
-            {lastRefresh ? lastRefresh.toLocaleTimeString("id-ID") : "—"}
+            {lastRefresh ? lastRefresh.toLocaleTimeString("id-ID") : ", "}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ export default function AiMonitoringPage() {
         </div>
       )}
 
-      {/* ── Stat Cards — Hari Ini ── */}
+      {/* ── Stat Cards, Hari Ini ── */}
       <div>
         <p className="text-[10px] font-black uppercase tracking-widest text-brand-black/30 font-mono mb-3">Hari Ini</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -256,7 +256,7 @@ export default function AiMonitoringPage() {
         </div>
       </div>
 
-      {/* ── Stat Cards — Minggu & Bulan ── */}
+      {/* ── Stat Cards, Minggu & Bulan ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Req Minggu Ini"   value={summary.week.requests}                sub="7 hari terakhir"  Icon={IcoTrendUp} />
         <StatCard label="Token Minggu Ini" value={summary.week.tokens.toLocaleString()}  sub="7 hari terakhir"  Icon={IcoCpu} />
@@ -267,7 +267,7 @@ export default function AiMonitoringPage() {
       {/* ── Per Tipe + Per Provider ── */}
       <div className="grid md:grid-cols-2 gap-4">
 
-        <Section title="Hari Ini — Per Tipe Query">
+        <Section title="Hari Ini, Per Tipe Query">
           {by_type.length === 0 ? (
             <p className="text-xs text-brand-black/30 font-mono">Belum ada query hari ini.</p>
           ) : (
@@ -287,7 +287,7 @@ export default function AiMonitoringPage() {
           )}
         </Section>
 
-        <Section title="Hari Ini — Provider LLM">
+        <Section title="Hari Ini, Provider LLM">
           {by_provider.length === 0 ? (
             <p className="text-xs text-brand-black/30 font-mono">Data provider belum tersedia (query lama tidak menyimpan provider).</p>
           ) : (
@@ -314,7 +314,7 @@ export default function AiMonitoringPage() {
               })}
               {by_provider.some((p) => p.provider === "openrouter") && (
                 <div className="flex items-center gap-1.5 text-[10px] text-amber-600 font-mono font-bold mt-1 rounded-md bg-amber-50 border border-amber-200 px-2.5 py-1.5">
-                  <IcoAlert /> Fallback aktif — Groq sedang/pernah rate-limited hari ini.
+                  <IcoAlert /> Fallback aktif, Groq sedang/pernah rate-limited hari ini.
                 </div>
               )}
             </div>
@@ -361,7 +361,7 @@ export default function AiMonitoringPage() {
       </Section>
 
       {/* ── Per-User Usage ── */}
-      <Section title="Penggunaan Per User — Bulan Ini" Icon={IcoUsers}>
+      <Section title="Penggunaan Per User, Bulan Ini" Icon={IcoUsers}>
         {users_today.length === 0 ? (
           <p className="text-xs text-brand-black/30 font-mono">Belum ada user yang memakai AI bulan ini.</p>
         ) : (

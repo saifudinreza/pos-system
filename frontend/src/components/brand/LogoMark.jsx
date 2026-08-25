@@ -1,7 +1,7 @@
 // ============================================================
-// LogoMark — Ikon brand KasirAI (huruf "K" + ekor chat bubble)
+// LogoMark, Ikon brand KasirAI (huruf "K" + ekor chat bubble)
 //
-// Analogi: ini "wajah" brand — kotak kuning neobrutalist berisi
+// Analogi: ini "wajah" brand, kotak kuning neobrutalist berisi
 // huruf K, dengan takik di pojok kanan bawah yang membuatnya
 // terbaca seperti balon chat (isyarat sisi AI-nya).
 //
@@ -11,7 +11,7 @@
 //  - warna brand konsisten di latar terang maupun gelap
 //
 // Dipakai di: LandingNavbar, Sidebar, login, register, footer,
-// kasir layout — menggantikan kotak "K" versi CSS lama.
+// kasir layout, menggantikan kotak "K" versi CSS lama.
 // ============================================================
 
 // Warna brand (dikunci agar konsisten di mana pun dipakai)
@@ -19,7 +19,7 @@ const YELLOW = "#FFE500"; // brand-yellow
 const BLACK  = "#0A0A0A"; // brand-black
 
 /**
- * LogoMark — SVG logo KasirAI ("K" dalam kotak + takik balon chat).
+ * LogoMark, SVG logo KasirAI ("K" dalam kotak + takik balon chat).
  *
  * Props:
  *   size     : ukuran logo dalam px (default: 36)
@@ -52,7 +52,7 @@ export default function LogoMark({ size = 36, className = "", title = "KasirAI",
         strokeLinejoin="round"
       />
 
-      {/* Huruf "K" tebal — digambar sebagai path agar tetap tajam
+      {/* Huruf "K" tebal, digambar sebagai path agar tetap tajam
           dan tidak bergantung pada font yang ter-load. */}
       <path
         d="M28 28 L40 28 L40 44 L53 28 L67 28 L51 50 L69 72 L55 72 L40 56 L40 72 L28 72 Z"

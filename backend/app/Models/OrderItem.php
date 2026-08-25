@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model OrderItem — baris item di dalam satu order.
+ * Model OrderItem, baris item di dalam satu order.
  *
  * Tabel: `order_items`. Menyimpan snapshot harga jual (price) & harga modal
  * (cost) saat transaksi dibuat, supaya COGS/profit historis akurat walau
@@ -27,7 +27,7 @@ class OrderItem extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

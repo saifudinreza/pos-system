@@ -1,5 +1,5 @@
 // ============================================================
-// aiService.js — Layanan AI Assistant (powered by Groq + LLaMA)
+// aiService.js, Layanan AI Assistant (powered by Groq + LLaMA)
 //
 // Analogi: Ini seperti "konsultan bisnis pintar" yang selalu siap
 // menjawab pertanyaan soal data toko kita. Dia membaca data
@@ -27,7 +27,7 @@
 import api from "@/lib/axios";
 
 const POLL_INTERVAL_MS = 2000;
-const POLL_TIMEOUT_MS  = 120000; // 2 menit — Groq bisa lambat saat rate limit
+const POLL_TIMEOUT_MS  = 120000; // 2 menit, Groq bisa lambat saat rate limit
 
 // --- POLL STATUS JOB AI ---
 // Kirim POST /ai/* → dapat job_id → poll GET /ai/jobs/{id} sampai
@@ -55,7 +55,7 @@ const pollJob = async (jobId) => {
     await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
   }
 
-  // Batas waktu polling tercapai — job masih belum selesai
+  // Batas waktu polling tercapai, job masih belum selesai
   const err = new Error("AI membutuhkan waktu terlalu lama. Coba lagi.");
   err.response = { data: { message: err.message } };
   throw err;
@@ -65,7 +65,7 @@ const aiService = {
 
   // --- QUERY ANALISIS PENJUALAN ---
   // Kirim pertanyaan dalam bahasa natural → AI jawab berdasarkan data DB
-  // @param {{ query: string }} payload — max 500 karakter
+  // @param {{ query: string }} payload, max 500 karakter
   // @returns {{ message, response: string, tokens_used: number }}
   query: async (query) => {
     const { data } = await api.post("/ai/query", { query });
@@ -74,7 +74,7 @@ const aiService = {
 
   // --- PREDIKSI KAPAN STOK HABIS ---
   // AI menganalisis kecepatan penjualan per produk lalu memperkirakan
-  // kapan stok akan habis. Proses async — polling job di balik layar.
+  // kapan stok akan habis. Proses async, polling job di balik layar.
   // @param {{ query: string }} payload
   predictStock: async (query) => {
     const { data } = await api.post("/ai/predict-stock", { query });
@@ -84,7 +84,7 @@ const aiService = {
   // --- REKOMENDASI PRODUK / STRATEGI ---
   // Bisa spesifik ke satu produk (productId) atau umum untuk seluruh toko.
   // @param {string} query
-  // @param {number|null} productId — ID produk spesifik (opsional)
+  // @param {number|null} productId, ID produk spesifik (opsional)
   recommend: async (query, productId = null) => {
     const { data } = await api.post("/ai/recommend", { query, product_id: productId });
     return pollJob(data.job_id);

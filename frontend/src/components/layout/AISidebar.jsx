@@ -1,9 +1,9 @@
 "use client";
 
 // ============================================================
-// AISidebar — Panel chat "KasirAI Assistant" di sisi kanan
+// AISidebar, Panel chat "KasirAI Assistant" di sisi kanan
 //
-// Sumber data: aiStore (Zustand) — pesan, loading, kuota harian.
+// Sumber data: aiStore (Zustand), pesan, loading, kuota harian.
 // Dua mode pemakaian:
 //   - alwaysVisible=true  → panel menetap (dipakai di halaman /kasir)
 //   - alwaysVisible=false → slide-in dari kanan dengan overlay
@@ -17,13 +17,13 @@
 import { useState, useRef, useEffect } from "react";
 import useAiStore from "@/stores/aiStore";
 
-// Label & warna badge provider — dipakai di bawah bubble pesan AI
+// Label & warna badge provider, dipakai di bawah bubble pesan AI
 const PROVIDER_LABEL = {
   groq:        { text: "Groq",        cls: "bg-brand-yellow text-brand-black" },
   openrouter:  { text: "OpenRouter",  cls: "bg-purple-100 text-purple-700" },
 };
 
-// Icon chat (bubble) — dipakai di header panel
+// Icon chat (bubble), dipakai di header panel
 const ChatIcon = ({ className = "" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M12 2a9 9 0 0 1 9 9c0 2.4-.94 4.6-2.48 6.23L20 22l-4.5-1.5A9 9 0 1 1 12 2z"/>
@@ -39,7 +39,7 @@ const SendIcon = ({ className = "" }) => (
   </svg>
 );
 
-// Icon reset percakapan — tombol "Reset" di header
+// Icon reset percakapan, tombol "Reset" di header
 const ResetIcon = ({ className = "" }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
@@ -59,7 +59,7 @@ const BlockIcon = ({ className = "" }) => (
   </svg>
 );
 
-// Ikon per quick prompt — key = teks prompt, value = ikon SVG kecil
+// Ikon per quick prompt, key = teks prompt, value = ikon SVG kecil
 const QUICK_PROMPT_ICONS = {
   "Produk terlaris bulan ini?": (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3 shrink-0">
@@ -85,7 +85,7 @@ const QUICK_PROMPT_ICONS = {
 };
 
 /**
- * MessageBubble — satu gelembung pesan chat.
+ * MessageBubble, satu gelembung pesan chat.
  *
  * msg: { id, role: "user"|"assistant", content, isError?, provider?, tokens_used? }
  *   - User  → kuning, rata kanan
@@ -124,7 +124,7 @@ const MessageBubble = ({ msg }) => {
   );
 };
 
-// Pertanyaan siap pakai di bawah input — sekali klik langsung terkirim
+// Pertanyaan siap pakai di bawah input, sekali klik langsung terkirim
 const QUICK_PROMPTS = [
   "Produk terlaris bulan ini?",
   "Stok apa yang mau habis?",
@@ -133,12 +133,12 @@ const QUICK_PROMPTS = [
 ];
 
 /**
- * AISidebar — panel chat AI Assistant (lihat header file untuk deskripsi).
+ * AISidebar, panel chat AI Assistant (lihat header file untuk deskripsi).
  *
  * Props:
  *   isOpen        : kontrol tampil (mode slide-in)
  *   onClose       : tutup panel (mode slide-in)
- *   alwaysVisible : true → panel menetap tanpa overlay/tombol ✕
+ *   alwaysVisible : true → panel menetap tanpa overlay/tombol 
  *   isDev         : true → tampil badge "DEV" (mode developer)
  */
 export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDev = false }) {
@@ -240,7 +240,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
             <ResetIcon className="w-3 h-3" /> Reset
           </button>
           {!alwaysVisible && (
-            <button onClick={onClose} className="text-white/60 hover:text-white font-black text-sm">✕</button>
+            <button onClick={onClose} className="text-white/60 hover:text-white font-black text-sm"></button>
           )}
         </div>
       </div>
@@ -263,7 +263,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
         )}
       </div>
 
-      {/* Warning banner — mendekati limit */}
+      {/* Warning banner, mendekati limit */}
       {!limitReached && usageWarning && (
         <div className="mx-3 mt-3 px-3 py-2.5 rounded-md bg-orange-50 border-2 border-orange-400 shrink-0">
           <div className="flex items-start gap-2">

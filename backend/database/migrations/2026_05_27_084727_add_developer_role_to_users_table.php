@@ -13,7 +13,7 @@ return new class extends Migration
         // jadi no-op di sqlite (test/development). Di MySQL, ubah enum-nya.
         if (DB::getDriverName() === 'sqlite') {
             Schema::table('users', function ($table) {
-                // no-op — kolom role sudah ada dari migration awal
+                // no-op, kolom role sudah ada dari migration awal
             });
             return;
         }

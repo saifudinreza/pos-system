@@ -1,6 +1,6 @@
 "use client";
 
-// Order Detail Page — Detail satu pesanan (GET /api/orders/{id})
+// Order Detail Page, Detail satu pesanan (GET /api/orders/{id})
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -15,7 +15,7 @@ export default function OrderDetailPage() {
   const [order, setOrder]     = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Ambil detail order (GET /api/orders/{id}) — refetch kalau id berubah
+  // Ambil detail order (GET /api/orders/{id}), refetch kalau id berubah
   useEffect(() => {
     orderService.getById(params.id)
       .then(setOrder)

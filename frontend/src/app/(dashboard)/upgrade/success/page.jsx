@@ -1,11 +1,11 @@
 "use client";
 
 // ============================================================
-// Upgrade Success — Halaman setelah pembayaran Midtrans berhasil
+// Upgrade Success, Halaman setelah pembayaran Midtrans berhasil
 //
 // Aktivasi plan terjadi via WEBHOOK Midtrans di backend (bisa telat
 // beberapa detik). Halaman ini mem-poll fetchCurrentUser() tiap 5 detik
-// (maks 6×) sampai user.subscription_plan cocok dengan plan yang dibeli —
+// (maks 6×) sampai user.subscription_plan cocok dengan plan yang dibeli,
 // baru tombol "Ke Dashboard" aktif.
 // ============================================================
 
@@ -90,7 +90,7 @@ function SuccessContent() {
           )}
           <div className="flex justify-between text-sm font-semibold">
             <span className="text-brand-black/60">Status</span>
-            <span className="font-black text-green-700">✓ Aktif</span>
+            <span className="font-black text-green-700"> Aktif</span>
           </div>
         </div>
 

@@ -44,7 +44,7 @@ class QueueJobTest extends TestCase
         ]);
     }
 
-    // ── PROCESS AI JOB — jalankan LLM lalu tulis hasil ke ai_jobs ──
+    // ── PROCESS AI JOB, jalankan LLM lalu tulis hasil ke ai_jobs ──
 
     public function test_process_ai_job_runs_llm_and_writes_result(): void
     {
@@ -108,7 +108,7 @@ class QueueJobTest extends TestCase
         $this->assertNotNull($job->error);
     }
 
-    // ── JOB STATUS ENDPOINT — polling hasil AI ──
+    // ── JOB STATUS ENDPOINT, polling hasil AI ──
 
     public function test_job_status_polling_returns_completed_result(): void
     {
@@ -151,7 +151,7 @@ class QueueJobTest extends TestCase
         $this->getJson("/api/ai/jobs/{$job->id}")->assertStatus(403);
     }
 
-    // ── WHATSAPP JOB — dikirim async, bukan blok webhook/request ──
+    // ── WHATSAPP JOB, dikirim async, bukan blok webhook/request ──
 
     public function test_whatsapp_receipt_dispatched_on_order_paid(): void
     {

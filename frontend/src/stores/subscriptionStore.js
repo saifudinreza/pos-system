@@ -1,7 +1,7 @@
 // ============================================================
-// subscriptionStore.js — Global state manajemen langganan (dev)
+// subscriptionStore.js, Global state manajemen langganan (dev)
 //
-// Analogi: Ini seperti "papan kontrol langganan" di sisi developer —
+// Analogi: Ini seperti "papan kontrol langganan" di sisi developer,
 // menyimpan daftar semua subscription tenant, statistik ringkas
 // (total/aktif/free/pro/enterprise/MRR), plus aksi ganti plan
 // dan toggle aktif/nonaktif langganan.
@@ -9,7 +9,7 @@
 // Relasi:
 //   - Dipakai di halaman /dev/subscriptions (developer only)
 //   - PLANS diekspor dan dipakai komponen lain (upgrade page,
-//     profile) — jangan diubah tanpa sinkron dengan backend
+//     profile), jangan diubah tanpa sinkron dengan backend
 //     SubscriptionController::PRICES (lihat CLAUDE.md poin 8)
 //   - Berbeda dari store lain: memanggil api langsung (tidak ada
 //     subscriptionService untuk endpoint /dev/subscriptions)
@@ -20,7 +20,7 @@ import api from "@/lib/axios";
 
 // ============================================================
 // Subscription Plans definition (frontend config)
-// Harga bersumber dari backend SubscriptionController::PRICES —
+// Harga bersumber dari backend SubscriptionController::PRICES,
 // jaga agar selalu sinkron saat ada perubahan.
 // ============================================================
 export const PLANS = {
@@ -161,8 +161,8 @@ const useSubscriptionStore = create((set) => ({
   },
 
   // --- CEK FITUR SUATU PLAN ---
-  // @param {string} plan — "free" | "pro" | "enterprise"
-  // @param {string} feature — misal "reports_download", "ai_assistant"
+  // @param {string} plan, "free" | "pro" | "enterprise"
+  // @param {string} feature, misal "reports_download", "ai_assistant"
   hasFeature: (plan, feature) => PLANS[plan]?.features[feature] ?? false,
 }));
 

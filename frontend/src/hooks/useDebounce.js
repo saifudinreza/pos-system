@@ -1,9 +1,9 @@
 "use client";
 
 // ============================================================
-// useDebounce.js — Hook untuk "tunda" perubahan nilai
+// useDebounce.js, Hook untuk "tunda" perubahan nilai
 //
-// Analogi: Ini seperti "timer otomatis di lift" —
+// Analogi: Ini seperti "timer otomatis di lift",
 // lift tidak langsung tutup pintu saat satu orang masuk.
 // Dia tunggu beberapa detik dulu, kalau ada orang lagi masuk
 // timer di-reset. Baru kalau tidak ada yang masuk sekian detik,
@@ -20,8 +20,8 @@
 //   const debouncedSearch = useDebounce(searchQuery, 500);
 //   useEffect(() => { fetch('/products?search=' + debouncedSearch) }, [debouncedSearch]);
 //
-// @param {any}    value — nilai yang mau di-debounce (biasanya string input)
-// @param {number} delay — waktu tunggu dalam millisecond (default 500ms)
+// @param {any}    value, nilai yang mau di-debounce (biasanya string input)
+// @param {number} delay, waktu tunggu dalam millisecond (default 500ms)
 // @returns       nilai yang sudah di-debounce (stabil setelah delay)
 // ============================================================
 
@@ -29,7 +29,7 @@ import { useState, useEffect } from "react";
 
 export function useDebounce(value, delay = 500) {
   // debouncedValue = nilai yang "terlambat" dibanding value asli
-  // Inilah yang kita pakai untuk query API — lebih stabil
+  // Inilah yang kita pakai untuk query API, lebih stabil
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function useDebounce(value, delay = 500) {
     }, delay);
 
     // Cleanup: batalkan timer lama saat value berubah lagi sebelum delay habis
-    // Ini yang membuat debounce bekerja — timer selalu di-reset kalau nilai berubah
+    // Ini yang membuat debounce bekerja, timer selalu di-reset kalau nilai berubah
     return () => clearTimeout(timer);
   }, [value, delay]);
 

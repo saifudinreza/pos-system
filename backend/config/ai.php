@@ -3,7 +3,7 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | AI Monthly Request Limit — Paket FREE
+    | AI Monthly Request Limit, Paket FREE
     |--------------------------------------------------------------------------
     | Jumlah maksimum prompt AI yang boleh dilakukan satu user paket FREE
     | per bulan (dihitung per bulan kalender). Paket Pro & Enterprise
@@ -13,7 +13,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | AI Daily Request Limit — Paket Pro & Enterprise
+    | AI Daily Request Limit, Paket Pro & Enterprise
     |--------------------------------------------------------------------------
     | Jumlah maksimum prompt AI per HARI (per user) untuk paket berbayar.
     | Free tidak memakai ini (tetap pakai kuota bulanan di atas).

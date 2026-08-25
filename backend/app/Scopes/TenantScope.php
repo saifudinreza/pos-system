@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * Global scope multi-tenant — filter otomatis semua query model tenant-aware
+ * Global scope multi-tenant, filter otomatis semua query model tenant-aware
  * berdasarkan tenant_id user yang sedang login.
  *
  * Dipakai via static::addGlobalScope(new TenantScope) di model yang

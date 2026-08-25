@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model AiChatUsage — penghitung kuota pemakaian AI per user per hari.
+ * Model AiChatUsage, penghitung kuota pemakaian AI per user per hari.
  *
  * Tabel: `ai_chat_usage`. Satu baris per user per tanggal; kolom `count`
  * bertambah tiap kali kuota AI dipakai. Dijumlah via AiChatUsageService

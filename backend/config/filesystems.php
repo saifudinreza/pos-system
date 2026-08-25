@@ -60,7 +60,7 @@ return [
             'report' => false,
         ],
 
-        // Cloudflare R2 — S3-compatible storage gratis
+        // Cloudflare R2, S3-compatible storage gratis
         // Gambar produk disimpan di sini agar tidak hilang saat Railway redeploy
         'r2' => [
             'driver'                  => 's3',

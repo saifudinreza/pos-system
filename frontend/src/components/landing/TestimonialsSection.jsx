@@ -1,15 +1,15 @@
 // ============================================================
-// TestimonialsSection — Ulasan dari pengguna nyata KasirAI
+// TestimonialsSection, Ulasan dari pengguna nyata KasirAI
 //
-// Analogi: Seperti kolom "Review Pembeli" di marketplace —
+// Analogi: Seperti kolom "Review Pembeli" di marketplace,
 // orang lebih percaya rekomendasi sesama pembeli daripada iklan.
-// Ini namanya "social proof" — bukti sosial yang membangun kepercayaan.
+// Ini namanya "social proof", bukti sosial yang membangun kepercayaan.
 //
 // Relasi: Berdiri sendiri. Data testimoni ditulis statis di sini.
 // Di masa depan, bisa diganti dengan data dari API.
 // ============================================================
 
-// Data testimoni — orang nyata dengan cerita nyata
+// Data testimoni, orang nyata dengan cerita nyata
 // (Analogi: seperti buku tamu di toko atau restoran)
 const TESTIMONIALS = [
   {
@@ -20,7 +20,7 @@ const TESTIMONIALS = [
     rating:   5,
     quote:
       "Sebelum pakai KasirAI, saya hitung kasir manual pakai kertas. Sekarang laporan langsung ada di HP. AI-nya juga bantu saya tahu produk mana yang paling laris. Mantap!",
-    // Highlight angka — dampak nyata yang bisa diukur
+    // Highlight angka, dampak nyata yang bisa diukur
     highlight: "Hemat 2 jam/hari",
   },
   {
@@ -56,8 +56,8 @@ const TESTIMONIALS = [
 ];
 
 /**
- * StarRating — deretan 5 bintang (★). Bintang terisi = warna kuning.
- * Props: count — jumlah bintang terisi (0–5).
+ * StarRating, deretan 5 bintang (). Bintang terisi = warna kuning.
+ * Props: count, jumlah bintang terisi (0–5).
  */
 // --- StarRating: bintang rating ---
 // Analogi: seperti bintang di Google Maps
@@ -66,15 +66,15 @@ const StarRating = ({ count }) => (
     {Array.from({ length: 5 }).map((_, i) => (
       // Bintang ke-i terisi kalau i < count (indeks 0-based)
       <span key={i} className={i < count ? "text-brand-yellow" : "text-brand-black/20"}>
-        ★
+        
       </span>
     ))}
   </div>
 );
 
 /**
- * Avatar — lingkaran dengan inisial nama pengguna (tanpa gambar).
- * Props: initials — 1–2 huruf (mis. "BS", "SR").
+ * Avatar, lingkaran dengan inisial nama pengguna (tanpa gambar).
+ * Props: initials, 1–2 huruf (mis. "BS", "SR").
  */
 // --- Avatar: lingkaran dengan inisial nama ---
 // Analogi: seperti foto profil yang digantikan huruf depan nama
@@ -88,8 +88,8 @@ const Avatar = ({ initials }) => (
 );
 
 /**
- * TestimonialCard — satu kartu testimoni (rating + kutipan + profil).
- * Props: t — objek dari TESTIMONIALS (name, role, location, avatar,
+ * TestimonialCard, satu kartu testimoni (rating + kutipan + profil).
+ * Props: t, objek dari TESTIMONIALS (name, role, location, avatar,
  * rating, quote, highlight).
  */
 // --- TestimonialCard: satu kartu testimoni ---
@@ -101,17 +101,17 @@ const TestimonialCard = ({ t }) => (
     {/* Baris atas: rating bintang */}
     <StarRating count={t.rating} />
 
-    {/* Kutipan testimoni — diapit tanda petik besar */}
+    {/* Kutipan testimoni, diapit tanda petik besar */}
     <blockquote className="text-brand-black/70 font-medium leading-relaxed text-sm flex-1 italic">
       "{t.quote}"
     </blockquote>
 
-    {/* Highlight dampak — angka/fakta yang diringkas */}
+    {/* Highlight dampak, angka/fakta yang diringkas */}
     <div
       className="bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-black font-mono inline-block self-start"
       style={{ boxShadow: "1px 1px 0 #0A0A0A" }}
     >
-      ✦ {t.highlight}
+       {t.highlight}
     </div>
 
     {/* Profil pengguna: avatar + nama + role */}
@@ -128,7 +128,7 @@ const TestimonialCard = ({ t }) => (
 );
 
 /**
- * TestimonialsSection — grid testimoni + rating agregat + logo industri
+ * TestimonialsSection, grid testimoni + rating agregat + logo industri
  * (lihat header file). Tanpa props; data statis di TESTIMONIALS.
  */
 export default function TestimonialsSection() {
@@ -143,7 +143,7 @@ export default function TestimonialsSection() {
               className="inline-block bg-brand-black text-white px-3 py-1 text-xs font-mono font-black tracking-wider mb-4"
               style={{ boxShadow: "2px 2px 0 #FFE500" }}
             >
-              ✦ TESTIMONI
+               TESTIMONI
             </div>
             <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk">
               Dipercaya{" "}
@@ -153,7 +153,7 @@ export default function TestimonialsSection() {
             </h2>
           </div>
 
-          {/* Rating ringkasan — seperti score agregat di review platform */}
+          {/* Rating ringkasan, seperti score agregat di review platform */}
           <div
             className="bg-brand-yellow border-3 border-brand-black p-4 text-center shrink-0"
             style={{ boxShadow: "4px 4px 0 #0A0A0A" }}

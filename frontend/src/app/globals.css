@@ -302,7 +302,7 @@ h1, h2, h3, h4, h5, h6,
     padding: 96px 24px 56px;
     gap: 8px;
   }
-  /* Stage TIDAK lagi disembunyikan — komponen meng-scale dirinya
+  /* Stage TIDAK lagi disembunyikan, komponen meng-scale dirinya
      sendiri agar muat & tetap bercerita di tablet maupun HP. */
   .hero-stage {
     margin-top: 16px;
@@ -317,7 +317,7 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* ============================================================
-   Aksesibilitas — hormati prefers-reduced-motion
+   Aksesibilitas, hormati prefers-reduced-motion
    Kalau user mematikan animasi di OS-nya, semua animasi
    dekoratif (float, pulse, spin, shimmer) dihentikan.
    Framer Motion sudah ditangani via useReducedMotion di JS;
@@ -381,7 +381,7 @@ input[type="checkbox"]:checked {
   background: #FFE500;
 }
 input[type="checkbox"]:checked::after {
-  content: "✓";
+  content: "";
   position: absolute;
   top: -2px;
   left: 1px;

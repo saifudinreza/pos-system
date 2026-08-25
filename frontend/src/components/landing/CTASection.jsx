@@ -1,15 +1,15 @@
 // ============================================================
-// CTASection — Panggilan Aksi Terakhir (Call To Action)
+// CTASection, Panggilan Aksi Terakhir (Call To Action)
 //
 // Analogi: Ini seperti kasir yang berkata "Mau dibungkus sekarang?"
 // setelah pelanggan sudah keliling toko. Satu kesempatan terakhir
-// sebelum mereka pergi — harus kuat dan meyakinkan.
+// sebelum mereka pergi, harus kuat dan meyakinkan.
 //
 // Desain: Section ini mencolok dengan background hitam +
-// shadow kuning — kontras maksimal supaya tidak terlewat.
+// shadow kuning, kontras maksimal supaya tidak terlewat.
 //
 // Relasi: Diletakkan setelah Testimoni, sebelum Footer.
-// Tidak ada state atau data — murni UI statis.
+// Tidak ada state atau data, murni UI statis.
 // ============================================================
 
 "use client";
@@ -18,21 +18,21 @@ import Link from "next/link";
 import { Reveal } from "./motion";
 
 /**
- * CTASection — panggilan aksi terakhir sebelum footer (lihat header file).
- * Tanpa props & state — murni UI statis dalam bungkus animasi Reveal.
+ * CTASection, panggilan aksi terakhir sebelum footer (lihat header file).
+ * Tanpa props & state, murni UI statis dalam bungkus animasi Reveal.
  */
 export default function CTASection() {
   return (
     <section className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray">
       <div className="max-w-6xl mx-auto">
 
-        {/* Kotak CTA utama — hitam pekat untuk kontras maksimal */}
+        {/* Kotak CTA utama, hitam pekat untuk kontras maksimal */}
         <Reveal
           y={32}
           className="bg-brand-black text-white border-3 border-brand-black p-12 sm:p-16 text-center relative overflow-hidden"
           style={{ boxShadow: "8px 8px 0 #FFE500" }}
         >
-          {/* Dekorasi latar — titik-titik kecil ala neobrutalist */}
+          {/* Dekorasi latar, titik-titik kecil ala neobrutalist */}
           {/* Analogi: seperti motif di kemasan produk premium */}
           <div className="absolute inset-0 opacity-5"
             style={{
@@ -41,29 +41,29 @@ export default function CTASection() {
             }}
           />
 
-          {/* Konten CTA — di atas layer dekorasi */}
+          {/* Konten CTA, di atas layer dekorasi */}
           <div className="relative z-10">
             {/* Label */}
             <div
               className="inline-block bg-brand-yellow text-brand-black border-2 border-brand-yellow px-3 py-1 text-xs font-mono font-black tracking-wider mb-6"
             >
-              ✦ MULAI SEKARANG
+               MULAI SEKARANG
             </div>
 
-            {/* Headline CTA — sesimpel dan sekuat mungkin */}
+            {/* Headline CTA, sesimpel dan sekuat mungkin */}
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-grotesk leading-tight mb-4">
               Tingkatkan bisnis kamu
               <br />
               <span className="text-brand-yellow">hari ini juga.</span>
             </h2>
 
-            {/* Sub-teks — hilangkan keraguan terakhir */}
+            {/* Sub-teks, hilangkan keraguan terakhir */}
             <p className="text-white/60 font-medium text-lg max-w-lg mx-auto mb-10">
               Bergabung dengan 2.000+ pebisnis yang sudah merasakan manfaat KasirAI.
               Gratis 14 hari, tidak perlu kartu kredit.
             </p>
 
-            {/* Tombol CTA — besar, kuning, mencolok */}
+            {/* Tombol CTA, besar, kuning, mencolok */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/register"
@@ -80,12 +80,12 @@ export default function CTASection() {
               </Link>
             </div>
 
-            {/* Trust badges terakhir — pengingat final */}
+            {/* Trust badges terakhir, pengingat final */}
             <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm font-semibold text-white/40">
-              <span>✓ Tanpa kartu kredit</span>
-              <span>✓ Batalkan kapan saja</span>
-              <span>✓ Support 7 hari seminggu</span>
-              <span>✓ Setup dalam 5 menit</span>
+              <span> Tanpa kartu kredit</span>
+              <span> Batalkan kapan saja</span>
+              <span> Support 7 hari seminggu</span>
+              <span> Setup dalam 5 menit</span>
             </div>
           </div>
         </Reveal>

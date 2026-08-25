@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
- * Export Excel laporan penjualan — dipakai ReportController::downloadSales().
+ * Export Excel laporan penjualan, dipakai ReportController::downloadSales().
  *
  * Berisi per-transaksi: no, nomor order, customer, metode bayar, amount,
  * COGS, laba & margin, plus blok RINGKASAN (total revenue/COGS/laba/margin)

@@ -1,5 +1,5 @@
 // ============================================================
-// axios.js — Konfigurasi HTTP Client utama
+// axios.js, Konfigurasi HTTP Client utama
 //
 // Analogi: Ini seperti "kurir resmi" antara frontend dan backend.
 // Setiap kali frontend mau minta/kirim data ke server Laravel,
@@ -24,7 +24,7 @@ const api = axios.create({
 });
 
 // ============================================================
-// INTERCEPTOR REQUEST — "Pemeriksaan sebelum surat dikirim"
+// INTERCEPTOR REQUEST, "Pemeriksaan sebelum surat dikirim"
 // Analogi: seperti petugas pos yang selalu cek apakah ada materai (token)
 // sebelum surat dikirimkan ke tujuan
 // ============================================================
@@ -46,15 +46,15 @@ api.interceptors.request.use(
 );
 
 // ============================================================
-// INTERCEPTOR RESPONSE — "Pemeriksaan saat surat balasan datang"
-// Analogi: seperti resepsionis yang sortir surat — surat normal
+// INTERCEPTOR RESPONSE, "Pemeriksaan saat surat balasan datang"
+// Analogi: seperti resepsionis yang sortir surat, surat normal
 // langsung diteruskan, surat masalah (error) ditangani lebih dulu
 // ============================================================
 api.interceptors.response.use(
   // Respons sukses (2xx): paksa semua URL gambar ke HTTPS
-  // Ini fix Mixed Content error — backend Railway generate http:// tapi Vercel pakai https://
+  // Ini fix Mixed Content error, backend Railway generate http:// tapi Vercel pakai https://
   (response) => {
-    // LEWATI respons biner (download PDF/Excel, responseType: "blob") —
+    // LEWATI respons biner (download PDF/Excel, responseType: "blob"),
     // Blob tidak bisa di-stringify (hasilnya "{}") dan akan merusak file unduhan.
     if (response.config?.responseType === "blob") return response;
 
@@ -81,7 +81,7 @@ api.interceptors.response.use(
       if (error.response?.status === 403) {
         // 403 = Forbidden: token valid tapi tidak punya izin (role tidak cukup)
         // Analogi: punya kunci rumah tapi tidak boleh masuk ruang tertentu
-        console.warn("[API] 403 Forbidden — akses ditolak untuk resource ini");
+        console.warn("[API] 403 Forbidden, akses ditolak untuk resource ini");
       }
     }
     return Promise.reject(error);

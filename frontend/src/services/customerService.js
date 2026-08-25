@@ -1,7 +1,7 @@
 // ============================================================
-// customerService.js — Layanan manajemen pelanggan (CRM)
+// customerService.js, Layanan manajemen pelanggan (CRM)
 //
-// Analogi: "buku tamu" toko — mendata siapa saja yang pernah
+// Analogi: "buku tamu" toko, mendata siapa saja yang pernah
 // belanja (lewat nomor HP struk WhatsApp) beserta total belanjanya.
 //
 // Relasi ke Backend:
@@ -17,7 +17,7 @@ import { buildQueryString } from "@/lib/utils";
 const customerService = {
   // --- DAFTAR PELANGGAN ---
   // Mengembalikan daftar pelanggan + agregat (total order, total belanja)
-  // @param {Object} params — { search: nama atau nomor HP }
+  // @param {Object} params, { search: nama atau nomor HP }
   // @returns { data: Customer[], ... }
   getAll: async (params = {}) => {
     const { data } = await api.get(`/customers${buildQueryString(params)}`);
@@ -26,7 +26,7 @@ const customerService = {
 
   // --- DETAIL SATU PELANGGAN ---
   // @param {number} id
-  // @returns { data: { customer, recent_orders } } — termasuk 20 order terbaru
+  // @returns { data: { customer, recent_orders } }, termasuk 20 order terbaru
   getById: async (id) => {
     const { data } = await api.get(`/customers/${id}`);
     return data.data;

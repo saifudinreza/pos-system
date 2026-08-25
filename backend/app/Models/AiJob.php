@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * Penting: prompt SUDAH dibuat di controller (masih dalam konteks request
  * dengan auth, jadi isolasi tenant aman). Job worker hanya memanggil LLM
- * (GroqService::ask) tanpa menyentuh query database — supaya tidak ada risiko
+ * (GroqService::ask) tanpa menyentuh query database, supaya tidak ada risiko
  * data tenant bocor ke tenant lain saat worker jalan tanpa user login.
  */
 class AiJob extends Model
@@ -36,7 +36,7 @@ class AiJob extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

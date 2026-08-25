@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Transactions Page — Daftar transaksi Midtrans + detail + batal
+// Transactions Page, Daftar transaksi Midtrans + detail + batal
 //
 // Data yang diambil:
 //   - transactionService.getAll(filters) → GET /api/transactions
@@ -32,7 +32,7 @@ const STATUS_COLOR = {
 
 // ── Detail modal ────────────────────────────────────────────────
 /**
- * TransactionDetailModal — Modal detail transaksi: status, nominal,
+ * TransactionDetailModal, Modal detail transaksi: status, nominal,
  * ID Midtrans, metode bayar, dan order terkait (item + total).
  * Transaksi pending menampilkan tombol "Batalkan Transaksi".
  */
@@ -55,7 +55,7 @@ function TransactionDetailModal({ txId, onClose, onCancelled }) {
   }, [txId]);
 
   /**
-   * handleCancel — Batalkan transaksi pending via POST /api/transactions/{id}/cancel.
+   * handleCancel, Batalkan transaksi pending via POST /api/transactions/{id}/cancel.
    * Backend mengembalikan stok & membatalkan order; onCancelled() dipanggil
    * supaya daftar transaksi di halaman ikut di-refresh.
    */
@@ -91,7 +91,7 @@ function TransactionDetailModal({ txId, onClose, onCancelled }) {
               disabled={cancelling}
               className="flex-1"
             >
-              {cancelling ? "Membatalkan..." : "✕  Batalkan Transaksi"}
+              {cancelling ? "Membatalkan..." : "  Batalkan Transaksi"}
             </NeoButton>
           )}
           <NeoButton variant="ghost" onClick={onClose} className={isPending ? "" : "ml-auto"}>
@@ -229,7 +229,7 @@ export default function TransactionsPage() {
   const [fetchError, setFetchError] = useState("");
 
   /**
-   * fetchData — Ambil daftar transaksi sesuai filter. useCallback supaya
+   * fetchData, Ambil daftar transaksi sesuai filter. useCallback supaya
    * useEffect yang bergantung padanya tidak jalan berulang tiap render.
    */
   const fetchData = useCallback(async () => {

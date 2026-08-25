@@ -15,11 +15,11 @@ use Midtrans\Notification;
 use Midtrans\Transaction;
 
 /**
- * SubscriptionController — langganan Pro/Enterprise via Midtrans Snap.
+ * SubscriptionController, langganan Pro/Enterprise via Midtrans Snap.
  *
  * Harga terpusat di PRICES (yearly = monthly × 10, 2 bulan gratis). Snap token
  * dibuat pakai server key PLATFORM (langganan adalah produk platform, bukan
- * per-tenant) — berbeda dengan TransactionController yang memakai key per-tenant.
+ * per-tenant), berbeda dengan TransactionController yang memakai key per-tenant.
  * Webhook subscription memakai key yang sama (set di constructor).
  * Endpoint dev-* khusus role developer (tanpa global scope).
  */
@@ -33,7 +33,7 @@ class SubscriptionController extends Controller
 
     /**
      * Set konfigurasi Midtrans PLATFORM (langganan milik platform,
-     * bukan tenant) — key diambil dari config services.midtrans.
+     * bukan tenant), key diambil dari config services.midtrans.
      */
     public function __construct()
     {
@@ -51,7 +51,7 @@ class SubscriptionController extends Controller
      * @param Request $request Request ber-autentikasi
      * @return JsonResponse { plan, subscription, pending }
      */
-    // GET /api/subscription — status langganan user yang login
+    // GET /api/subscription, status langganan user yang login
     public function status(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -99,7 +99,7 @@ class SubscriptionController extends Controller
             Transaction::cancel($subscription->midtrans_order_id);
         } catch (\Exception $e) {
             // Transaksi mungkin belum sempat berstatus "pending" di sisi Midtrans
-            // (misal user tutup popup sebelum pilih metode bayar) — aman dilanjutkan.
+            // (misal user tutup popup sebelum pilih metode bayar), aman dilanjutkan.
             Log::warning('Midtrans cancel gagal, lanjut batalkan lokal: ' . $e->getMessage());
         }
 
@@ -255,7 +255,7 @@ class SubscriptionController extends Controller
     /**
      * Semua tenant & status langganan (dashboard developer).
      * GET /api/dev/subscriptions
-     * Developer-only — memakai withoutGlobalScopes() agar bisa lintas tenant.
+     * Developer-only, memakai withoutGlobalScopes() agar bisa lintas tenant.
      *
      * @return JsonResponse { data, stats: { total, active, free, pro, enterprise } }
      */

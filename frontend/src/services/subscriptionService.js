@@ -1,7 +1,7 @@
 // ============================================================
-// subscriptionService.js — Layanan langganan (plan) & profil
+// subscriptionService.js, Layanan langganan (plan) & profil
 //
-// Analogi: Ini seperti "loket pembayaran langganan" —
+// Analogi: Ini seperti "loket pembayaran langganan",
 // cek status paket aktif, mulai pembayaran upgrade (Midtrans),
 // batalkan pembayaran yang belum lunas, dan update data toko.
 //
@@ -40,7 +40,7 @@ const subscriptionService = {
   },
 
   // --- UPDATE DATA PROFIL TOKO ---
-  // Endpoint /profile (bukan /subscription) — lihat catatan di header
+  // Endpoint /profile (bukan /subscription), lihat catatan di header
   // @param {{ name?, phone?, address?, ... }} payload
   updateProfile: async (payload) => {
     const { data } = await api.put("/profile", payload);

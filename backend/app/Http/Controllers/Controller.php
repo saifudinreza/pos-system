@@ -16,7 +16,7 @@ abstract class Controller
 {
     /**
      * Determine subscription plan for the tenant.
-     * Kasir doesn't own a subscription — use their tenant admin's plan instead.
+     * Kasir doesn't own a subscription, use their tenant admin's plan instead.
      */
     protected function getEffectivePlan(User $user): string
     {
@@ -38,7 +38,7 @@ abstract class Controller
     {
         $limits = ['free' => 50, 'pro' => null, 'enterprise' => null];
 
-        // array_key_exists, bukan ?? — karena null (unlimited) adalah nilai valid
+        // array_key_exists, bukan ??, karena null (unlimited) adalah nilai valid
         return array_key_exists($plan, $limits) ? $limits[$plan] : 50;
     }
 
@@ -47,7 +47,7 @@ abstract class Controller
     {
         $limits = ['free' => 15, 'pro' => null, 'enterprise' => null];
 
-        // array_key_exists, bukan ?? — karena null (unlimited) adalah nilai valid
+        // array_key_exists, bukan ??, karena null (unlimited) adalah nilai valid
         return array_key_exists($plan, $limits) ? $limits[$plan] : 15;
     }
 }

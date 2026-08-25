@@ -9,7 +9,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 
 /**
- * AppServiceProvider — registrasi layanan aplikasi.
+ * AppServiceProvider, registrasi layanan aplikasi.
  *
  * Boot: paksa HTTPS di production (Railway) & daftarkan limiter rate global
  * 'api' yang dipasang di semua route /api/* via bootstrap/app.php.

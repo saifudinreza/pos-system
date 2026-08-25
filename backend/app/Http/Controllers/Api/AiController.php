@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 
 
 /**
- * AiController — semua endpoint AI KasirAI (chat, prediksi stok, rekomendasi).
+ * AiController, semua endpoint AI KasirAI (chat, prediksi stok, rekomendasi).
  *
  * AI berjalan ASYNC via job queue (ProcessAiJob): controller hanya membangun
  * prompt (masih dalam konteks auth() → isolasi tenant aman), lalu mengembalikan
@@ -37,7 +37,7 @@ class AiController extends Controller
     /**
      * Limit kuota AI BULANAN untuk user yang sedang login.
      * FREE = 5 prompt/bulan (trial). Pro/Enterprise = null (tidak dibatasi
-     * per bulan — mereka memakai kuota harian, lihat dailyLimit()).
+     * per bulan, mereka memakai kuota harian, lihat dailyLimit()).
      * developer = null (tak terbatas). Kasir mengikuti plan admin tenant-nya.
      */
     private function monthlyLimit(): ?int
@@ -57,7 +57,7 @@ class AiController extends Controller
      * Limit kuota AI HARIAN untuk user yang sedang login.
      * FREE = null (tetap pakai kuota bulanan), Pro = 10/hari,
      * Enterprise = 50/hari, developer = null (tak terbatas).
-     * null = unlimited — jangan pakai ?? untuk fallback!
+     * null = unlimited, jangan pakai ?? untuk fallback!
      */
     private function dailyLimit(): ?int
     {
@@ -114,7 +114,7 @@ class AiController extends Controller
     }
 
     // =============================================================
-    // USAGE — sisa kuota AI user yang login (dihitung per bulan)
+    // USAGE, sisa kuota AI user yang login (dihitung per bulan)
     // GET /api/ai/usage-today
     // =============================================================
     /**
@@ -147,7 +147,7 @@ class AiController extends Controller
     }
 
     // =============================================================
-    // QUERY — analisis penjualan natural language
+    // QUERY, analisis penjualan natural language
     // POST /api/ai/query
     // =============================================================
     /**
@@ -173,11 +173,11 @@ class AiController extends Controller
 
         $tenantId = $request->user()->tenant_id;
 
-        // ===== PENJUALAN PER PERIODE — supaya AI tidak salah kira periode =====
+        // ===== PENJUALAN PER PERIODE, supaya AI tidak salah kira periode =====
         // Sebelumnya cuma data bulan ini yang dikirim, jadi pertanyaan "minggu ini"
         // atau "hari ini" tetap dijawab pakai angka bulanan. Sekarang kita hitung
         // ketiganya sekaligus dan biarkan AI pilih sesuai kata dalam pertanyaan user.
-        // CATATAN: Transaction tidak punya tenant_id — isolasi tenant wajib manual
+        // CATATAN: Transaction tidak punya tenant_id, isolasi tenant wajib manual
         // via whereHas('order', tenant_id), sama seperti di ReportController.
         $periods = [
             'hari_ini'   => [now()->startOfDay(), now()->endOfDay()],
@@ -220,7 +220,7 @@ class AiController extends Controller
             ->limit(10)
             ->get();
 
-        // ===== KATALOG PRODUK & STOK — supaya pertanyaan stok/produk juga
+        // ===== KATALOG PRODUK & STOK, supaya pertanyaan stok/produk juga
         // bisa dijawab dari chat utama, tidak perlu endpoint terpisah =====
         $catalog = Product::with('category')
             ->where('is_active', true)
@@ -268,7 +268,7 @@ class AiController extends Controller
     }
 
     // =============================================================
-    // JOB STATUS — polling hasil AI yang diproses async
+    // JOB STATUS, polling hasil AI yang diproses async
     // GET /api/ai/jobs/{id}
     // =============================================================
     /**
@@ -466,7 +466,7 @@ class AiController extends Controller
     }
 
     // =============================================================
-    // LOGS — riwayat query AI
+    // LOGS, riwayat query AI
     // GET /api/ai/logs
     // =============================================================
     /**
@@ -507,7 +507,7 @@ class AiController extends Controller
     }
 
     // =============================================================
-    // STATS — ringkasan monitoring untuk admin
+    // STATS, ringkasan monitoring untuk admin
     // GET /api/ai/stats
     // =============================================================
     /**
@@ -578,7 +578,7 @@ class AiController extends Controller
             ->get()
             ->map(fn($r) => ['provider' => $r->provider, 'count' => (int) $r->count]);
 
-        // ===== PEMAKAIAN PER USER (hari ini) — untuk tabel monitoring =====
+        // ===== PEMAKAIAN PER USER (hari ini), untuk tabel monitoring =====
         // Pro/Enterprise memakai kuota HARIAN → used = pemakaian hari ini;
         // Free memakai kuota BULANAN → used = total sejak awal bulan.
         $usersToday = AiChatUsage::with('user')
@@ -681,7 +681,7 @@ class AiController extends Controller
                 }
             }
 
-            // Baca ulang setelah lock — pemakaian paling baru ikut terhitung
+            // Baca ulang setelah lock, pemakaian paling baru ikut terhitung
             $todayUsed = (int) $usage->count;
             $monthUsed = (int) AiChatUsage::where('user_id', $userId)
                 ->whereDate('usage_date', '>=', now()->startOfMonth())

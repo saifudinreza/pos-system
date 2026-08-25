@@ -1,7 +1,7 @@
 // ============================================================
-// orderService.js — Layanan manajemen pesanan (order)
+// orderService.js, Layanan manajemen pesanan (order)
 //
-// Analogi: Ini seperti "buku pesanan" di restoran —
+// Analogi: Ini seperti "buku pesanan" di restoran,
 // setiap pesanan masuk dicatat (POST /orders),
 // koki/kasir bisa lihat semua pesanan (GET /orders),
 // dan status pesanan bisa diupdate (PATCH status).
@@ -48,8 +48,8 @@ const orderService = {
   // @param {Object} params:
   //   status    : "pending" | "paid" | "cancelled"
   //   user_id   : filter per pelanggan
-  //   date_from : "YYYY-MM-DD" — filter dari tanggal
-  //   date_to   : "YYYY-MM-DD" — filter sampai tanggal
+  //   date_from : "YYYY-MM-DD", filter dari tanggal
+  //   date_to   : "YYYY-MM-DD", filter sampai tanggal
   //   page, per_page
   getAll: async (params = {}) => {
     const { data } = await api.get(`/orders${buildQueryString(params)}`);

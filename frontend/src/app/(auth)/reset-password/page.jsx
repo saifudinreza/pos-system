@@ -1,8 +1,8 @@
 "use client";
 
 // ============================================================
-// Reset Password — Halaman ganti password pakai link dari email
-// Analogi: Ini seperti "ruang ganti kunci kantor" — user datang
+// Reset Password, Halaman ganti password pakai link dari email
+// Analogi: Ini seperti "ruang ganti kunci kantor", user datang
 // dengan surat izin (link dari email), lalu boleh mengganti kunci
 // (password) dengan yang baru.
 //
@@ -24,7 +24,7 @@ import { getErrorMessage } from "@/lib/utils";
 function ResetForm() {
   // ── State ──
   // token & email diambil dari URL (?token=...&email=...) yang dikirim
-  // lewat link di email — kalau kosong berarti link dibuka manual
+  // lewat link di email, kalau kosong berarti link dibuka manual
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const email = searchParams.get("email") ?? "";
@@ -34,7 +34,7 @@ function ResetForm() {
   const [error, setError]   = useState("");
 
   /**
-   * handleChange — Update nilai input password; reset pesan error.
+   * handleChange, Update nilai input password; reset pesan error.
    */
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -42,9 +42,9 @@ function ResetForm() {
   };
 
   /**
-   * handleSubmit — Validasi lokal (konfirmasi cocok & min 8 karakter) lalu
+   * handleSubmit, Validasi lokal (konfirmasi cocok & min 8 karakter) lalu
    * kirim token + email + password baru ke POST /api/reset-password.
-   * Token sekali pakai — berhasil berarti semua sesi lama dicabut.
+   * Token sekali pakai, berhasil berarti semua sesi lama dicabut.
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -68,7 +68,7 @@ function ResetForm() {
     }
   };
 
-  // ── Render: 3 kondisi — sukses | link tidak valid | form ganti password ──
+  // ── Render: 3 kondisi, sukses | link tidak valid | form ganti password ──
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -96,7 +96,7 @@ function ResetForm() {
             </>
           ) : !token || !email ? (
             <>
-              {/* Link tidak lengkap — bisa jadi dibuka manual tanpa token */}
+              {/* Link tidak lengkap, bisa jadi dibuka manual tanpa token */}
               <h1 className="font-black text-2xl font-grotesk mb-3">Link Tidak Valid</h1>
               <p className="text-sm text-brand-black/60 font-medium mb-6 leading-relaxed">
                 Link reset password tidak lengkap. Pakai link yang dikirim lewat email,

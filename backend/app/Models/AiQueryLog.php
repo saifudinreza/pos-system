@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model AiQueryLog — log pertanyaan & jawaban AI per user.
+ * Model AiQueryLog, log pertanyaan & jawaban AI per user.
  *
  * Tabel: `ai_query_logs`. Tidak memakai TenantScope karena tabel ini tidak
- * punya kolom tenant_id — log dihubungkan lewat user dan difilter manual
+ * punya kolom tenant_id, log dihubungkan lewat user dan difilter manual
  * di controller (AiController::logs()/stats() memakai scope per user untuk
  * admin, atau lintas tenant untuk developer).
  * Casts: tokens_used → integer.
@@ -28,7 +28,7 @@ class AiQueryLog extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

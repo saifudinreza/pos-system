@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// LandingNavbar — Navigasi utama di bagian atas halaman
+// LandingNavbar, Navigasi utama di bagian atas halaman
 //
 // Analogi: Ini seperti papan nama + menu di depan pintu restoran.
 // Pengunjung langsung tahu nama tempatnya, bisa lihat apa yang ada,
@@ -15,10 +15,10 @@ import Link from "next/link";
 import LogoMark from "@/components/brand/LogoMark";
 
 // --- Logo komponen ---
-// Analogi: Logo adalah "wajah" brand — kotak kuning dengan K, langsung dikenal
+// Analogi: Logo adalah "wajah" brand, kotak kuning dengan K, langsung dikenal
 const Logo = () => (
   <Link href="/" className="flex items-center gap-3 group">
-    {/* Ikon brand — identitas visual neobrutalist */}
+    {/* Ikon brand, identitas visual neobrutalist */}
     <LogoMark size={36} className="group-hover:-rotate-3 transition-transform" />
     {/* Nama brand di sebelah logo */}
     <span className="font-black text-xl text-brand-black tracking-tight font-grotesk">
@@ -28,7 +28,7 @@ const Logo = () => (
 );
 
 // --- Daftar link navigasi ---
-// Analogi: Seperti daftar menu di papan restoran — tiap item membawa ke bagian tertentu
+// Analogi: Seperti daftar menu di papan restoran, tiap item membawa ke bagian tertentu
 const NAV_LINKS = [
   { label: "Masalah", href: "#masalah" },
   { label: "Fitur",   href: "#fitur" },
@@ -37,16 +37,16 @@ const NAV_LINKS = [
 ];
 
 /**
- * LandingNavbar — navbar sticky landing page (lihat header file).
+ * LandingNavbar, navbar sticky landing page (lihat header file).
  * Tanpa props; state internal: menuOpen (hamburger mobile) &
  * scrolled (efek background saat halaman digulir > 20px).
  */
 export default function LandingNavbar() {
   // State untuk menu mobile (buka/tutup hamburger)
-  // Analogi: seperti saklar lampu — true = nyala (menu terbuka), false = mati (menu tertutup)
+  // Analogi: seperti saklar lampu, true = nyala (menu terbuka), false = mati (menu tertutup)
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // State untuk efek scroll — navbar berubah saat halaman digulir
+  // State untuk efek scroll, navbar berubah saat halaman digulir
   // Analogi: seperti kaca depan toko yang jadi buram sedikit saat hujan (scroll)
   const [scrolled, setScrolled] = useState(false);
 
@@ -87,7 +87,7 @@ export default function LandingNavbar() {
                 className="text-sm font-semibold text-brand-black hover:text-brand-yellow transition-colors relative group"
               >
                 {link.label}
-                {/* Garis bawah kuning saat hover — efek underline animasi */}
+                {/* Garis bawah kuning saat hover, efek underline animasi */}
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-brand-yellow group-hover:w-full transition-all duration-200" />
               </a>
             ))}

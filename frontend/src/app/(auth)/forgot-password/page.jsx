@@ -1,8 +1,8 @@
 "use client";
 
 // ============================================================
-// Forgot Password — Halaman minta link reset password
-// Analogi: Ini seperti "pintu cadangan" saat kunci kantor hilang —
+// Forgot Password, Halaman minta link reset password
+// Analogi: Ini seperti "pintu cadangan" saat kunci kantor hilang,
 // user cukup isi email, sistem kirim "kunci baru" (link reset) ke email itu.
 //
 // Alur:
@@ -12,7 +12,7 @@
 //   4. User buka link → diarahkan ke halaman reset password
 //
 // Catatan keamanan: server selalu membalas pesan yang sama walau email
-// tidak terdaftar — supaya orang jahat tidak bisa "memancing" email mana
+// tidak terdaftar, supaya orang jahat tidak bisa "memancing" email mana
 // yang punya akun. Dari sisi user: kalau email terdaftar, link akan datang.
 // ============================================================
 
@@ -24,15 +24,15 @@ import { getErrorMessage } from "@/lib/utils";
 
 export default function ForgotPasswordPage() {
   // ── State ──
-  // status: idle | sending | sent | error — menggerakkan tampilan form/sukses
+  // status: idle | sending | sent | error, menggerakkan tampilan form/sukses
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [error, setError] = useState("");
 
   /**
-   * handleSubmit — Minta link reset via POST /api/forgot-password.
+   * handleSubmit, Minta link reset via POST /api/forgot-password.
    * Server selalu balas sukses walau email tidak terdaftar (anti
-   * user-enumeration) — jadi di sini langsung tampilkan state "sent".
+   * user-enumeration), jadi di sini langsung tampilkan state "sent".
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
     }
   };
 
-  // ── Render: dua kondisi — sudah terkirim (sent) vs form input ──
+  // ── Render: dua kondisi, sudah terkirim (sent) vs form input ──
   return (
     <div className="min-h-screen bg-brand-cream flex items-center justify-center px-4">
       <div className="w-full max-w-md">

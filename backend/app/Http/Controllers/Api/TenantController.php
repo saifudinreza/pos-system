@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * TenantController — manajemen tenant (dev tools, developer-only).
+ * TenantController, manajemen tenant (dev tools, developer-only).
  *
  * Semua endpoint dev-* tanpa tenant scope (developer butuh melihat lintas
  * tenant). Hapus tenant TIDAK boleh me-null-kan tenant_id user (user dengan
@@ -96,7 +96,7 @@ class TenantController extends Controller
      * Hapus tenant beserta semua user-nya (aman & amanah):
      * 1) cabut semua token Sanctum (logout semua perangkat),
      * 2) nonaktifkan akun (is_active = false → tidak bisa login).
-     * tenant_id user dibiarkan di-null-kan oleh FK nullOnDelete — TIDAK
+     * tenant_id user dibiarkan di-null-kan oleh FK nullOnDelete, TIDAK
      * di-set manual karena user dengan tenant_id null dianggap developer.
      * DELETE /api/dev/tenants/{id}
      *
@@ -110,7 +110,7 @@ class TenantController extends Controller
 
         $name = $tenant->name;
 
-        // ⚠️ JANGAN set tenant_id = null pada user — user dengan tenant_id null
+        //  JANGAN set tenant_id = null pada user, user dengan tenant_id null
         // dianggap developer (TenantScope melewati filter) → bisa melihat data
         // SEMUA tenant. Yang benar:
         // 1. Cabut semua token Sanctum user tenant (langsung logout di semua perangkat)

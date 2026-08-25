@@ -9,7 +9,7 @@ module.exports = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        // Palet warna utama KasirAI — seperti cat tembok toko yang konsisten
+        // Palet warna utama KasirAI, seperti cat tembok toko yang konsisten
         brand: {
           yellow: "#FFE500",   // Kuning mencolok → identitas utama brand
           black:  "#0A0A0A",   // Hitam pekat → teks dan border
@@ -24,7 +24,7 @@ module.exports = {
         mono: ['"JetBrains Mono"', "monospace"],
       },
       boxShadow: {
-        // Shadow khas neobrutalist — seperti stiker yang ditempel miring di kertas
+        // Shadow khas neobrutalist, seperti stiker yang ditempel miring di kertas
         // Tidak ada blur (0px), hanya offset → kesan 3D yang tegas dan grafis
         neo:          "4px 4px 0px #0A0A0A",
         "neo-lg":     "8px 8px 0px #0A0A0A",

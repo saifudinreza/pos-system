@@ -73,7 +73,7 @@ class PlanGatingTest extends TestCase
         ]);
     }
 
-    // ── QRIS / pembayaran digital — FREE diblokir, PRO boleh ──
+    // ── QRIS / pembayaran digital, FREE diblokir, PRO boleh ──
 
     public function test_qris_create_blocked_for_free_plan(): void
     {
@@ -102,7 +102,7 @@ class PlanGatingTest extends TestCase
         $response->assertStatus(422)->assertJsonPath('plan_required', 'pro');
     }
 
-    // ── Export PDF/Excel — FREE diblokir ──
+    // ── Export PDF/Excel, FREE diblokir ──
 
     public function test_report_download_blocked_for_free_plan(): void
     {
@@ -115,7 +115,7 @@ class PlanGatingTest extends TestCase
         $this->getJson('/api/reports/stock/download')->assertStatus(403)->assertJsonPath('plan_required', 'pro');
     }
 
-    // ── Kuota AI — FREE 5/bulan, PRO 10/hari, Enterprise 50/hari, kasir ikut plan admin tenant ──
+    // ── Kuota AI, FREE 5/bulan, PRO 10/hari, Enterprise 50/hari, kasir ikut plan admin tenant ──
 
     public function test_ai_usage_today_free_plan_shows_monthly_limit(): void
     {
@@ -228,7 +228,7 @@ class PlanGatingTest extends TestCase
             ->assertJsonPath('users_today.0.pct', 100);
     }
 
-    // ── Read limit produk & kategori — FREE 50/15, PRO unlimited ──
+    // ── Read limit produk & kategori, FREE 50/15, PRO unlimited ──
 
     public function test_free_plan_products_capped_at_50(): void
     {
@@ -268,7 +268,7 @@ class PlanGatingTest extends TestCase
             ->assertJsonPath('meta.plan_limit', null);
     }
 
-    // ── Harga subscription — harus sinkron dengan halaman upgrade ──
+    // ── Harga subscription, harus sinkron dengan halaman upgrade ──
 
     public function test_subscription_prices_match_new_plans(): void
     {

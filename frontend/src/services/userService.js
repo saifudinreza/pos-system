@@ -1,7 +1,7 @@
 // ============================================================
-// userService.js — Layanan manajemen pengguna (admin only)
+// userService.js, Layanan manajemen pengguna (admin only)
 //
-// Analogi: Ini seperti "bagian HRD" di perusahaan —
+// Analogi: Ini seperti "bagian HRD" di perusahaan,
 // bisa lihat daftar karyawan, ubah data, atau nonaktifkan akun.
 //
 // Semua endpoint di sini HANYA bisa diakses oleh admin.
@@ -65,7 +65,7 @@ const userService = {
 
   // --- TOGGLE AKTIF/NONAKTIF USER ---
   // Analogi: HRD menonaktifkan akses karyawan yang sedang cuti atau keluar
-  // Tidak menghapus akun — hanya ubah is_active (true ↔ false)
+  // Tidak menghapus akun, hanya ubah is_active (true ↔ false)
   //
   // @param {number} id
   // @returns { message, user }

@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         // ============================================================
-        // AUDIT LOG — jejak perubahan data penting (produk, harga, role,
+        // AUDIT LOG, jejak perubahan data penting (produk, harga, role,
         // plan, setting tenant). Selama ini tidak ada sama sekali:
         // kalau harga produk berubah, tidak ada yang tahu siapa & kapan.
         // ============================================================

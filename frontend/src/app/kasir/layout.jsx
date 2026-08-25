@@ -1,12 +1,12 @@
 "use client";
 
 // ============================================================
-// KasirLayout — Kerangka halaman POS (mode kasir, tanpa sidebar)
+// KasirLayout, Kerangka halaman POS (mode kasir, tanpa sidebar)
 //
 // Struktur: header tipis (jam, nama user, tombol ke dashboard & logout)
 // + area konten {children} (kasir/page.jsx).
 //
-// Catatan: Midtrans Snap JS TIDAK di-load di layout ini — dimuat on-demand
+// Catatan: Midtrans Snap JS TIDAK di-load di layout ini, dimuat on-demand
 // oleh loadMidtransSnap() di kasir/page.jsx dengan data-client-key milik
 // tenant, supaya tidak double-load dengan script inject manual.
 // ============================================================
@@ -29,7 +29,7 @@ export default function KasirLayout({ children }) {
     setMounted(true);
   }, [hydrateFromStorage]);
 
-  /** handleLogout — Logout lalu redirect ke halaman login. */
+  /** handleLogout, Logout lalu redirect ke halaman login. */
   const handleLogout = async () => {
     await logout();
     router.push("/login");
@@ -37,11 +37,11 @@ export default function KasirLayout({ children }) {
 
   return (
     <>
-    {/* Catatan: Midtrans Snap JS TIDAK di-load di sini — dimuat on-demand oleh
+    {/* Catatan: Midtrans Snap JS TIDAK di-load di sini, dimuat on-demand oleh
         loadMidtransSnap() di kasir/page.jsx dengan data-client-key milik tenant,
         supaya tidak double-load dengan script inject manual. */}
     <div className="flex flex-col h-screen bg-brand-cream overflow-hidden">
-      {/* Kasir Navbar — minimal, no sidebar */}
+      {/* Kasir Navbar, minimal, no sidebar */}
       <header className="h-14 bg-brand-black text-white flex items-center justify-between px-4 border-b-2 border-brand-black shrink-0 z-10">
         <div className="flex items-center gap-3">
           <LogoMark size={32} />

@@ -46,7 +46,7 @@ return [
         'base_url' => 'https://openrouter.ai/api/v1/chat/completions',
     ],
 
-    // Fonnte WA Gateway — untuk kirim struk digital ke WhatsApp customer
+    // Fonnte WA Gateway, untuk kirim struk digital ke WhatsApp customer
     // Daftar di fonnte.com, scan QR dengan WA kamu, copy token ke .env
     'fonnte' => [
         'token' => env('FONNTE_TOKEN', ''),
@@ -59,7 +59,7 @@ return [
         'notification_url'  => env('MIDTRANS_NOTIFICATION_URL'),
     ],
 
-    // URL frontend (Next.js) — dipakai untuk membangun link reset password
+    // URL frontend (Next.js), dipakai untuk membangun link reset password
     // yang dikirim lewat email. HARUS diisi di .env production.
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:3000'),
 

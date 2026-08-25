@@ -1,15 +1,15 @@
 "use client";
 
 // ============================================================
-// useAuth.js — Hook autentikasi siap pakai untuk komponen
+// useAuth.js, Hook autentikasi siap pakai untuk komponen
 //
-// Analogi: Ini seperti "remote control" untuk authStore —
+// Analogi: Ini seperti "remote control" untuk authStore,
 // komponen tidak perlu tau detail implementasi authStore,
 // cukup panggil hook ini dan dapat semua yang dibutuhkan.
 //
 // Kenapa pakai hook dibanding langsung pakai store?
 // - Hook bisa tambahkan logika tambahan (navigasi setelah login, dll)
-// - Komponen jadi lebih bersih — tidak perlu import banyak hal
+// - Komponen jadi lebih bersih, tidak perlu import banyak hal
 // - Mudah di-mock saat testing
 //
 // Cara pakai di komponen:
@@ -39,7 +39,7 @@ export function useAuth() {
     hasRole,
   } = useAuthStore();
 
-  // Apakah sudah login — cek ada user dan ada token
+  // Apakah sudah login, cek ada user dan ada token
   const isAuthenticated = !!user;
 
   // --- LOGIN + REDIRECT ---

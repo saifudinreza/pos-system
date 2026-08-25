@@ -1,13 +1,13 @@
 "use client";
 
 // ============================================================
-// Profile Page — Profil akun + status langganan + konfigurasi
+// Profile Page, Profil akun + status langganan + konfigurasi
 //
 // Data yang diambil:
 //   - fetchCurrentUser() (authStore) → data user (nama, tenant, plan)
 //   - subscriptionService.getStatus() → status & pending subscription
 //
-// Kolom kiri  : form profil (nama, HP, info toko, key Midtrans — admin saja)
+// Kolom kiri  : form profil (nama, HP, info toko, key Midtrans, admin saja)
 // Kolom kanan : status langganan (aktif / menunggu bayar / free + kartu upgrade)
 //
 // Midtrans keys diisi per-tenant; server key disembunyikan (input password,
@@ -83,7 +83,7 @@ export default function ProfilePage() {
     fetchCurrentUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Isi form dari data user — jalan ulang setiap user berubah
+  // Isi form dari data user, jalan ulang setiap user berubah
   // (mis. usai fetchCurrentUser / usai simpan profil)
   useEffect(() => {
     if (user) {
@@ -99,7 +99,7 @@ export default function ProfilePage() {
     }
   }, [user]);
 
-  /** loadSubscriptionStatus — Ambil status & pending subscription dari backend. */
+  /** loadSubscriptionStatus, Ambil status & pending subscription dari backend. */
   const loadSubscriptionStatus = () => {
     subscriptionService.getStatus()
       .then((d) => { setSub(d.subscription); setPending(d.pending); })
@@ -110,7 +110,7 @@ export default function ProfilePage() {
     loadSubscriptionStatus();
   }, []);
 
-  /** handleCancelPending — Batalkan transaksi subscription yang masih pending. */
+  /** handleCancelPending, Batalkan transaksi subscription yang masih pending. */
   const handleCancelPending = async () => {
     if (!confirm("Batalkan transaksi pembayaran ini?")) return;
     setCancelling(true);
@@ -125,7 +125,7 @@ export default function ProfilePage() {
   };
 
   /**
-   * handleSave — Simpan perubahan profil via subscriptionService.updateProfile.
+   * handleSave, Simpan perubahan profil via subscriptionService.updateProfile.
    * Response berisi user terbaru → setUser di store + fetchCurrentUser ulang
    * supaya UI (role/plan) langsung sinkron. Banner sukses hilang setelah 3 detik.
    */
@@ -253,7 +253,7 @@ export default function ProfilePage() {
                     <p className="text-xs font-black uppercase tracking-wider text-brand-black/50">Midtrans Payment</p>
                   </div>
                   <span className={`text-xs font-black px-2 py-0.5 border-2 ${user?.midtrans_configured ? "bg-green-100 border-green-400 text-green-700" : "bg-red-50 border-red-300 text-red-600"}`}>
-                    {user?.midtrans_configured ? "✓ Terkonfigurasi" : "Belum Dikonfigurasi"}
+                    {user?.midtrans_configured ? " Terkonfigurasi" : "Belum Dikonfigurasi"}
                   </span>
                 </div>
 
@@ -263,7 +263,7 @@ export default function ProfilePage() {
 
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-black uppercase tracking-wider text-brand-black/60">
-                    Server Key <span className="normal-case font-normal text-brand-black/40">(Rahasia — isi hanya jika ingin mengubah)</span>
+                    Server Key <span className="normal-case font-normal text-brand-black/40">(Rahasia, isi hanya jika ingin mengubah)</span>
                   </label>
                   <input
                     type="password"
@@ -412,7 +412,7 @@ export default function ProfilePage() {
               {/* Pro card */}
               <div className="border-2 border-brand-black p-4 space-y-3" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
                 <div className="flex items-center justify-between">
-                  <span className="font-black text-sm">Pro — Rp{PLANS.pro.price.toLocaleString("id-ID")}/bln</span>
+                  <span className="font-black text-sm">Pro, Rp{PLANS.pro.price.toLocaleString("id-ID")}/bln</span>
                   <span className="text-xs font-mono bg-brand-yellow px-2 py-0.5 font-bold border border-brand-black">Populer</span>
                 </div>
                 <ul className="space-y-1">
@@ -430,7 +430,7 @@ export default function ProfilePage() {
 
               {/* Enterprise card */}
               <div className="border-2 border-brand-black p-4 space-y-3 bg-brand-black text-white" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
-                <span className="font-black text-sm">Enterprise — Rp{PLANS.enterprise.price.toLocaleString("id-ID")}/bln</span>
+                <span className="font-black text-sm">Enterprise, Rp{PLANS.enterprise.price.toLocaleString("id-ID")}/bln</span>
                 <ul className="space-y-1">
                   {PLAN_FEATURES.enterprise.slice(0, 3).map((f) => (
                     <li key={f} className="flex items-start gap-1.5 text-xs text-white/60">

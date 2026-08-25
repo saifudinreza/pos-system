@@ -1,7 +1,7 @@
 // ============================================================
-// middleware.js — Penjaga pintu rute (route guard)
+// middleware.js, Penjaga pintu rute (route guard)
 //
-// Analogi: Ini seperti "satpam gedung" —
+// Analogi: Ini seperti "satpam gedung",
 // setiap kali seseorang mau masuk ke suatu ruangan (URL),
 // satpam cek dulu: apakah punya kartu akses (token)?
 // Kalau tidak punya kartu → arahkan ke pintu masuk (/login).
@@ -32,7 +32,7 @@ const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password", "/reset-p
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Baca cookie "token" — ini yang diset saat login di authService.js
+  // Baca cookie "token", ini yang diset saat login di authService.js
   const raw = request.cookies.get("token")?.value;
   // Sanitasi: anggap tidak ada token kalau nilainya "undefined" atau "null" (string)
   // Ini bisa terjadi kalau ada bug saat simpan token sebelumnya
@@ -73,12 +73,12 @@ export function middleware(request) {
 // Kita SKIP file-file statis (gambar, CSS, JS bundle Next.js, favicon)
 // karena tidak perlu pengecekan token untuk file-file itu
 //
-// ⚠️ JANGAN HAPUS exclusions di bawah ini (sitemap.xml, robots.txt,
+//  JANGAN HAPUS exclusions di bawah ini (sitemap.xml, robots.txt,
 // icon.svg, apple-icon.png, opengraph-image, manifest.webmanifest,
-// favicon.ico, dll) — itu file konvensi Next.js yang dipanggil crawler /
+// favicon.ico, dll), itu file konvensi Next.js yang dipanggil crawler /
 // social-share bot TANPA cookie token. Kalau ada satu saja yang tidak
 // di-exclude, bot di-redirect ke /login dan SEO/preview rusak (sudah
-// pernah terjadi 3× — lihat CLAUDE.md bagian "Gotcha Next.js / Vercel").
+// pernah terjadi 3×, lihat CLAUDE.md bagian "Gotcha Next.js / Vercel").
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|manifest.webmanifest|opengraph-image|apple-touch-icon|og-image|images/|sitemap.xml|robots.txt|web-app-manifest).*)"],
 };

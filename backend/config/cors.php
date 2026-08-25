@@ -1,6 +1,6 @@
 <?php
 
-// CORS — mengizinkan request dari frontend (Vercel) ke backend (Railway)
+// CORS, mengizinkan request dari frontend (Vercel) ke backend (Railway)
 // Tanpa ini, browser memblok semua request cross-origin (beda domain)
 return [
     // Endpoint yang dikenai CORS policy (semua endpoint)

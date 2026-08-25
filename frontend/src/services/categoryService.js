@@ -1,7 +1,7 @@
 // ============================================================
-// categoryService.js — Layanan manajemen kategori produk
+// categoryService.js, Layanan manajemen kategori produk
 //
-// Analogi: Ini seperti "labeling di rak toko" —
+// Analogi: Ini seperti "labeling di rak toko",
 // kategori adalah label/divisi yang mengelompokkan produk.
 // Misalnya: "Minuman", "Makanan Berat", "Camilan".
 //
@@ -27,7 +27,7 @@ const categoryService = {
 
   // --- DAFTAR KATEGORI ---
   // @param {{ search?: string, is_active?: boolean }} params
-  // @returns Category[] (bukan paginated — backend mengembalikan semua sekaligus)
+  // @returns Category[] (bukan paginated, backend mengembalikan semua sekaligus)
   getAll: async (params = {}) => {
     const { data } = await api.get(`/categories${buildQueryString(params)}`);
     // Return full response so callers can access meta (plan_limit, is_limited)

@@ -1,11 +1,11 @@
 // ============================================================
-// authService.js — Layanan HTTP untuk autentikasi
+// authService.js, Layanan HTTP untuk autentikasi
 //
-// Analogi: Ini seperti "petugas front desk" —
+// Analogi: Ini seperti "petugas front desk",
 // dia yang ngurusin semua administrasi masuk/keluar:
 // daftar akun baru, login, logout, dan cek siapa yang sedang masuk.
 //
-// PENTING — Dua tempat penyimpanan token:
+// PENTING, Dua tempat penyimpanan token:
 //
 //   1. sessionStorage  → dibaca oleh axios.js (untuk sisipkan header Authorization)
 //      Contoh: sessionStorage.setItem("token", "abc123")
@@ -46,7 +46,7 @@ const clearTokenCookie = () => {
 };
 
 // --- HELPER: SIMPAN SESI LOGIN ---
-// Dipakai bersama oleh login() dan register() — kedua tempat penyimpanan
+// Dipakai bersama oleh login() dan register(), kedua tempat penyimpanan
 // (sessionStorage + cookie) harus selalu sinkron, makanya disatukan di sini
 const persistSession = (token, user) => {
   if (typeof window === "undefined") return;
@@ -78,7 +78,7 @@ const authService = {
   },
 
   // --- REGISTER ---
-  // Daftar akun baru — setelah berhasil, langsung login (dapat token)
+  // Daftar akun baru, setelah berhasil, langsung login (dapat token)
   // Backend response shape sama dengan login
   register: async (payload) => {
     const { data } = await api.post("/register", payload);
@@ -140,7 +140,7 @@ const authService = {
 
   // --- AMBIL USER DARI SESSIONSTORAGE (synchronous, tidak perlu await) ---
   // Digunakan untuk hydrate state saat pertama kali komponen load
-  // Lebih cepat dari request ke server — tampilkan data lama dulu, update nanti
+  // Lebih cepat dari request ke server, tampilkan data lama dulu, update nanti
   getStoredUser: () => {
     if (typeof window === "undefined") return null;  // Guard untuk SSR
     try {

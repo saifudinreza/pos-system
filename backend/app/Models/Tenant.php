@@ -6,14 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model Tenant — merepresentasikan satu toko/UMKM (unit bisnis) di KasirAI.
+ * Model Tenant, merepresentasikan satu toko/UMKM (unit bisnis) di KasirAI.
  *
  * Tabel: `tenants`. Hampir semua model tenant-aware ber-relasi ke sini dan
  * difilter otomatis via TenantScope. Menyimpan juga konfigurasi pembayaran
  * per-tenant (split payment).
  * Casts: is_active → boolean, midtrans_server_key → encrypted (server key
  * Midtrans dienkripsi di database), midtrans_is_production → boolean
- * (nullable — kalau kosong, ikut mode platform via midtransIsProduction()).
+ * (nullable, kalau kosong, ikut mode platform via midtransIsProduction()).
  */
 class Tenant extends Model
 {
@@ -30,7 +30,7 @@ class Tenant extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

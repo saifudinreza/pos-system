@@ -1,5 +1,5 @@
 // ============================================================
-// insightService.js — Layanan Wawasan AI (AI Business Insight)
+// insightService.js, Layanan Wawasan AI (AI Business Insight)
 //
 // Analogi: "analis bisnis otomatis" yang membaca angka toko lalu
 // merangkainya jadi kalimat yang mudah dipahami.
@@ -22,7 +22,7 @@ const insightService = {
 
   // --- GENERATE WAWASAN BARU ---
   // Minta AI (Groq/OpenRouter) menulis ulang wawasan dari data terkini.
-  // Dipanggil manual oleh admin — throttle 5 request/menit di backend.
+  // Dipanggil manual oleh admin, throttle 5 request/menit di backend.
   // @returns { data: { insight, ... } }
   generateInsights: async () => {
     const { data } = await api.post("/insights/generate");

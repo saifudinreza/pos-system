@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
  *
  * Setiap perubahan stok produk (penjualan, pembatalan, restok, penyesuaian)
  * WAJIB lewat service ini supaya `products.stock` selalu punya jejak audit.
- * Catatan: service ini TIDAK mengubah stok — dia hanya mencatat. Perubahan
+ * Catatan: service ini TIDAK mengubah stok, dia hanya mencatat. Perubahan
  * stok tetap dilakukan oleh pemanggil (decrement/increment).
  */
 class InventoryService
@@ -18,7 +18,7 @@ class InventoryService
     /**
      * Catat satu pergerakan stok ke ledger inventory.
      *
-     * Service ini HANYA mencatat — perubahan `products.stock` tetap dilakukan
+     * Service ini HANYA mencatat, perubahan `products.stock` tetap dilakukan
      * oleh pemanggil (decrement/increment). `before_stock`/`after_stock`
      * adalah snapshot yang dipakai untuk riwayat pergerakan.
      *

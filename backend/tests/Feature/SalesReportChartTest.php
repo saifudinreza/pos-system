@@ -13,10 +13,10 @@ use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 /**
- * Test chart data laporan penjualan — memastikan query-nya portabel
+ * Test chart data laporan penjualan, memastikan query-nya portabel
  * (berjalan di SQLite :memory: maupun MySQL production).
  *
- * Dulu chart bulanan memakai MONTH() (MySQL-only) — di-fix jadi
+ * Dulu chart bulanan memakai MONTH() (MySQL-only), di-fix jadi
  * dikelompokkan di PHP via Carbon (aturan CLAUDE.md point 9).
  */
 class SalesReportChartTest extends TestCase

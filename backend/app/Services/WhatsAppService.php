@@ -49,7 +49,7 @@ class WhatsAppService
             $response = Http::withHeaders([
                 'Authorization' => $this->token,
             ])->post($this->apiUrl, [
-                // Nomor dinormalisasi ke format internasional (62...) — lihat formatPhone()
+                // Nomor dinormalisasi ke format internasional (62...), lihat formatPhone()
                 'target'      => $this->formatPhone($order->customer_phone),
                 'message'     => $message,
                 'countryCode' => '62',   // Indonesia

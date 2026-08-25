@@ -1,13 +1,13 @@
 "use client";
-// NeoInput — Input field neobrutalist
-// Analogi: seperti kolom isian di formulir resmi — tepi tegas, jelas mana yang aktif
+// NeoInput, Input field neobrutalist
+// Analogi: seperti kolom isian di formulir resmi, tepi tegas, jelas mana yang aktif
 
 /**
- * NeoInput — input text neobrutalist dengan label & pesan error opsional.
+ * NeoInput, input text neobrutalist dengan label & pesan error opsional.
  *
  * Props:
  *   label    : teks label di atas input (opsional)
- *   error    : pesan error — kalau terisi, border jadi merah + teks merah di bawah
+ *   error    : pesan error, kalau terisi, border jadi merah + teks merah di bawah
  *   className: class Tailwind untuk WRAPPER (flex flex-col)
  *   type     : type input (default: "text")
  *   id       : dihubungkan ke htmlFor label (aksesibilitas)

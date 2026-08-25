@@ -17,10 +17,10 @@ use Illuminate\Support\Facades\Log;
  */
 class GroqService
 {
-    // Kunci cache penanda Groq sedang rate-limited — dipakai juga oleh
+    // Kunci cache penanda Groq sedang rate-limited, dipakai juga oleh
     // getActiveProvider()/getActiveModel() untuk info provider aktif.
     private const GROQ_RATE_LIMIT_KEY = 'groq_rate_limited';
-    // Durasi cooldown fallback ke OpenRouter — 65 detik, sedikit di atas
+    // Durasi cooldown fallback ke OpenRouter, 65 detik, sedikit di atas
     // reset window rate limit Groq (60 detik) supaya tidak langsung kena lagi.
     private const GROQ_RATE_LIMIT_TTL = 65;
 
@@ -47,7 +47,7 @@ class GroqService
     }
 
     // ============================================================
-    // ask() — kirim ke Groq dulu, auto-fallback ke OpenRouter
+    // ask(), kirim ke Groq dulu, auto-fallback ke OpenRouter
     //          jika Groq rate-limited (429). Setelah TTL habis
     //          (65 detik), otomatis kembali ke Groq.
     // ============================================================
@@ -77,12 +77,12 @@ class GroqService
             } catch (\Exception $e) {
                 if ($this->isRateLimitError($e)) {
                     // Kena rate limit → aktifkan cooldown & langsung pindah ke OpenRouter
-                    Log::warning('Groq rate limit hit — switching to OpenRouter for ' . self::GROQ_RATE_LIMIT_TTL . 's');
+                    Log::warning('Groq rate limit hit, switching to OpenRouter for ' . self::GROQ_RATE_LIMIT_TTL . 's');
                     Cache::put(self::GROQ_RATE_LIMIT_KEY, true, self::GROQ_RATE_LIMIT_TTL);
                     if (! empty($this->orKey)) {
                         return $this->callOpenRouter($systemPrompt, $userQuery);
                     }
-                    // Tanpa OpenRouter tidak ada alternatif — biarkan error naik ke pemanggil
+                    // Tanpa OpenRouter tidak ada alternatif, biarkan error naik ke pemanggil
                     throw new \Exception('Groq rate limited dan OpenRouter tidak dikonfigurasi.');
                 }
                 // Error selain rate limit → jangan ditutup, lempar apa adanya
@@ -118,7 +118,7 @@ class GroqService
     }
 
     // ============================================================
-    // PRIVATE — call Groq
+    // PRIVATE, call Groq
     // ============================================================
     /**
      * Panggil Groq API (chat completions).
@@ -158,7 +158,7 @@ class GroqService
     }
 
     // ============================================================
-    // PRIVATE — call OpenRouter
+    // PRIVATE, call OpenRouter
     // ============================================================
     /**
      * Panggil OpenRouter API (chat completions) sebagai fallback.
@@ -173,7 +173,7 @@ class GroqService
 
         $response = Http::timeout(30)
             ->withToken($this->orKey)
-            // Header identitas aplikasi — diminta OpenRouter untuk source tracking
+            // Header identitas aplikasi, diminta OpenRouter untuk source tracking
             ->withHeaders([
                 'HTTP-Referer' => config('app.url', 'http://localhost'),
                 'X-Title'      => config('app.name', 'KasirAI'),
@@ -204,7 +204,7 @@ class GroqService
     }
 
     // ============================================================
-    // PRIVATE — deteksi apakah error adalah rate limit
+    // PRIVATE, deteksi apakah error adalah rate limit
     // ============================================================
     /**
      * Deteksi apakah error berasal dari rate limit Groq (HTTP 429).
@@ -241,7 +241,7 @@ You can help with:
 - Helping interpret reports and numbers
 
 Always answer in Bahasa Indonesia that is easy to understand for a small business owner.
-Keep answers concise, clear, and actionable. Never show raw JSON data — summarize in natural sentences.
+Keep answers concise, clear, and actionable. Never show raw JSON data, summarize in natural sentences.
 If asked something completely unrelated to business, kindly redirect the user.
 If the data is not sufficient to answer, say so honestly.
 
@@ -250,7 +250,7 @@ Store data context:
     }
 
     /**
-     * Prompt untuk chat analisis penjualan — berisi data 3 periode
+     * Prompt untuk chat analisis penjualan, berisi data 3 periode
      * (hari_ini/minggu_ini/bulan_ini) + katalog & stok produk, plus aturan
      * wajib soal periode waktu supaya LLM tidak salah label periode.
      */
@@ -261,21 +261,21 @@ Store data context:
 
         // ----- Bagian prompt: aturan wajib periode waktu & aturan stok/katalog -----
         $extra = "\n\nATURAN WAJIB SOAL PERIODE WAKTU:
-- Data \"penjualan_per_periode\" berisi 3 rentang: hari_ini, minggu_ini, bulan_ini — masing-masing sudah dihitung terpisah dan akurat.
+- Data \"penjualan_per_periode\" berisi 3 rentang: hari_ini, minggu_ini, bulan_ini, masing-masing sudah dihitung terpisah dan akurat.
 - Cocokkan periode yang dipakai jawaban PERSIS dengan kata yang diucapkan user: \"hari ini\"/\"hari ini juga\" → pakai hari_ini. \"minggu ini\" → pakai minggu_ini. \"bulan ini\" → pakai bulan_ini.
 - Kalau user tidak sebutkan periode sama sekali, default pakai bulan_ini tapi sebutkan eksplisit \"(bulan ini)\" di jawaban supaya tidak ambigu.
-- JANGAN PERNAH menjawab pakai angka dari periode lain daripada yang diminta user — ini penyebab utama jawaban salah, jadi selalu cek ulang periode sebelum menjawab.
+- JANGAN PERNAH menjawab pakai angka dari periode lain daripada yang diminta user, ini penyebab utama jawaban salah, jadi selalu cek ulang periode sebelum menjawab.
 
 ATURAN SOAL STOK & KATALOG PRODUK:
 - \"katalog_dan_stok_produk\" berisi semua produk aktif toko ini beserta harga, kategori, stok, dan status (Normal/MENIPIS).
-- Gunakan data ini untuk jawab pertanyaan soal stok, harga, atau detail produk tertentu — jangan bilang tidak ada data kalau informasinya sebenarnya ada di situ.
+- Gunakan data ini untuk jawab pertanyaan soal stok, harga, atau detail produk tertentu, jangan bilang tidak ada data kalau informasinya sebenarnya ada di situ.
 - Kalau ditanya \"stok apa yang mau habis\", filter & sebutkan hanya yang berstatus MENIPIS.";
 
         return $this->baseSystemPrompt($dataJson . $extra);
     }
 
     /**
-     * Prompt untuk prediksi stok — data per produk (stok, rata penjualan
+     * Prompt untuk prediksi stok, data per produk (stok, rata penjualan
      * per hari, estimasi hari) dengan aturan analisis stok untuk LLM.
      */
     public function buildStockPrompt(array $stockData): string
@@ -293,7 +293,7 @@ ATURAN SOAL STOK & KATALOG PRODUK:
     }
 
     /**
-     * Prompt untuk rekomendasi produk — data transaksi (item yang sering
+     * Prompt untuk rekomendasi produk, data transaksi (item yang sering
      * dibeli bersamaan) untuk analisis cross-selling.
      */
     public function buildRecommendationPrompt(array $transactionData): string

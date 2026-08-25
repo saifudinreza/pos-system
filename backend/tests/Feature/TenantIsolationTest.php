@@ -55,7 +55,7 @@ class TenantIsolationTest extends TestCase
         return $order;
     }
 
-    // ── AI QUERY — data penjualan tidak boleh bocor antar tenant ──
+    // ── AI QUERY, data penjualan tidak boleh bocor antar tenant ──
 
     public function test_ai_query_does_not_leak_revenue_from_other_tenant(): void
     {
@@ -67,7 +67,7 @@ class TenantIsolationTest extends TestCase
         $this->makePaidOrder($tenantA, $adminA, 50000);
         $this->makePaidOrder($tenantB, $adminB, 999000);
 
-        // Mock AI provider — tangkap isi prompt yang dikirim ke LLM
+        // Mock AI provider, tangkap isi prompt yang dikirim ke LLM
         $capturedPrompt = null;
         $this->mock(\App\Services\GroqService::class, function ($mock) use (&$capturedPrompt) {
             $mock->shouldReceive('buildSalesPrompt')->andReturnUsing(function ($data) use (&$capturedPrompt) {
@@ -99,7 +99,7 @@ class TenantIsolationTest extends TestCase
             ->assertJsonPath('data.data.response', 'analisis selesai');
     }
 
-    // ── AI LOGS — admin tenant hanya lihat log user tenant sendiri ──
+    // ── AI LOGS, admin tenant hanya lihat log user tenant sendiri ──
 
     public function test_ai_logs_only_show_own_tenant(): void
     {
@@ -131,7 +131,7 @@ class TenantIsolationTest extends TestCase
         $response->assertJsonPath('data.0.query', 'pertanyaan toko A');
     }
 
-    // ── AI STATS — summary hanya hitung user dalam tenant sendiri ──
+    // ── AI STATS, summary hanya hitung user dalam tenant sendiri ──
 
     public function test_ai_stats_only_count_own_tenant_usage(): void
     {
@@ -152,7 +152,7 @@ class TenantIsolationTest extends TestCase
         $response->assertJsonPath('summary.today.requests', 2);
     }
 
-    // ── REPORT SALES — transaksi tenant lain tidak masuk summary ──
+    // ── REPORT SALES, transaksi tenant lain tidak masuk summary ──
 
     public function test_report_sales_only_include_own_tenant_transactions(): void
     {
@@ -173,7 +173,7 @@ class TenantIsolationTest extends TestCase
         $this->assertEquals(1, (int) $response->json('data.summary.total_transactions'));
     }
 
-    // ── DEVELOPER TENANT FILTER — produk & kategori bisa difilter per tenant ──
+    // ── DEVELOPER TENANT FILTER, produk & kategori bisa difilter per tenant ──
 
     private function makeProduct(Tenant $tenant, Category $category, string $name, string $sku): Product
     {

@@ -1,8 +1,8 @@
-// NeoTable — Tabel data neobrutalist
-// Analogi: seperti buku kas di meja kasir — baris-kolom rapi dengan header tegas
+// NeoTable, Tabel data neobrutalist
+// Analogi: seperti buku kas di meja kasir, baris-kolom rapi dengan header tegas
 
 /**
- * NeoTable — tabel data generik dengan header, loading & empty state.
+ * NeoTable, tabel data generik dengan header, loading & empty state.
  *
  * Props:
  *   columns   : [{ key, label, width?, render?(value, row) }]

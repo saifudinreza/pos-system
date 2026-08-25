@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Products Page — CRUD produk + filter & pagination
+// Products Page, CRUD produk + filter & pagination
 //
 // Data yang diambil:
 //   - useProducts hook → GET /api/products (search debounce 500ms,
@@ -39,7 +39,7 @@ const EMPTY_FORM = {
 };
 
 /**
- * generateSku — Buat SKU otomatis dari nama produk:
+ * generateSku, Buat SKU otomatis dari nama produk:
  * 3 huruf pertama tiap kata (uppercase) + angka acak 3 digit.
  * Contoh: "Es Teh Manis" → "EST-MAN-123". Kalau nama kosong → "SKU-123".
  */
@@ -50,7 +50,7 @@ function generateSku(name) {
 }
 
 /**
- * StockBadge — Badge status stok produk: Habis (0) / Menipis (≤ alert) / Normal.
+ * StockBadge, Badge status stok produk: Habis (0) / Menipis (≤ alert) / Normal.
  */
 function StockBadge({ stock, stockAlert }) {
   if (stock === 0)                          return <NeoBadge color="red">Habis</NeoBadge>;
@@ -77,7 +77,7 @@ export default function ProductsPage() {
   const [preview,     setPreview]    = useState(null);  // URL preview foto sebelum upload
   const [saving,      setSaving]     = useState(false);
   const [formError,   setFormError]  = useState("");
-  const [activeFilter, setActiveFilter] = useState("all"); // "all" | "low" — filter stok rendah
+  const [activeFilter, setActiveFilter] = useState("all"); // "all" | "low", filter stok rendah
 
   // ── Data pendukung: ambil daftar tenant (developer) + kategori ──
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function ProductsPage() {
     }
   }, [isDeveloper]);
 
-  // Kategori untuk dropdown filter & modal — ikut tenant yang dipilih (developer)
+  // Kategori untuk dropdown filter & modal, ikut tenant yang dipilih (developer)
   useEffect(() => {
     const params = { is_active: true };
     if (isDeveloper && selectedTenant) params.tenant_id = selectedTenant;
@@ -97,7 +97,7 @@ export default function ProductsPage() {
       .catch(() => {});
   }, [isDeveloper, selectedTenant]);
 
-  /** handleTenantChange — Ganti tenant yang difilter (developer only). */
+  /** handleTenantChange, Ganti tenant yang difilter (developer only). */
   const handleTenantChange = (e) => {
     const val = e.target.value;
     setSelectedTenant(val);
@@ -105,7 +105,7 @@ export default function ProductsPage() {
   };
 
   /**
-   * openModal — Buka modal tambah (data=null) atau edit (data=produk).
+   * openModal, Buka modal tambah (data=null) atau edit (data=produk).
    * Form di-pre-fill dari data produk; field yang tidak ada diberi default.
    */
   const openModal = (data = null) => {
@@ -123,14 +123,14 @@ export default function ProductsPage() {
     setFormError("");
   };
 
-  /** closeModal — Tutup modal & buang preview foto. */
+  /** closeModal, Tutup modal & buang preview foto. */
   const closeModal = () => {
     setModal({ open: false, data: null });
     setPreview(null);
   };
 
   /**
-   * handleImageChange — Simpan File gambar ke form + buat URL preview
+   * handleImageChange, Simpan File gambar ke form + buat URL preview
    * lokal via URL.createObjectURL (hanya preview, upload terjadi saat save).
    */
   const handleImageChange = (e) => {
@@ -140,18 +140,18 @@ export default function ProductsPage() {
     setPreview(URL.createObjectURL(file));
   };
 
-  /** handleFieldChange — Curried handler untuk input generik per nama field. */
+  /** handleFieldChange, Curried handler untuk input generik per nama field. */
   const handleFieldChange = (field) => (e) =>
     setForm((p) => ({ ...p, [field]: e.target.value }));
 
-  /** handleAutoSku — Isi field SKU otomatis dari nama produk saat ini. */
+  /** handleAutoSku, Isi field SKU otomatis dari nama produk saat ini. */
   const handleAutoSku = () => {
     if (!form.name.trim()) return;
     setForm((p) => ({ ...p, sku: generateSku(p.name) }));
   };
 
   /**
-   * handleSave — Simpan produk (create atau update sesuai modal.data).
+   * handleSave, Simpan produk (create atau update sesuai modal.data).
    * Field numerik dikonversi ke Number; cost boleh kosong (null);
    * kalau tidak ada file gambar, key image dihapus dari payload.
    */
@@ -179,7 +179,7 @@ export default function ProductsPage() {
     } finally { setSaving(false); }
   };
 
-  /** handleDelete — Hapus produk dengan konfirmasi dialog. */
+  /** handleDelete, Hapus produk dengan konfirmasi dialog. */
   const handleDelete = async (id, name) => {
     if (!confirm(`Hapus produk "${name}"?`)) return;
     try { await deleteProduct(id); }
@@ -187,7 +187,7 @@ export default function ProductsPage() {
   };
 
   /**
-   * handleToggleStatus — Aktif/nonaktifkan produk. Backend butuh payload
+   * handleToggleStatus, Aktif/nonaktifkan produk. Backend butuh payload
    * lengkap pada PUT, jadi field penting dikirim ulang dari data row.
    */
   const handleToggleStatus = async (row) => {
@@ -208,7 +208,7 @@ export default function ProductsPage() {
   };
 
   /**
-   * handleStockFilter — Toggle filter "stok rendah". Meneruskan query param
+   * handleStockFilter, Toggle filter "stok rendah". Meneruskan query param
    * low_stock ke useProducts (undefined = filter dihapus).
    */
   const handleStockFilter = (type) => {
@@ -221,7 +221,7 @@ export default function ProductsPage() {
   };
 
   /**
-   * handleSortChange — Sortir tabel (developer only untuk opsi "Tenant").
+   * handleSortChange, Sortir tabel (developer only untuk opsi "Tenant").
    * Value select berbentuk "sort_by:sort_order".
    */
   const handleSortChange = (e) => {
@@ -237,7 +237,7 @@ export default function ProductsPage() {
         <div className="flex items-center gap-3">
           {row.image_url
             ? <img src={row.image_url} alt={val} className="w-9 h-9 object-cover border-2 border-brand-black/20 shrink-0" />
-            : <div className="w-9 h-9 bg-brand-gray border-2 border-brand-black/10 shrink-0 flex items-center justify-center text-xs text-brand-black/30">📦</div>
+            : <div className="w-9 h-9 bg-brand-gray border-2 border-brand-black/10 shrink-0 flex items-center justify-center text-xs text-brand-black/30"></div>
           }
           <div>
             <p className="font-bold text-sm">{val}</p>
@@ -257,7 +257,7 @@ export default function ProductsPage() {
       label: "Modal",
       render: (v, row) => (
         <div>
-          <p className="font-mono font-bold">{v ? formatCurrency(v) : <span className="text-brand-black/30">—</span>}</p>
+          <p className="font-mono font-bold">{v ? formatCurrency(v) : <span className="text-brand-black/30">, </span>}</p>
           {v > 0 && row.price > 0 && (
             <p className="text-[10px] font-black text-green-600 font-mono">
               +{Math.round(((row.price - v) / v) * 100)}% margin
@@ -333,7 +333,7 @@ export default function ProductsPage() {
             </svg>
             <div>
               <p className="font-black text-amber-800 text-sm">
-                Paket {PLAN_LABEL[meta.plan] ?? meta.plan} — hanya {meta.plan_limit} produk yang ditampilkan
+                Paket {PLAN_LABEL[meta.plan] ?? meta.plan}, hanya {meta.plan_limit} produk yang ditampilkan
               </p>
               <p className="text-xs text-amber-700">
                 Toko ini punya {meta.total_in_tenant} produk. Upgrade untuk lihat & kelola semua.

@@ -10,10 +10,10 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
- * CategoryController — CRUD kategori produk per-tenant.
+ * CategoryController, CRUD kategori produk per-tenant.
  *
  * Isolasi tenant otomatis via TenantScope (tidak ada WHERE tenant_id manual).
- * Read limit paket dipakai untuk FREE (15 kategori) — lihat Controller::categoryReadLimits().
+ * Read limit paket dipakai untuk FREE (15 kategori), lihat Controller::categoryReadLimits().
  * Slug digenerate otomatis dari model (event creating), tidak perlu dikirim frontend.
  */
 class CategoryController extends Controller
@@ -37,7 +37,7 @@ class CategoryController extends Controller
 
         // ----- FILTER TENANT (khusus developer) -----
         // Developer biasanya melihat semua tenant. Bila ingin fokus ke satu
-        // tenant, kirim ?tenant_id=xxx — parameter ini DIABAIKAN untuk
+        // tenant, kirim ?tenant_id=xxx, parameter ini DIABAIKAN untuk
         // non-developer (keamanan: mereka tetap hanya lihat tenant sendiri).
         if ($request->user()->role === 'developer' && $request->filled('tenant_id')) {
             $query->where('categories.tenant_id', $request->tenant_id);
@@ -93,7 +93,7 @@ class CategoryController extends Controller
 
 
     // =============================================================
-    // SHOW — ambil satu kategori by ID beserta produknya
+    // SHOW, ambil satu kategori by ID beserta produknya
     // GET /api/categories/{id}
     // =============================================================
     /**
@@ -123,7 +123,7 @@ class CategoryController extends Controller
             'message' => 'Deatail kategori berhasil diambil.',
             'data' => [
                 ...$this->formatCategory($category),
-                // ↑ Spread operator — ambil semua field dari formatCategory()
+                // ↑ Spread operator, ambil semua field dari formatCategory()
                 'products' => $category->products->map(fn($p) => [
                     'id'    => $p->id,
                     'name'  => $p->name,
@@ -138,7 +138,7 @@ class CategoryController extends Controller
 
 
     // =============================================================
-    // STORE — tambah kategori baru
+    // STORE, tambah kategori baru
     // POST /api/categories
     // Role: admin only
     // =============================================================
@@ -183,7 +183,7 @@ class CategoryController extends Controller
 
 
     // =============================================================
-    // UPDATE — edit kategori
+    // UPDATE, edit kategori
     // PUT /api/categories/{id}
     // Role: admin only
     // =============================================================
@@ -228,13 +228,13 @@ class CategoryController extends Controller
 
 
     // =============================================================
-    // DESTROY — hapus kategori
+    // DESTROY, hapus kategori
     // DELETE /api/categories/{id}
     // Role: admin only
     // =============================================================
     /**
      * Hapus kategori. Kategori yang masih dipakai produk TIDAK boleh dihapus
-     * (422 + products_count) — integritas relasi terjaga.
+     * (422 + products_count), integritas relasi terjaga.
      *
      * @param int $id ID kategori
      * @return JsonResponse 200 / 404 / 422 masih punya produk
@@ -266,7 +266,7 @@ class CategoryController extends Controller
     }
 
     // =============================================================
-    // HELPER — format data kategori untuk response
+    // HELPER, format data kategori untuk response
     // =============================================================
     /**
      * Format data kategori untuk response (whitelist field).

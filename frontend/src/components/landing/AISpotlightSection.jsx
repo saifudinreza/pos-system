@@ -1,10 +1,10 @@
 "use client";
 
 // ============================================================
-// AISpotlightSection — SOROTAN untuk pembeda utama: AI Sidebar (Groq)
+// AISpotlightSection, SOROTAN untuk pembeda utama: AI Sidebar (Groq)
 //
 // Posisi cerita: setelah fitur umum, kita beri "panggung khusus"
-// untuk hal yang bikin KasirAI beda — AI assistant bertenaga Groq
+// untuk hal yang bikin KasirAI beda, AI assistant bertenaga Groq
 // yang super cepat dan paham data toko.
 //
 // Visual: background gelap + sorotan kuning (radial glow) yang
@@ -31,7 +31,7 @@ const BENEFITS = [
   {
     Icon: Zap,
     title: "Jawaban instan",
-    desc: "Ditenagai Groq LPU — respon dalam hitungan detik, bukan menit.",
+    desc: "Ditenagai Groq LPU, respon dalam hitungan detik, bukan menit.",
   },
   {
     Icon: Database,
@@ -41,7 +41,7 @@ const BENEFITS = [
   {
     Icon: MessageSquareText,
     title: "Bahasa Indonesia natural",
-    desc: "Tanya seperti ngobrol biasa — \"omzet minggu ini berapa?\"",
+    desc: "Tanya seperti ngobrol biasa, \"omzet minggu ini berapa?\"",
   },
   {
     Icon: ShieldCheck,
@@ -51,7 +51,7 @@ const BENEFITS = [
 ];
 
 /**
- * ChatBubble — satu baris chat dalam mock sidebar (lihat header file).
+ * ChatBubble, satu baris chat dalam mock sidebar (lihat header file).
  *
  * Props:
  *   role     : "user" (kuning, rata kanan) | "ai" (gelap, rata kiri)
@@ -85,7 +85,7 @@ function ChatBubble({ role, children }) {
 }
 
 /**
- * AISpotlightSection — section sorotan AI (lihat header file).
+ * AISpotlightSection, section sorotan AI (lihat header file).
  * Tanpa props; animasi glow mengikuti scroll via useScroll/useTransform,
  * dan mati otomatis saat user mengaktifkan reduced-motion.
  */
@@ -109,7 +109,7 @@ export default function AISpotlightSection() {
       id="ai"
       className="relative z-[1] overflow-hidden bg-brand-black text-white py-24 px-4 sm:px-6"
     >
-      {/* Sorotan radial kuning — "lampu panggung" */}
+      {/* Sorotan radial kuning, "lampu panggung" */}
       <motion.div
         aria-hidden="true"
         style={{ x: glowX, y: glowY }}
@@ -134,7 +134,7 @@ export default function AISpotlightSection() {
         }}
       />
 
-      {/* Shape parallax dekoratif — melayang mengikuti scroll */}
+      {/* Shape parallax dekoratif, melayang mengikuti scroll */}
       <Parallax speed={0.55} aria-hidden="true" className="pointer-events-none absolute left-6 top-16 -z-0">
         <div className="w-24 h-24 border-3 border-brand-yellow/25 rotate-12" />
       </Parallax>
@@ -150,7 +150,7 @@ export default function AISpotlightSection() {
             className="inline-flex items-center gap-2 bg-brand-yellow text-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-5 border-2 border-brand-yellow"
           >
             <span className="inline-block w-2 h-2 rounded-full bg-[#00C27C] animate-pulse" />
-            ✦ PEMBEDA UTAMA · GROQ AI
+             PEMBEDA UTAMA · GROQ AI
           </div>
 
           <h2 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-black tracking-tight font-grotesk leading-[0.98]">
@@ -162,7 +162,7 @@ export default function AISpotlightSection() {
 
           <p className="mt-5 text-white/60 font-medium text-lg max-w-md">
             Bukan chatbot biasa. AI Assistant KasirAI terhubung langsung ke data
-            tokomu dan menjawab dalam Bahasa Indonesia — secepat kamu sempat berpikir.
+            tokomu dan menjawab dalam Bahasa Indonesia, secepat kamu sempat berpikir.
           </p>
 
           <Stagger className="mt-8 grid sm:grid-cols-2 gap-4" gap={0.1}>
@@ -215,7 +215,7 @@ export default function AISpotlightSection() {
               </div>
             </div>
 
-            {/* Body chat — pesan muncul berurutan saat masuk viewport */}
+            {/* Body chat, pesan muncul berurutan saat masuk viewport */}
             <Stagger
               className="flex flex-col gap-3 p-4 min-h-[360px]"
               gap={0.55}
@@ -223,8 +223,8 @@ export default function AISpotlightSection() {
             >
               <ChatBubble role="user">Produk apa yang paling laku minggu ini?</ChatBubble>
               <ChatBubble role="ai">
-                <b className="text-brand-yellow">Nasi Goreng Spesial</b> — 312 porsi (Rp 4,7jt).
-                Naik <b className="text-[#00C27C]">+18%</b> dari minggu lalu. 🔥
+                <b className="text-brand-yellow">Nasi Goreng Spesial</b>, 312 porsi (Rp 4,7jt).
+                Naik <b className="text-[#00C27C]">+18%</b> dari minggu lalu. 
               </ChatBubble>
 
               <ChatBubble role="user">Ada saran biar margin naik?</ChatBubble>
@@ -235,8 +235,8 @@ export default function AISpotlightSection() {
 
               <ChatBubble role="user">Stok mana yang harus direorder?</ChatBubble>
               <ChatBubble role="ai">
-                <b>Es Kopi Susu</b> sisa <b className="text-[#FF6B00]">8 cup</b> — habis ~besok siang.
-                Reorder min. 40 cup sekarang. ⚡
+                <b>Es Kopi Susu</b> sisa <b className="text-[#FF6B00]">8 cup</b>, habis ~besok siang.
+                Reorder min. 40 cup sekarang. 
               </ChatBubble>
             </Stagger>
 

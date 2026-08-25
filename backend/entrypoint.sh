@@ -4,7 +4,7 @@ set -e
 # ── Redis (opsional): kalau REDIS_URL di-set (Railway plugin Redis), pindahkan
 #    cache / queue / session ke Redis. Tanpa REDIS_URL → fallback aman ke
 #    database/file (perilaku lama). Client predis (pure-PHP, tanpa ekstensi redis).
-#    Dihitung DI LUAR heredoc .env — logic shell tidak boleh masuk ke file .env.
+#    Dihitung DI LUAR heredoc .env, logic shell tidak boleh masuk ke file .env.
 CACHE_STORE_FINAL="${CACHE_STORE:-database}"
 SESSION_DRIVER_FINAL="${SESSION_DRIVER:-file}"
 QUEUE_CONNECTION_FINAL="${QUEUE_CONNECTION:-database}"
@@ -13,9 +13,9 @@ if [ -n "${REDIS_URL}" ]; then
     CACHE_STORE_FINAL="${CACHE_STORE_REDIS:-redis}"
     SESSION_DRIVER_FINAL="${SESSION_DRIVER_REDIS:-redis}"
     QUEUE_CONNECTION_FINAL="${QUEUE_CONNECTION_REDIS:-redis}"
-    echo "✅ Redis REDIS_URL terdeteksi -> cache/session/queue ke Redis"
+    echo " Redis REDIS_URL terdeteksi -> cache/session/queue ke Redis"
 else
-    echo "✅ REDIS_URL kosong -> fallback cache/session/file & queue database"
+    echo " REDIS_URL kosong -> fallback cache/session/file & queue database"
 fi
 
 # Buat .env dari environment variables Railway
@@ -34,7 +34,7 @@ DB_USERNAME="${DB_USERNAME}"
 DB_PASSWORD="${DB_PASSWORD}"
 
 # SSL koneksi DB (TiDB Cloud butuh TLS). MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
-# dipakai config/database.php via filter_var() — nilai "false" artinya TLS
+# dipakai config/database.php via filter_var(), nilai "false" artinya TLS
 # aktif tanpa verifikasi sertifikat (cocok untuk TiDB Cloud public endpoint).
 MYSQL_ATTR_SSL_CA="${MYSQL_ATTR_SSL_CA:-}"
 MYSQL_ATTR_SSL_VERIFY_SERVER_CERT="${MYSQL_ATTR_SSL_VERIFY_SERVER_CERT:-false}"
@@ -54,11 +54,11 @@ GROQ_MODEL="${GROQ_MODEL:-llama-3.3-70b-versatile}"
 OPENROUTER_API_KEY="${OPENROUTER_API_KEY}"
 OPENROUTER_MODEL="${OPENROUTER_MODEL:-meta-llama/llama-3.1-8b-instruct:free}"
 
-# Frontend URL — dipakai untuk link reset password di email & CORS Sanctum.
+# Frontend URL, dipakai untuk link reset password di email & CORS Sanctum.
 FRONTEND_URL="${FRONTEND_URL:-https://sikasirai.com}"
 SANCTUM_STATEFUL_DOMAINS="${SANCTUM_STATEFUL_DOMAINS:-sikasirai.com,localhost:3000}"
 
-# Mail — kirim email reset password (SMTP Gmail)
+# Mail, kirim email reset password (SMTP Gmail)
 MAIL_MAILER="${MAIL_MAILER:-log}"
 MAIL_SCHEME="${MAIL_SCHEME:-tls}"
 MAIL_HOST="${MAIL_HOST:-smtp.gmail.com}"
@@ -68,7 +68,7 @@ MAIL_PASSWORD="${MAIL_PASSWORD}"
 MAIL_FROM_ADDRESS="${MAIL_FROM_ADDRESS:-noreply.kasirai@gmail.com}"
 MAIL_FROM_NAME="${MAIL_FROM_NAME:-KasirAI}"
 
-# Fonnte — kirim struk digital via WhatsApp
+# Fonnte, kirim struk digital via WhatsApp
 FONNTE_TOKEN="${FONNTE_TOKEN}"
 
 # Kuota AI & monitoring
@@ -103,7 +103,7 @@ APP_FALLBACK_LOCALE="${APP_FALLBACK_LOCALE:-en}"
 LOG_LEVEL="${LOG_LEVEL:-error}"
 EOF
 
-echo "✅ .env created"
+echo " .env created"
 
 # Buat folder storage yang dibutuhkan Laravel
 mkdir -p /var/www/html/storage/app/public/products
@@ -121,30 +121,30 @@ chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 # Ini wajib agar gambar yang diupload bisa diakses via URL
 rm -rf /var/www/html/public/storage
 ln -sf /var/www/html/storage/app/public /var/www/html/public/storage
-echo "✅ Storage symlink created: public/storage → storage/app/public"
+echo " Storage symlink created: public/storage → storage/app/public"
 
 # Clear cache lama lalu cache ulang
 php artisan config:clear
 php artisan route:clear
 php artisan config:cache
 php artisan route:cache
-echo "✅ Config & routes cached"
+echo " Config & routes cached"
 
 # Jalankan migration & seeder
-php artisan migrate --force 2>&1 || echo "⚠️ Migration warning (non-fatal)"
-php artisan db:seed --force 2>&1 || echo "⚠️ Seeder warning (non-fatal)"
-echo "✅ Laravel ready"
+php artisan migrate --force 2>&1 || echo " Migration warning (non-fatal)"
+php artisan db:seed --force 2>&1 || echo " Seeder warning (non-fatal)"
+echo " Laravel ready"
 
-# Jalankan queue worker di background — proyek ini memakai job queue untuk
+# Jalankan queue worker di background, proyek ini memakai job queue untuk
 # kirim WhatsApp (webhook Midtrans) & panggilan AI (Groq/OpenRouter) supaya
 # tidak menahan worker PHP-FPM. Connection mengikuti QUEUE_CONNECTION dari .env
 # (database, atau redis kalau REDIS_URL tersedia).
 php artisan queue:work --tries=3 --timeout=300 > /var/log/queue-worker.log 2>&1 &
-echo "✅ Queue worker started"
+echo " Queue worker started"
 
 # Start PHP-FPM di background
 php-fpm -D
-echo "✅ PHP-FPM started"
+echo " PHP-FPM started"
 
 # Tulis nginx config langsung (hindari masalah cache/template)
 export PORT="${PORT:-80}"
@@ -185,7 +185,7 @@ server {
     }
 }
 NGINXEOF
-echo "✅ Starting Nginx on port $PORT"
+echo " Starting Nginx on port $PORT"
 
 # Pastikan symlink sites-enabled ada
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default

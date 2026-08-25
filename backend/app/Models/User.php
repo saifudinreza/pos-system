@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
- * Model User — merepresentasikan pengguna KasirAI (developer, admin, kasir, customer).
+ * Model User, merepresentasikan pengguna KasirAI (developer, admin, kasir, customer).
  *
  * Tabel: `users`. Multi-tenant: global scope TenantScope aktif, jadi user
  * non-developer hanya melihat user lain di tenant yang sama; developer
@@ -22,7 +22,7 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * Daftarkan TenantScope secara global — dipanggil otomatis oleh Eloquent
+     * Daftarkan TenantScope secara global, dipanggil otomatis oleh Eloquent
      * saat model pertama kali digunakan.
      */
     protected static function booted(): void
@@ -49,7 +49,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

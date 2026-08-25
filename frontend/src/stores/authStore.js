@@ -1,13 +1,13 @@
 // ============================================================
-// authStore.js — Global state untuk autentikasi
+// authStore.js, Global state untuk autentikasi
 //
-// Analogi: Ini seperti "dompet digital" aplikasi —
+// Analogi: Ini seperti "dompet digital" aplikasi,
 // menyimpan siapa yang sedang login, apa role-nya, dan apakah
 // sudah terverifikasi. Semua komponen bisa intip dompet ini
 // tanpa harus tanya ke server berulang kali.
 //
-// Menggunakan Zustand — library state management yang ringan.
-// Analogi Zustand: seperti papan pengumuman global —
+// Menggunakan Zustand, library state management yang ringan.
+// Analogi Zustand: seperti papan pengumuman global,
 // siapapun bisa baca, dan siapapun bisa update. Semua yang
 // langganan (subscribe) otomatis dapat update terbaru.
 //
@@ -23,7 +23,7 @@ import authService from "@/services/authService";
 
 const useAuthStore = create((set, get) => ({
   // ============================================================
-  // STATE — data yang disimpan di "dompet"
+  // STATE, data yang disimpan di "dompet"
   // ============================================================
 
   // Data user yang sedang login. null = belum login
@@ -38,7 +38,7 @@ const useAuthStore = create((set, get) => ({
   error: null,
 
   // ============================================================
-  // COMPUTED — nilai turunan dari state (bukan state sendiri)
+  // COMPUTED, nilai turunan dari state (bukan state sendiri)
   // ============================================================
 
   // Apakah user sudah login? (ada token di localStorage)
@@ -48,7 +48,7 @@ const useAuthStore = create((set, get) => ({
   },
 
   // ============================================================
-  // ACTIONS — fungsi untuk mengubah state
+  // ACTIONS, fungsi untuk mengubah state
   // Analogi: tombol-tombol di panel kontrol
   // ============================================================
 
@@ -87,13 +87,13 @@ const useAuthStore = create((set, get) => ({
     try {
       await authService.logout();
     } finally {
-      // Kosongkan "dompet" — apapun yang terjadi di server
+      // Kosongkan "dompet", apapun yang terjadi di server
       set({ user: null, isLoading: false, error: null });
     }
   },
 
   // --- FETCH USER DARI SERVER ---
-  // Dipanggil saat aplikasi pertama dibuka — verifikasi apakah token masih valid
+  // Dipanggil saat aplikasi pertama dibuka, verifikasi apakah token masih valid
   // Analogi: saat masuk kantor, satpam scan kartu akses untuk memastikan masih aktif
   fetchCurrentUser: async () => {
     if (!authService.hasToken()) return;   // Tidak ada token = tidak perlu cek
@@ -102,7 +102,7 @@ const useAuthStore = create((set, get) => ({
       const user = await authService.me();
       set({ user, isLoading: false });
     } catch {
-      // Token tidak valid — bersihkan state (axios interceptor sudah redirect ke /login)
+      // Token tidak valid, bersihkan state (axios interceptor sudah redirect ke /login)
       set({ user: null, isLoading: false });
     }
   },
@@ -114,7 +114,7 @@ const useAuthStore = create((set, get) => ({
   },
 
   // --- UPDATE STATE USER LOKAL ---
-  // Digunakan setelah update profil — supaya nama/data di navbar ikut berubah
+  // Digunakan setelah update profil, supaya nama/data di navbar ikut berubah
   // tanpa perlu fetch ulang dari server
   setUser: (user) => set({ user }),
 
@@ -123,7 +123,7 @@ const useAuthStore = create((set, get) => ({
 
   // --- HELPER ROLE ---
   // Cek apakah user punya role tertentu
-  // Analogi: cek jabatan di KTP — apakah ini direktur (admin) atau pegawai (kasir)?
+  // Analogi: cek jabatan di KTP, apakah ini direktur (admin) atau pegawai (kasir)?
   isAdmin:  () => get().user?.role === "admin",
   isKasir:  () => get().user?.role === "kasir",
   hasRole:  (role) => get().user?.role === role,
@@ -133,7 +133,7 @@ const useAuthStore = create((set, get) => ({
 
   isDeveloper: () => get().user?.role === "developer",
 
-  // AI tersedia untuk semua staff (admin/kasir/developer) — kuota diatur
+  // AI tersedia untuk semua staff (admin/kasir/developer), kuota diatur
   // per plan oleh backend: FREE = 5 prompt/bulan, Pro/Enterprise = tak terbatas.
   canAccessAI: () => {
     const user = get().user;
@@ -141,7 +141,7 @@ const useAuthStore = create((set, get) => ({
     return ["admin", "kasir", "developer"].includes(user.role);
   },
 
-  // Plan efektif — kasir mengikuti plan admin tenant-nya.
+  // Plan efektif, kasir mengikuti plan admin tenant-nya.
   // Backend sudah mengirim `effective_plan` via /me (login/register).
   getEffectivePlan: () => {
     const user = get().user;

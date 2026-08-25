@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * ShiftController — buka/tutup shift & laporan shift.
+ * ShiftController, buka/tutup shift & laporan shift.
  *
  * Shift bersifat PER-TENANT, bukan per-user: satu shift aktif dipakai bersama
  * semua kasir dalam tenant yang sama (TenantScope otomatis membatasi query).
@@ -28,7 +28,7 @@ class ShiftController extends Controller
      */
     public function current(Request $request): JsonResponse
     {
-        // Cek shift aktif milik tenant (bukan per-user) — semua kasir share 1 shift
+        // Cek shift aktif milik tenant (bukan per-user), semua kasir share 1 shift
         $shift = Shift::where('status', 'open')
             ->latest('opened_at')
             ->first();
@@ -298,7 +298,7 @@ class ShiftController extends Controller
 
     /**
      * Daftar shift (pagination 20, terbaru dulu) + agregat order/sales per shift.
-     * Agregat dihitung via withCount/withSum (subselect join) — bukan 2 query
+     * Agregat dihitung via withCount/withSum (subselect join), bukan 2 query
      * per shift seperti sebelumnya (fix N+1).
      * GET /api/shifts
      *

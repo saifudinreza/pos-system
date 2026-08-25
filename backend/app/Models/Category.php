@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 /**
- * Model Category — pengelompokan produk.
+ * Model Category, pengelompokan produk.
  *
  * Tabel: `categories`. Global scope TenantScope aktif. Saat kategori dibuat,
  * slug otomatis di-generate dari nama (event creating). Casts: is_active →
@@ -26,7 +26,7 @@ class Category extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

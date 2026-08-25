@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model Subscription — riwayat pembelian/langganan plan (Free/Pro/Enterprise).
+ * Model Subscription, riwayat pembelian/langganan plan (Free/Pro/Enterprise).
  *
  * Tabel: `subscriptions`. Menyimpan data pembayaran langganan via Midtrans
  * (snap token, status, respons webhook) dan masa berlaku langganan.

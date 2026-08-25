@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
- * OrderController — CRUD order & perubahan status.
+ * OrderController, CRUD order & perubahan status.
  *
  * Poin penting:
  * - Semua transaksi WAJIB dalam shift aktif (lapisan pengaman backend;
@@ -29,7 +29,7 @@ use Illuminate\Validation\ValidationException;
 class OrderController extends Controller
 {
     // =============================================================
-    // INDEX — ambil semua order (admin & kasir)
+    // INDEX, ambil semua order (admin & kasir)
     // GET /api/orders
     // GET /api/orders?status=pending
     // GET /api/orders?date_from=2025-01-01&date_to=2025-12-31
@@ -86,7 +86,7 @@ class OrderController extends Controller
     }
 
     // =============================================================
-    // MY ORDERS — riwayat order milik customer yang login
+    // MY ORDERS, riwayat order milik customer yang login
     // GET /api/orders/my/history
     // =============================================================
     /**
@@ -116,7 +116,7 @@ class OrderController extends Controller
     }
 
     // =============================================================
-    // SHOW — detail satu order
+    // SHOW, detail satu order
     // GET /api/orders/{id}
     // =============================================================
     /**
@@ -151,7 +151,7 @@ class OrderController extends Controller
     }
 
     // =============================================================
-    // STORE — buat order baru dari cart
+    // STORE, buat order baru dari cart
     // POST /api/orders
     // Body:
     // {
@@ -188,7 +188,7 @@ class OrderController extends Controller
         // Setiap transaksi HARUS terjadi di dalam shift yang sedang berjalan,
         // supaya rekonsiliasi kas saat tutup shift selalu akurat.
         // Shift bersifat per-tenant (dipakai bersama semua kasir), jadi tidak
-        // difilter per-user — TenantScope otomatis membatasi ke tenant ini.
+        // difilter per-user, TenantScope otomatis membatasi ke tenant ini.
         // (Frontend juga sudah memblokir, ini lapisan pengaman di backend.)
         $shift = Shift::where('status', 'open')
             ->latest('opened_at')
@@ -246,10 +246,10 @@ class OrderController extends Controller
                     'product_id' => $product->id,
                     'quantity'   => $item['quantity'],
                     'price'      => $product->price,
-                    // ↑ Snapshot harga saat ini — penting!
+                    // ↑ Snapshot harga saat ini, penting!
                     // Kalau harga produk berubah besok, harga di order ini tetap
                     'cost'       => $product->cost,
-                    // ↑ Snapshot harga modal (COGS) — dipakai laporan profit.
+                    // ↑ Snapshot harga modal (COGS), dipakai laporan profit.
                     // Null kalau produk belum diisi cost-nya.
                     'subtotal'   => $itemSubtotal,
                     // Snapshot stok untuk pencatatan ledger
@@ -324,7 +324,7 @@ class OrderController extends Controller
     }
 
     // =============================================================
-    // UPDATE STATUS — update status order
+    // UPDATE STATUS, update status order
     // PATCH /api/orders/{id}/status
     // Role: admin & kasir
     // =============================================================
@@ -343,7 +343,7 @@ class OrderController extends Controller
      */
     public function updateStatus(Request $request, int $id): JsonResponse
     {
-        // Eager load items.product — dipakai branch pembatalan (restore stok)
+        // Eager load items.product, dipakai branch pembatalan (restore stok)
         // dan di-format ulang lewat fresh()->load() di akhir method.
         $order = Order::with('items.product')->find($id);
 
@@ -419,7 +419,7 @@ class OrderController extends Controller
     }
 
     // =============================================================
-    // HELPER — format data order untuk response
+    // HELPER, format data order untuk response
     // =============================================================
     /**
      * Format order untuk response. Relasi dibaca hanya kalau sudah di-load

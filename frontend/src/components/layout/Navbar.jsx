@@ -1,18 +1,18 @@
 "use client";
 
 // ============================================================
-// Navbar — bar atas halaman dashboard
+// Navbar, bar atas halaman dashboard
 //
 // Isi: judul halaman (dipetakan dari pathname via PAGE_TITLES),
 // badge plan & role user, nama user, dan tombol Keluar.
 // Sumber data: authStore (Zustand). Badge plan menampilkan
-// effective_plan — role developer selalu ditampilkan sebagai "DEV".
+// effective_plan, role developer selalu ditampilkan sebagai "DEV".
 // ============================================================
 
 import { useRouter, usePathname } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 
-// Judul per halaman — key = pathname, dipakai sebagai heading navbar
+// Judul per halaman, key = pathname, dipakai sebagai heading navbar
 const PAGE_TITLES = {
   "/dashboard":    "Dashboard",
   "/products":     "Produk",
@@ -26,7 +26,7 @@ const PAGE_TITLES = {
   "/upgrade":      "Upgrade Plan",
 };
 
-// Badge plan — label + warna untuk tiap paket langganan
+// Badge plan, label + warna untuk tiap paket langganan
 const PLAN_BADGE = {
   free:       { label: "FREE",       cls: "bg-white/80 text-brand-black/60 border-brand-black/20" },
   pro:        { label: "PRO",        cls: "bg-brand-yellow text-brand-black border-brand-black" },
@@ -34,7 +34,7 @@ const PLAN_BADGE = {
   developer:  { label: "DEV",        cls: "bg-brand-yellow text-brand-black border-brand-black" },
 };
 
-// Warna badge role user — dipakai di samping badge plan
+// Warna badge role user, dipakai di samping badge plan
 const ROLE_COLORS = {
   admin:     "bg-brand-yellow text-brand-black border-brand-black",
   kasir:     "bg-brand-black text-white border-brand-black",
@@ -43,10 +43,10 @@ const ROLE_COLORS = {
 };
 
 /**
- * Navbar — bar atas dashboard (lihat header file untuk deskripsi).
+ * Navbar, bar atas dashboard (lihat header file untuk deskripsi).
  *
  * Props:
- *   onMenuToggle : membuka sidebar di layar mobile (tombol hamburger ☰)
+ *   onMenuToggle : membuka sidebar di layar mobile (tombol hamburger )
  */
 export default function Navbar({ onMenuToggle }) {
   const router   = useRouter();
@@ -76,7 +76,7 @@ export default function Navbar({ onMenuToggle }) {
           style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
           aria-label="Buka menu"
         >
-          ☰
+          
         </button>
         <h1 className="font-black text-base sm:text-lg text-brand-black font-grotesk truncate">
           {pageTitle}

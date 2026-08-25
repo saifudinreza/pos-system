@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            // ↑ Siapa yang buat order ini — bisa customer atau kasir
+            // ↑ Siapa yang buat order ini, bisa customer atau kasir
             // Kalau user dihapus, order ikut terhapus (cascadeOnDelete)
 
             $table->string('order_number')->unique();

@@ -52,7 +52,7 @@ class ForecastService
         $daysActive = min(35, $daysActive);
 
         // Jumlah hari tiap day-of-week di dalam jendela aktif
-        // (Carbon: 0 = Minggu .. 6 = Sabtu) — penyebut rata-rata per hari-of-week
+        // (Carbon: 0 = Minggu .. 6 = Sabtu), penyebut rata-rata per hari-of-week
         $weekdayCount = array_fill(0, 7, 0);
         for ($i = 0; $i < $daysActive; $i++) {
             $weekday = now()->subDays($i)->dayOfWeek;
@@ -73,7 +73,7 @@ class ForecastService
             $weekdayAvg[$weekday] = $count > 0 ? array_sum($revenues) / $count : 0;
         }
 
-        // Rata-rata keseluruhan — fallback untuk day-of-week yang tidak punya data
+        // Rata-rata keseluruhan, fallback untuk day-of-week yang tidak punya data
         $totalRevenue = array_sum($revenueByDate->values()->all());
         $overallAvg   = $totalRevenue / $daysActive;
 

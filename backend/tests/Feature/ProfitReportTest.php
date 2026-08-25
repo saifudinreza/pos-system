@@ -151,7 +151,7 @@ class ProfitReportTest extends TestCase
         ])->assertStatus(201);
         $this->settleOrder(Order::find($orderRes->json('data.id')), 50000);
 
-        // Tenant B melihat 0 COGS & profit — data A tidak bocor
+        // Tenant B melihat 0 COGS & profit, data A tidak bocor
         Sanctum::actingAs($adminB);
         $this->getJson('/api/reports/sales?date_from=' . now()->toDateString() . '&date_to=' . now()->toDateString())
             ->assertStatus(200)

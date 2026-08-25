@@ -1,18 +1,18 @@
-// NeoCard — Kartu konten neobrutalist
-// Analogi: seperti kartu pos — berbatas tebal, bayangan tegas, bersih
+// NeoCard, Kartu konten neobrutalist
+// Analogi: seperti kartu pos, berbatas tebal, bayangan tegas, bersih
 // React.memo: kartu dipakai di banyak komponen, memo cegah re-render sia-sia
 
 import { memo } from "react";
 
 /**
- * NeoCard — kartu konten neobrutalist (border tebal + shadow offset).
+ * NeoCard, kartu konten neobrutalist (border tebal + shadow offset).
  *
  * Props:
  *   children : isi kartu
  *   className: class Tailwind tambahan
  *   style    : style inline tambahan (digabung SETELAH shadow bawaan,
  *              jadi bisa di-override sesuai kebutuhan warna kartu)
- *   onClick  : kalau diberikan, kartu jadi bisa diklik —
+ *   onClick  : kalau diberikan, kartu jadi bisa diklik,
  *              muncul cursor-pointer + hover "naik" sedikit
  *   noPad    : true → tanpa padding bawaan (p-5), untuk isi yang
  *              butuh kontrol padding sendiri

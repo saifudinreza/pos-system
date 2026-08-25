@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Upgrade Page — Beli/langganan paket Pro / Enterprise
+// Upgrade Page, Beli/langganan paket Pro / Enterprise
 //
 // Alur pembayaran (Midtrans Snap):
 //   1. User isi identitas (nama, HP, alamat) + pilih siklus (bulanan/tahunan)
@@ -33,7 +33,7 @@ function loadSnap() {
     if (window.snap) { resolve(); return; }
     const existing = document.querySelector(`script[src="${SNAP_URL}"]`);
     if (existing) {
-      // Script tag exists but snap might not be ready yet — poll briefly
+      // Script tag exists but snap might not be ready yet, poll briefly
       let tries = 0;
       const wait = setInterval(() => {
         if (window.snap) { clearInterval(wait); resolve(); }
@@ -82,7 +82,7 @@ function UpgradeContent() {
   const searchParams = useSearchParams();
   const { user }     = useAuthStore();
 
-  // Paket & siklus dari query string (?plan=pro&cycle=monthly) — default pro/monthly
+  // Paket & siklus dari query string (?plan=pro&cycle=monthly), default pro/monthly
   const plan  = searchParams.get("plan") ?? "pro";
   const cycle = searchParams.get("cycle") ?? "monthly";
 
@@ -103,10 +103,10 @@ function UpgradeContent() {
   const currentPrice = PRICES[plan]?.[billing] ?? PRICES.pro.monthly;
 
   /**
-   * handlePay — Alur lengkap pembayaran:
+   * handlePay, Alur lengkap pembayaran:
    *   1. minta snap_token ke backend (POST /api/subscriptions/initiate)
    *   2. load script Midtrans Snap (sekali saja, on-demand)
-   *   3. buka popup window.snap.pay() — callback menentukan redirect tujuan
+   *   3. buka popup window.snap.pay(), callback menentukan redirect tujuan
    * Urutan ini penting: token diambil DULU supaya kalau gagal tidak perlu
    * memuat script.
    */
@@ -145,7 +145,7 @@ function UpgradeContent() {
     }
   };
 
-  /** btnLabel — Label tombol bayar yang berubah mengikuti tahap proses. */
+  /** btnLabel, Label tombol bayar yang berubah mengikuti tahap proses. */
   const btnLabel = () => {
     if (!paying) return `Bayar ${formatCurrency(currentPrice)}`;
     if (snapStep === "loading-token")  return "Menyiapkan pembayaran...";

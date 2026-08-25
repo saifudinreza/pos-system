@@ -1,8 +1,8 @@
 "use client";
 
 // ============================================================
-// Login Page — Halaman masuk ke sistem
-// Analogi: Ini seperti "pintu masuk kantor" — setiap karyawan
+// Login Page, Halaman masuk ke sistem
+// Analogi: Ini seperti "pintu masuk kantor", setiap karyawan
 // harus scan ID (email+password) sebelum boleh masuk ke ruang kerja.
 //
 // Alur:
@@ -30,7 +30,7 @@ export default function LoginPage() {
 
   // ── Efek saat halaman terbuka ──
   // Ping backend saat halaman login terbuka supaya Railway "bangun"
-  // sebelum user klik tombol Masuk — mengurangi cold start delay
+  // sebelum user klik tombol Masuk, mengurangi cold start delay
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, { method: "GET" })
       .then(() => setServerWarm(true))
@@ -38,7 +38,7 @@ export default function LoginPage() {
   }, []);
 
   /**
-   * handleChange — Update nilai input form sesuai field yang diketik.
+   * handleChange, Update nilai input form sesuai field yang diketik.
    * Error lama di-reset supaya pesan merah hilang begitu user mengetik ulang.
    */
   const handleChange = (e) => {
@@ -47,7 +47,7 @@ export default function LoginPage() {
   };
 
   /**
-   * handleSubmit — Kirim kredensial ke authStore.login().
+   * handleSubmit, Kirim kredensial ke authStore.login().
    * Berhasil → redirect ke /dashboard (full reload via window.location
    * supaya middleware auth Next.js ikut re-evaluasi token baru).
    */
@@ -116,7 +116,7 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Lupa password — link ke halaman minta link reset */}
+            {/* Lupa password, link ke halaman minta link reset */}
             <div className="flex justify-end -mt-2">
               <Link href="/forgot-password" className="text-xs font-bold text-brand-black/60 hover:text-brand-black underline underline-offset-2 transition-colors">
                 Lupa password?

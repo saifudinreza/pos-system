@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Register Page — Halaman pendaftaran akun baru
+// Register Page, Halaman pendaftaran akun baru
 //
 // Alur:
 //   1. User isi form (nama, toko, email, HP, password)
@@ -23,8 +23,8 @@ import api from "@/lib/axios";
 
 // ── Input Field component ────────────────────────────────────
 /**
- * Field — Input form terstandar (label, input, pesan error).
- * error bisa string biasa atau array (dari validasi Laravel) — array
+ * Field, Input form terstandar (label, input, pesan error).
+ * error bisa string biasa atau array (dari validasi Laravel), array
  * diambil elemen pertamanya.
  */
 const Field = ({ name, label, type = "text", placeholder, value, onChange, error, required = true }) => (
@@ -46,7 +46,7 @@ const Field = ({ name, label, type = "text", placeholder, value, onChange, error
 
 // ── Tenant status indicator ───────────────────────────────────
 /**
- * TenantStatus — Info real-time di bawah input Nama Toko:
+ * TenantStatus, Info real-time di bawah input Nama Toko:
  *   checking → "memeriksa..." · join → toko ditemukan (bergabung)
  *   new      → nama baru (buat toko sendiri) · selain itu → null (kosong)
  */
@@ -90,7 +90,7 @@ function TenantStatus({ status, tenantInfo }) {
 
 function RegisterForm() {
   // ── State ──
-  // tenantStatus: null | "checking" | "join" | "new" — hasil cek nama toko
+  // tenantStatus: null | "checking" | "join" | "new", hasil cek nama toko
   // tenantInfo: data tenant kalau nama toko ternyata sudah dipakai
   const { register, isLoading } = useAuthStore();
   const searchParams = useSearchParams();
@@ -103,7 +103,7 @@ function RegisterForm() {
   const debounceRef = useRef(null);
 
   /**
-   * handleChange — Update form + reset error field yang sedang diketik.
+   * handleChange, Update form + reset error field yang sedang diketik.
    * Khusus "store_name": cek ketersediaan tenant via API dengan debounce
    * 500ms (debounceRef) supaya tidak spam request per keystroke.
    */
@@ -140,7 +140,7 @@ function RegisterForm() {
   useEffect(() => () => clearTimeout(debounceRef.current), []);
 
   /**
-   * handleSubmit — Validasi lokal (konfirmasi password cocok) lalu kirim
+   * handleSubmit, Validasi lokal (konfirmasi password cocok) lalu kirim
    * ke authStore.register(). Kalau daftar karena klik paket berbayar di
    * landing (?plan=pro|enterprise) → arahkan ke halaman upgrade.
    */

@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Konsolidasi akhir: pastikan seluruh produk & kategori milik tenant
-        // Maung Store (akun nabila) — memperbaiki data yatim akibat riwayat
+        // Maung Store (akun nabila), memperbaiki data yatim akibat riwayat
         // pembuatan/penghapusan tenant sebelumnya. Idempoten & aman diulang.
         $this->call(RepairNabilaTenant::class);
     }

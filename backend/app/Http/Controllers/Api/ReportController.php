@@ -15,7 +15,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SalesReportExport;
 
 /**
- * ReportController — laporan penjualan, stok, forecast, dan export PDF/Excel.
+ * ReportController, laporan penjualan, stok, forecast, dan export PDF/Excel.
  *
  * - Transaction TIDAK punya tenant_id → semua query transaksi wajib filter
  *   manual via whereHas('order', tenant_id) (kecuali Order/Product yang
@@ -27,11 +27,11 @@ use App\Exports\SalesReportExport;
 class ReportController extends Controller
 {
     // =============================================================
-    // FORECAST — prediksi penjualan 7 hari ke depan (deterministik)
+    // FORECAST, prediksi penjualan 7 hari ke depan (deterministik)
     // GET /api/reports/forecast
     // =============================================================
     /**
-     * Prediksi penjualan 7 hari ke depan (deterministik, tanpa LLM) —
+     * Prediksi penjualan 7 hari ke depan (deterministik, tanpa LLM),
      * dihitung ForecastService dari rata-rata per hari-of-week 35 hari lalu.
      *
      * @param Request $request Request ber-autentikasi
@@ -48,7 +48,7 @@ class ReportController extends Controller
     }
 
     // =============================================================
-    // SALES REPORT — laporan penjualan
+    // SALES REPORT, laporan penjualan
     // GET /api/reports/sales
     // GET /api/reports/sales?period=daily
     // GET /api/reports/sales?period=monthly&year=2026
@@ -132,13 +132,13 @@ class ReportController extends Controller
             ])
             ->values();
 
-        // ===== CHART DATA — penjualan per periode =====
+        // ===== CHART DATA, penjualan per periode =====
         // Label & bulan diformat di PHP (bukan SQL) supaya query portabel
-        // (SQLite tidak punya DATE_FORMAT/MONTHNAME/MONTH — aturan CLAUDE.md point 9).
+        // (SQLite tidak punya DATE_FORMAT/MONTHNAME/MONTH, aturan CLAUDE.md point 9).
         if ($period === 'monthly') {
             // $year sudah di-set di awal method (rentang tanggal bulanan)
             // Ambil semua transaksi settlement di tahun itu, lalu kelompokkan
-            // per bulan di PHP via Carbon — outputnya identik dengan GROUP BY SQL.
+            // per bulan di PHP via Carbon, outputnya identik dengan GROUP BY SQL.
             $chartData = Transaction::where('status', 'settlement')
                 ->whereYear('paid_at', $year)
                 ->when($tenantId, fn($q) => $q->whereHas('order', fn($o) => $o->where('tenant_id', $tenantId)))
@@ -173,7 +173,7 @@ class ReportController extends Controller
                 ]);
         }
 
-        // ===== TOP PRODUCTS — produk terlaris =====
+        // ===== TOP PRODUCTS, produk terlaris =====
         $topProducts = OrderItem::join('orders', 'order_items.order_id', '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->where('orders.status', 'paid')
@@ -242,7 +242,7 @@ class ReportController extends Controller
     }
 
     // =============================================================
-    // STOCK REPORT — laporan stok produk
+    // STOCK REPORT, laporan stok produk
     // GET /api/reports/stock
     // GET /api/reports/stock?category_id=1&low_stock=true
     // =============================================================
@@ -312,7 +312,7 @@ class ReportController extends Controller
     }
 
     // =============================================================
-    // DOWNLOAD SALES — download laporan penjualan sebagai PDF
+    // DOWNLOAD SALES, download laporan penjualan sebagai PDF
     // GET /api/reports/sales/download?format=pdf
     // GET /api/reports/sales/download?format=excel
     // =============================================================
@@ -341,7 +341,7 @@ class ReportController extends Controller
 
         $tenantId = $request->user()->tenant_id;
 
-        // Ambil data untuk laporan — wajib filter tenant (Transaction tidak punya tenant_id)
+        // Ambil data untuk laporan, wajib filter tenant (Transaction tidak punya tenant_id)
         // order.items ikut di-load supaya COGS per transaksi bisa dihitung dari snapshot
         // `order_items.cost` (produk lama tanpa cost dihitung 0).
         $transactions = Transaction::with(['order.user', 'order.items'])
@@ -395,7 +395,7 @@ class ReportController extends Controller
     }
 
     // =============================================================
-    // DOWNLOAD STOCK — download laporan stok sebagai PDF/Excel
+    // DOWNLOAD STOCK, download laporan stok sebagai PDF/Excel
     // GET /api/reports/stock/download?format=pdf
     // =============================================================
     /**

@@ -1,7 +1,7 @@
 // ============================================================
-// aiStore.js — Global state untuk AI Assistant chat
+// aiStore.js, Global state untuk AI Assistant chat
 //
-// Analogi: Ini seperti "riwayat percakapan" di WhatsApp —
+// Analogi: Ini seperti "riwayat percakapan" di WhatsApp,
 // menyimpan semua pesan (pertanyaan + jawaban) selama sesi ini,
 // dan status apakah AI sedang "mengetik" (loading).
 //
@@ -44,7 +44,7 @@ const useAiStore = create((set) => ({
     {
       id:        "welcome",
       role:      "assistant",
-      content:   "Halo! Saya AI Assistant KasirAI. Tanya apa saja tentang bisnis kamu — penjualan, stok, tren produk, atau rekomendasi strategi. Saya siap membantu! 🤖",
+      content:   "Halo! Saya AI Assistant KasirAI. Tanya apa saja tentang bisnis kamu, penjualan, stok, tren produk, atau rekomendasi strategi. Saya siap membantu! ",
       timestamp: new Date().toISOString(),
     },
   ],
@@ -136,7 +136,7 @@ const useAiStore = create((set) => ({
           {
             id:        `err-${Date.now()}`,
             role:      "assistant",
-            content:   `⚠️ ${errorMsg}`,
+            content:   ` ${errorMsg}`,
             timestamp: new Date().toISOString(),
             isError:   true,
           },
@@ -196,7 +196,7 @@ const useAiStore = create((set) => ({
           {
             id:        `err-${Date.now()}`,
             role:      "assistant",
-            content:   "⚠️ Gagal memproses prediksi stok.",
+            content:   " Gagal memproses prediksi stok.",
             timestamp: new Date().toISOString(),
             isError:   true,
           },
@@ -253,7 +253,7 @@ const useAiStore = create((set) => ({
           {
             id:        `err-${Date.now()}`,
             role:      "assistant",
-            content:   "⚠️ Gagal memproses rekomendasi.",
+            content:   " Gagal memproses rekomendasi.",
             timestamp: new Date().toISOString(),
             isError:   true,
           },

@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Orders Page — Daftar pesanan + detail + aksi status
+// Orders Page, Daftar pesanan + detail + aksi status
 //
 // Data yang diambil:
 //   - useOrders hook → GET /api/orders (filter status & rentang tanggal,
@@ -25,7 +25,7 @@ import NeoModal  from "@/components/ui/NeoModal";
 import { formatCurrency, formatDateTime, getOrderStatusConfig, getErrorMessage } from "@/lib/utils";
 
 /**
- * OrderDetailModal — Modal detail satu order: info pelanggan, item,
+ * OrderDetailModal, Modal detail satu order: info pelanggan, item,
  * subtotal/PPN/total, catatan, dan tombol aksi sesuai status.
  * onVoid(id, status) & onMarkPaid(id) dioper dari halaman utama.
  */
@@ -113,7 +113,7 @@ function OrderDetailModal({ order, onClose, onVoid, onMarkPaid }) {
               <>
                 {/* Tandai Lunas: berguna untuk bayar tunai atau testing tanpa ngrok */}
                 <NeoButton variant="primary" size="sm" onClick={() => onMarkPaid(order.id)}>
-                  ✓ Tandai Lunas
+                   Tandai Lunas
                 </NeoButton>
                 <NeoButton variant="danger" size="sm" onClick={() => onVoid(order.id, "cancelled")}>
                   Batalkan Order
@@ -122,7 +122,7 @@ function OrderDetailModal({ order, onClose, onVoid, onMarkPaid }) {
             )}
             {order.status === "paid" && (
               <NeoButton variant="danger" size="sm" onClick={() => onVoid(order.id, "void")}>
-                🔒 Void (Admin)
+                 Void (Admin)
               </NeoButton>
             )}
           </div>
@@ -138,7 +138,7 @@ export default function OrdersPage() {
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   /**
-   * openDetail — Ambil detail lengkap order (GET /api/orders/{id}) lalu
+   * openDetail, Ambil detail lengkap order (GET /api/orders/{id}) lalu
    * tampilkan di modal. Response bisa berbentuk { data } atau langsung objek.
    */
   const openDetail = async (id) => {
@@ -150,7 +150,7 @@ export default function OrdersPage() {
     finally { setLoadingDetail(false); }
   };
 
-  /** handleMarkPaid — Tandai order pending menjadi lunas (bayar tunai/manual). */
+  /** handleMarkPaid, Tandai order pending menjadi lunas (bayar tunai/manual). */
   const handleMarkPaid = async (id) => {
     if (!confirm("Tandai order ini sebagai LUNAS? (Bayar Tunai / Manual)")) return;
     try {
@@ -160,7 +160,7 @@ export default function OrdersPage() {
   };
 
   /**
-   * handleVoid — Batalkan (cancelled) atau void order. Status "void" butuh
+   * handleVoid, Batalkan (cancelled) atau void order. Status "void" butuh
    * PIN admin yang diminta via prompt; PIN divalidasi di backend.
    */
   const handleVoid = async (id, status) => {

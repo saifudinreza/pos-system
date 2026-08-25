@@ -21,7 +21,7 @@ use App\Http\Controllers\Api\CustomerController;
 // Route di bawah ini bebas diakses siapa saja tanpa token Sanctum.
 
 // ---------- AUTH (login/register/reset password) ----------
-// throttling: 5 percobaan per menit per IP — anti brute-force password
+// throttling: 5 percobaan per menit per IP, anti brute-force password
 Route::post('/register',      [AuthController::class, 'register'])->middleware('throttle:5,1');
 Route::post('/login',         [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:5,1');
@@ -29,7 +29,7 @@ Route::post('/reset-password',  [AuthController::class, 'resetPassword'])->middl
 Route::get('/check-tenant',   [AuthController::class, 'checkTenant']);
 
 // ---------- MEDIA PROXY ----------
-// Media proxy — serve gambar dari R2/storage tanpa butuh auth
+// Media proxy, serve gambar dari R2/storage tanpa butuh auth
 Route::get('/media/{path}', function (string $path) {
     $disk = !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public';
     if (! \Illuminate\Support\Facades\Storage::disk($disk)->exists($path)) {
@@ -38,7 +38,7 @@ Route::get('/media/{path}', function (string $path) {
     return \Illuminate\Support\Facades\Storage::disk($disk)->response($path);
 })->where('path', '.*');
 // ↑ Endpoint ini bebas diakses siapa saja tanpa token (URL R2 tidak pernah
-//   diekspos langsung ke browser — gambar produk selalu lewat proxy ini)
+//   diekspos langsung ke browser, gambar produk selalu lewat proxy ini)
 
 
 // =============================================================
@@ -62,7 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/subscription/cancel-pending', [SubscriptionController::class, 'cancelPending']);
 
 
-    // ============ KATALOG (produk & kategori — semua role bisa lihat) ============
+    // ============ KATALOG (produk & kategori, semua role bisa lihat) ============
     // ----- PRODUCTS -----
     Route::get('/products',        [ProductController::class, 'index']);
     Route::get('/products/{id}',   [ProductController::class, 'show']);
@@ -87,7 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // ↑ Customer lihat riwayat pembayaran sendiri
 
 
-    // ============ KASIR (POS) — kasir, admin & developer ============
+    // ============ KASIR (POS), kasir, admin & developer ============
     Route::middleware('role:admin,kasir,developer')->group(function () {
         // ----- ORDER & PEMBAYARAN -----
         Route::get('/orders',                              [OrderController::class, 'index']);
@@ -95,7 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/transactions',                       [TransactionController::class, 'index']);
         Route::patch('/transactions/{id}/cancel',         [TransactionController::class, 'cancelTransaction']);
         Route::post('/transactions/cash',                 [TransactionController::class, 'payCash']);
-        // ↑ Pembayaran tunai langsung settlement (tanpa Midtrans) — untuk kasir POS
+        // ↑ Pembayaran tunai langsung settlement (tanpa Midtrans), untuk kasir POS
 
         // ----- SHIFT MANAGEMENT -----
         Route::get('/shifts',                             [ShiftController::class, 'index']);
@@ -107,7 +107,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // ============ CRUD PRODUK & KATEGORI (admin, kasir & developer) ============
-    // Write operation — dengan limit baca per plan (free 50/15, pro/enterprise unlimited)
+    // Write operation, dengan limit baca per plan (free 50/15, pro/enterprise unlimited)
     Route::middleware('role:admin,kasir,developer')->group(function () {
         // ----- PRODUCTS CRUD -----
         Route::post('/products',           [ProductController::class, 'store']);
@@ -152,7 +152,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     // ============ DEVELOPER ONLY ============
-    // Manajemen user, tenant & subscription lintas tenant — hanya developer
+    // Manajemen user, tenant & subscription lintas tenant, hanya developer
     Route::middleware('role:developer')->group(function () {
         // ----- USER MANAGEMENT -----
         Route::get('/users',                [UserController::class, 'index']);
@@ -184,7 +184,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/ai/usage-today',    [AiController::class, 'usageToday']);
         Route::get('/ai/jobs/{id}',      [AiController::class, 'jobStatus']);
 
-        // usage-today & jobs sengaja TIDAK ikut throttle — sidebar/polling memanggilnya
+        // usage-today & jobs sengaja TIDAK ikut throttle, sidebar/polling memanggilnya
         // tiap dibuka, sedangkan POST submit AI tetap di-throttle di bawah.
         Route::middleware('throttle:10,1')->group(function () {
             Route::post('/ai/query',         [AiController::class, 'query']);

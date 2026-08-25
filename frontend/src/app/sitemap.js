@@ -1,9 +1,9 @@
 // ============================================================
-// sitemap.js — Peta situs (XML sitemap) untuk SEO
+// sitemap.js, Peta situs (XML sitemap) untuk SEO
 //
 // Next.js file convention: menghasilkan /sitemap.xml otomatis
 // dari array di bawah. Hanya halaman PUBLIK yang didaftarkan
-// (landing, login, register) — halaman dashboard bersifat privat
+// (landing, login, register), halaman dashboard bersifat privat
 // dan sudah di-block di robots.txt.
 // ============================================================
 

@@ -1,9 +1,9 @@
 "use client";
 
 // ============================================================
-// KasirPage — Halaman Point of Sale (POS)
+// KasirPage, Halaman Point of Sale (POS)
 //
-// Analogi: Ini seperti mesin kasir digital —
+// Analogi: Ini seperti mesin kasir digital,
 // kasir pilih produk → masuk keranjang → checkout → bayar via Midtrans.
 //
 // ALUR LENGKAP:
@@ -20,10 +20,10 @@
 //   Left  (flex-1, ~60%): Grid produk + search + filter kategori
 //   Right (w-80, ~40%):   Keranjang + ringkasan harga + tombol bayar
 //
-//   Di mobile: keranjang tersembunyi → buka via tombol 🛒 (slide-over dari kanan)
+//   Di mobile: keranjang tersembunyi → buka via tombol  (slide-over dari kanan)
 //
 // State management:
-//   - cartStore (Zustand): keranjang — persists selama sesi, tidak hilang saat navigate
+//   - cartStore (Zustand): keranjang, persists selama sesi, tidak hilang saat navigate
 //   - useState lokal: products, categories, search, loading, dll
 //
 // Relasi:
@@ -47,7 +47,7 @@ import { formatCurrency, getErrorMessage } from "@/lib/utils";
 import { useDebounce }    from "@/hooks/useDebounce";
 
 // ============================================================
-// QuickProductPanel — Panel slide-over untuk kelola produk
+// QuickProductPanel, Panel slide-over untuk kelola produk
 //
 // Kasir bisa tambah/edit/hapus produk langsung dari halaman kasir
 // tanpa harus pergi ke menu Produk. Berguna saat ada produk baru
@@ -63,9 +63,9 @@ const EMPTY_PROD = {
   category_id: "", is_active: true, image: null
 };
 
-// ── CashPaymentModal — Input nominal tunai + hitung kembalian ──────────────
+// ── CashPaymentModal, Input nominal tunai + hitung kembalian ──────────────
 /**
- * CashPaymentModal — Modal pembayaran tunai: kasir memasukkan nominal uang
+ * CashPaymentModal, Modal pembayaran tunai: kasir memasukkan nominal uang
  * yang diterima, sistem menghitung kembalian (dan menolak tombol proses
  * kalau uang kurang). Ada tombol quick amount (uang pas, bulatkan ke 5rb, dst).
  * onConfirm(cashAmount) dipanggil setelah nominal cukup.
@@ -85,7 +85,7 @@ function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
       <div className="bg-white border-2 border-brand-black w-full max-w-sm" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
         <div className="px-5 py-4 bg-brand-yellow border-b-2 border-brand-black">
-          <h3 className="font-black text-lg font-grotesk">💵 Bayar Tunai</h3>
+          <h3 className="font-black text-lg font-grotesk"> Bayar Tunai</h3>
         </div>
         <div className="p-5 space-y-4">
           <div className="flex justify-between items-center py-2 border-2 border-brand-black px-3 bg-brand-cream">
@@ -139,9 +139,9 @@ function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
   );
 }
 
-// ── ReceiptModal — Struk setelah pembayaran sukses ────────────────────────
+// ── ReceiptModal, Struk setelah pembayaran sukses ────────────────────────
 /**
- * ReceiptModal — Struk digital setelah pembayaran sukses: tampilan struk,
+ * ReceiptModal, Struk digital setelah pembayaran sukses: tampilan struk,
  * tombol print (buka window terpisah + window.print()), dan kirim struk
  * via WhatsApp ke nomor customer (Fonnte, proxied lewat backend).
  */
@@ -150,7 +150,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
   if (!isOpen || !data) return null;
 
   /**
-   * buildWhatsAppText — Susun teks struk berformat WhatsApp (bold via *).
+   * buildWhatsAppText, Susun teks struk berformat WhatsApp (bold via *).
    * Struk disusun baris demi baris supaya rapi di tampilan chat.
    */
   const buildWhatsAppText = () => {
@@ -186,7 +186,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
   };
 
   /**
-   * handlePrint — Cetak struk: buka jendela baru, tulis HTML struk polos
+   * handlePrint, Cetak struk: buka jendela baru, tulis HTML struk polos
    * (monospace, mirip struk thermal), lalu auto window.print() + close.
    */
   const handlePrint = () => {
@@ -222,7 +222,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
   };
 
   /**
-   * handleWhatsApp — Kirim struk ke WhatsApp customer via endpoint proxy
+   * handleWhatsApp, Kirim struk ke WhatsApp customer via endpoint proxy
    * /api/send-whatsapp (backend pegang token Fonnte, tidak pernah ke browser).
    * Nomor dinormalisasi: hanya digit, kosong → peringatan.
    */
@@ -256,7 +256,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
         style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
         {/* Header */}
         <div className="px-5 py-4 bg-green-400 border-b-2 border-brand-black text-center shrink-0">
-          <div className="text-4xl mb-1 font-black text-green-900">✓</div>
+          <div className="text-4xl mb-1 font-black text-green-900"></div>
           <h3 className="font-black text-xl font-grotesk">PEMBAYARAN SUKSES</h3>
         </div>
         {/* Struk */}
@@ -322,7 +322,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
 }
 
 /**
- * QuickProductPanel — Panel slide-over kelola produk dari halaman kasir.
+ * QuickProductPanel, Panel slide-over kelola produk dari halaman kasir.
  *
  * Tiga mode (editTarget):
  *   null → LIST VIEW (daftar produk + search) · {} → form tambah
@@ -380,7 +380,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
   // Kembali ke list dan refresh
   const backToList = () => { setEditTarget(null); setPreview(null); loadList(); };
 
-  // Handle pilih gambar — buat URL preview lokal dari File object
+  // Handle pilih gambar, buat URL preview lokal dari File object
   const handleImg = (e) => {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -436,7 +436,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
         {/* Header panel */}
         <div className="px-4 py-3 bg-brand-black text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
-            {/* Tombol kembali ke list — hanya tampil saat di FORM VIEW */}
+            {/* Tombol kembali ke list, hanya tampil saat di FORM VIEW */}
             {editTarget !== null && (
               <button onClick={backToList} className="text-white/60 hover:text-white font-black mr-1">←</button>
             )}
@@ -444,7 +444,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
               {editTarget === null ? "Kelola Produk" : editTarget?.id ? "Edit Produk" : "Tambah Produk"}
             </span>
           </div>
-          <button onClick={onClose} className="text-white/60 hover:text-white font-black">✕</button>
+          <button onClick={onClose} className="text-white/60 hover:text-white font-black"></button>
         </div>
 
         {/* ── LIST VIEW: tampilkan daftar produk ── */}
@@ -466,7 +466,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
                 <div key={p.id} className="flex items-center gap-3 px-4 py-3 hover:bg-brand-cream transition-colors">
                   {p.image_url
                     ? <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover border-2 border-brand-black/20 shrink-0" />
-                    : <div className="w-10 h-10 bg-brand-cream border-2 border-brand-black/10 shrink-0 flex items-center justify-center text-lg">📦</div>
+                    : <div className="w-10 h-10 bg-brand-cream border-2 border-brand-black/10 shrink-0 flex items-center justify-center text-lg"></div>
                   }
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-sm truncate">{p.name}</p>
@@ -496,9 +496,9 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
               <div className="flex items-center gap-3">
                 {preview
                   ? <img src={preview} alt="preview" className="w-16 h-16 object-cover border-2 border-brand-black shrink-0" />
-                  : <div className="w-16 h-16 bg-brand-cream border-2 border-brand-black shrink-0 flex items-center justify-center text-2xl">📦</div>
+                  : <div className="w-16 h-16 bg-brand-cream border-2 border-brand-black shrink-0 flex items-center justify-center text-2xl"></div>
                 }
-                {/* Label wrapper untuk input file — klik area → buka file picker */}
+                {/* Label wrapper untuk input file, klik area → buka file picker */}
                 <label className="flex-1 cursor-pointer">
                   <div className="border-2 border-dashed border-brand-black px-3 py-3 text-center text-sm text-brand-black/50 hover:border-brand-yellow hover:text-brand-black transition-colors">
                     {form.image ? form.image.name : "Klik untuk pilih / ganti foto"}
@@ -545,7 +545,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
               </div>
             </div>
 
-            {/* Pilih kategori — hanya tampil kalau ada data kategori */}
+            {/* Pilih kategori, hanya tampil kalau ada data kategori */}
             {categories.length > 0 && (
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-bold">Kategori</label>
@@ -587,7 +587,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
 }
 
 // ============================================================
-// ProductCard — Kartu produk di grid kasir
+// ProductCard, Kartu produk di grid kasir
 //
 // Klik kartu → addItem(product) → masuk keranjang
 // Produk stok 0 → disabled (tidak bisa diklik)
@@ -616,7 +616,7 @@ const ProductCard = ({ product, onAdd }) => {
         {product.image_url ? (
           <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-3xl select-none">📦</div>
+          <div className="w-full h-full flex items-center justify-center text-3xl select-none"></div>
         )}
         {/* Badge stok menipis */}
         {lowStock && (
@@ -649,9 +649,9 @@ const ProductCard = ({ product, onAdd }) => {
 };
 
 // ============================================================
-// CartItem — Satu baris item di keranjang
+// CartItem, Satu baris item di keranjang
 //
-// Tombol +/- untuk ubah quantity, ✕ untuk hapus item
+// Tombol +/- untuk ubah quantity,  untuk hapus item
 // Subtotal per item: harga × quantity
 // ============================================================
 const CartItem = ({ item, onAdd, onRemove, onDelete }) => (
@@ -675,7 +675,7 @@ const CartItem = ({ item, onAdd, onRemove, onDelete }) => (
       {/* Tombol hapus item langsung */}
       <button onClick={onDelete}
         className="ml-1 w-5 h-5 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors font-black text-[10px]">
-        ✕
+        
       </button>
     </div>
     {/* Subtotal: harga × quantity */}
@@ -688,11 +688,11 @@ const CartItem = ({ item, onAdd, onRemove, onDelete }) => (
 // ── Pecahan Rupiah (lembar & koin) untuk kalkulator laci ──────
 const RUPIAH = [100000, 50000, 20000, 10000, 5000, 2000, 1000, 500, 200, 100];
 
-// ── DenominationCounter — hitung total uang laci dari rincian pecahan ──
+// ── DenominationCounter, hitung total uang laci dari rincian pecahan ──
 /**
- * DenominationCounter — Input jumlah lembar/koin per pecahan Rupiah.
+ * DenominationCounter, Input jumlah lembar/koin per pecahan Rupiah.
  * value: objek { "100000": qty, ... }; onChange(nextObj, total) dipanggil
- * setiap ada perubahan — total dihitung ulang dari seluruh pecahan.
+ * setiap ada perubahan, total dihitung ulang dari seluruh pecahan.
  */
 function DenominationCounter({ value, onChange }) {
   const counts = value || {};
@@ -727,9 +727,9 @@ function DenominationCounter({ value, onChange }) {
   );
 }
 
-// ── ShiftOpenModal — Modal buka shift baru ──
+// ── ShiftOpenModal, Modal buka shift baru ──
 /**
- * ShiftOpenModal — Form buka shift baru: nama shift (dengan preset Pagi/
+ * ShiftOpenModal, Form buka shift baru: nama shift (dengan preset Pagi/
  * Siang/Malam), jam mulai–selesai, rincian uang laci (modal awal), dan
  * catatan opsional. onConfirm(payload) dipanggil saat tombol "Buka Shift".
  */
@@ -746,28 +746,28 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
 
   if (!isOpen) return null;
 
-  // Preset jam kerja umum — klik langsung mengisi nama + jam
+  // Preset jam kerja umum, klik langsung mengisi nama + jam
   const SHIFT_PRESETS = [
     { label: "Pagi",  start: "07:00", end: "16:00" },
     { label: "Siang", start: "12:00", end: "21:00" },
     { label: "Malam", start: "17:00", end: "23:59" },
   ];
 
-  /** applyPreset — Isi form dari preset shift (nama + jam mulai/selesai). */
+  /** applyPreset, Isi form dari preset shift (nama + jam mulai/selesai). */
   const applyPreset = (preset) => {
     setShiftName(preset.label);
     setStartTime(preset.start);
     setEndTime(preset.end);
   };
 
-  /** reset — Kembalikan semua field ke nilai awal. */
+  /** reset, Kembalikan semua field ke nilai awal. */
   const reset = () => {
     setShiftName("Pagi"); setStartTime("07:00"); setEndTime("16:00");
     setDenoms({}); setTotal(0); setNote(""); setErr("");
   };
 
   /**
-   * handleOpen — Validasi form lalu kirim payload buka shift ke backend.
+   * handleOpen, Validasi form lalu kirim payload buka shift ke backend.
    * opening_denominations hanya dikirim kalau ada rincian pecahan diisi.
    */
   const handleOpen = async () => {
@@ -879,9 +879,9 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
   );
 }
 
-// ── ShiftCloseModal — Modal tutup shift (klerek lengkap) ──────────────
+// ── ShiftCloseModal, Modal tutup shift (klerek lengkap) ──────────────
 /**
- * ShiftCloseModal — Form penutupan shift: kasir mencatat saldo fisik laci
+ * ShiftCloseModal, Form penutupan shift: kasir mencatat saldo fisik laci
  * (rincian pecahan), pengeluaran kas kecil, dan verifikasi. Sistem menghitung
  * selisih = uang fisik − (Modal Awal + Penjualan Tunai − Kas Kecil).
  * onConfirm(payload) → backend; error ditampilkan bila pencatatan ditolak
@@ -912,14 +912,14 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
   // Selisih = uang fisik − seharusnya  (minus = kurang/shortage, plus = lebih/overage)
   const variance = closingTotal - expected;
 
-  /** reset — Kosongkan semua field setelah sukses / saat ditutup. */
+  /** reset, Kosongkan semua field setelah sukses / saat ditutup. */
   const reset = () => {
     setClosingDenoms({}); setClosingTotal(0); setPettyCash(""); setPettyNote("");
     setNotes(""); setVerifiedBy(""); setErr("");
   };
 
   /**
-   * handleClose — Kirim data penutupan ke backend. Field kosong dikirim
+   * handleClose, Kirim data penutupan ke backend. Field kosong dikirim
    * sebagai undefined (backend menerapkan default-nya sendiri).
    */
   const handleClose = async () => {
@@ -945,7 +945,7 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
       <div className="bg-white border-2 border-brand-black w-full max-w-2xl flex flex-col max-h-[95vh]"
         style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
         <div className="px-5 py-4 bg-brand-black text-white border-b-2 border-brand-black shrink-0">
-          <h3 className="font-black text-lg font-grotesk">🔒 Tutup Shift — {shift.shift_name}</h3>
+          <h3 className="font-black text-lg font-grotesk"> Tutup Shift, {shift.shift_name}</h3>
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-thin">
@@ -1027,7 +1027,7 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
             </div>
           </div>
 
-          {/* Petty cash — pengeluaran kas kecil */}
+          {/* Petty cash, pengeluaran kas kecil */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-bold block mb-1">Pengeluaran Kas Kecil (Rp)</label>
@@ -1144,9 +1144,9 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
   );
 }
 
-// ── ShiftHistoryModal — Riwayat shift ─────────────────────────
+// ── ShiftHistoryModal, Riwayat shift ─────────────────────────
 /**
- * ShiftHistoryModal — Daftar riwayat shift tenant (nama, jam, order, total).
+ * ShiftHistoryModal, Daftar riwayat shift tenant (nama, jam, order, total).
  * Klik salah satu shift → onSelectShift(shift) untuk membuka detailnya.
  */
 function ShiftHistoryModal({ isOpen, onClose, shifts, onSelectShift }) {
@@ -1158,7 +1158,7 @@ function ShiftHistoryModal({ isOpen, onClose, shifts, onSelectShift }) {
         style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
         <div className="px-5 py-4 bg-brand-black text-white border-b-2 border-brand-black flex items-center justify-between shrink-0">
           <h3 className="font-black text-lg font-grotesk">Riwayat Shift</h3>
-          <button onClick={onClose} className="text-white/60 hover:text-white font-black">✕</button>
+          <button onClick={onClose} className="text-white/60 hover:text-white font-black"></button>
         </div>
         <div className="flex-1 overflow-y-auto divide-y divide-brand-black/10">
           {shifts.length === 0 ? (
@@ -1192,7 +1192,7 @@ function ShiftHistoryModal({ isOpen, onClose, shifts, onSelectShift }) {
 }
 
 // ============================================================
-// KasirPage — Komponen utama halaman kasir
+// KasirPage, Komponen utama halaman kasir
 // ============================================================
 export default function KasirPage() {
   const [products,    setProducts]    = useState([]);      // daftar produk dari API
@@ -1225,11 +1225,11 @@ export default function KasirPage() {
   const debouncedSearch = useDebounce(search, 400);
 
   // Ambil fungsi dan data dari cartStore (Zustand)
-  // Destructuring langsung dari store — semua ini reaktif
+  // Destructuring langsung dari store, semua ini reaktif
   const { items, addItem, removeItem, deleteItem, getSubtotal, getTax, getTotal, clearCart, getOrderPayload } = useCartStore();
   const user = useAuthStore((s) => s.user);
 
-  // Paket efektif — kasir mengikuti plan admin tenant-nya (dari backend /me)
+  // Paket efektif, kasir mengikuti plan admin tenant-nya (dari backend /me)
   const isFreePlan = user
     ? (user.effective_plan ?? user.subscription_plan ?? "free") === "free"
     : true;
@@ -1265,7 +1265,7 @@ export default function KasirPage() {
   }, [selCategory, debouncedSearch]);
 
   // ============================================================
-  // handleCheckout — Proses pembayaran
+  // handleCheckout, Proses pembayaran
   //
   // Alur:
   //   1. Buat order di backend → dapat order_id
@@ -1279,7 +1279,7 @@ export default function KasirPage() {
   // ============================================================
   // ── Checkout (tunai & digital) ──
   /**
-   * buildReceipt — Susun objek data struk dari hasil create order + pilihan
+   * buildReceipt, Susun objek data struk dari hasil create order + pilihan
    * pembayaran. Dipakai showReceipt() untuk mengisi ReceiptModal.
    */
   const buildReceipt = (orderRes, cashAmount, paymentMethod) => ({
@@ -1297,7 +1297,7 @@ export default function KasirPage() {
     customer_phone: customerPhone,
   });
 
-  /** showReceipt — Tampilkan struk lalu bersihkan keranjang & field input. */
+  /** showReceipt, Tampilkan struk lalu bersihkan keranjang & field input. */
   const showReceipt = (data) => {
     setReceiptData(data);
     setReceiptOpen(true);
@@ -1308,7 +1308,7 @@ export default function KasirPage() {
   };
 
   /**
-   * handleCashCheckout — Checkout tunai: blokir bila shift belum dibuka atau
+   * handleCashCheckout, Checkout tunai: blokir bila shift belum dibuka atau
    * di luar jam shift → buat order → tandai paid → tampilkan struk.
    */
   const handleCashCheckout = async (cashAmount) => {
@@ -1338,7 +1338,7 @@ export default function KasirPage() {
   };
 
   /**
-   * loadMidtransSnap — Muat script Snap JS dari Midtrans secara dinamis
+   * loadMidtransSnap, Muat script Snap JS dari Midtrans secara dinamis
    * (sekali saja per halaman) dengan data-client-key milik tenant.
    * Mengembalikan Promise yang resolve saat script siap.
    */
@@ -1356,7 +1356,7 @@ export default function KasirPage() {
   });
 
   /**
-   * handleDigitalCheckout — Checkout QRIS/digital via Midtrans Snap.
+   * handleDigitalCheckout, Checkout QRIS/digital via Midtrans Snap.
    * Pra-kondisi: keranjang terisi, shift aktif & dalam jam, plan ≥ Pro,
    * client key Midtrans sudah dikonfigurasi tenant. Snapshot struk dibuat
    * dari hasil create order; window.snap.pay memutuskan redirect akhir.
@@ -1414,7 +1414,7 @@ export default function KasirPage() {
 
   // ── Shift Functions ──
   /**
-   * loadCurrentShift — Ambil shift aktif tenant + status jam kerja
+   * loadCurrentShift, Ambil shift aktif tenant + status jam kerja
    * (within_window). Dipanggil saat halaman dibuka dan setelah
    * checkout / buka-tutup shift.
    */
@@ -1436,7 +1436,7 @@ export default function KasirPage() {
     }
   };
 
-  /** handleOpenShift — Buka shift baru (payload dari ShiftOpenModal). */
+  /** handleOpenShift, Buka shift baru (payload dari ShiftOpenModal). */
   const handleOpenShift = async (payload) => {
     const res = await shiftService.open(payload);
     setCurrentShift(res.data);
@@ -1444,7 +1444,7 @@ export default function KasirPage() {
   };
 
   /**
-   * handleCloseShift — Tutup shift + beri konfirmasi hasil rekonsiliasi kas
+   * handleCloseShift, Tutup shift + beri konfirmasi hasil rekonsiliasi kas
    * ke kasir, lalu muat ulang status shift.
    */
   const handleCloseShift = async (payload) => {
@@ -1456,9 +1456,9 @@ export default function KasirPage() {
     // Beri konfirmasi hasil rekonsiliasi kas ke kasir
     const diff = res.data?.difference ?? 0;
     const status =
-      diff === 0 ? "Kas PAS ✅"
-      : diff > 0 ? `Kas LEBIH ${formatCurrency(diff)} 🔼`
-      : `Kas KURANG ${formatCurrency(Math.abs(diff))} 🔽`;
+      diff === 0 ? "Kas PAS "
+      : diff > 0 ? `Kas LEBIH ${formatCurrency(diff)} `
+      : `Kas KURANG ${formatCurrency(Math.abs(diff))} `;
     alert(`Shift berhasil ditutup.\n\nSelisih kas: ${status}`);
 
     // Muat ulang status shift → tampilkan saran shift berikutnya di info bar
@@ -1466,7 +1466,7 @@ export default function KasirPage() {
   };
 
   /**
-   * openCloseModal — Ambil laporan shift terkini lalu buka modal tutup shift.
+   * openCloseModal, Ambil laporan shift terkini lalu buka modal tutup shift.
    * Laporan (laci tunai + ringkasan) jadi basis rekonsiliasi.
    */
   const openCloseModal = async () => {
@@ -1482,7 +1482,7 @@ export default function KasirPage() {
     }
   };
 
-  /** openShiftHistory — Ambil semua riwayat shift lalu buka modal daftarnya. */
+  /** openShiftHistory, Ambil semua riwayat shift lalu buka modal daftarnya. */
   const openShiftHistory = async () => {
     try {
       const res = await shiftService.getAll();
@@ -1493,7 +1493,7 @@ export default function KasirPage() {
     }
   };
 
-  /** viewShiftReport — Buka detail laporan shift tertentu dari riwayat. */
+  /** viewShiftReport, Buka detail laporan shift tertentu dari riwayat. */
   const viewShiftReport = async (shift) => {
     setShiftHistoryModal(false);
     setCloseReportLoading(true);
@@ -1509,7 +1509,7 @@ export default function KasirPage() {
   };
 
   // Total item di keranjang (jumlah unit, bukan jenis produk)
-  // Dipakai untuk badge di tombol 🛒 mobile
+  // Dipakai untuk badge di tombol  mobile
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
 
   return (
@@ -1549,7 +1549,7 @@ export default function KasirPage() {
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block" />
               <span className="font-semibold">Belum ada shift aktif</span>
-              <span className="text-brand-black/50">— Buka shift untuk mulai bertransaksi</span>
+              <span className="text-brand-black/50">, Buka shift untuk mulai bertransaksi</span>
             </span>
           )}
         </div>
@@ -1562,7 +1562,7 @@ export default function KasirPage() {
               </button>
               <button onClick={openCloseModal} disabled={closeReportLoading}
                 className="text-[10px] px-2 py-1 bg-brand-black text-white border border-brand-black hover:bg-gray-800 transition-colors font-black disabled:opacity-40">
-                {closeReportLoading ? "Memuat..." : "🔒 Tutup Shift"}
+                {closeReportLoading ? "Memuat..." : " Tutup Shift"}
               </button>
             </>
           ) : (
@@ -1576,8 +1576,8 @@ export default function KasirPage() {
       {/* Banner peringatan di luar jam shift */}
       {currentShift && !shiftWithinWindow && (
         <div className="px-4 py-2 bg-orange-100 border-b-2 border-orange-400 text-xs font-semibold text-orange-700 flex items-center gap-2 shrink-0">
-          <span>⚠️</span>
-          <span>Di luar jam shift <strong>{currentShift.shift_name}</strong> ({currentShift.start_time}–{currentShift.end_time}). Transaksi diblokir — lakukan klerk untuk menutup shift ini.</span>
+          <span></span>
+          <span>Di luar jam shift <strong>{currentShift.shift_name}</strong> ({currentShift.start_time}–{currentShift.end_time}). Transaksi diblokir, lakukan klerk untuk menutup shift ini.</span>
         </div>
       )}
       </>
@@ -1591,7 +1591,7 @@ export default function KasirPage() {
     }`}>
 
       {/* ═══════════════════════════════════════
-          KOLOM KIRI — Grid Produk
+          KOLOM KIRI, Grid Produk
           flex-1: ambil semua sisa ruang setelah kolom kanan
           ═══════════════════════════════════════ */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden border-r-2 border-brand-black">
@@ -1606,7 +1606,7 @@ export default function KasirPage() {
               className="flex-1 px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow bg-white"
               style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
             />
-            {/* Tombol kelola produk — hanya di sm+ (tersembunyi di mobile kecil) */}
+            {/* Tombol kelola produk, hanya di sm+ (tersembunyi di mobile kecil) */}
             <button
               onClick={() => setProdPanel(true)}
               className="px-3 py-2 border-2 border-brand-black font-black text-sm bg-white hover:bg-brand-yellow transition-colors hidden sm:flex items-center"
@@ -1615,14 +1615,14 @@ export default function KasirPage() {
             >
               Produk
             </button>
-            {/* Tombol toggle keranjang — HANYA di mobile (lg:hidden) */}
+            {/* Tombol toggle keranjang, HANYA di mobile (lg:hidden) */}
             <button
               onClick={() => setCartVisible(true)}
               className="lg:hidden relative px-3 py-2 bg-brand-yellow border-2 border-brand-black font-black text-sm"
               style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
             >
               Keranjang
-              {/* Badge jumlah item — hanya tampil kalau ada item */}
+              {/* Badge jumlah item, hanya tampil kalau ada item */}
               {totalItems > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-brand-black text-white text-[10px] font-black flex items-center justify-center border border-brand-black">
                   {totalItems}
@@ -1631,9 +1631,9 @@ export default function KasirPage() {
             </button>
           </div>
 
-          {/* Tab filter kategori — horizontal scroll (overflow-x-auto) */}
+          {/* Tab filter kategori, horizontal scroll (overflow-x-auto) */}
           <div className="flex gap-2 overflow-x-auto scrollbar-none pb-0.5">
-            {/* Tab "Semua" — aktif kalau selCategory kosong */}
+            {/* Tab "Semua", aktif kalau selCategory kosong */}
             <button
               onClick={() => setSelCategory("")}
               className={`shrink-0 px-3 py-1.5 text-xs font-black border-2 border-brand-black transition-colors whitespace-nowrap ${
@@ -1643,7 +1643,7 @@ export default function KasirPage() {
             >
               Semua
             </button>
-            {/* Tab per kategori — aktif kalau ID-nya cocok dengan selCategory */}
+            {/* Tab per kategori, aktif kalau ID-nya cocok dengan selCategory */}
             {categories.map((c) => (
               <button
                 key={c.id}
@@ -1659,7 +1659,7 @@ export default function KasirPage() {
           </div>
         </div>
 
-        {/* Grid produk — responsive kolom: 2 → 3 → 4 → 5 sesuai lebar layar */}
+        {/* Grid produk, responsive kolom: 2 → 3 → 4 → 5 sesuai lebar layar */}
         <div className="flex-1 overflow-y-auto p-3 scrollbar-thin">
           {isLoading ? (
             // Skeleton loading: tampilkan placeholder saat data belum datang
@@ -1682,9 +1682,9 @@ export default function KasirPage() {
       </div>
 
       {/* ═══════════════════════════════════════
-          KOLOM KANAN — Panel Keranjang
+          KOLOM KANAN, Panel Keranjang
           Desktop (lg+): selalu terlihat di sebelah kanan
-          Mobile:        slide-over dari kanan (toggle dengan tombol 🛒)
+          Mobile:        slide-over dari kanan (toggle dengan tombol )
           ═══════════════════════════════════════ */}
 
       {/* Backdrop untuk mobile saat keranjang terbuka */}
@@ -1720,12 +1720,12 @@ export default function KasirPage() {
                 Kosongkan
               </button>
             )}
-            {/* Tombol tutup — hanya di mobile */}
-            <button onClick={() => setCartVisible(false)} className="lg:hidden text-white/60 hover:text-white font-black">✕</button>
+            {/* Tombol tutup, hanya di mobile */}
+            <button onClick={() => setCartVisible(false)} className="lg:hidden text-white/60 hover:text-white font-black"></button>
           </div>
         </div>
 
-        {/* List item keranjang — bisa scroll kalau banyak */}
+        {/* List item keranjang, bisa scroll kalau banyak */}
         <div className="flex-1 overflow-y-auto px-3 py-2 scrollbar-thin">
           {items.length === 0 ? (
             // State kosong: panduan untuk kasir
@@ -1739,7 +1739,7 @@ export default function KasirPage() {
               <CartItem
                 key={item.product_id}
                 item={item}
-                // onAdd: tambah 1 unit — perlu buat object product ulang (addItem butuh format product)
+                // onAdd: tambah 1 unit, perlu buat object product ulang (addItem butuh format product)
                 onAdd={() => addItem({ id: item.product_id, name: item.name, price: item.price, stock: item.stock })}
                 onRemove={() => removeItem(item.product_id)}
                 onDelete={() => deleteItem(item.product_id)}
@@ -1762,7 +1762,7 @@ export default function KasirPage() {
             />
             {customerPhone && (
               <button onClick={() => setCustomerPhone("")}
-                className="pr-2 text-brand-black/30 hover:text-red-400 font-bold text-xs">✕</button>
+                className="pr-2 text-brand-black/30 hover:text-red-400 font-bold text-xs"></button>
             )}
           </div>
 
@@ -1793,7 +1793,7 @@ export default function KasirPage() {
           </div>
 
           {/* Dua tombol bayar: TUNAI dan DIGITAL (PRD: split button)
-              DIGITAL (QRIS) hanya untuk paket Pro/Enterprise — paket FREE
+              DIGITAL (QRIS) hanya untuk paket Pro/Enterprise, paket FREE
               dilayani dengan pembayaran tunai. */}
           <div className="flex gap-2">
             <button
@@ -1816,7 +1816,7 @@ export default function KasirPage() {
           </div>
           {isFreePlan && (
             <p className="text-[10px] font-mono text-brand-black/40 text-center border border-dashed border-brand-black/30 px-2 py-1">
-              💳 Pembayaran QRIS/digital untuk paket <b>Pro & Enterprise</b> — <a href="/upgrade?plan=pro" className="underline font-bold">upgrade sekarang</a>
+               Pembayaran QRIS/digital untuk paket <b>Pro & Enterprise</b>, <a href="/upgrade?plan=pro" className="underline font-bold">upgrade sekarang</a>
             </p>
           )}
           <p className="text-[10px] font-mono text-brand-black/30 text-center">
@@ -1865,7 +1865,7 @@ export default function KasirPage() {
       onClose={() => setReceiptOpen(false)}
     />
 
-    {/* Panel kelola produk — di-render di luar flex layout agar bisa fixed overlay */}
+    {/* Panel kelola produk, di-render di luar flex layout agar bisa fixed overlay */}
     <QuickProductPanel
       isOpen={prodPanel}
       onClose={() => setProdPanel(false)}

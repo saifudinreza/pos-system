@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         // ============================================================
-        // TABEL CUSTOMERS — enabler CRM & segmentation.
+        // TABEL CUSTOMERS, enabler CRM & segmentation.
         // Selama ini pelanggan cuma berupa string `orders.customer_phone`;
         // sekarang jadi entitas nyata yang bisa diagregasi (total belanja,
         // frekuensi, kunjungan terakhir).

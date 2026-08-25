@@ -1,17 +1,17 @@
 "use client";
 
 // ============================================================
-// Dev · Manajemen Subscriptions — Kelola langganan semua user
+// Dev · Manajemen Subscriptions, Kelola langganan semua user
 //
 // Data: subscriptionStore.fetchSubscriptions() → daftar subscription +
 // statistik agregat (total/aktif/free/pro/enterprise/MRR)
 //
 // Aksi: ubah plan user (modal radio), tangguhkan / aktifkan langganan.
-// Akun developer (is_developer) terkunci — tidak bisa diubah.
+// Akun developer (is_developer) terkunci, tidak bisa diubah.
 // Aksi langsung mengubah plan aktif user; harga plan dari
 // subscriptionStore PLANS (harus sinkron dengan PRICES di backend).
 //
-// Akses via /dev/* — hanya developer (PIN / email developer).
+// Akses via /dev/*, hanya developer (PIN / email developer).
 // ============================================================
 
 import { useState, useEffect } from "react";
@@ -94,7 +94,7 @@ const STATUS_BADGE = {
 
 // ── StatCard ────────────────────────────────────────────────
 /**
- * StatCard — Kartu statistik ringkas: label, nilai besar, sub-teks opsional.
+ * StatCard, Kartu statistik ringkas: label, nilai besar, sub-teks opsional.
  * accent menentukan warna border/shadow/ikon (default: putih transparan).
  */
 function StatCard({ label, value, sub, accent, Icon }) {
@@ -144,10 +144,10 @@ export default function SubscriptionsPage() {
     return matchSearch && matchPlan;
   });
 
-  /** handleEdit — Buka modal ubah plan, pre-fill dengan plan saat ini. */
+  /** handleEdit, Buka modal ubah plan, pre-fill dengan plan saat ini. */
   const handleEdit = (sub) => { setEditModal(sub); setNewPlan(sub.plan); };
 
-  /** handleSavePlan — Simpan plan baru user via store (updatePlan). */
+  /** handleSavePlan, Simpan plan baru user via store (updatePlan). */
   const handleSavePlan = async () => {
     if (!editModal || !newPlan) return;
     setSaving(true);
@@ -161,7 +161,7 @@ export default function SubscriptionsPage() {
     }
   };
 
-  /** handleToggle — Tangguhkan / aktifkan langganan user via store. */
+  /** handleToggle, Tangguhkan / aktifkan langganan user via store. */
   const handleToggle = async (sub) => {
     setToggling(sub.id);
     try { await toggleStatus(sub.id); }
@@ -178,7 +178,7 @@ export default function SubscriptionsPage() {
         <div>
           <h1 className="text-2xl font-black text-white font-grotesk">Manajemen Subscriptions</h1>
           <p className="text-sm text-white/40 mt-1">
-            Kelola semua langganan pengguna KasirAI — hanya dapat diakses developer.
+            Kelola semua langganan pengguna KasirAI, hanya dapat diakses developer.
           </p>
         </div>
         <button
@@ -415,7 +415,7 @@ export default function SubscriptionsPage() {
                       <td key={plan.id} className="py-2 text-center">
                         {typeof val === "boolean" ? (
                           <span className={val ? "text-green-400 font-black" : "text-white/20"}>
-                            {val ? "✓" : "—"}
+                            {val ? "" : ", "}
                           </span>
                         ) : (
                           <span className="text-white/60 font-mono text-[10px]">

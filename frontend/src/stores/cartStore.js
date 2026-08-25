@@ -1,16 +1,16 @@
 // ============================================================
-// cartStore.js — Global state untuk keranjang belanja kasir
+// cartStore.js, Global state untuk keranjang belanja kasir
 //
-// Analogi: Ini seperti "nampan" di kasir restoran —
+// Analogi: Ini seperti "nampan" di kasir restoran,
 // kasir menaruh produk yang dipesan ke nampan,
 // bisa tambah/kurangi/hapus, dan di akhir langsung checkout.
 //
-// Keranjang ini dipakai di halaman Kasir (/kasir) —
+// Keranjang ini dipakai di halaman Kasir (/kasir),
 // kasir klik produk → masuk keranjang → checkout → order terbuat
 //
 // Relasi:
 //   - cartStore → dipakai langsung oleh halaman /kasir (grid produk, keranjang,
-//     modal bayar) dan /dashboard — semua komponen sudah di-inline di halaman
+//     modal bayar) dan /dashboard, semua komponen sudah di-inline di halaman
 //   - setelah checkout sukses, keranjang dikosongkan (clearCart)
 //
 // Rumus harga:
@@ -30,11 +30,11 @@ const useCartStore = create((set, get) => ({
 
   // Daftar item di keranjang
   // Format: [{ product_id, name, price, stock, image, quantity }]
-  // Analogi: isi nampan — setiap produk adalah satu jenis makanan di nampan
+  // Analogi: isi nampan, setiap produk adalah satu jenis makanan di nampan
   items: [],
 
   // ============================================================
-  // COMPUTED (getter) — dihitung dari items, bukan disimpan sendiri
+  // COMPUTED (getter), dihitung dari items, bukan disimpan sendiri
   // ============================================================
 
   // Total sebelum pajak
@@ -76,7 +76,7 @@ const useCartStore = create((set, get) => ({
         // Produk sudah ada di keranjang → tambah quantity
         // Cek apakah stok masih cukup untuk tambah 1 lagi
         if (existing.quantity >= product.stock) {
-          // Stok habis — tidak tambah (bisa tampilkan toast dari komponen pemanggil)
+          // Stok habis, tidak tambah (bisa tampilkan toast dari komponen pemanggil)
           return state;
         }
         return {
@@ -138,7 +138,7 @@ const useCartStore = create((set, get) => ({
   // --- UPDATE QUANTITY MANUAL ---
   // Dipanggil saat kasir ketik angka quantity langsung
   // @param {number} productId
-  // @param {number} quantity — harus > 0 dan <= stock
+  // @param {number} quantity, harus > 0 dan <= stock
   setQuantity: (productId, quantity) => {
     if (quantity <= 0) {
       get().deleteItem(productId);
@@ -155,7 +155,7 @@ const useCartStore = create((set, get) => ({
   },
 
   // --- KOSONGKAN KERANJANG ---
-  // Dipanggil setelah checkout berhasil — bersihkan nampan untuk pelanggan berikutnya
+  // Dipanggil setelah checkout berhasil, bersihkan nampan untuk pelanggan berikutnya
   clearCart: () => set({ items: [] }),
 
   // --- FORMAT ITEMS UNTUK DIKIRIM KE API ---

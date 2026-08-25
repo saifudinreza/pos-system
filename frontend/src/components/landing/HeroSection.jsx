@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// HeroSection — Hero utama landing page KasirAI
+// HeroSection, Hero utama landing page KasirAI
 //
 // Tujuan: first impression yang BOLD + bercerita.
 //  - Kolom kiri: copy yang masuk berurutan (stagger entrance)
@@ -10,7 +10,7 @@
 //
 // Responsif SEMUA device: collage didesain di frame tetap
 // (DESIGN_W x DESIGN_H) lalu DI-SCALE proporsional mengikuti
-// lebar container via ResizeObserver — jadi tidak pernah
+// lebar container via ResizeObserver, jadi tidak pernah
 // disembunyikan di HP/tablet, hanya mengecil rapi.
 //
 // Parallax: tilt halus mengikuti mouse + pergeseran saat scroll
@@ -34,13 +34,13 @@ const DESIGN_H = 600;
 // Versi Link & anchor yang bisa di-animasi (untuk hover spring)
 const MotionLink = motion.create(Link);
 
-// Properti hover untuk tombol CTA — spring "memantul" + shadow tumbuh + miring
+// Properti hover untuk tombol CTA, spring "memantul" + shadow tumbuh + miring
 // (sengaja TANPA whileTap supaya tidak "gerak-gerak" saat dipencet)
 const ctaHover = { scale: 1.07, y: -6, rotate: -1.4, boxShadow: "12px 12px 0 #0A0A0A" };
 const ctaSpring = { type: "spring", stiffness: 460, damping: 14 };
 
 // ======================================================
-// BarChart — Bar animasi yang tumbuh dari bawah saat mount
+// BarChart, Bar animasi yang tumbuh dari bawah saat mount
 //
 // Data statis 7 hari (SEN–MIN); tinggi bar = proporsi pct.
 // Animasi: scaleY dari 0 → pct/100 dengan jeda bertahap
@@ -118,7 +118,7 @@ const BarChart = () => {
 };
 
 // ======================================================
-// AIChat — Percakapan AI yang BERPUTAR terus-menerus
+// AIChat, Percakapan AI yang BERPUTAR terus-menerus
 //  user bertanya → indikator mengetik → bot menjawab → ulang
 // ======================================================
 const TYPING = "typing";
@@ -128,7 +128,7 @@ const CONVO = [
     q: "Produk apa paling laku minggu ini?",
     a: (
       <>
-        <b style={{ color: "#FFE500" }}>Nasi Goreng Spesial</b> — 312 porsi,
+        <b style={{ color: "#FFE500" }}>Nasi Goreng Spesial</b>, 312 porsi,
         Rp 4,7jt. Bundle dengan Es Teh → +23% margin.
       </>
     ),
@@ -137,8 +137,8 @@ const CONVO = [
     q: "Stok mana yang harus direorder?",
     a: (
       <>
-        <b style={{ color: "#FFE500" }}>Es Kopi Susu</b> sisa 8 cup — habis ~besok.
-        Reorder min. 40 cup sekarang ⚡
+        <b style={{ color: "#FFE500" }}>Es Kopi Susu</b> sisa 8 cup, habis ~besok.
+        Reorder min. 40 cup sekarang 
       </>
     ),
   },
@@ -154,8 +154,8 @@ const CONVO = [
 ];
 
 /**
- * TypingDots — 3 titik mengetik yang bergoyang (indikator AI "berpikir").
- * Animasi repeat:Infinity — setiap titik berdelay 0.18s.
+ * TypingDots, 3 titik mengetik yang bergoyang (indikator AI "berpikir").
+ * Animasi repeat:Infinity, setiap titik berdelay 0.18s.
  */
 const TypingDots = () => (
   <span style={{ display: "inline-flex", gap: "4px", alignItems: "center", padding: "2px 2px" }}>
@@ -174,7 +174,7 @@ const TypingDots = () => (
 );
 
 /**
- * AIChat — simulasi percakapan AI yang berputar terus-menerus.
+ * AIChat, simulasi percakapan AI yang berputar terus-menerus.
  *
  * Mesin state 3 fase (per pertanyaan di CONVO[idx]):
  *   phase 1  → tampil pertanyaan user
@@ -271,10 +271,10 @@ const AIChat = () => {
 };
 
 // ======================================================
-// StampRays — 16 sinar berputar di sekitar stamp LUNAS
+// StampRays, 16 sinar berputar di sekitar stamp LUNAS
 // ======================================================
 /**
- * StampRays — dekorasi stamp "LUNAS": sinar berputar searah jarum jam
+ * StampRays, dekorasi stamp "LUNAS": sinar berputar searah jarum jam
  * + cincin putus-putus berlawanan arah (kesan "cap keluar dari mesin").
  *
  * Props:
@@ -318,15 +318,15 @@ const StampRays = ({ visible, reduce }) => (
 );
 
 // ======================================================
-// OrderTicker — Pesanan masuk berganti tiap 2 detik dengan slide
+// OrderTicker, Pesanan masuk berganti tiap 2 detik dengan slide
 // ======================================================
 /**
- * OrderTicker — ticker pesanan masuk yang berganti tiap 2,2 detik.
+ * OrderTicker, ticker pesanan masuk yang berganti tiap 2,2 detik.
  * Setiap pergantian: key=ticks → motion.div re-mount → slide dari atas.
  * Data pesanan statis (inv, waktu, nominal, metode bayar).
  */
 const OrderTicker = () => {
-  // Data ticker — diputar melingkar (modulo) mengikuti interval
+  // Data ticker, diputar melingkar (modulo) mengikuti interval
   const orders = [
     { inv: "#3829", time: "2 mnt", amt: "Rp 45.000", pay: "QRIS", payBg: "#0066FF", payFg: "#fff" },
     { inv: "#3830", time: "barusan", amt: "Rp 25.000", pay: "Cash", payBg: "#FFE500", payFg: "#0A0A0A" },
@@ -379,14 +379,14 @@ const OrderTicker = () => {
 };
 
 // ======================================================
-// HeroStage — collage kanan, di-scale agar responsif
+// HeroStage, collage kanan, di-scale agar responsif
 // ======================================================
 /**
- * HeroStage — "stage" collage UI di kanan hero.
+ * HeroStage, "stage" collage UI di kanan hero.
  *
  * Cara kerja responsif: canvas tetap DESIGN_W×DESIGN_H (520×600),
  * lalu di-scale proporsional mengikuti lebar container via
- * ResizeObserver — collage tidak pernah disembunyikan di layar kecil.
+ * ResizeObserver, collage tidak pernah disembunyikan di layar kecil.
  *
  * Isi collage (urutan kedalaman 3D dari belakang ke depan):
  * dekorasi geometris → dashboard window → stamp LUNAS →
@@ -460,7 +460,7 @@ function HeroStage() {
           style={{ position: "absolute", inset: 0, transformStyle: "preserve-3d" }}
         >
           {/* ===== Bagian: dekorasi geometris (lapisan paling belakang) ===== */}
-          {/* Dekorasi geometris — translateZ negatif → di "belakang", parallax saat tilt */}
+          {/* Dekorasi geometris, translateZ negatif → di "belakang", parallax saat tilt */}
           <div style={{
             position: "absolute", width: "130px", height: "130px",
             background: "#FF7AB6", border: "2.5px solid #0A0A0A",
@@ -481,7 +481,7 @@ function HeroStage() {
             boxShadow: "5px 5px 0 #0A0A0A",
           }} />
 
-          {/* Ping dots — titik berdenyut dekoratif (CSS class hero-ping) */}
+          {/* Ping dots, titik berdenyut dekoratif (CSS class hero-ping) */}
           <div className="hero-ping" style={{ top: "38%", left: "30%" }} />
           <div className="hero-ping" style={{ top: "16%", right: "34%" }} />
 
@@ -551,7 +551,7 @@ function HeroStage() {
                 </div>
               </div>
 
-              {/* Stat Strip — 3 kartu ringkas (Revenue, Order, AOV) */}
+              {/* Stat Strip, 3 kartu ringkas (Revenue, Order, AOV) */}
               <div style={{
                 display: "grid", gridTemplateColumns: "1fr 1fr 1fr",
                 gap: "8px", marginBottom: "16px",
@@ -585,7 +585,7 @@ function HeroStage() {
                 ))}
               </div>
 
-              {/* Chart mingguan — komponen BarChart di atas */}
+              {/* Chart mingguan, komponen BarChart di atas */}
               <BarChart />
             </div>
           </div>
@@ -755,12 +755,12 @@ function HeroStage() {
 }
 
 // ======================================================
-// HeroSection — gabungan copy kiri + stage kanan
+// HeroSection, gabungan copy kiri + stage kanan
 // ======================================================
 /**
- * HeroSection — hero utama landing page (lihat header file).
+ * HeroSection, hero utama landing page (lihat header file).
  * Tanpa props. Terdiri dari kolom kiri (copy dengan stagger entrance)
- * dan kolom kanan (HeroStage — collage UI live).
+ * dan kolom kanan (HeroStage, collage UI live).
  */
 export default function HeroSection() {
   // Hero showcase: animasi SELALU aktif, tidak tergantung setting OS (sesuai permintaan)
@@ -826,7 +826,7 @@ export default function HeroSection() {
             POS + AI ASSISTANT
           </motion.div>
 
-          {/* H1 — di-animasikan per baris dengan efek 3D flip */}
+          {/* H1, di-animasikan per baris dengan efek 3D flip */}
           <motion.h1
             variants={h1Container}
             style={{
@@ -871,12 +871,12 @@ export default function HeroSection() {
             color: "#222", marginBottom: "36px",
           }}>
             Kelola penjualan, stok, dan laporan di satu layar. Tanya AI Assistant
-            langsung dalam Bahasa Indonesia —{" "}
+            langsung dalam Bahasa Indonesia,{" "}
             <b>&quot;produk apa yang paling laku bulan ini?&quot;</b>{" "}
-            — dan dapat jawaban dalam hitungan detik.
+           , dan dapat jawaban dalam hitungan detik.
           </motion.p>
 
-          {/* CTA Buttons — hover spring (ctaHover/ctaSpring) + kilau sweep */}
+          {/* CTA Buttons, hover spring (ctaHover/ctaSpring) + kilau sweep */}
           <motion.div variants={item} style={{ display: "flex", gap: "14px", alignItems: "center", flexWrap: "wrap" }}>
             <MotionLink
               href="/register"
@@ -910,7 +910,7 @@ export default function HeroSection() {
             </motion.a>
           </motion.div>
 
-          {/* Proof Stats — deretan angka + separator vertikal; null = garis pemisah */}
+          {/* Proof Stats, deretan angka + separator vertikal; null = garis pemisah */}
           <motion.div variants={item} style={{ display: "flex", gap: "28px", marginTop: "48px", alignItems: "center", flexWrap: "wrap" }}>
             {[
               { num: "11%", label: "Pajak otomatis" },

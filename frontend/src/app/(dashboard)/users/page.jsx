@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Users Page — Manajemen pengguna dalam tenant (admin/developer)
+// Users Page, Manajemen pengguna dalam tenant (admin/developer)
 //
 // Data yang diambil:
 //   - userService.getAll({ page, per_page, search, role, is_active })
@@ -44,7 +44,7 @@ const AVATAR_COLORS = [
 ];
 
 /**
- * UserAvatar — Avatar lingkaran dengan inisial nama (max 2 kata).
+ * UserAvatar, Avatar lingkaran dengan inisial nama (max 2 kata).
  * Warna dipilih deterministik dari huruf pertama nama.
  */
 function UserAvatar({ name }) {
@@ -82,7 +82,7 @@ export default function UsersPage() {
   const [formError,    setFormError]    = useState("");
   const debouncedSearch = useDebounce(search, 500);
 
-  /** fetchData — Ambil daftar user sesuai filter + search (debounced). */
+  /** fetchData, Ambil daftar user sesuai filter + search (debounced). */
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -96,7 +96,7 @@ export default function UsersPage() {
 
   useEffect(() => { fetchData(); }, [filters, debouncedSearch]);
 
-    /** openModal — Buka modal tambah (data=null) atau edit (data=user). */
+    /** openModal, Buka modal tambah (data=null) atau edit (data=user). */
   const openModal = (data = null) => {
     setForm(data
       ? {
@@ -111,7 +111,7 @@ export default function UsersPage() {
   };
 
   /**
-   * handleSave — Simpan user (create/update). Saat edit, password boleh
+   * handleSave, Simpan user (create/update). Saat edit, password boleh
    * dikosongkan (= tidak diubah) → key password dihapus dari payload.
    */
   const handleSave = async (e) => {
@@ -132,7 +132,7 @@ export default function UsersPage() {
     finally { setSaving(false); }
   };
 
-  /** handleDelete — Hapus permanen user (dari modal konfirmasi). */
+  /** handleDelete, Hapus permanen user (dari modal konfirmasi). */
   const handleDelete = async () => {
     if (!deleteModal.data) return;
     setDeleting(true);
@@ -144,7 +144,7 @@ export default function UsersPage() {
     finally { setDeleting(false); }
   };
 
-  /** handleRoleChange — Ubah role user (kasir ↔ admin) via PATCH; update state lokal. */
+  /** handleRoleChange, Ubah role user (kasir ↔ admin) via PATCH; update state lokal. */
   const handleRoleChange = async (id, name, newRole) => {
     if (!confirm(`Ubah role "${name}" menjadi ${newRole}?`)) return;
     try {
@@ -153,7 +153,7 @@ export default function UsersPage() {
     } catch (err) { alert(getErrorMessage(err)); }
   };
 
-  /** handleToggle — Aktif/nonaktifkan akun user (dilarang untuk akun sendiri). */
+  /** handleToggle, Aktif/nonaktifkan akun user (dilarang untuk akun sendiri). */
   const handleToggle = async (id, name, isActive) => {
     if (id === currentUser?.id) {
       alert("Tidak bisa mengubah status akunmu sendiri.");
@@ -218,7 +218,7 @@ export default function UsersPage() {
           <NeoButton size="sm" variant="secondary" onClick={() => openModal(row)}>Edit</NeoButton>
           {id !== currentUser?.id ? (
             <>
-              {/* Quick role toggle — kasir ↔ admin */}
+              {/* Quick role toggle, kasir ↔ admin */}
               {(row.role === "kasir" || row.role === "admin") && (
                 <NeoButton
                   size="sm"

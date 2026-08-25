@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// CategoriesPage — CRUD kategori produk
+// CategoriesPage, CRUD kategori produk
 //
 // Kategori dipakai untuk:
 //   1. Filter di halaman kasir (tab horizontal)
@@ -46,7 +46,7 @@ export default function CategoriesPage() {
   const [selectedTenant, setSelectedTenant] = useState(""); // "" = semua tenant (default developer)
   const [sort,          setSort]           = useState({ sort_by: "name", sort_order: "asc" });
 
-  /** fetchData — Ambil daftar kategori + meta limit paket dari backend. */
+  /** fetchData, Ambil daftar kategori + meta limit paket dari backend. */
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -75,25 +75,25 @@ export default function CategoriesPage() {
 
   useEffect(() => { fetchData(); }, [isDeveloper, selectedTenant, sort]);
 
-  /** handleTenantChange — Ganti tenant yang difilter (developer only). */
+  /** handleTenantChange, Ganti tenant yang difilter (developer only). */
   const handleTenantChange = (e) => {
     setSelectedTenant(e.target.value);
   };
 
-  /** handleSortChange — Sortir tabel (developer only, termasuk berdasarkan tenant). */
+  /** handleSortChange, Sortir tabel (developer only, termasuk berdasarkan tenant). */
   const handleSortChange = (e) => {
     const [sort_by, sort_order] = e.target.value.split(":");
     setSort({ sort_by, sort_order });
   };
 
-  /** openModal — Buka modal tambah (data=null) atau edit (data=kategori). */
+  /** openModal, Buka modal tambah (data=null) atau edit (data=kategori). */
   const openModal = (data = null) => {
     setForm(data ? { name: data.name, is_active: data.is_active } : { name: "", is_active: true });
     setModal({ open: true, data });
     setError("");
   };
 
-  /** handleSave — Simpan kategori (create/update) lalu refresh tabel. */
+  /** handleSave, Simpan kategori (create/update) lalu refresh tabel. */
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -106,7 +106,7 @@ export default function CategoriesPage() {
     finally { setSaving(false); }
   };
 
-  /** handleDelete — Hapus kategori (gagal kalau masih ada produk terkait). */
+  /** handleDelete, Hapus kategori (gagal kalau masih ada produk terkait). */
   const handleDelete = async (id, name) => {
     if (!confirm(`Hapus kategori "${name}"?`)) return;
     try { await categoryService.delete(id); fetchData(); }
@@ -185,7 +185,7 @@ export default function CategoriesPage() {
             </svg>
             <div>
               <p className="font-black text-amber-800 text-sm">
-                Paket {PLAN_LABEL[planMeta.plan] ?? planMeta.plan} — hanya {planMeta.plan_limit} kategori yang ditampilkan
+                Paket {PLAN_LABEL[planMeta.plan] ?? planMeta.plan}, hanya {planMeta.plan_limit} kategori yang ditampilkan
               </p>
               <p className="text-xs text-amber-700">
                 Toko ini punya {planMeta.total_in_tenant} kategori. Upgrade untuk lihat semua.

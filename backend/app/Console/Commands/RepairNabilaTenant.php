@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Console\Command;
 
 /**
- * RepairNabilaTenant — perintah pemulihan data satu kali (idempoten, aman diulang).
+ * RepairNabilaTenant, perintah pemulihan data satu kali (idempoten, aman diulang).
  *
  * Masalah yang diperbaiki:
  *   Produk & kategori yang di-upload lewat UI oleh nabila@gmail.com tertinggal
@@ -38,7 +38,7 @@ class RepairNabilaTenant extends Command
 
         $user = User::where('email', $email)->first();
         if (! $user) {
-            $this->warn("User {$email} tidak ditemukan — tidak ada yang diperbaiki.");
+            $this->warn("User {$email} tidak ditemukan, tidak ada yang diperbaiki.");
             return self::SUCCESS;
         }
 
@@ -55,7 +55,7 @@ class RepairNabilaTenant extends Command
         }
 
         if (! $targetTenant) {
-            $this->warn('Tenant Maung Store tidak ditemukan — jalankan seeder dulu.');
+            $this->warn('Tenant Maung Store tidak ditemukan, jalankan seeder dulu.');
             return self::SUCCESS;
         }
 

@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Harga beli/modal per produk — enabler fitur Profit & Margin.
+        // Harga beli/modal per produk, enabler fitur Profit & Margin.
         // Nullable: tenant bebas mengisi bertahap, produk lama tidak wajib.
         Schema::table('products', function (Blueprint $table) {
             $table->decimal('cost', 12, 2)->nullable()->after('price');

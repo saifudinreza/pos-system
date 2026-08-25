@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Sidebar.jsx — Menu navigasi kiri
+// Sidebar.jsx, Menu navigasi kiri
 // Role-based: admin, kasir, user, developer
 // developer = akses semua + menu /dev/subscriptions + /users
 // ============================================================
@@ -61,7 +61,7 @@ const NAV_GROUPS = [
 ];
 
 // ============================================================
-// NavItem — Satu baris menu di sidebar
+// NavItem, Satu baris menu di sidebar
 //
 // Props:
 //   href     : URL tujuan
@@ -86,11 +86,11 @@ const NavItem = ({ href, Icon, label, isActive, badge }) => (
     // Shadow hanya untuk item aktif (efek neobrutalism)
     style={isActive ? { boxShadow: "2px 2px 0 #0A0A0A" } : undefined}
   >
-    {/* Icon dari Lucide React — size 16px, stroke lebih tebal (2.5) */}
+    {/* Icon dari Lucide React, size 16px, stroke lebih tebal (2.5) */}
     <Icon size={16} className="shrink-0" strokeWidth={2.5} />
-    {/* Label teks — flex-1 agar mengisi ruang, truncate untuk teks panjang */}
+    {/* Label teks, flex-1 agar mengisi ruang, truncate untuk teks panjang */}
     <span className="flex-1 truncate">{label}</span>
-    {/* Badge opsional — contoh: "DEV" untuk menu developer */}
+    {/* Badge opsional, contoh: "DEV" untuk menu developer */}
     {badge && (
       <span className="text-[9px] font-black bg-brand-black text-white px-1.5 py-0.5 font-mono shrink-0">
         {badge}
@@ -102,11 +102,11 @@ const NavItem = ({ href, Icon, label, isActive, badge }) => (
 );
 
 /**
- * Sidebar — menu navigasi kiri role-based (lihat header file untuk deskripsi).
+ * Sidebar, menu navigasi kiri role-based (lihat header file untuk deskripsi).
  *
  * Props:
  *   isOpen  : kontrol tampil di layar MOBILE (slide-in + overlay)
- *   onClose : menutup sidebar dari tombol ✕ / overlay (mobile)
+ *   onClose : menutup sidebar dari tombol  / overlay (mobile)
  *
  * Catatan: di desktop (lg+) sidebar selalu tampil statis; `mounted`
  * mencegah hydration mismatch karena user diambil dari localStorage.
@@ -165,8 +165,8 @@ export default function Sidebar({ isOpen, onClose }) {
             <LogoMark size={32} />
             <span className="font-black text-lg font-grotesk">KasirAI</span>
           </Link>
-          {/* Tombol ✕ hanya di mobile (lg:hidden) */}
-          <button onClick={onClose} className="lg:hidden text-xl font-black hover:text-red-500 transition-colors">✕</button>
+          {/* Tombol  hanya di mobile (lg:hidden) */}
+          <button onClick={onClose} className="lg:hidden text-xl font-black hover:text-red-500 transition-colors"></button>
         </div>
 
         {/* ── Area navigasi ──
@@ -189,7 +189,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
             return (
               <div key={group.label}>
-                {/* Label group — huruf kecil uppercase, warna abu muda */}
+                {/* Label group, huruf kecil uppercase, warna abu muda */}
                 <p className="text-[9px] font-black uppercase tracking-widest text-brand-black/30 mb-1.5 px-3 font-mono">
                   {group.label}
                 </p>
@@ -209,7 +209,7 @@ export default function Sidebar({ isOpen, onClose }) {
             );
           })}
 
-          {/* ── Section Developer — hanya role "developer" ── */}
+          {/* ── Section Developer, hanya role "developer" ── */}
           {isDevUser && (
             <div>
               <p className="text-[9px] font-black uppercase tracking-widest text-red-400/60 mb-1.5 px-3 font-mono">
@@ -235,7 +235,7 @@ export default function Sidebar({ isOpen, onClose }) {
           )}
         </nav>
 
-        {/* ── User card — klik untuk ke halaman profil ── */}
+        {/* ── User card, klik untuk ke halaman profil ── */}
         <Link
           href="/profile"
           className="block px-3 py-3 border-t-2 border-brand-black bg-white hover:bg-brand-yellow/20 transition-colors shrink-0 group"

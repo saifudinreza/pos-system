@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 /**
- * Export Excel laporan stok — dipakai ReportController::downloadStock().
+ * Export Excel laporan stok, dipakai ReportController::downloadStock().
  *
  * Berisi satu baris per produk: no, SKU, nama, kategori, stok, alert dan
  * status (Stok Menipis / Normal). Implements: FromCollection, WithHeadings,

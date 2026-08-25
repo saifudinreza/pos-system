@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Dashboard Page — Halaman utama setelah login
+// Dashboard Page, Halaman utama setelah login
 //
 // Data yang ditampilkan (diambil dari 4 endpoint):
 //   - reportService.getSales({ period: "daily" }) → summary & chart bulan ini
@@ -53,7 +53,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     /**
-     * fetchAll — Ambil data dashboard utama dalam satu batch (Promise.allSettled
+     * fetchAll, Ambil data dashboard utama dalam satu batch (Promise.allSettled
      * supaya satu kegagalan tidak menggagalkan yang lain). Period "daily" dikirim
      * tapi summary yang dipakai tetap ringkasan bulan berjalan dari backend.
      */
@@ -122,7 +122,7 @@ export default function DashboardPage() {
   }, []);
 
   /**
-   * handleGenerateInsights — Panggil POST /api/insights/generate agar AI
+   * handleGenerateInsights, Panggil POST /api/insights/generate agar AI
    * menganalisis penjualan/stok/pelanggan dan menulis wawasan baru.
    * Kalau gagal (mis. LLM offline) backend sudah punya fallback templated,
    * tapi tetap kasih notifikasi supaya user tahu.
@@ -228,7 +228,7 @@ export default function DashboardPage() {
             <div className="text-center py-6 space-y-2">
               <p className="text-sm font-bold text-brand-black/60">Belum ada wawasan AI.</p>
               <p className="text-xs text-brand-black/40 max-w-md mx-auto">
-                Klik tombol Generate — KasirAI akan menganalisis penjualan, stok, dan pelangganmu dari data asli toko.
+                Klik tombol Generate, KasirAI akan menganalisis penjualan, stok, dan pelangganmu dari data asli toko.
               </p>
             </div>
           ) : (
@@ -261,7 +261,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <span className="font-black text-sm font-mono">
-            {forecastLoading ? "—" : formatCurrency(forecast?.total ?? 0)}
+            {forecastLoading ? ", " : formatCurrency(forecast?.total ?? 0)}
           </span>
         </div>
         <div className="p-4">
@@ -295,11 +295,11 @@ export default function DashboardPage() {
 
       {/* ── 4 Stat Cards (sesuai PRD: Revenue/Orders/Stok/Customer) ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 items-stretch">
-        {/* Card 1: Revenue Bulan Ini — kuning */}
+        {/* Card 1: Revenue Bulan Ini, kuning */}
         <div className="slide-up stagger-1 h-full">
           <StatCard
             label="Pendapatan Bulan Ini"
-            value={loading ? "—" : formatCurrency(summary?.total_revenue ?? 0)}
+            value={loading ? ", " : formatCurrency(summary?.total_revenue ?? 0)}
             icon={<Banknote size={22} strokeWidth={2.5} />}
             color="yellow"
             trend={summary?.revenue_trend ?? undefined}
@@ -310,29 +310,29 @@ export default function DashboardPage() {
         <div className="slide-up stagger-2 h-full">
           <StatCard
             label="Pesanan Bulan Ini"
-            value={loading ? "—" : (summary?.total_orders ?? 0)}
+            value={loading ? ", " : (summary?.total_orders ?? 0)}
             icon={<Receipt size={22} strokeWidth={2.5} />}
             color="black"
             sub="order dibayar"
           />
         </div>
 
-        {/* Card 3: Stok Kritis — oranye (atau putih kalau aman) */}
+        {/* Card 3: Stok Kritis, oranye (atau putih kalau aman) */}
         <div className="slide-up stagger-3 h-full">
           <StatCard
             label="Stok Hampir Habis"
-            value={loading ? "—" : stock.length}
+            value={loading ? ", " : stock.length}
             icon={<Package size={22} strokeWidth={2.5} />}
             color={stock.length > 0 ? "orange" : "white"}
             sub={stock.length > 0 ? "perlu restock" : "semua aman"}
           />
         </div>
 
-        {/* Card 4: Total Customer (pembeli unik bulan ini) — hijau */}
+        {/* Card 4: Total Customer (pembeli unik bulan ini), hijau */}
         <div className="slide-up stagger-4 h-full">
           <StatCard
             label="Total Customer"
-            value={loading ? "—" : (summary?.total_customers ?? 0)}
+            value={loading ? ", " : (summary?.total_customers ?? 0)}
             icon={<Users size={22} strokeWidth={2.5} />}
             color="green"
             sub="pembeli bulan ini"
@@ -532,7 +532,7 @@ export default function DashboardPage() {
               </div>
             ) : stock.length === 0 ? (
               <div className="py-10 text-center text-sm text-green-600 font-semibold">
-                ✓ Semua stok aman
+                 Semua stok aman
               </div>
             ) : (
               stock.slice(0, 8).map((p) => (

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model Order — mewakili satu transaksi penjualan (keranjang yang sudah jadi).
+ * Model Order, mewakili satu transaksi penjualan (keranjang yang sudah jadi).
  *
  * Tabel: `orders`. Global scope TenantScope aktif. Terhubung ke shift
  * (sesi kasir), customer (CRM ringan via nomor HP) dan transaction
@@ -33,7 +33,7 @@ class Order extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {
@@ -45,7 +45,7 @@ class Order extends Model
     }
 
     /**
-     * Daftarkan TenantScope secara global — dipanggil otomatis oleh Eloquent.
+     * Daftarkan TenantScope secara global, dipanggil otomatis oleh Eloquent.
      */
     protected static function booted(): void
     {

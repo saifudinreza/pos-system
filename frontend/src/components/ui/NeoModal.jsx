@@ -1,22 +1,22 @@
 "use client";
-// NeoModal — Dialog popup neobrutalist
-// Analogi: seperti memo penting di atas semua dokumen lain — harus direspons dulu
+// NeoModal, Dialog popup neobrutalist
+// Analogi: seperti memo penting di atas semua dokumen lain, harus direspons dulu
 
 import { useEffect, useRef } from "react";
 
 /**
- * NeoModal — dialog popup (overlay gelap + kotak di tengah layar).
+ * NeoModal, dialog popup (overlay gelap + kotak di tengah layar).
  *
  * Props:
  *   isOpen  : true → tampil; scroll body dikunci selama terbuka
- *   onClose : dipanggil saat klik overlay / tombol ✕ / (footer)
+ *   onClose : dipanggil saat klik overlay / tombol  / (footer)
  *   title   : judul di header modal
- *   children: isi body — bisa di-scroll kalau kontennya panjang (max-h 90vh)
+ *   children: isi body, bisa di-scroll kalau kontennya panjang (max-h 90vh)
  *   footer  : elemen opsional di baris bawah (biasanya tombol aksi)
  *   size    : sm|md|lg|xl → lebar maksimal kotak (default: md)
  */
 export default function NeoModal({ isOpen, onClose, title, children, footer, size = "md" }) {
-  // Kunci scroll body saat modal terbuka — supaya background tidak bergerak
+  // Kunci scroll body saat modal terbuka, supaya background tidak bergerak
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
     else document.body.style.overflow = "";
@@ -46,7 +46,7 @@ export default function NeoModal({ isOpen, onClose, title, children, footer, siz
         dragFromOverlay.current = false;
       }}
     >
-      {/* Kotak modal — stopPropagation agar klik dalam modal tidak tutup modal */}
+      {/* Kotak modal, stopPropagation agar klik dalam modal tidak tutup modal */}
       <div
         className={`bg-white border-3 border-brand-black rounded-md w-full ${WIDTH[size] ?? WIDTH.md} flex flex-col max-h-[90vh]`}
         style={{ boxShadow: "6px 6px 0 #0A0A0A" }}
@@ -58,7 +58,7 @@ export default function NeoModal({ isOpen, onClose, title, children, footer, siz
             onClick={onClose}
             className="w-8 h-8 flex items-center justify-center font-black text-lg hover:bg-brand-yellow border-2 border-transparent hover:border-brand-black transition-colors"
           >
-            ✕
+            
           </button>
         </div>
 

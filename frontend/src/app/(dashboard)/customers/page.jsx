@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// CustomersPage — Daftar pelanggan (CRM) + riwayat belanja
+// CustomersPage, Daftar pelanggan (CRM) + riwayat belanja
 //
 // Pelanggan ter-capture otomatis saat kasir mengisi nomor HP
 // di POS (struk WhatsApp). Halaman ini melihat siapa saja yang
@@ -23,9 +23,9 @@ import NeoModal  from "@/components/ui/NeoModal";
 import { formatCurrency, getOrderStatusConfig } from "@/lib/utils";
 
 // Nomor HP tersimpan format 628xx → tampilkan 08xx untuk dibaca orang
-/** formatPhone — Ubah format nomor HP internal (628xx) jadi tampilan user (08xx). */
+/** formatPhone, Ubah format nomor HP internal (628xx) jadi tampilan user (08xx). */
 function formatPhone(phone) {
-  if (!phone) return "—";
+  if (!phone) return ", ";
   if (phone.startsWith("62")) return "0" + phone.slice(2);
   return phone;
 }
@@ -39,7 +39,7 @@ export default function CustomersPage() {
   const [detailLoading, setDetailLoading] = useState(false);
 
   /**
-   * fetchCustomers — Ambil daftar pelanggan; kalau ada kata kunci search,
+   * fetchCustomers, Ambil daftar pelanggan; kalau ada kata kunci search,
    * dikirim ke backend (nama/HP). Dipanggil saat halaman dibuka & tombol Cari.
    */
   const fetchCustomers = async () => {
@@ -55,7 +55,7 @@ export default function CustomersPage() {
   useEffect(() => { fetchCustomers(); }, []);
 
   /**
-   * openDetail — Buka modal detail pelanggan. Modal langsung tampil dengan
+   * openDetail, Buka modal detail pelanggan. Modal langsung tampil dengan
    * data dasar (skeleton order), lalu isi riwayat order diambil dari
    * GET /api/customers/{id}.
    */
@@ -95,7 +95,7 @@ export default function CustomersPage() {
       label: "Total Nilai",
       render: (v) => <span className="font-black text-sm font-mono">{formatCurrency(v)}</span>,
     },
-    { key: "last_order_at", label: "Terakhir Belanja", render: (v) => <span className="text-xs text-brand-black/60">{v ?? "—"}</span> },
+    { key: "last_order_at", label: "Terakhir Belanja", render: (v) => <span className="text-xs text-brand-black/60">{v ?? ", "}</span> },
     {
       key: "id",
       label: "Aksi",
@@ -169,7 +169,7 @@ export default function CustomersPage() {
               </div>
               <div className="border-2 border-brand-black/15 p-3 rounded-md">
                 <p className="text-[10px] font-black uppercase text-brand-black/40">Total Order (lunas)</p>
-                <p className="font-bold text-sm">{detail.summary?.orders_count ?? "—"}</p>
+                <p className="font-bold text-sm">{detail.summary?.orders_count ?? ", "}</p>
               </div>
               <div className="border-2 border-brand-black/15 p-3 rounded-md">
                 <p className="text-[10px] font-black uppercase text-brand-black/40">Total Belanja</p>

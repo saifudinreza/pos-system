@@ -1,7 +1,7 @@
 // ============================================================
-// transactionService.js — Layanan pembayaran (Midtrans)
+// transactionService.js, Layanan pembayaran (Midtrans)
 //
-// Analogi: Ini seperti "mesin EDC" di kasir —
+// Analogi: Ini seperti "mesin EDC" di kasir,
 // setelah order dibuat, kita minta mesin EDC (Midtrans) untuk
 // memproses pembayaran. Mesin kasir dapat "Snap Token" dari Midtrans,
 // lalu tampilkan popup pembayaran ke pelanggan.
@@ -35,7 +35,7 @@ const transactionService = {
 
   // --- BUAT TRANSAKSI BARU (inisiasi pembayaran) ---
   // Memanggil Midtrans Snap API via backend, mendapat snap_token
-  // snap_token berlaku 24 jam — dipakai untuk buka popup Midtrans di frontend
+  // snap_token berlaku 24 jam, dipakai untuk buka popup Midtrans di frontend
   //
   // @param {{ order_id: number }} payload
   // @returns { message, transaction: { snap_token, status, amount, ... } }
@@ -53,7 +53,7 @@ const transactionService = {
 
   // --- DETAIL TRANSAKSI ---
   // Digunakan untuk poll status pembayaran setelah pelanggan bayar
-  // Analogi: cek struk pembayaran — sudah lunas atau belum
+  // Analogi: cek struk pembayaran, sudah lunas atau belum
   getById: async (id) => {
     const { data } = await api.get(`/transactions/${id}`);
     return data.data ?? data;

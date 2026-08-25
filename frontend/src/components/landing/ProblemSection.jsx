@@ -1,10 +1,10 @@
 "use client";
 
 // ============================================================
-// ProblemSection — "Ribetnya kelola toko manual"
+// ProblemSection, "Ribetnya kelola toko manual"
 //
 // Posisi cerita: tepat setelah Hero. Tujuannya membuat user
-// mengangguk — "iya, ini masalahku" — sebelum kita tunjukkan
+// mengangguk, "iya, ini masalahku", sebelum kita tunjukkan
 // solusinya di section berikutnya.
 //
 // Visual: kartu-kartu "rasa sakit" (pain points) yang muncul
@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
-// Daftar "rasa sakit" (pain points) — tiap objek = satu kartu
+// Daftar "rasa sakit" (pain points), tiap objek = satu kartu
 const PAINS = [
   {
     Icon: NotebookPen,
@@ -63,13 +63,13 @@ const PAINS = [
 ];
 
 /**
- * ProblemSection — grid "masalah manual" dengan animasi stagger
+ * ProblemSection, grid "masalah manual" dengan animasi stagger
  * (lihat header file). Tanpa props; konten dari konstanta PAINS.
  */
 export default function ProblemSection() {
   return (
     <section id="masalah" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-cream overflow-hidden">
-      {/* Shape parallax dekoratif — melayang berlawanan arah scroll */}
+      {/* Shape parallax dekoratif, melayang berlawanan arah scroll */}
       <Parallax speed={0.5} aria-hidden="true" className="pointer-events-none absolute -left-10 top-24 -z-0">
         <div className="w-28 h-28 bg-[#FF3B3B]/15 border-3 border-[#FF3B3B]/30 rotate-12" />
       </Parallax>
@@ -85,7 +85,7 @@ export default function ProblemSection() {
             className="inline-block bg-[#FF3B3B] text-white px-3 py-1 text-xs font-mono font-black tracking-wider mb-4 border-2 border-brand-black"
             style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
           >
-            ✦ MASALAHNYA
+             MASALAHNYA
           </div>
           <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk leading-tight">
             Kelola toko manual itu{" "}
@@ -99,11 +99,11 @@ export default function ProblemSection() {
           </h2>
           <p className="mt-4 text-brand-black/60 font-medium text-lg">
             Setiap hari habis waktu untuk hal yang sama. Bukan jualannya yang
-            susah — tapi <b>mengurus di belakangnya</b>.
+            susah, tapi <b>mengurus di belakangnya</b>.
           </p>
         </Reveal>
 
-        {/* Grid pain points — muncul berurutan saat scroll */}
+        {/* Grid pain points, muncul berurutan saat scroll */}
         <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" gap={0.08}>
           {PAINS.map((p) => (
             <StaggerItem key={p.title}>

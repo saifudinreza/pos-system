@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Menjalankan panggilan LLM secara async. Prompt sudah dibangun di controller
- * (dalam konteks auth — isolasi tenant aman), jadi job ini TIDAK menyentuh
+ * (dalam konteks auth, isolasi tenant aman), jadi job ini TIDAK menyentuh
  * database tenant sama sekali, hanya memanggil GroqService::ask lalu menulis
  * hasilnya kembali ke baris `ai_jobs` sebagai respons yang dipoll frontend.
  */
@@ -21,7 +21,7 @@ class ProcessAiJob implements ShouldQueue
 
     /** Jumlah maksimal percobaan eksekusi job (retry otomatis oleh queue). */
     public int $tries = 2;
-    /** Batas waktu eksekusi per percobaan (detik) — LLM butuh waktu. */
+    /** Batas waktu eksekusi per percobaan (detik), LLM butuh waktu. */
     public int $timeout = 90;
 
     /** ID baris ai_jobs yang akan diproses oleh worker. */
@@ -54,7 +54,7 @@ class ProcessAiJob implements ShouldQueue
         try {
             $result = $groq->ask($job->prompt, $job->query);
 
-            // Simpan hasil LLM ke baris job — frontend mem-poll status ini
+            // Simpan hasil LLM ke baris job, frontend mem-poll status ini
             $job->update([
                 'status'      => 'completed',
                 'response'    => $result['text'],
@@ -64,7 +64,7 @@ class ProcessAiJob implements ShouldQueue
                 'processed_at' => now(),
             ]);
 
-            // Simpan log query — dipindah ke job supaya reliable walau
+            // Simpan log query, dipindah ke job supaya reliable walau
             // response dikirim async (jika request owner sudah pergi).
             AiQueryLog::create([
                 'user_id'     => $job->user_id,
@@ -92,7 +92,7 @@ class ProcessAiJob implements ShouldQueue
 
     /**
      * Dipanggil saat job gagal permanen (retry habis).
-     * Error LLM sederhana ditangani di handle() — di sini cukup dicatat di log.
+     * Error LLM sederhana ditangani di handle(), di sini cukup dicatat di log.
      */
     public function failed(\Throwable $e): void
     {

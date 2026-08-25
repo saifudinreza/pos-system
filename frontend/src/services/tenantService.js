@@ -1,7 +1,7 @@
 // ============================================================
-// tenantService.js — Layanan manajemen tenant (developer only)
+// tenantService.js, Layanan manajemen tenant (developer only)
 //
-// Analogi: Ini seperti "panel kontrol gedung" —
+// Analogi: Ini seperti "panel kontrol gedung",
 // hanya developer yang bisa lihat & kelola seluruh "toko" (tenant)
 // yang memakai KasirAI, termasuk ubah data atau hapus.
 //
@@ -32,7 +32,7 @@ const tenantService = {
 
   // --- UPDATE DATA TENANT ---
   // @param {number} id
-  // @param {Object} payload — field tenant yang mau diubah
+  // @param {Object} payload, field tenant yang mau diubah
   update: async (id, payload) => {
     const { data } = await api.put(`/dev/tenants/${id}`, payload);
     return data;

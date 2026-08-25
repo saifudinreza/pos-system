@@ -1,9 +1,9 @@
 "use client";
 
 // ============================================================
-// useProducts.js — Hook untuk manajemen data produk
+// useProducts.js, Hook untuk manajemen data produk
 //
-// Analogi: Ini seperti "manajer gudang otomatis" —
+// Analogi: Ini seperti "manajer gudang otomatis",
 // dia tahu daftar produk saat ini, bisa filter, cari,
 // tambah/edit/hapus, dan auto-refresh kalau ada perubahan.
 //
@@ -16,7 +16,7 @@ import { useState, useEffect, useCallback } from "react";
 import productService from "@/services/productService";
 import { getErrorMessage } from "@/lib/utils";
 
-// @param {Object} initialFilters — filter awal (opsional)
+// @param {Object} initialFilters, filter awal (opsional)
 export function useProducts(initialFilters = {}) {
   // Data produk dari server
   const [products, setProducts]   = useState([]);
@@ -25,8 +25,8 @@ export function useProducts(initialFilters = {}) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError]         = useState(null);
 
-  // Filter aktif — dipakai sebagai parameter query ke API
-  // Analogi: seperti filter di mesin pencari —
+  // Filter aktif, dipakai sebagai parameter query ke API
+  // Analogi: seperti filter di mesin pencari,
   // ganti filter → hasil langsung berubah
   const [filters, setFilters] = useState({
     page:     1,
@@ -36,7 +36,7 @@ export function useProducts(initialFilters = {}) {
 
   // --- AMBIL DATA PRODUK ---
   // useCallback: fungsi ini tidak dibuat ulang setiap render,
-  // hanya dibuat ulang jika "filters" berubah — optimasi performa
+  // hanya dibuat ulang jika "filters" berubah, optimasi performa
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -59,7 +59,7 @@ export function useProducts(initialFilters = {}) {
   }, [fetchProducts]);
 
   // --- SINKRONISASI FILTER AWAL (misal search yang di-debounce) ---
-  // useProducts({ search: x }) — kalau x berubah, state filter harus ikut.
+  // useProducts({ search: x }), kalau x berubah, state filter harus ikut.
   // Sebelumnya initialFilters hanya dibaca SEKALI saat mount, jadi
   // pencarian produk di halaman tidak pernah berfungsi.
   useEffect(() => {

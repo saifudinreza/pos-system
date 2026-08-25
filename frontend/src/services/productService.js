@@ -1,7 +1,7 @@
 // ============================================================
-// productService.js — Layanan manajemen produk
+// productService.js, Layanan manajemen produk
 //
-// Analogi: Ini seperti "manajer gudang" —
+// Analogi: Ini seperti "manajer gudang",
 // bisa melihat daftar barang, mencari barang tertentu,
 // menambah/mengubah/menghapus stok.
 //
@@ -24,7 +24,7 @@ import api from "@/lib/axios";
 import { buildQueryString } from "@/lib/utils";
 
 // --- HELPER: UBAH OBJEK PAYLOAD → FORM-DATA (upload gambar) ---
-// Dipakai create() dan update() — logikanya identik, disatukan di sini
+// Dipakai create() dan update(), logikanya identik, disatukan di sini
 //
 // PENTING: boolean harus dikonversi ke "1"/"0" di FormData karena
 // Laravel validation `boolean` menolak string "true"/"false"
@@ -51,8 +51,8 @@ const productService = {
   // @param {Object} params - filter opsional:
   //   search      : cari berdasarkan nama produk
   //   category_id : filter per kategori
-  //   is_active   : true/false — tampilkan hanya produk aktif/nonaktif
-  //   low_stock   : true — tampilkan hanya produk stok rendah
+  //   is_active   : true/false, tampilkan hanya produk aktif/nonaktif
+  //   low_stock   : true, tampilkan hanya produk stok rendah
   //   sort_by     : "name" | "price" | "stock"
   //   sort_order  : "asc" | "desc"
   //   page        : halaman ke-berapa (default 1)
@@ -99,10 +99,10 @@ const productService = {
   // --- UPDATE PRODUK (admin only) ---
   // Laravel menerima PUT untuk update. Jika ada file baru, pakai POST + _method=PUT
   // karena PHP tidak bisa baca multipart dari PUT secara native.
-  // Analogi: revisi data di katalog — kalau ada foto baru, tukar foto lamanya
+  // Analogi: revisi data di katalog, kalau ada foto baru, tukar foto lamanya
   //
   // @param {number} id
-  // @param {Object} payload — field yang mau diubah (partial update diterima backend)
+  // @param {Object} payload, field yang mau diubah (partial update diterima backend)
   update: async (id, payload) => {
     let body = payload;
     let config = {};

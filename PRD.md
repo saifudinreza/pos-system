@@ -1,4 +1,4 @@
-# PRD — KasirAI
+# PRD, KasirAI
 
 Product Requirements Document. Disusun berdasarkan `README.md` dan `CLAUDE.md` di repo ini sebagai sumber kebenaran (arsitektur, fitur, dan batasan yang tercatat di sana tidak diulang-jelaskan dari nol, hanya dirangkum jadi format requirement).
 
@@ -7,7 +7,7 @@ Product Requirements Document. Disusun berdasarkan `README.md` dan `CLAUDE.md` d
 **KasirAI** adalah SaaS Point of Sale (POS) berbasis web untuk UMKM Indonesia. Setiap toko yang mendaftar menjadi satu *tenant* terisolasi dengan datanya sendiri, dan bisa langsung memakai kasir, mengelola stok, menerima pembayaran digital via Midtrans, mengirim struk otomatis ke WhatsApp pelanggan, serta bertanya soal kondisi bisnisnya ke AI Assistant berbahasa Indonesia.
 
 - Live: https://sikasirai.com/
-- Status: production (bukan sandbox) — Midtrans sudah mode production, transaksi memindahkan uang asli.
+- Status: production (bukan sandbox), Midtrans sudah mode production, transaksi memindahkan uang asli.
 - Dibangun solo oleh **Saifudin Reza** sebagai final project Full Stack Web Development Bootcamp 2026.
 
 ## 2. Latar Belakang & Masalah
@@ -40,8 +40,8 @@ Role hierarki: `user` < `kasir` < `admin` < `developer` (lihat tabel hak akses d
 ### 5.2 Subscription & Billing
 - 3 paket dengan harga terpusat di backend (`SubscriptionController::PRICES`):
   - **Free (Rp 0)**: 1 outlet, maks. 50 produk & 15 kategori, transaksi tanpa batas, 5 prompt AI/bulan, pembayaran tunai saja.
-  - **Pro**: Rp 129.000/bulan (Rp 100.000/bulan jika tahunan) — produk/kategori unlimited, AI Assistant 10 prompt/hari, export PDF/Excel, QRIS & e-wallet.
-  - **Enterprise**: Rp 499.000/bulan (Rp 399.000/bulan jika tahunan) — semua fitur Pro + AI Assistant 50 prompt/hari, outlet unlimited, API & integrasi kustom, account manager, SLA.
+  - **Pro**: Rp 129.000/bulan (Rp 100.000/bulan jika tahunan), produk/kategori unlimited, AI Assistant 10 prompt/hari, export PDF/Excel, QRIS & e-wallet.
+  - **Enterprise**: Rp 499.000/bulan (Rp 399.000/bulan jika tahunan), semua fitur Pro + AI Assistant 50 prompt/hari, outlet unlimited, API & integrasi kustom, account manager, SLA.
 - Enforcement berlapis: backend memblokir fitur premium untuk paket Free (QRIS → 422, export → 403, AI habis → 429), frontend juga memblokir/menyembunyikan tombol.
 - Upgrade paket dibayar via Midtrans Snap (bulanan/tahunan, harga tahunan diskon).
 - Webhook otomatis mengaktifkan paket + upgrade role user saat status `settlement`.
@@ -51,14 +51,14 @@ Role hierarki: `user` < `kasir` < `admin` < `developer` (lihat tabel hak akses d
 ### 5.3 POS Terminal (`/kasir`)
 - Split-screen: grid produk (search real-time debounce 400ms, filter kategori) + keranjang belanja.
 - Validasi stok real-time saat menambah item ke keranjang.
-- Bayar Tunai — kalkulasi kembalian otomatis.
-- Bayar Digital — Midtrans Snap (QRIS, GoPay, OVO, VA, kartu kredit).
+- Bayar Tunai, kalkulasi kembalian otomatis.
+- Bayar Digital, Midtrans Snap (QRIS, GoPay, OVO, VA, kartu kredit).
 - Struk digital: cetak atau kirim ke WhatsApp pelanggan.
 - Panel kelola produk langsung dari kasir (slide-over), tanpa pindah halaman.
 - **Kasir terkunci sampai shift dibuka**: begitu halaman kasir dibuka tanpa shift aktif, form "Buka Shift" langsung tampil di depan dan grid produk + keranjang di-blur & tidak bisa diklik sampai shift dibuka.
 
 ### 5.4 Shift Management / Klerek
-- Shift **per-tenant** (bukan per-user) — satu shift aktif dipakai bersama semua kasir dalam tenant yang sama.
+- Shift **per-tenant** (bukan per-user), satu shift aktif dipakai bersama semua kasir dalam tenant yang sama.
 - Auto-resume saat login dalam jam shift yang masih aktif (tidak perlu isi ulang form buka shift), termasuk setelah logout/login ulang oleh kasir lain, selama shift belum ditutup.
 - Form buka shift: nama custom + preset (Pagi/Siang/Malam) + jam mulai/selesai custom + kalkulator denominasi uang fisik + modal awal + catatan.
 - Realtime enforcement: transaksi otomatis diblokir di luar jam shift, dengan banner peringatan.
@@ -96,25 +96,25 @@ Role hierarki: `user` < `kasir` < `admin` < `developer` (lihat tabel hak akses d
 
 | Fitur | user | kasir | admin | developer |
 |---|:---:|:---:|:---:|:---:|
-| POS + Shift Management | ✅ | ✅ | ✅ | ✅ |
-| Kelola Produk & Kategori | — | ✅ | ✅ | ✅ |
-| Pesanan & Transaksi | — | ✅ | ✅ | ✅ |
-| Dashboard & Laporan | — | — | ✅ | ✅ |
-| Konfigurasi Midtrans | — | — | ✅ | ✅ |
-| AI Assistant | — | ✅ | ✅ | ✅ |
-| AI Monitoring | — | — | ✅ | ✅ |
-| User Management | — | — | — | ✅ |
-| Kelola Tenant & Subscription (semua toko) | — | — | — | ✅ |
+| POS + Shift Management |  |  |  |  |
+| Kelola Produk & Kategori |, |  |  |  |
+| Pesanan & Transaksi |, |  |  |  |
+| Dashboard & Laporan |, |, |  |  |
+| Konfigurasi Midtrans |, |, |  |  |
+| AI Assistant |, |  |  |  |
+| AI Monitoring |, |, |  |  |
+| User Management |, |, |, |  |
+| Kelola Tenant & Subscription (semua toko) |, |, |, |  |
 
 ## 7. Requirement Arsitektur & Non-Fungsional
 
 Ini adalah keputusan arsitektur yang **wajib dipatuhi** saat mengembangkan fitur baru (sumber: `CLAUDE.md` §Arsitektur Kunci):
 
-1. **Isolasi multi-tenant otomatis** — semua query tenant-aware wajib lewat Laravel Global Scope (`TenantScope`), tidak boleh filter tenant manual di controller. `tenant_id = null` khusus role `developer`.
-2. **AI harus dual-provider** — tidak boleh hardcode satu provider AI saja; fallback Groq → OpenRouter wajib tetap berfungsi.
-3. **Payment key per-tenant** — server key Midtrans tenant dienkripsi di DB, dengan fallback ke key platform. Billing subscription platform (`SubscriptionController`) dan transaksi kasir tenant (`TransactionController`) memakai jalur konfigurasi key yang terpisah tegas.
-4. **Shift per-tenant, bukan per-user** — satu shift aktif dipakai bersama semua kasir dalam tenant yang sama; enforcement jam shift real-time.
-5. **Media selalu lewat proxy backend** — URL Cloudflare R2 tidak boleh pernah diekspos langsung ke frontend.
+1. **Isolasi multi-tenant otomatis**, semua query tenant-aware wajib lewat Laravel Global Scope (`TenantScope`), tidak boleh filter tenant manual di controller. `tenant_id = null` khusus role `developer`.
+2. **AI harus dual-provider**, tidak boleh hardcode satu provider AI saja; fallback Groq → OpenRouter wajib tetap berfungsi.
+3. **Payment key per-tenant**, server key Midtrans tenant dienkripsi di DB, dengan fallback ke key platform. Billing subscription platform (`SubscriptionController`) dan transaksi kasir tenant (`TransactionController`) memakai jalur konfigurasi key yang terpisah tegas.
+4. **Shift per-tenant, bukan per-user**, satu shift aktif dipakai bersama semua kasir dalam tenant yang sama; enforcement jam shift real-time.
+5. **Media selalu lewat proxy backend**, URL Cloudflare R2 tidak boleh pernah diekspos langsung ke frontend.
 6. **Webhook Midtrans**: server key harus di-set sebelum verifikasi notifikasi (urutan operasi kritis, sudah pernah jadi bug production).
 
 ### Keamanan
@@ -131,8 +131,8 @@ Ini adalah keputusan arsitektur yang **wajib dipatuhi** saat mengembangkan fitur
 | SQL Injection | Eloquent ORM + parameter binding |
 
 ### Batasan Skalabilitas yang Diketahui (belum di-scope untuk fase ini)
-- Cache/queue/session semua `database` driver — belum ada Redis.
-- Tidak ada job queue — kirim WhatsApp & panggilan AI berjalan sinkron di dalam request/webhook, menahan worker PHP-FPM.
+- Cache/queue/session semua `database` driver, belum ada Redis.
+- Tidak ada job queue, kirim WhatsApp & panggilan AI berjalan sinkron di dalam request/webhook, menahan worker PHP-FPM.
 - Belum ada rate limiting/throttle di endpoint manapun (termasuk login & AI).
 - Backend single instance di Railway, cold start saat idle, tidak ada horizontal scaling.
 
@@ -143,14 +143,14 @@ Ini adalah keputusan arsitektur yang **wajib dipatuhi** saat mengembangkan fitur
 | Frontend | Next.js 14 (App Router), React 18, Tailwind CSS 3.4 (neobrutalism), Zustand 5, Axios, Framer Motion, Recharts, Lucide React |
 | Backend | Laravel 11 (PHP ^8.3), MySQL 8, Laravel Sanctum, Global Scope multi-tenant, DomPDF, Maatwebsite Excel, Midtrans PHP SDK |
 | AI | Groq (LLaMA 3.3 70B, primer) → OpenRouter (LLaMA 3.1 8B, fallback) |
-| Payment | Midtrans Snap — production, QRIS/GoPay/OVO/VA/kartu kredit |
+| Payment | Midtrans Snap, production, QRIS/GoPay/OVO/VA/kartu kredit |
 | Storage | Cloudflare R2 (S3-compatible), diproksikan backend |
 | WhatsApp | Fonnte API, dipanggil server-side |
 | Infrastruktur | Frontend di Vercel, backend di Railway (Docker + Nginx + PHP-FPM), DB Railway MySQL |
 
 ## 9. Testing & Definition of Done
 
-- E2E: TestSprite — baseline 20/20 skenario PASSED (login, buka shift + kalkulator pecahan, checkout tunai + struk, tutup shift + rekonsiliasi, checkout tanpa shift ditolak, tombol bayar disabled saat cart kosong, search real-time, riwayat shift).
+- E2E: TestSprite, baseline 20/20 skenario PASSED (login, buka shift + kalkulator pecahan, checkout tunai + struk, tutup shift + rekonsiliasi, checkout tanpa shift ditolak, tombol bayar disabled saat cart kosong, search real-time, riwayat shift).
 - Backend: PHPUnit (`backend/tests`).
 - Sebelum fitur/perubahan besar dianggap selesai: jalankan test relevan dan/atau skill `/verify`.
 - Bahasa semua teks user-facing (label UI, pesan error): Bahasa Indonesia.
@@ -165,5 +165,5 @@ Ini adalah keputusan arsitektur yang **wajib dipatuhi** saat mengembangkan fitur
 
 ## 11. Referensi
 
-- `README.md` — dokumentasi lengkap untuk pembaca eksternal/recruiter, termasuk studi kasus tantangan teknis.
-- `CLAUDE.md` — panduan kerja teknis di repo ini (wajib dibaca sebelum mengubah bagian arsitektur kunci).
+- `README.md`, dokumentasi lengkap untuk pembaca eksternal/recruiter, termasuk studi kasus tantangan teknis.
+- `CLAUDE.md`, panduan kerja teknis di repo ini (wajib dibaca sebelum mengubah bagian arsitektur kunci).

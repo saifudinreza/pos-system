@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 define('PRODUCT_DISK', !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'public');
 
 /**
- * ProductController — CRUD produk + restock + riwayat pergerakan stok.
+ * ProductController, CRUD produk + restock + riwayat pergerakan stok.
  *
  * - Gambar produk disimpan ke disk R2 (bila dikonfigurasi) atau fallback
  *   'public'; URL selalu lewat proxy backend /api/media/{path}.
@@ -28,7 +28,7 @@ define('PRODUCT_DISK', !empty(config('filesystems.disks.r2.key')) ? 'r2' : 'publ
 class ProductController extends Controller
 {
     // =============================================================
-    // INDEX — ambil semua produk dengan filter, search, pagination
+    // INDEX, ambil semua produk dengan filter, search, pagination
     // GET /api/products
     // GET /api/products?search=indomie
     // GET /api/products?category_id=1
@@ -56,7 +56,7 @@ class ProductController extends Controller
 
         // ----- FILTER TENANT (khusus developer) -----
         // Developer (tenant_id = null) biasanya melihat semua tenant. Bila ingin
-        // fokus ke satu tenant, kirim ?tenant_id=xxx — parameter ini DIABAIKAN
+        // fokus ke satu tenant, kirim ?tenant_id=xxx, parameter ini DIABAIKAN
         // untuk non-developer (keamanan: mereka tetap hanya lihat tenant sendiri
         // via TenantScope, bukan tenant lain).
         if ($request->user()->role === 'developer' && $request->filled('tenant_id')) {
@@ -106,7 +106,7 @@ class ProductController extends Controller
         $totalInTenant = (clone $query)->count();
 
         // Developer bebas melihat semua produk tanpa cap read-limit
-        // (dev tools lintas tenant) — tetap pakai pagination normal.
+        // (dev tools lintas tenant), tetap pakai pagination normal.
         if ($readLimit !== null && ! $isDeveloper) {
             // Hard cap: return only the first $readLimit products
             $items = $query->take($readLimit)->get();
@@ -146,7 +146,7 @@ class ProductController extends Controller
     }
 
     // =============================================================
-    // SHOW — ambil satu produk by ID
+    // SHOW, ambil satu produk by ID
     // GET /api/products/{id}
     // =============================================================
     /**
@@ -173,7 +173,7 @@ class ProductController extends Controller
     }
 
     // =============================================================
-    // STORE — tambah produk baru
+    // STORE, tambah produk baru
     // POST /api/products
     // Role: admin only
     // =============================================================
@@ -240,7 +240,7 @@ class ProductController extends Controller
     }
 
     // =============================================================
-    // UPDATE — edit produk
+    // UPDATE, edit produk
     // PUT /api/products/{id}
     // Role: admin only
     // =============================================================
@@ -308,13 +308,13 @@ class ProductController extends Controller
     }
 
     // =============================================================
-    // DESTROY — hapus produk
+    // DESTROY, hapus produk
     // DELETE /api/products/{id}
     // Role: admin only
     // =============================================================
     /**
      * Hapus produk. Produk yang pernah ada di transaksi TIDAK boleh dihapus
-     * (422 — saran: nonaktifkan saja, supaya histori laporan tetap utuh).
+     * (422, saran: nonaktifkan saja, supaya histori laporan tetap utuh).
      * Gambar ikut dihapus; audit log 'deleted'.
      *
      * @param int $id ID produk
@@ -360,7 +360,7 @@ class ProductController extends Controller
     }
 
     // =============================================================
-    // RESTOCK — tambah stok produk (dengan pencatatan ledger)
+    // RESTOCK, tambah stok produk (dengan pencatatan ledger)
     // POST /api/products/{id}/restock
     // Body: { "quantity": 20, "note": "Restok dari supplier" }
     // Role: admin & kasir
@@ -413,7 +413,7 @@ class ProductController extends Controller
     }
 
     // =============================================================
-    // MOVEMENTS — riwayat pergerakan stok satu produk
+    // MOVEMENTS, riwayat pergerakan stok satu produk
     // GET /api/products/{id}/movements
     // Role: admin & kasir
     // =============================================================
@@ -459,11 +459,11 @@ class ProductController extends Controller
     }
 
     // =============================================================
-    // HELPER — format data produk untuk response
+    // HELPER, format data produk untuk response
     // =============================================================
     /**
      * Format produk untuk response. URL gambar selalu lewat proxy backend
-     * (/api/media/...) — URL R2 tidak pernah diekspos. Relasi category dibaca
+     * (/api/media/...), URL R2 tidak pernah diekspos. Relasi category dibaca
      * hanya kalau sudah di-load (relationLoaded).
      *
      * @param Product $product Produk yang akan diformat
@@ -481,7 +481,7 @@ class ProductController extends Controller
             'stock'       => $product->stock,
             'stock_alert' => $product->stock_alert,
             'is_low_stock' => $product->isLowStock(),
-            // ↑ Helper dari Model — true kalau stok sudah mepet
+            // ↑ Helper dari Model, true kalau stok sudah mepet
             'is_active'   => $product->is_active,
             'image_url'   => $product->image
                 ? url('/api/media/' . $product->image)

@@ -1,9 +1,9 @@
 "use client";
 
 // ============================================================
-// DashboardLayout — Kerangka halaman dashboard
+// DashboardLayout, Kerangka halaman dashboard
 //
-// Analogi: Ini seperti "bangunan kantor" —
+// Analogi: Ini seperti "bangunan kantor",
 // terdiri dari 3 bagian tetap yang selalu ada di setiap halaman:
 //   - Sidebar kiri  : menu navigasi
 //   - Area tengah   : navbar atas + konten halaman (yang berganti-ganti)
@@ -34,7 +34,7 @@ import useAuthStore from "@/stores/authStore";
 
 export default function DashboardLayout({ children }) {
   // Ambil fungsi dari authStore menggunakan selector
-  // Selector (s) => s.xxx mencegah re-render berlebihan —
+  // Selector (s) => s.xxx mencegah re-render berlebihan,
   // komponen hanya re-render kalau nilai yang di-select berubah
   const hydrateFromStorage = useAuthStore((s) => s.hydrateFromStorage);
   // Select user directly so the layout re-renders whenever user changes
@@ -79,10 +79,10 @@ export default function DashboardLayout({ children }) {
       ── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
-        {/* Navbar selalu di atas — tombol menu untuk toggle sidebar di mobile */}
+        {/* Navbar selalu di atas, tombol menu untuk toggle sidebar di mobile */}
         <Navbar onMenuToggle={() => setSidebarOpen(true)} />
 
-        {/* Area konten halaman — bisa di-scroll jika konten panjang
+        {/* Area konten halaman, bisa di-scroll jika konten panjang
             {children} = konten dari page.jsx yang sedang aktif
             Ganti navigasi → children berganti, layout tetap */}
         <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 scrollbar-thin">
@@ -101,7 +101,7 @@ export default function DashboardLayout({ children }) {
       ── */}
       {showAI && (
         <>
-          {/* Tombol floating di pojok kanan bawah — hanya muncul di mobile/tablet
+          {/* Tombol floating di pojok kanan bawah, hanya muncul di mobile/tablet
               lg:hidden = sembunyikan di layar besar (desktop sudah ada panel tetap) */}
           <button
             onClick={() => setAiPanelOpen((v) => !v)}
@@ -116,7 +116,7 @@ export default function DashboardLayout({ children }) {
             aria-label="Buka AI Assistant"
           >
             {aiPanelOpen ? (
-              <span className="text-base leading-none">✕</span>
+              <span className="text-base leading-none"></span>
             ) : (
               <svg
                 xmlns="http://www.w3.org/2000/svg"

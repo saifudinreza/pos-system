@@ -1,10 +1,10 @@
 "use client";
 
 // ============================================================
-// FeaturesSection — "Solusi": fitur POS yang di-reveal saat scroll
+// FeaturesSection, "Solusi": fitur POS yang di-reveal saat scroll
 //
 // Posisi cerita: jawaban langsung atas ProblemSection. Tiap kartu
-// fitur muncul berurutan (stagger) saat masuk viewport — memberi
+// fitur muncul berurutan (stagger) saat masuk viewport, memberi
 // kesan "satu per satu masalahmu beres".
 // ============================================================
 
@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
-// Daftar fitur — tiap objek = satu kartu (ikon, judul, deskripsi, tag)
+// Daftar fitur, tiap objek = satu kartu (ikon, judul, deskripsi, tag)
 const FEATURES = [
   {
     Icon:        MonitorCheck,
@@ -31,7 +31,7 @@ const FEATURES = [
   {
     Icon:        BrainCircuit,
     title:       "AI Assistant Cerdas",
-    description: "Tanya apa saja ke AI: analisis penjualan, rekomendasi stok, tren produk — langsung dijawab.",
+    description: "Tanya apa saja ke AI: analisis penjualan, rekomendasi stok, tren produk, langsung dijawab.",
     tag:         "AI",
     tagColor:    "bg-brand-black text-white",
     iconBg:      "bg-brand-black",
@@ -72,7 +72,7 @@ const FEATURES = [
 ];
 
 /**
- * FeatureCard — satu kartu fitur (ikon, tag, judul, deskripsi).
+ * FeatureCard, satu kartu fitur (ikon, tag, judul, deskripsi).
  * Props: Icon, title, description, tag, tagColor, iconBg, iconColor?
  * Semua field berasal dari satu objek di FEATURES (di-spread saat render).
  */
@@ -107,7 +107,7 @@ const FeatureCard = ({ Icon, title, description, tag, tagColor, iconBg, iconColo
 );
 
 /**
- * FeaturesSection — grid fitur dengan animasi stagger saat scroll
+ * FeaturesSection, grid fitur dengan animasi stagger saat scroll
  * (lihat header file). Tanpa props; konten dari konstanta FEATURES.
  */
 export default function FeaturesSection() {
@@ -127,7 +127,7 @@ export default function FeaturesSection() {
             className="inline-block bg-brand-black text-white px-3 py-1 text-xs font-mono font-black tracking-wider mb-4"
             style={{ boxShadow: "2px 2px 0 #FFE500" }}
           >
-            ✦ SOLUSINYA
+             SOLUSINYA
           </div>
           <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk max-w-xl">
             Semua yang kamu
@@ -136,13 +136,13 @@ export default function FeaturesSection() {
             <span className="bg-brand-yellow px-1">satu platform.</span>
           </h2>
           <p className="mt-4 text-brand-black/60 font-medium max-w-lg">
-            Dari kasir hingga laporan, dari manajemen stok hingga AI — semuanya
+            Dari kasir hingga laporan, dari manajemen stok hingga AI, semuanya
             terhubung dan bekerja otomatis buat bisnis kamu.
           </p>
         </Reveal>
 
         <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" gap={0.08}>
-          {/* Grid kartu fitur — muncul berurutan (stagger) saat masuk viewport */}
+          {/* Grid kartu fitur, muncul berurutan (stagger) saat masuk viewport */}
           {FEATURES.map((feature) => (
             <StaggerItem key={feature.title} className="h-full">
               <FeatureCard {...feature} />
@@ -150,7 +150,7 @@ export default function FeaturesSection() {
           ))}
         </Stagger>
 
-        {/* Panel "FITUR UNGGULAN" — sorotan AI dengan contoh pertanyaan */}
+        {/* Panel "FITUR UNGGULAN", sorotan AI dengan contoh pertanyaan */}
         <Reveal delay={0.1}>
           <div
             className="mt-8 bg-brand-black text-white border-3 border-brand-black p-8 flex flex-col sm:flex-row items-center justify-between gap-6"
@@ -158,14 +158,14 @@ export default function FeaturesSection() {
           >
             <div>
               <div className="text-brand-yellow font-mono font-black text-sm tracking-wider mb-2">
-                ✦ FITUR UNGGULAN
+                 FITUR UNGGULAN
               </div>
               <h3 className="text-2xl font-black leading-tight">
                 AI Assistant yang benar-benar paham bisnis kamu
               </h3>
               <p className="text-white/60 mt-2 text-sm font-medium max-w-md">
                 Bukan sekadar chatbot biasa. AI KasirAI membaca data penjualan kamu dan
-                memberi insight yang actionable — kapan saja kamu tanya.
+                memberi insight yang actionable, kapan saja kamu tanya.
               </p>
             </div>
             <div className="shrink-0 space-y-2">

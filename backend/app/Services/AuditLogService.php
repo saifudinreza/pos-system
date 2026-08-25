@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 /**
  * Pencatat audit log untuk perubahan data penting (produk, harga, role,
- * plan, setting tenant). Dipanggil dari controller, bukan model event —
+ * plan, setting tenant). Dipanggil dari controller, bukan model event,
  * supaya kita kontrol penuh apa yang dicatat & konteksnya (siapa, IP).
  */
 class AuditLogService
@@ -16,7 +16,7 @@ class AuditLogService
      * Catat satu kejadian audit (perubahan produk, harga, role, plan, setting tenant).
      *
      * Dipanggil dari controller SETELAH aksi utama berhasil. Kegagalan menulis
-     * audit log tidak boleh menggagalkan operasi utama — cukup dicatat di log
+     * audit log tidak boleh menggagalkan operasi utama, cukup dicatat di log
      * aplikasi (try/catch).
      *
      * @param string $action         Nama aksi, mis. 'product_updated', 'role_changed'

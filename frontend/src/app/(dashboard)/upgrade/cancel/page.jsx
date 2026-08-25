@@ -1,11 +1,11 @@
 "use client";
 
 // ============================================================
-// Upgrade Cancel — Halaman setelah pembayaran Midtrans dibatalkan/gagal
+// Upgrade Cancel, Halaman setelah pembayaran Midtrans dibatalkan/gagal
 //
 // Tujuan: memberi tahu user tidak ada biaya yang dikenakan, daftar
 // kemungkinan penyebab, dan tombol untuk mencoba lagi / kembali ke profil.
-// Plan user TIDAK berubah di halaman ini — backend menangani status
+// Plan user TIDAK berubah di halaman ini, backend menangani status
 // subscription lewat webhook (cancel/deny/expire).
 // ============================================================
 
@@ -47,7 +47,7 @@ function CancelContent() {
 
         {/* Demo info Midtrans */}
         <div className="bg-brand-yellow/30 border-2 border-brand-black/20 p-3 mb-6 text-left text-xs font-mono">
-          <p className="font-black text-brand-black mb-1">Midtrans Sandbox — Alur Cancel/Gagal</p>
+          <p className="font-black text-brand-black mb-1">Midtrans Sandbox, Alur Cancel/Gagal</p>
           <p className="text-brand-black/60">Status: <span className="text-red-600 font-bold">cancel / deny / expire</span></p>
           <p className="text-brand-black/60">Webhook diterima → subscription.status = cancelled → user.subscription_plan tidak berubah</p>
         </div>

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
  * Prinsip (sesuai roadmap): SEMUA angka dihitung di server (SQL deterministik,
  * bukan ditebak AI). AI hanya "merangkai kalimat" dari angka-angka itu supaya
  * pemilik toko langsung paham tanpa baca tabel. Kalau LLM gagal/offline,
- * ada fallback templated dari data yang sama — insight tetap muncul.
+ * ada fallback templated dari data yang sama, insight tetap muncul.
  */
 class InsightService
 {
@@ -53,11 +53,11 @@ class InsightService
     }
 
     // ============================================================
-    // Metrik deterministik — hitung dari data nyata, bukan AI.
+    // Metrik deterministik, hitung dari data nyata, bukan AI.
     // ============================================================
     /**
      * Hitung semua metrik minggu ini dari data nyata (SQL deterministik).
-     * Bagian ini TIDAK menyentuh LLM — angka yang sama dipakai baik oleh
+     * Bagian ini TIDAK menyentuh LLM, angka yang sama dipakai baik oleh
      * narasi AI maupun fallback templated.
      */
     private function computeMetrics(?int $tenantId): array
@@ -122,7 +122,7 @@ class InsightService
     }
 
     // ============================================================
-    // Narasi AI — LLM hanya menulis kalimat dari angka yang sudah
+    // Narasi AI, LLM hanya menulis kalimat dari angka yang sudah
     // dihitung. Kalau gagal → fallback templated.
     // ============================================================
     /**
@@ -132,7 +132,7 @@ class InsightService
      */
     private function narrate(array $metrics): array
     {
-        $systemPrompt = "Kamu adalah analis bisnis KasirAI untuk toko UMKM Indonesia. Semua angka dalam data sudah dihitung akurat oleh server — TUGASMU HANYA merangkai angka-angka itu menjadi insight yang mudah dipahami pemilik toko. JANGAN menambah angka yang tidak ada di data. JANGAN memberi saran generik yang kosong; selalu kaitkan dengan angka.
+        $systemPrompt = "Kamu adalah analis bisnis KasirAI untuk toko UMKM Indonesia. Semua angka dalam data sudah dihitung akurat oleh server, TUGASMU HANYA merangkai angka-angka itu menjadi insight yang mudah dipahami pemilik toko. JANGAN menambah angka yang tidak ada di data. JANGAN memberi saran generik yang kosong; selalu kaitkan dengan angka.
 
 Aturan:
 - Bahasa Indonesia, ringkas, hangat, dan actionable.
@@ -177,7 +177,7 @@ Aturan:
     }
 
     // ============================================================
-    // Fallback tanpa LLM — insight tetap muncul walau AI offline.
+    // Fallback tanpa LLM, insight tetap muncul walau AI offline.
     // ============================================================
     /**
      * Buat insight tanpa LLM langsung dari metrik (template kalimat).
@@ -226,7 +226,7 @@ Aturan:
             $insights[] = [
                 'type'  => 'customer',
                 'title' => "{$m['customer_baru']} pelanggan baru minggu ini",
-                'body'  => "Ada {$m['customer_baru']} pembeli baru yang terdata minggu ini. Pertahankan dengan layanan yang baik — pelanggan yang puas biasanya belanja lagi.",
+                'body'  => "Ada {$m['customer_baru']} pembeli baru yang terdata minggu ini. Pertahankan dengan layanan yang baik, pelanggan yang puas biasanya belanja lagi.",
             ];
         }
 

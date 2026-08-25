@@ -1,7 +1,7 @@
 "use client";
 
 // ============================================================
-// Reports Page — Laporan penjualan & stok + export PDF/Excel
+// Reports Page, Laporan penjualan & stok + export PDF/Excel
 //
 // Data yang diambil (per tab):
 //   - Tab "Penjualan": reportService.getSales(params) → summary
@@ -11,7 +11,7 @@
 //   - Tab "Stok": reportService.getStock() → daftar produk + ringkasan
 //     stok (menipis, habis, nilai total)
 //
-// Export PDF/Excel hanya untuk paket Pro/Enterprise — backend juga
+// Export PDF/Excel hanya untuk paket Pro/Enterprise, backend juga
 // memblokir (403) kalau Free; tombol disembunyikan via isFreePlan.
 // File di-download via blob (triggerFileDownload dari reportService).
 // ============================================================
@@ -38,7 +38,7 @@ import { formatCurrency } from "@/lib/utils";
 // Format tanggal ke string YYYY-MM-DD (untuk query param date_from/date_to)
 const fmtDate = (d) => d.toISOString().split("T")[0];
 const todayStr = () => fmtDate(new Date());
-// n hari kebelakang — +1 supaya "7 hari" berarti 7 entri termasuk hari ini
+// n hari kebelakang, +1 supaya "7 hari" berarti 7 entri termasuk hari ini
 const daysAgo  = (n) => { const d = new Date(); d.setDate(d.getDate() - n + 1); return fmtDate(d); };
 
 const PRESETS = [
@@ -50,7 +50,7 @@ const PRESETS = [
 ];
 
 // ── Tooltip ──────────────────────────────────────────────────────
-/** ChartTooltip — Tooltip kustom untuk chart Recharts (neobrutal, konsisten dgn tema). */
+/** ChartTooltip, Tooltip kustom untuk chart Recharts (neobrutal, konsisten dgn tema). */
 const ChartTooltip = ({ active, payload, label, currency }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -84,7 +84,7 @@ export default function ReportsPage() {
   );
 
   /**
-   * getParams — Ubah preset periode menjadi query params API.
+   * getParams, Ubah preset periode menjadi query params API.
    * Preset "custom" tanpa tanggal lengkap → null (fetch dibatalkan).
    */
   const getParams = useCallback(() => {
@@ -100,7 +100,7 @@ export default function ReportsPage() {
     }
   }, [preset, filterYear, customFrom, customTo]);
 
-  /** fetchSales — Ambil data laporan penjualan sesuai params; 403 → tampilan akses ditolak. */
+  /** fetchSales, Ambil data laporan penjualan sesuai params; 403 → tampilan akses ditolak. */
   const fetchSales = useCallback(async () => {
     const params = getParams();
     if (!params) return;
@@ -113,7 +113,7 @@ export default function ReportsPage() {
     } finally { setLoading(false); }
   }, [getParams]);
 
-  /** fetchStock — Ambil laporan stok (daftar produk + ringkasan). */
+  /** fetchStock, Ambil laporan stok (daftar produk + ringkasan). */
   const fetchStock = useCallback(async () => {
     setLoading(true);
     try {
@@ -132,7 +132,7 @@ export default function ReportsPage() {
   }, [tab, fetchSales, fetchStock]);
 
   /**
-   * handleDownload — Unduh laporan PDF/Excel. Backend mengembalikan blob
+   * handleDownload, Unduh laporan PDF/Excel. Backend mengembalikan blob
    * (responseType blob) → triggerFileDownload membuat <a download> secara
    * otomatis dan mengekliknya; nama file pakai timestamp biar unik.
    */
@@ -217,7 +217,7 @@ export default function ReportsPage() {
     <div className="flex flex-col items-center justify-center py-24 gap-4 page-fade">
       <div className="w-20 h-20 bg-red-100 border-2 border-brand-black flex items-center justify-center"
         style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
-        <span className="text-4xl">🔒</span>
+        <span className="text-4xl"></span>
       </div>
       <h2 className="text-2xl font-black font-grotesk">Akses Ditolak</h2>
       <p className="text-sm text-brand-black/50 text-center max-w-xs">
@@ -239,7 +239,7 @@ export default function ReportsPage() {
           {isFreePlan ? (
             <div className="text-[10px] font-mono font-bold text-brand-black/50 border border-dashed border-brand-black/30 px-3 py-2 flex items-center gap-1.5 max-w-[240px]">
               <AlertTriangle size={12} className="shrink-0" />
-              Export PDF/Excel untuk paket <b>Pro &amp; Enterprise</b> —{" "}
+              Export PDF/Excel untuk paket <b>Pro &amp; Enterprise</b>,{" "}
               <a href="/upgrade?plan=pro" className="underline font-black">upgrade</a>
             </div>
           ) : (
@@ -289,7 +289,7 @@ export default function ReportsPage() {
               </button>
             ))}
 
-            {/* Year picker — visible only for monthly */}
+            {/* Year picker, visible only for monthly */}
             {preset === "monthly" && (
               <input
                 type="number"
@@ -318,7 +318,7 @@ export default function ReportsPage() {
             </div>
           )}
 
-          {/* Summary Cards — sesuai PRD: Revenue, Total Transaksi, Avg, Produk Terjual */}
+          {/* Summary Cards, sesuai PRD: Revenue, Total Transaksi, Avg, Produk Terjual */}
           {sales?.summary && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <StatCard
@@ -349,7 +349,7 @@ export default function ReportsPage() {
             </div>
           )}
 
-          {/* Profit Cards — COGS, Laba Kotor, Margin (produk harus punya Harga Modal) */}
+          {/* Profit Cards, COGS, Laba Kotor, Margin (produk harus punya Harga Modal) */}
           {sales?.summary && (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <StatCard
@@ -376,7 +376,7 @@ export default function ReportsPage() {
             </div>
           )}
 
-          {/* Tren Penjualan — Line Chart */}
+          {/* Tren Penjualan, Line Chart */}
           {chartData.length > 0 && (
             <NeoCard noPad>
               <div className="px-5 py-4 border-b-2 border-brand-black">
@@ -414,11 +414,11 @@ export default function ReportsPage() {
             </NeoCard>
           )}
 
-          {/* Top Produk — Bar Chart */}
+          {/* Top Produk, Bar Chart */}
           {topBarData.length > 0 && (
             <NeoCard noPad>
               <div className="px-5 py-4 border-b-2 border-brand-black">
-                <h3 className="font-black text-sm font-grotesk">Top Produk — Chart</h3>
+                <h3 className="font-black text-sm font-grotesk">Top Produk, Chart</h3>
               </div>
               <div className="px-3 py-4">
                 <ResponsiveContainer width="100%" height={240}>
@@ -446,7 +446,7 @@ export default function ReportsPage() {
             </NeoCard>
           )}
 
-          {/* Top Produk — Tabel dengan Rank + % ─── PRD: "Rank, Nama, Qty, Revenue, % dari total" */}
+          {/* Top Produk, Tabel dengan Rank + % ─── PRD: "Rank, Nama, Qty, Revenue, % dari total" */}
           {topProds.length > 0 && (
             <NeoCard noPad>
               <div className="px-5 py-4 border-b-2 border-brand-black flex items-center justify-between">
@@ -477,7 +477,7 @@ export default function ReportsPage() {
       {/* ══════════════════ STOCK TAB ══════════════════ */}
       {tab === "stock" && (
         <>
-          {/* Summary Cards — PRD: Total Aktif, Menipis, Habis, Nilai Total */}
+          {/* Summary Cards, PRD: Total Aktif, Menipis, Habis, Nilai Total */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatCard
               label="Total Produk Aktif"

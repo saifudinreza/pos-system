@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model AuditLog — catatan jejak aksi admin untuk traceability.
+ * Model AuditLog, catatan jejak aksi admin untuk traceability.
  *
  * Tabel: `audit_logs`. Menyimpan snapshot sebelum/sesudah data yang diubah
  * (format array) plus pelaku dan IP. Global scope TenantScope aktif.
@@ -31,7 +31,7 @@ class AuditLog extends Model
     ];
 
     /**
-     * Daftarkan TenantScope secara global — dipanggil otomatis oleh Eloquent.
+     * Daftarkan TenantScope secara global, dipanggil otomatis oleh Eloquent.
      */
     protected static function booted(): void
     {
@@ -39,7 +39,7 @@ class AuditLog extends Model
     }
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

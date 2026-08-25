@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model Product — mewakili satu produk/jasa yang dijual toko.
+ * Model Product, mewakili satu produk/jasa yang dijual toko.
  *
  * Tabel: `products`. Global scope TenantScope aktif. Menyimpan harga jual
  * (price), harga modal (cost, untuk COGS) dan stok.
@@ -33,7 +33,7 @@ class Product extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {
@@ -47,7 +47,7 @@ class Product extends Model
     }
 
     /**
-     * Daftarkan TenantScope secara global — dipanggil otomatis oleh Eloquent.
+     * Daftarkan TenantScope secara global, dipanggil otomatis oleh Eloquent.
      */
     protected static function booted(): void
     {

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model Transaction — merepresentasikan pembayaran untuk satu order.
+ * Model Transaction, merepresentasikan pembayaran untuk satu order.
  *
  * Tabel: `transactions`. Menyimpan data pembayaran Midtrans (snap token,
  * status, respons webhook mentah) maupun pembayaran tunai. Satu order
@@ -31,7 +31,7 @@ class Transaction extends Model
     ];
 
     /**
-     * Cast atribut model — dipanggil otomatis oleh Eloquent.
+     * Cast atribut model, dipanggil otomatis oleh Eloquent.
      */
     protected function casts(): array
     {

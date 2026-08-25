@@ -1,9 +1,9 @@
 "use client";
 
 // ============================================================
-// PricingSection — Daftar paket harga KasirAI
+// PricingSection, Daftar paket harga KasirAI
 //
-// Analogi: Ini seperti menu paket di restoran cepat saji —
+// Analogi: Ini seperti menu paket di restoran cepat saji,
 // ada yang murah (paket reguler), ada yang recommended (paket spesial),
 // ada yang premium (paket family). Harga jelas, isi jelas.
 //
@@ -18,13 +18,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
-// Data paket harga — tiap objek = satu paket
+// Data paket harga, tiap objek = satu paket
 // Harga harus sinkron dengan backend (SubscriptionController::PRICES)
 const PLANS = [
   {
     name:        "Free",
     price:       { monthly: 0, yearly: 0 },
-    description: "Gratis selamanya — bisa langsung dipakai toko kecil & warung untuk operasional harian.",
+    description: "Gratis selamanya, bisa langsung dipakai toko kecil & warung untuk operasional harian.",
     highlighted: false,
     features:    [
       "Maks. 50 produk",
@@ -81,11 +81,11 @@ const formatRupiah = (num) =>
   "Rp " + num.toLocaleString("id-ID");
 
 /**
- * PricingCard — satu kartu paket harga (lihat header file).
+ * PricingCard, satu kartu paket harga (lihat header file).
  *
  * Props:
  *   plan   : objek dari PLANS (name, price {monthly, yearly}, features, ...)
- *   billing: "monthly" | "yearly" — menentukan harga yang ditampilkan
+ *   billing: "monthly" | "yearly", menentukan harga yang ditampilkan
  */
 // --- PricingCard: satu kartu paket harga ---
 const PricingCard = ({ plan, billing }) => {
@@ -108,13 +108,13 @@ const PricingCard = ({ plan, billing }) => {
           : "4px 4px 0 #0A0A0A",
       }}
     >
-      {/* Badge "Paling Populer" — hanya di plan yang highlighted */}
+      {/* Badge "Paling Populer", hanya di plan yang highlighted */}
       {plan.highlighted && (
         <div
           className="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-black text-white px-4 py-1 text-xs font-black font-mono whitespace-nowrap"
           style={{ boxShadow: "2px 2px 0 #FFE500" }}
         >
-          ✦ PALING POPULER
+           PALING POPULER
         </div>
       )}
 
@@ -124,7 +124,7 @@ const PricingCard = ({ plan, billing }) => {
         <p className="text-sm text-brand-black/60 font-medium mt-1">{plan.description}</p>
       </div>
 
-      {/* Harga — angka besar yang langsung terlihat */}
+      {/* Harga, angka besar yang langsung terlihat */}
       <div className="mb-6">
         {price === null ? (
           <span className="text-3xl font-black text-brand-black font-mono">
@@ -172,13 +172,13 @@ const PricingCard = ({ plan, billing }) => {
       <ul className="space-y-2.5 flex-1">
         {plan.features.map((f) => (
           <li key={f} className="flex items-start gap-2 text-sm font-medium text-brand-black">
-            <span className="shrink-0 font-black text-green-600">✓</span> {f}
+            <span className="shrink-0 font-black text-green-600"></span> {f}
           </li>
         ))}
         {/* Fitur yang tidak tersedia */}
         {plan.missing.map((f) => (
           <li key={f} className="flex items-start gap-2 text-sm font-medium text-brand-black/30 line-through">
-            <span className="shrink-0">✗</span> {f}
+            <span className="shrink-0"></span> {f}
           </li>
         ))}
       </ul>
@@ -187,12 +187,12 @@ const PricingCard = ({ plan, billing }) => {
 };
 
 /**
- * PricingSection — daftar paket harga dengan toggle bulanan/tahunan
+ * PricingSection, daftar paket harga dengan toggle bulanan/tahunan
  * (lihat header file). State internal: `billing`.
  */
 export default function PricingSection() {
   // State toggle bulanan vs tahunan
-  // Analogi: seperti tombol pilih ukuran di toko — S, M, L
+  // Analogi: seperti tombol pilih ukuran di toko, S, M, L
   const [billing, setBilling] = useState("monthly");
 
   return (
@@ -213,7 +213,7 @@ export default function PricingSection() {
             className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-4"
             style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
           >
-            ✦ HARGA
+             HARGA
           </div>
           <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk mb-4">
             Pilih paket yang pas
@@ -225,7 +225,7 @@ export default function PricingSection() {
           </p>
 
           {/* Toggle bulanan / tahunan
-              Analogi: seperti tombol pilih ukuran baju — pilih salah satu */}
+              Analogi: seperti tombol pilih ukuran baju, pilih salah satu */}
           <div
             className="inline-flex mt-6 border-2 border-brand-black overflow-hidden"
             style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
@@ -249,7 +249,7 @@ export default function PricingSection() {
               }`}
             >
               Tahunan
-              {/* Badge hemat — insentif memilih tahunan */}
+              {/* Badge hemat, insentif memilih tahunan */}
               <span className="bg-green-400 text-green-900 text-[10px] font-black px-1.5 py-0.5 border border-green-600">
                 HEMAT
               </span>
@@ -266,9 +266,9 @@ export default function PricingSection() {
           ))}
         </Stagger>
 
-        {/* Catatan garansi di bawah — mengurangi kekhawatiran */}
+        {/* Catatan garansi di bawah, mengurangi kekhawatiran */}
         <div className="text-center mt-10 text-sm text-brand-black/50 font-medium">
-          Semua paket termasuk ✓ 14 hari free trial &nbsp;·&nbsp; ✓ Batalkan kapan saja &nbsp;·&nbsp; ✓ Tanpa biaya tersembunyi
+          Semua paket termasuk  14 hari free trial &nbsp;·&nbsp;  Batalkan kapan saja &nbsp;·&nbsp;  Tanpa biaya tersembunyi
         </div>
       </div>
     </section>

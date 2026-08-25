@@ -19,7 +19,7 @@ class ProductSeeder extends Seeder
      * gambar yang terbuang.
      *
      * Nama produk diambil dari nama file gambar (tanpa ekstensi) supaya
-     * cocok dengan isinya — mis. "matcha-latte.png" → "Matcha Latte",
+     * cocok dengan isinya, mis. "matcha-latte.png" → "Matcha Latte",
      * "Es Teh Manis.jpg" → "Es Teh Manis". Cukup ganti nama file gambarnya
      * lalu jalankan ulang seeder ini untuk memperbarui nama & gambar.
      *
@@ -43,7 +43,7 @@ class ProductSeeder extends Seeder
             ->get();
 
         if ($categories->isEmpty()) {
-            $this->command->warn('Kategori belum ada — jalankan CategorySeeder dulu.');
+            $this->command->warn('Kategori belum ada, jalankan CategorySeeder dulu.');
             return;
         }
         $categoryIds = $categories->pluck('id')->all();
@@ -70,7 +70,7 @@ class ProductSeeder extends Seeder
             ->values();
 
         if ($imageFiles->isEmpty()) {
-            $this->command->warn('Tidak ada gambar di storage/app/public/products — tidak ada yang dipulihkan.');
+            $this->command->warn('Tidak ada gambar di storage/app/public/products, tidak ada yang dipulihkan.');
             return;
         }
 

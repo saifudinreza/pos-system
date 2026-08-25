@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Middleware RoleMiddleware — membatasi akses route berdasarkan role user.
+ * Middleware RoleMiddleware, membatasi akses route berdasarkan role user.
  *
  * Dipasang via alias 'role' (didaftarkan di bootstrap/app.php). Bisa menerima
  * satu atau lebih role, contoh: role:admin atau role:admin,kasir.

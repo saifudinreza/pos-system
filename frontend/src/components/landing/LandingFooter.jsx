@@ -1,5 +1,5 @@
 // ============================================================
-// LandingFooter — footer landing page (gelap, aksen kuning)
+// LandingFooter, footer landing page (gelap, aksen kuning)
 //
 // Isi dari atas ke bawah:
 //   - Accent bar kuning tipis
@@ -13,7 +13,7 @@
 
 import LogoMark from "@/components/brand/LogoMark";
 
-// ─── Contact & social config — ganti sesuai data bisnis kamu ────
+// ─── Contact & social config, ganti sesuai data bisnis kamu ────
 const CONTACT = {
   email:     "donojomi@gmail.com",
   whatsapp:  "6281294508057", // ganti dengan nomor WA kamu (format: 62xxx tanpa +)
@@ -50,7 +50,7 @@ const IconMapPin = () => (
   </svg>
 );
 
-// ─── Footer link groups — judul + daftar anchor ─────────────────
+// ─── Footer link groups, judul + daftar anchor ─────────────────
 const LINK_GROUPS = [
   {
     title: "Produk",
@@ -78,8 +78,8 @@ const LINK_GROUPS = [
 ];
 
 /**
- * LandingFooter — footer landing page (lihat header file untuk struktur).
- * Tanpa props — konten statis dari konstanta CONTACT & LINK_GROUPS.
+ * LandingFooter, footer landing page (lihat header file untuk struktur).
+ * Tanpa props, konten statis dari konstanta CONTACT & LINK_GROUPS.
  */
 export default function LandingFooter() {
   return (
@@ -96,7 +96,7 @@ export default function LandingFooter() {
               Ada pertanyaan tentang KasirAI?
             </p>
             <p className="text-white/50 text-sm mt-0.5">
-              Hubungi kami langsung — kami siap membantu bisnis kamu.
+              Hubungi kami langsung, kami siap membantu bisnis kamu.
             </p>
           </div>
           <div className="flex gap-3 shrink-0">
@@ -125,7 +125,7 @@ export default function LandingFooter() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-10">
 
-          {/* Brand column — spans 2 on lg */}
+          {/* Brand column, spans 2 on lg */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-2">
 
             {/* Logo */}
@@ -139,7 +139,7 @@ export default function LandingFooter() {
             {/* Tagline */}
             <p className="text-white/50 text-sm font-medium leading-relaxed max-w-sm mb-6">
               Platform kasir + AI untuk bisnis retail & UMKM Indonesia.
-              Kelola penjualan, stok, dan laporan — semuanya dalam satu tempat.
+              Kelola penjualan, stok, dan laporan, semuanya dalam satu tempat.
             </p>
 
             {/* Contact info */}
@@ -168,7 +168,7 @@ export default function LandingFooter() {
                 <span className="w-7 h-7 bg-white/5 border border-white/10 rounded flex items-center justify-center">
                   <IconMapPin />
                 </span>
-                Indonesia 🇮🇩
+                Indonesia 
               </div>
             </div>
 

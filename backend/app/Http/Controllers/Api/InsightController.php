@@ -9,7 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * InsightController — Wawasan AI (AI Business Insight) yang tersimpan.
+ * InsightController, Wawasan AI (AI Business Insight) yang tersimpan.
  *
  * Insight dibuat/di-update oleh InsightService (LLM Groq dengan fallback
  * templated kalau LLM error). Berbeda dari AI chat: generate di sini masih
@@ -28,7 +28,7 @@ class InsightController extends Controller
     public function index(Request $request): JsonResponse
     {
         $tenantId = $request->user()->tenant_id;
-        // ↑ TenantScope juga aktif di model — where tenant_id di sini redundant
+        // ↑ TenantScope juga aktif di model, where tenant_id di sini redundant
         // tapi harmless; untuk developer (tenant_id null) hasilnya kosong.
 
         $insights = AiInsight::where('tenant_id', $tenantId)

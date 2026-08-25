@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 /**
- * AuthController — autentikasi & profil: register, login, logout, reset
+ * AuthController, autentikasi & profil: register, login, logout, reset
  * password via email, dan update profil (termasuk konfigurasi Midtrans
  * per-tenant untuk admin/developer).
  *
@@ -25,7 +25,7 @@ use Illuminate\Validation\Rules\Password;
 class AuthController extends Controller
 {
     // =============================================================
-    // REGISTER — daftar akun baru (sekaligus buat tenant/toko)
+    // REGISTER, daftar akun baru (sekaligus buat tenant/toko)
     // POST /api/register
     // Body: { name, email, password, phone?, store_name? }
     // =============================================================
@@ -166,7 +166,7 @@ class AuthController extends Controller
     }
 
     // =============================================================
-    // FORGOT PASSWORD — minta link reset lewat email
+    // FORGOT PASSWORD, minta link reset lewat email
     // POST /api/forgot-password
     // Body: { email }
     // =============================================================
@@ -185,7 +185,7 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Selalu balas pesan yang sama (terdaftar atau tidak) — anti user-enumeration:
+        // Selalu balas pesan yang sama (terdaftar atau tidak), anti user-enumeration:
         // orang jahat tidak boleh tahu apakah sebuah email terdaftar di sistem.
         $message = 'Kalau email kamu terdaftar, link reset password sudah dikirim. Cek kotak masuk (atau folder spam)!';
 
@@ -205,7 +205,7 @@ class AuthController extends Controller
     }
 
     // =============================================================
-    // RESET PASSWORD — ganti password pakai token dari email
+    // RESET PASSWORD, ganti password pakai token dari email
     // POST /api/reset-password
     // Body: { email, token, password, password_confirmation }
     // =============================================================
@@ -237,7 +237,7 @@ class AuthController extends Controller
             ],
             function (User $user, string $password) {
                 $user->forceFill(['password' => Hash::make($password)])->save();
-                // Cabut semua sesi login lama — user harus login ulang dengan password baru
+                // Cabut semua sesi login lama, user harus login ulang dengan password baru
                 $user->tokens()->delete();
             }
         );
@@ -274,7 +274,7 @@ class AuthController extends Controller
     }
 
     // =============================================================
-    // ME — ambil data user yang sedang login
+    // ME, ambil data user yang sedang login
     // GET /api/me
     // =============================================================
     /**
@@ -296,7 +296,7 @@ class AuthController extends Controller
     // =============================================================
     /**
      * Update profil user. Field user (name/phone) berlaku untuk semua role;
-     * info toko + key Midtrans hanya untuk admin/developer — kasir yang
+     * info toko + key Midtrans hanya untuk admin/developer, kasir yang
      * mengirim field tersebut diabaikan (silent).
      *
      * @param Request $request Body: name?, phone?, store_name?, store_description?,
@@ -344,7 +344,7 @@ class AuthController extends Controller
     // =============================================================
     /**
      * Format data user untuk response (whitelist field, tanpa data sensitif
-     * seperti password/hash). Key Midtrans server TIDAK pernah dikirim —
+     * seperti password/hash). Key Midtrans server TIDAK pernah dikirim,
      * hanya flag `midtrans_configured`.
      *
      * @param User $user User yang akan diformat
@@ -366,7 +366,7 @@ class AuthController extends Controller
             'phone'                 => $user->phone,
             'is_active'             => $user->is_active,
             'subscription_plan'     => $user->subscription_plan ?? 'free',
-            // Plan efektif — kasir mengikuti plan admin tenant-nya
+            // Plan efektif, kasir mengikuti plan admin tenant-nya
             'effective_plan'        => $this->getEffectivePlan($user),
             'created_at'            => $user->created_at->format('d M Y'),
         ];

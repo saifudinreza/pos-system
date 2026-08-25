@@ -1,7 +1,7 @@
 // ============================================================
-// shiftService.js — Layanan manajemen shift kasir
+// shiftService.js, Layanan manajemen shift kasir
 //
-// Analogi: Ini seperti "jam kerja toko" —
+// Analogi: Ini seperti "jam kerja toko",
 // kasir buka shift (open) dengan modal awal, transaksi dicatat
 // dalam shift itu, lalu tutup shift (close) dengan hitung kas.
 //
@@ -12,7 +12,7 @@
 //   GET  /api/shifts/{id}/report   → laporan shift (rekap penjualan)
 //   GET  /api/shifts               → riwayat shift
 //
-// Catatan: shift bersifat PER-TENANT, bukan per-user — satu shift
+// Catatan: shift bersifat PER-TENANT, bukan per-user, satu shift
 // aktif dipakai bersama semua kasir dalam tenant yang sama.
 // Transaksi diblokir di luar jam shift (enforcement di backend).
 // ============================================================
@@ -22,7 +22,7 @@ import { buildQueryString } from "@/lib/utils";
 
 const shiftService = {
   // --- SHIFT YANG SEDANG AKTIF ---
-  // @returns { data: Shift | null } — null kalau belum ada shift terbuka
+  // @returns { data: Shift | null }, null kalau belum ada shift terbuka
   getCurrent: async () => {
     const { data } = await api.get("/shifts/current");
     return data;
