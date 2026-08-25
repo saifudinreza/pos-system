@@ -2,7 +2,7 @@
 // NeoModal — Dialog popup neobrutalist
 // Analogi: seperti memo penting di atas semua dokumen lain — harus direspons dulu
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 /**
  * NeoModal — dialog popup (overlay gelap + kotak di tengah layar).
@@ -25,20 +25,31 @@ export default function NeoModal({ isOpen, onClose, title, children, footer, siz
 
   if (!isOpen) return null;
 
+  // Lacak drag: modal hanya tutup kalau mousedown & mouseup sama-sama di overlay,
+  // supaya menyeleksi teks di dalam form (yang menggeser keluar kotak) tidak menutup modal.
+  const overlayRef = useRef(null);
+  const dragFromOverlay = useRef(false);
+
   const WIDTH = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" };
 
   return (
     // Overlay gelap di belakang modal
     <div
+      ref={overlayRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(10,10,10,0.6)" }}
-      onClick={onClose}
+      onMouseDown={(e) => {
+        dragFromOverlay.current = e.target === overlayRef.current;
+      }}
+      onMouseUp={(e) => {
+        if (dragFromOverlay.current && e.target === overlayRef.current) onClose();
+        dragFromOverlay.current = false;
+      }}
     >
       {/* Kotak modal — stopPropagation agar klik dalam modal tidak tutup modal */}
       <div
         className={`bg-white border-3 border-brand-black rounded-md w-full ${WIDTH[size] ?? WIDTH.md} flex flex-col max-h-[90vh]`}
         style={{ boxShadow: "6px 6px 0 #0A0A0A" }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b-2 border-brand-black shrink-0">
