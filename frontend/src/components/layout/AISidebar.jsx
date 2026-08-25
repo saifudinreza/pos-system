@@ -16,6 +16,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import useAiStore from "@/stores/aiStore";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Label & warna badge provider, dipakai di bawah bubble pesan AI
 const PROVIDER_LABEL = {
@@ -58,6 +60,31 @@ const BlockIcon = ({ className = "" }) => (
     <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
   </svg>
 );
+
+// Pemetaan elemen markdown ke gaya neobrutalism, dipakai saat merender
+// jawaban AI supaya tabel/list/heading terbaca rapi, bukan teks mentah.
+const MD_COMPONENTS = {
+  h1: ({ children }) => <p className="text-sm font-black mb-1">{children}</p>,
+  h2: ({ children }) => <p className="text-sm font-black mb-1">{children}</p>,
+  h3: ({ children }) => <p className="text-xs font-black mb-1">{children}</p>,
+  p: ({ children }) => <p className="text-xs font-medium leading-relaxed mb-1.5 last:mb-0">{children}</p>,
+  ul: ({ children }) => <ul className="list-disc pl-4 space-y-0.5 text-xs font-medium my-1.5">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal pl-4 space-y-0.5 text-xs font-medium my-1.5">{children}</ol>,
+  li: ({ children }) => <li className="leading-snug">{children}</li>,
+  strong: ({ children }) => <strong className="font-black">{children}</strong>,
+  a: ({ children, href }) => <a href={href} target="_blank" rel="noreferrer" className="underline text-blue-600">{children}</a>,
+  code: ({ children }) => <code className="font-mono bg-brand-black/5 px-1 rounded text-[11px]">{children}</code>,
+  table: ({ children }) => (
+    <div className="overflow-x-auto my-1.5 border-2 border-brand-black rounded">
+      <table className="w-full text-xs border-collapse">{children}</table>
+    </div>
+  ),
+  thead: ({ children }) => <thead className="bg-brand-black text-white">{children}</thead>,
+  tbody: ({ children }) => <tbody>{children}</tbody>,
+  tr: ({ children }) => <tr className="odd:bg-white even:bg-brand-cream/40 border-t border-brand-black/10">{children}</tr>,
+  th: ({ children }) => <th className="px-2 py-1 text-left font-black border-b-2 border-brand-black/30">{children}</th>,
+  td: ({ children }) => <td className="px-2 py-1 border-b border-brand-black/10 font-medium">{children}</td>,
+};
 
 // Ikon per quick prompt, key = teks prompt, value = ikon SVG kecil
 const QUICK_PROMPT_ICONS = {
@@ -108,7 +135,15 @@ const MessageBubble = ({ msg }) => {
         `}
         style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
       >
-        {msg.content}
+        {isUser ? (
+          msg.content
+        ) : msg.isError ? (
+          msg.content
+        ) : (
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
+            {msg.content}
+          </ReactMarkdown>
+        )}
       </div>
       <div className="flex items-center gap-2">
         {provider && (
