@@ -37,12 +37,12 @@ return [
 
     'groq' => [
         'api_key' => env('GROQ_API_KEY'),
-        'model'   => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+        'model'   => env('GROQ_MODEL', 'openai/gpt-oss-120b'),
     ],
 
     'openrouter' => [
         'api_key' => env('OPENROUTER_API_KEY'),
-        'model'   => env('OPENROUTER_MODEL', 'meta-llama/llama-3.1-8b-instruct:free'),
+        'model'   => env('OPENROUTER_MODEL', 'poolside/laguna-s-2.1:free'),
         'base_url' => 'https://openrouter.ai/api/v1/chat/completions',
     ],
 
