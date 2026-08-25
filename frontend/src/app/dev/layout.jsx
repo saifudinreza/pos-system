@@ -116,7 +116,7 @@ export default function DevLayout({ children }) {
             className="bg-brand-black text-brand-yellow px-3 py-1 text-xs font-black font-mono border-2 border-brand-black"
             style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
           >
-            🔒 DEV
+            DEV
           </div>
           <span className="font-black text-brand-black font-grotesk">KasirAI Developer Portal</span>
         </div>
