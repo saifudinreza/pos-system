@@ -23,7 +23,7 @@ import { useDebounce }    from "@/hooks/useDebounce";
 import categoryService    from "@/services/categoryService";
 import productService     from "@/services/productService";
 import tenantService      from "@/services/tenantService";
-import { useAuthStore }   from "@/stores/authStore";
+import useAuthStore   from "@/stores/authStore";
 import NeoButton  from "@/components/ui/NeoButton";
 import NeoTable   from "@/components/ui/NeoTable";
 import NeoBadge   from "@/components/ui/NeoBadge";
