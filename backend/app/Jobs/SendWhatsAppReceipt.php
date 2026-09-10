@@ -2,10 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Exceptions\FonnteApiException;
+use App\Exceptions\FonnteNetworkException;
+use App\Exceptions\FonnteNotConfiguredException;
 use App\Models\Order;
 use App\Services\WhatsAppService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Job kirim struk digital via WhatsApp (async).
@@ -20,8 +24,6 @@ class SendWhatsAppReceipt implements ShouldQueue
 
     /** Jumlah maksimal percobaan kirim struk (retry otomatis oleh queue). */
     public int $tries = 3;
-    /** Hentikan retry setelah 1 exception non-transient. */
-    public int $maxExceptions = 1;
     /** Delay antar retry (detik): 5s → 15s → 60s. */
     public array $backoff = [5, 15, 60];
 
@@ -46,12 +48,16 @@ class SendWhatsAppReceipt implements ShouldQueue
 
     /**
      * Kirim struk WhatsApp untuk order terkait.
+     *
+     * Retry logic:
+     * - FonnteNotConfiguredException: NON-retryable → log & jangan re-throw (job selesai, tidak retry)
+     * - FonnteApiException: retry HANYA kalau isRetryable() (429/5xx) → biarkan bubble up ke Laravel queue
+     * - FonnteNetworkException: TRANSIENT → biarkan bubble up ke Laravel queue (retry otomatis)
+     *
+     * Laravel queue akan retry sampai $tries (3×) dengan $backoff [5,15,60] untuk exception yang di-throw.
      */
     public function handle(WhatsAppService $whatsapp): void
     {
-        // Muat ulang order di dalam job supaya data selalu fresh (relatif
-        // terhadap saat job dieksekusi, bukan saat order dibuat). Kalau order
-        // sudah terhapus/dibatalkan, tidak perlu kirim apa-apa.
         $order = Order::with(['tenant', 'user', 'items.product', 'transaction'])
             ->find($this->orderId);
 
@@ -59,6 +65,27 @@ class SendWhatsAppReceipt implements ShouldQueue
             return;
         }
 
-        $whatsapp->sendReceipt($order);
+        try {
+            $whatsapp->sendReceipt($order);
+
+        } catch (FonnteNotConfiguredException $e) {
+            // Token belum dikonfigurasi — non-retryable, jangan re-throw.
+            // Job dianggap selesai (success) tapi struk tidak terkirim.
+            Log::warning("WhatsApp struk tidak terkirim (token belum dikonfigurasi): order {$order->order_number}");
+            return;
+
+        } catch (FonnteApiException $e) {
+            if (! $e->isRetryable()) {
+                // Non-retryable API error (401, 403, 404, dll) — log & jangan re-throw
+                Log::warning("WhatsApp API error (non-retryable): {$e->getMessage()} | order {$order->order_number}");
+                return;
+            }
+            // Retryable (429/5xx) — biarkan bubble up, Laravel queue akan retry
+            throw $e;
+
+        } catch (FonnteNetworkException $e) {
+            // Network error — transient, biarkan bubble up, Laravel queue akan retry
+            throw $e;
+        }
     }
 }

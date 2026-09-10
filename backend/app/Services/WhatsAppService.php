@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Exceptions\FonnteApiException;
+use App\Exceptions\FonnteNetworkException;
+use App\Exceptions\FonnteNotConfiguredException;
 use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -33,14 +36,24 @@ class WhatsAppService
     /**
      * Kirim struk pembayaran ke nomor WA customer.
      *
+     * Exception di-lewatkan ke caller (queue job) supaya Laravel queue
+     * bisa handle retry otomatis via $tries & $backoff.
+     *
      * @param Order $order Order yang sudah lunas (dengan relasi items.product)
-     * @return bool true kalau berhasil kirim, false kalau gagal/tidak dikonfigurasi
+     * @throws FonnteNotConfiguredException Token Fonnte belum diset (non-retryable)
+     * @throws FonnteApiException Fonnte API error 4xx/5xx (retry kalau 429/5xx)
+     * @throws FonnteNetworkException Network error timeout/DNS/TLS (retryable)
      */
-    public function sendReceipt(Order $order): bool
+    public function sendReceipt(Order $order): void
     {
-        // Jangan kirim kalau tidak ada nomor HP atau token belum dikonfigurasi
-        if (! $order->customer_phone || ! $this->token) {
-            return false;
+        // Jangan kirim kalau tidak ada nomor HP
+        if (! $order->customer_phone) {
+            return;
+        }
+
+        // Token tidak dikonfigurasi = error non-transient, jangan retry
+        if (! $this->token) {
+            throw new FonnteNotConfiguredException();
         }
 
         $message = $this->buildReceiptMessage($order);
@@ -49,24 +62,27 @@ class WhatsAppService
             $response = Http::withHeaders([
                 'Authorization' => $this->token,
             ])->post($this->apiUrl, [
-                // Nomor dinormalisasi ke format internasional (62...), lihat formatPhone()
                 'target'      => $this->formatPhone($order->customer_phone),
                 'message'     => $message,
-                'countryCode' => '62',   // Indonesia
+                'countryCode' => '62',
             ]);
-
-            if ($response->successful()) {
-                Log::info("Struk WA terkirim ke {$order->customer_phone} untuk order {$order->order_number}");
-                return true;
-            }
-
-            Log::warning("Gagal kirim struk WA: " . $response->body());
-            return false;
-
-        } catch (\Exception $e) {
-            Log::error("WhatsApp error: " . $e->getMessage());
-            return false;
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            // Network error (timeout, DNS, TLS) — wrap ke exception kita supaya job bisa catch
+            throw new FonnteNetworkException('Gagal terhubung ke Fonnte API: ' . $e->getMessage(), 0, $e);
         }
+
+        if ($response->successful()) {
+            Log::info("Struk WA terkirim ke {$order->customer_phone} untuk order {$order->order_number}");
+            return;
+        }
+
+        // Fonnte API return error response (4xx/5xx)
+        $responseBody = $response->json() ?? ['raw' => $response->body()];
+        throw new FonnteApiException(
+            "Gagal kirim struk WA: " . ($responseBody['message'] ?? $response->body()),
+            $response->status(),
+            $responseBody
+        );
     }
 
     /**
