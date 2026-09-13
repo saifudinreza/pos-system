@@ -107,7 +107,7 @@ export default function AISpotlightSection() {
     <section
       ref={ref}
       id="ai"
-      className="relative z-[1] overflow-hidden bg-brand-black text-white py-24 px-4 sm:px-6"
+      className="relative z-[1] overflow-hidden bg-brand-black text-white py-24 px-4 sm:px-6 rounded-md"
     >
       {/* Sorotan radial kuning, "lampu panggung" */}
       <motion.div
@@ -147,20 +147,20 @@ export default function AISpotlightSection() {
         {/* ===== KIRI: Narasi ===== */}
         <Reveal>
           <div
-            className="inline-flex items-center gap-2 bg-brand-yellow text-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-5 border-2 border-brand-yellow"
+            className="inline-flex items-center gap-2 bg-brand-yellow text-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-5 border-2 border-brand-yellow rounded-md"
           >
             <span className="inline-block w-2 h-2 rounded-full bg-[#00C27C] animate-pulse" />
              PEMBEDA UTAMA · GROQ AI
           </div>
 
-          <h2 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-black tracking-tight font-grotesk leading-[0.98]">
+          <h2 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-black tracking-tight font-grotesk leading-[0.98] rounded-md">
             Punya{" "}
             <span className="text-brand-yellow">analis bisnis</span>
             <br />
             di sidebar kasirmu.
           </h2>
 
-          <p className="mt-5 text-white/60 font-medium text-lg max-w-md">
+          <p className="mt-5 text-white/60 font-medium text-lg max-w-md rounded-md">
             Bukan chatbot biasa. AI Assistant KasirAI terhubung langsung ke data
             tokomu dan menjawab dalam Bahasa Indonesia, secepat kamu sempat berpikir.
           </p>
@@ -168,14 +168,14 @@ export default function AISpotlightSection() {
           <Stagger className="mt-8 grid sm:grid-cols-2 gap-4" gap={0.1}>
             {BENEFITS.map((b) => (
               <StaggerItem key={b.title}>
-                <div className="flex gap-3">
+                <div className="flex gap-3 rounded-md">
                   <div
-                    className="shrink-0 w-10 h-10 bg-brand-yellow text-brand-black border-2 border-brand-yellow flex items-center justify-center"
+                    className="shrink-0 w-10 h-10 bg-brand-yellow text-brand-black border-2 border-brand-yellow flex items-center justify-center rounded-md"
                   >
                     <b.Icon size={20} strokeWidth={2.5} />
                   </div>
                   <div>
-                    <h3 className="font-black text-base font-grotesk leading-tight">{b.title}</h3>
+                    <h3 className="font-black text-base font-grotesk leading-tight rounded-md">{b.title}</h3>
                     <p className="text-sm text-white/50 font-medium mt-0.5">{b.desc}</p>
                   </div>
                 </div>
@@ -186,12 +186,12 @@ export default function AISpotlightSection() {
           <div className="mt-9 flex flex-wrap gap-4 items-center">
             <Link
               href="/register"
-              className="btn-shine relative overflow-hidden px-6 py-3.5 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black neo-hover inline-block"
+              className="btn-shine relative overflow-hidden px-6 py-3.5 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black neo-hover inline-block rounded-md"
               style={{ boxShadow: "4px 4px 0 #FFE500" }}
             >
               Coba AI Assistant →
             </Link>
-            <span className="font-mono text-xs text-white/40 tracking-wider">
+            <span className="font-mono text-xs text-white/40 tracking-wider rounded-md">
               Powered by Groq · LLaMA 3.3 70B
             </span>
           </div>
@@ -200,11 +200,11 @@ export default function AISpotlightSection() {
         {/* ===== KANAN: Mock chat sidebar ===== */}
         <Reveal delay={0.1} y={32}>
           <div
-            className="relative bg-[#0d0d0d] border-3 border-brand-yellow"
+            className="relative bg-[#0d0d0d] border-3 border-brand-yellow rounded-md"
             style={{ boxShadow: "10px 10px 0 #FFE500" }}
           >
             {/* Header sidebar */}
-            <div className="flex items-center justify-between px-4 py-3 border-b-2 border-white/10 bg-[#141414]">
+            <div className="flex items-center justify-between px-4 py-3 border-b-2 border-white/10 bg-[#141414] rounded-md">
               <div className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-widest uppercase text-brand-yellow">
                 <span className="inline-block w-2 h-2 rounded-full bg-[#00C27C]" style={{ boxShadow: "0 0 8px #00C27C" }} />
                 AI Assistant
@@ -242,10 +242,10 @@ export default function AISpotlightSection() {
 
             {/* Input bar */}
             <div className="flex items-center gap-2 px-4 py-3 border-t-2 border-white/10 bg-[#141414]">
-              <div className="flex-1 font-mono text-[11px] text-white/40 border border-white/15 px-3 py-2 bg-black">
+              <div className="flex-1 font-mono text-[11px] text-white/40 border border-white/15 px-3 py-2 bg-black rounded-md">
                 Tanya apa saja tentang bisnismu...
               </div>
-              <div className="bg-brand-yellow text-brand-black border border-brand-yellow px-3 py-2 font-grotesk font-black text-[11px]">
+              <div className="bg-brand-yellow text-brand-black border border-brand-yellow px-3 py-2 font-grotesk font-black text-[11px] rounded-md">
                 KIRIM →
               </div>
             </div>

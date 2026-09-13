@@ -23,18 +23,18 @@ import { Reveal } from "./motion";
  */
 export default function CTASection() {
   return (
-    <section className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray">
-      <div className="max-w-6xl mx-auto">
+    <section className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray ">
+      <div className="max-w-6xl mx-auto rounded-md">
 
         {/* Kotak CTA utama, hitam pekat untuk kontras maksimal */}
         <Reveal
           y={32}
-          className="bg-brand-black text-white border-3 border-brand-black p-12 sm:p-16 text-center relative overflow-hidden"
+          className="bg-brand-black text-white border-3 border-brand-black p-12 sm:p-16 text-center relative overflow-hidden rounded-md"
           style={{ boxShadow: "8px 8px 0 #FFE500" }}
         >
           {/* Dekorasi latar, titik-titik kecil ala neobrutalist */}
           {/* Analogi: seperti motif di kemasan produk premium */}
-          <div className="absolute inset-0 opacity-5"
+          <div className="absolute inset-0 opacity-5 rounded-md"
             style={{
               backgroundImage: "radial-gradient(circle, #FFE500 1px, transparent 1px)",
               backgroundSize: "24px 24px",
@@ -45,43 +45,43 @@ export default function CTASection() {
           <div className="relative z-10">
             {/* Label */}
             <div
-              className="inline-block bg-brand-yellow text-brand-black border-2 border-brand-yellow px-3 py-1 text-xs font-mono font-black tracking-wider mb-6"
+              className="inline-block bg-brand-yellow text-brand-black border-2 border-brand-yellow px-3 py-1 text-xs font-mono font-black tracking-wider mb-6 rounded-md"
             >
                MULAI SEKARANG
             </div>
 
             {/* Headline CTA, sesimpel dan sekuat mungkin */}
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-grotesk leading-tight mb-4">
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-grotesk leading-tight mb-4 rounded-md">
               Tingkatkan bisnis kamu
               <br />
               <span className="text-brand-yellow">hari ini juga.</span>
             </h2>
 
             {/* Sub-teks, hilangkan keraguan terakhir */}
-            <p className="text-white/60 font-medium text-lg max-w-lg mx-auto mb-10">
+            <p className="text-white/60 font-medium text-lg max-w-lg mx-auto mb-10 rounded-md">
               Bergabung dengan 2.000+ pebisnis yang sudah merasakan manfaat KasirAI.
               Gratis 14 hari, tidak perlu kartu kredit.
             </p>
 
             {/* Tombol CTA, besar, kuning, mencolok */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center rounded-md">
               <Link
                 href="/register"
-                className="btn-shine relative overflow-hidden px-8 py-4 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black text-lg neo-hover inline-block"
+                className="btn-shine relative overflow-hidden px-8 py-4 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black text-lg neo-hover inline-block rounded-md"
                 style={{ boxShadow: "4px 4px 0 #FFE500" }}
               >
                 Coba Gratis 14 Hari →
               </Link>
               <Link
                 href="/login"
-                className="px-8 py-4 bg-transparent text-white border-2 border-white/40 font-bold text-lg hover:border-white hover:bg-white/10 transition-colors inline-block"
+                className="px-8 py-4 bg-transparent text-white border-2 border-white/40 font-bold text-lg hover:border-white hover:bg-white/10 transition-colors inline-block rounded-md"
               >
                 Masuk / Lihat Demo
               </Link>
             </div>
 
             {/* Trust badges terakhir, pengingat final */}
-            <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm font-semibold text-white/40">
+            <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm font-semibold text-white/40 rounded-md">
               <span> Tanpa kartu kredit</span>
               <span> Batalkan kapan saja</span>
               <span> Support 7 hari seminggu</span>

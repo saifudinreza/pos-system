@@ -96,7 +96,7 @@ const PricingCard = ({ plan, billing }) => {
 
   return (
     <div
-      className={`relative flex flex-col h-full border-3 border-brand-black p-6 transition-all duration-150
+      className={`relative flex flex-col h-full border-3 border-brand-black p-6 transition-all duration-150 rounded-md
         ${plan.highlighted
           ? "bg-brand-yellow"
           : "bg-white hover:-translate-y-1 hover:-translate-x-1"
@@ -205,12 +205,12 @@ export default function PricingSection() {
         <div className="w-16 h-16 rounded-full bg-[#8B5CF6]/15 border-3 border-[#8B5CF6]/30" />
       </Parallax>
 
-      <div className="relative max-w-6xl mx-auto">
+      <div className="relative max-w-6xl mx-auto rounded-md">
 
         {/* === HEADER === */}
         <Reveal className="text-center mb-12">
           <div
-            className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-4"
+            className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-4 rounded-md"
             style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
           >
              HARGA
@@ -227,15 +227,15 @@ export default function PricingSection() {
           {/* Toggle bulanan / tahunan
               Analogi: seperti tombol pilih ukuran baju, pilih salah satu */}
           <div
-            className="inline-flex mt-6 border-2 border-brand-black overflow-hidden"
+            className="inline-flex mt-6 border-2 border-brand-black overflow-hidden rounded-md"
             style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
           >
             <button
               onClick={() => setBilling("monthly")}
               className={`px-5 py-2 text-sm font-bold transition-colors ${
                 billing === "monthly"
-                  ? "bg-brand-black text-white"
-                  : "bg-white text-brand-black hover:bg-brand-yellow/30"
+                  ? "bg-brand-black text-white rounded-md"
+                  : "bg-white text-brand-black hover:bg-brand-yellow/30 rounded-md"
               }`}
             >
               Bulanan
@@ -258,7 +258,7 @@ export default function PricingSection() {
         </Reveal>
 
         {/* === GRID PAKET HARGA === */}
-        <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch" gap={0.1}>
+        <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch rounded-md" gap={0.1}>
           {PLANS.map((plan) => (
             <StaggerItem key={plan.name} className="h-full">
               <PricingCard plan={plan} billing={billing} />
