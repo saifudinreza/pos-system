@@ -68,7 +68,20 @@ const PAINS = [
  */
 export default function ProblemSection() {
   return (
-    <section id="masalah" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-cream overflow-hidden">
+    <section id="masalah" className="relative z-[1] py-20 px-4 sm:px-6 overflow-hidden">
+      {/* Background Image — sama dengan hero, suasana toko */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/landing/bacground.jpeg')" }}
+      />
+      {/* Overlay — cream gradient supaya teks tetap terbaca */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(255,251,235,0.88) 0%, rgba(255,251,235,0.82) 50%, rgba(255,251,235,0.90) 100%)",
+        }}
+      />
       {/* Shape parallax dekoratif, melayang berlawanan arah scroll */}
       <Parallax speed={0.5} aria-hidden="true" className="pointer-events-none absolute -left-10 top-24 -z-0">
         <div className="w-28 h-28 bg-[#FF3B3B]/15 border-3 border-[#FF3B3B]/30 rotate-12" />

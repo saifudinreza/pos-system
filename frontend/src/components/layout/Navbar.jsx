@@ -3,16 +3,13 @@
 // ============================================================
 // Navbar, bar atas halaman dashboard
 //
-// Isi: judul halaman (dipetakan dari pathname via PAGE_TITLES),
-// badge plan & role user, nama user, dan tombol Keluar.
-// Sumber data: authStore (Zustand). Badge plan menampilkan
-// effective_plan, role developer selalu ditampilkan sebagai "DEV".
+// Neobrutalist style: border tebal, shadow kotak, animasi hover.
 // ============================================================
 
 import { useRouter, usePathname } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
+import { LogOut, Menu } from "lucide-react";
 
-// Judul per halaman, key = pathname, dipakai sebagai heading navbar
 const PAGE_TITLES = {
   "/dashboard":    "Dashboard",
   "/products":     "Produk",
@@ -26,7 +23,6 @@ const PAGE_TITLES = {
   "/upgrade":      "Upgrade Plan",
 };
 
-// Badge plan, label + warna untuk tiap paket langganan
 const PLAN_BADGE = {
   free:       { label: "FREE",       cls: "bg-white/80 text-brand-black/60 border-brand-black/20" },
   pro:        { label: "PRO",        cls: "bg-brand-yellow text-brand-black border-brand-black" },
@@ -34,7 +30,6 @@ const PLAN_BADGE = {
   developer:  { label: "DEV",        cls: "bg-brand-yellow text-brand-black border-brand-black" },
 };
 
-// Warna badge role user, dipakai di samping badge plan
 const ROLE_COLORS = {
   admin:     "bg-brand-yellow text-brand-black border-brand-black",
   kasir:     "bg-brand-black text-white border-brand-black",
@@ -42,25 +37,16 @@ const ROLE_COLORS = {
   developer: "bg-brand-black text-brand-yellow border-brand-black",
 };
 
-/**
- * Navbar, bar atas dashboard (lihat header file untuk deskripsi).
- *
- * Props:
- *   onMenuToggle : membuka sidebar di layar mobile (tombol hamburger )
- */
 export default function Navbar({ onMenuToggle }) {
   const router   = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
 
-  // Judul halaman dari pathname saat ini; fallback nama brand
   const pageTitle    = PAGE_TITLES[pathname] ?? "KasirAI";
   const isDev        = user?.role === "developer";
-  // Developer selalu tampil sebagai plan "developer"; selain itu pakai effective_plan
   const effectivePlan = isDev ? "developer" : (user?.effective_plan ?? user?.subscription_plan ?? "free");
   const planBadge     = PLAN_BADGE[effectivePlan] ?? PLAN_BADGE.free;
 
-  // Logout lalu arahkan kembali ke halaman login
   const handleLogout = async () => {
     await logout();
     router.push("/login");
@@ -70,14 +56,16 @@ export default function Navbar({ onMenuToggle }) {
     <header className="h-14 bg-white border-b-2 border-brand-black flex items-center justify-between px-4 shrink-0 z-10">
       {/* Left */}
       <div className="flex items-center gap-3 min-w-0">
+        {/* Hamburger — neobrutalist button */}
         <button
           onClick={onMenuToggle}
-          className="lg:hidden w-9 h-9 border-2 border-brand-black flex items-center justify-center hover:bg-brand-yellow transition-colors shrink-0"
+          className="lg:hidden w-9 h-9 border-2 border-brand-black flex items-center justify-center bg-white hover:bg-brand-yellow transition-all duration-150 shrink-0 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
           style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
           aria-label="Buka menu"
         >
-          
+          <Menu size={16} strokeWidth={2.5} className="text-brand-black" />
         </button>
+
         <h1 className="font-black text-base sm:text-lg text-brand-black font-grotesk truncate">
           {pageTitle}
         </h1>
@@ -85,7 +73,7 @@ export default function Navbar({ onMenuToggle }) {
 
       {/* Right */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* Subscription plan badge */}
+        {/* Plan badge */}
         <span
           suppressHydrationWarning
           className={`hidden sm:inline-flex items-center text-[10px] font-black border px-2 py-0.5 font-mono tracking-wider ${planBadge.cls}`}
@@ -109,13 +97,14 @@ export default function Navbar({ onMenuToggle }) {
           {user?.name ?? ""}
         </span>
 
-        {/* Logout */}
+        {/* Logout — neobrutalist button with red hover */}
         <button
           onClick={handleLogout}
-          className="px-3 py-1.5 text-xs font-bold border-2 border-brand-black bg-white hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-colors whitespace-nowrap"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-brand-black bg-white hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-all duration-150 whitespace-nowrap active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
           style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
         >
-          Keluar
+          <LogOut size={13} strokeWidth={2.5} />
+          <span className="hidden sm:inline">Keluar</span>
         </button>
       </div>
     </header>

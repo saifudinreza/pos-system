@@ -61,6 +61,21 @@ class AuthController extends Controller
             $tenant  = $existingTenant;
             $role    = 'kasir';
             $message = 'Berhasil bergabung dengan toko "' . $storeName . '"! Login sebagai kasir.';
+
+            // Batasi: maksimal 2 kasir per tenant
+            $kasirCount = User::where('tenant_id', $tenant->id)
+                ->where('role', 'kasir')
+                ->count();
+            if ($kasirCount >= 2) {
+                return response()->json([
+                    'message' => 'Toko "' . $storeName . '" sudah mencapai batas maksimal kasir (2).',
+                ], 422);
+            }
+
+            // Ambil plan dari admin tenant untuk disinkronkan ke user baru
+            $adminPlan = User::where('tenant_id', $tenant->id)
+                ->where('role', 'admin')
+                ->value('subscription_plan') ?? 'free';
         } else {
             // Buat tenant baru, pendaftar pertama jadi admin toko
             $tenant  = Tenant::create([
@@ -69,15 +84,17 @@ class AuthController extends Controller
             ]);
             $role    = 'admin';
             $message = 'Toko "' . $storeName . '" berhasil dibuat! Kamu terdaftar sebagai admin.';
+            $adminPlan = 'free';
         }
 
         $user = User::create([
-            'tenant_id' => $tenant->id,
-            'name'      => $validated['name'],
-            'email'     => $validated['email'],
-            'password'  => Hash::make($validated['password']),
-            'phone'     => $validated['phone'] ?? null,
-            'role'      => $role,
+            'tenant_id'         => $tenant->id,
+            'name'              => $validated['name'],
+            'email'             => $validated['email'],
+            'password'          => Hash::make($validated['password']),
+            'phone'             => $validated['phone'] ?? null,
+            'role'              => $role,
+            'subscription_plan' => $adminPlan,
         ]);
 
         $token = $user->createToken('pos-token')->plainTextToken;

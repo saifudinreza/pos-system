@@ -351,6 +351,695 @@ h1, h2, h3, h4, h5, h6,
 }
 
 /* ============================================================
+   3D Loading Overlay (Login cold-start)
+   ============================================================ */
+
+/* Isometric cube container */
+.cube-scene {
+  width: 120px;
+  height: 120px;
+  perspective: 600px;
+}
+.cube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: cubeRotate 4s ease-in-out infinite;
+}
+.cube-face {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border: 3px solid #0A0A0A;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  backface-visibility: visible;
+  box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.08);
+}
+.cube-face-label {
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 800;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.cube-face--front  { background: #FFE500; color: #0A0A0A; transform: rotateY(0deg)   translateZ(60px); }
+.cube-face--back   { background: #0A0A0A; color: #FFE500; transform: rotateY(180deg) translateZ(60px); }
+.cube-face--right  { background: #00C27C; color: #0A0A0A; transform: rotateY(90deg)  translateZ(60px); }
+.cube-face--left   { background: #0066FF; color: #ffffff; transform: rotateY(-90deg) translateZ(60px); }
+.cube-face--top    { background: #FF7AB6; color: #0A0A0A; transform: rotateX(90deg)  translateZ(60px); }
+.cube-face--bottom { background: #8B5CF6; color: #ffffff; transform: rotateX(-90deg) translateZ(60px); }
+
+.server-telemetry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0A0A0A;
+  color: #00ff88;
+  border: 1.5px solid #0A0A0A;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  box-shadow: 2px 2px 0 #FFE500;
+}
+.telemetry-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 6px #00ff88;
+  animation: neo-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes cubeRotate {
+  0%   { transform: rotateX(-20deg) rotateY(0deg); }
+  25%  { transform: rotateX(-20deg) rotateY(90deg); }
+  50%  { transform: rotateX(20deg)  rotateY(180deg); }
+  75%  { transform: rotateX(20deg)  rotateY(270deg); }
+  100% { transform: rotateX(-20deg) rotateY(360deg); }
+}
+
+/* Floating particles */
+.loading-particle {
+  position: absolute;
+  border: 2px solid #0A0A0A;
+  animation: particleFloat linear infinite;
+  pointer-events: none;
+}
+@keyframes particleFloat {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-300px) rotate(180deg); opacity: 0; }
+}
+
+/* Indeterminate progress bar */
+.loading-progress-track {
+  width: 240px;
+  height: 8px;
+  background: #fff;
+  border: 2px solid #0A0A0A;
+  overflow: hidden;
+  position: relative;
+}
+.loading-progress-bar {
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 40%;
+  height: 100%;
+  background: #FFE500;
+  animation: progressIndeterminate 1.8s ease-in-out infinite;
+}
+@keyframes progressIndeterminate {
+  0%   { left: -40%; }
+  50%  { left: 100%; }
+  100% { left: -40%; }
+}
+
+/* Loading overlay transition */
+.loading-overlay-exit {
+  animation: overlayExit 0.6s ease-out forwards;
+}
+@keyframes overlayExit {
+  0%   { opacity: 1; transform: scale(1); }
+  50%  { opacity: 0.5; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1.08); pointer-events: none; }
+}
+
+/* Orbit ring around cube */
+.cube-orbit {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border: 2.5px dashed #0A0A0A;
+  border-radius: 50%;
+  opacity: 0.15;
+  animation: orbitSpin 6s linear infinite;
+}
+.cube-orbit--reverse {
+  width: 240px;
+  height: 240px;
+  animation: orbitSpinReverse 8s linear infinite;
+  opacity: 0.1;
+}
+@keyframes orbitSpin {
+  to { transform: rotate(360deg); }
+}
+@keyframes orbitSpinReverse {
+  to { transform: rotate(-360deg); }
+}
+
+/* ============================================================
+   Turtle Pet Loading Animation
+   ============================================================ */
+
+.turtle-pet-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Speech bubble "Loading..." */
+.turtle-speech-bubble {
+  position: relative;
+  background: #ffffff;
+  border: 2.5px solid #0A0A0A;
+  border-radius: 12px;
+  padding: 6px 14px;
+  box-shadow: 3px 3px 0 #0A0A0A;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.turtle-speech-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 8px solid #0A0A0A;
+}
+.turtle-speech-text {
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  color: #0A0A0A;
+}
+.turtle-speech-dots {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.turtle-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #0A0A0A;
+  animation: turtleDotPulse 1s ease-in-out infinite;
+}
+@keyframes turtleDotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Video frame — neobrutalist style */
+.turtle-video-frame {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border: 3px solid #0A0A0A;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0A0A0A;
+  box-shadow: 6px 6px 0 #0A0A0A;
+  animation: turtleBounce 0.6s ease-in-out infinite;
+}
+.turtle-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 9px;
+}
+
+/* Watermark cover — gradient overlay di pojok kanan bawah */
+.turtle-watermark-cover {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 60px;
+  height: 28px;
+  background: linear-gradient(135deg, transparent 30%, #0A0A0A 70%);
+  border-radius: 0 9px 0 0;
+  pointer-events: none;
+}
+
+/* Bouncing animation — simulasi kura-kura berjalan */
+@keyframes turtleBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+/* Walking indicator dots di bawah video */
+.turtle-walk-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+.walk-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid #0A0A0A;
+  background: transparent;
+  animation: walkDotStep 0.9s ease-in-out infinite;
+}
+@keyframes walkDotStep {
+  0%, 100% { background: transparent; transform: scale(0.8); }
+  50% { background: #FFE500; transform: scale(1.1); }
+}
+
+/* ============================================================
+   Product Showcase (Realistic 3D Devices: iPhone 17 Pro, iPad Pro, Retail POS Indomaret/Alfamart)
+   ============================================================ */
+
+/* 3D Showcase Stage */
+.showcase-stage-3d {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.device-3d-wrapper {
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+  will-change: transform;
+}
+
+/* Base device screen common */
+.device-screen {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  overflow: hidden;
+  position: relative;
+  user-select: none;
+}
+
+/* Glass glare reflection overlay */
+.device-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.05) 30%,
+    rgba(255, 255, 255, 0) 31%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  border-radius: inherit;
+}
+
+/* ------------------------------------------------------------
+   1. iPhone 17 Pro Frame
+   ------------------------------------------------------------ */
+.iphone-17-pro {
+  position: relative;
+  width: 250px;
+  height: 500px;
+  background: linear-gradient(145deg, #3c3c40 0%, #1e1e21 35%, #2a2a2e 70%, #161618 100%);
+  border-radius: 48px;
+  padding: 8px;
+  border: 2px solid #0A0A0A;
+  box-shadow: 
+    0 25px 45px -10px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
+    8px 12px 0px #0A0A0A;
+  transform-style: preserve-3d;
+}
+
+.iphone-screen-container {
+  width: 100%;
+  height: 100%;
+  background: #0A0A0A;
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid #1a1a1a;
+}
+
+/* Dynamic Island */
+.dynamic-island {
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 96px;
+  height: 25px;
+  background: #000000;
+  border-radius: 18px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.06);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dynamic-island-camera {
+  width: 9px;
+  height: 9px;
+  background: radial-gradient(circle at 40% 40%, #1a1a36 0%, #080812 70%);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dynamic-island-sensor {
+  width: 6px;
+  height: 6px;
+  background: #0f172a;
+  border-radius: 50%;
+}
+
+/* Speaker slit */
+.iphone-speaker {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 46px;
+  height: 2.5px;
+  background: #18181a;
+  border-radius: 2px;
+  z-index: 20;
+}
+
+/* Physical side buttons */
+.iphone-button {
+  position: absolute;
+  background: linear-gradient(to right, #444, #2a2a2e);
+  border: 1px solid #0A0A0A;
+}
+.iphone-btn-action {
+  left: -5px;
+  top: 76px;
+  width: 4px;
+  height: 20px;
+  border-radius: 3px 0 0 3px;
+}
+.iphone-btn-vol-up {
+  left: -5px;
+  top: 108px;
+  width: 4px;
+  height: 40px;
+  border-radius: 3px 0 0 3px;
+}
+.iphone-btn-vol-down {
+  left: -5px;
+  top: 156px;
+  width: 4px;
+  height: 40px;
+  border-radius: 3px 0 0 3px;
+}
+.iphone-btn-power {
+  right: -5px;
+  top: 118px;
+  width: 4px;
+  height: 54px;
+  border-radius: 0 3px 3px 0;
+}
+
+/* ------------------------------------------------------------
+   2. iPad Pro Frame (Counter POS Landscape)
+   ------------------------------------------------------------ */
+.ipad-pro {
+  position: relative;
+  width: 490px;
+  height: 335px;
+  background: linear-gradient(135deg, #2b2b2e 0%, #141416 50%, #222225 100%);
+  border-radius: 22px;
+  padding: 10px;
+  border: 2.5px solid #0A0A0A;
+  box-shadow: 
+    0 25px 45px -10px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    10px 14px 0px #0A0A0A;
+  transform-style: preserve-3d;
+}
+
+.ipad-screen-container {
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  border: 1.5px solid #0A0A0A;
+}
+
+.ipad-camera {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #111;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 20;
+}
+
+.ipad-apple-pencil-strip {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 2px;
+  background: #444;
+  border-radius: 1px;
+}
+
+/* iPad Counter Stand */
+.ipad-stand-neck {
+  width: 76px;
+  height: 42px;
+  margin: -6px auto 0;
+  background: linear-gradient(to bottom, #d4d4d8, #71717a);
+  border: 2.5px solid #0A0A0A;
+  border-top: none;
+  transform: perspective(300px) rotateX(15deg);
+  box-shadow: 4px 4px 0 #0A0A0A;
+}
+.ipad-stand-base {
+  width: 220px;
+  height: 14px;
+  margin: -3px auto 0;
+  background: linear-gradient(to bottom, #e4e4e7, #a1a1aa);
+  border: 2.5px solid #0A0A0A;
+  border-radius: 8px;
+  box-shadow: 6px 6px 0 #0A0A0A;
+}
+
+/* ------------------------------------------------------------
+   3. Retail POS Kasir Computer (Indomaret / Alfamart Style)
+   ------------------------------------------------------------ */
+.pos-retail-workstation {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  transform-style: preserve-3d;
+}
+
+.pos-retail-terminal {
+  position: relative;
+  width: 430px;
+  background: #18181b;
+  border: 3px solid #0A0A0A;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 10px 12px 0 #0A0A0A;
+  transform-style: preserve-3d;
+}
+
+.pos-retail-screen-bezel {
+  width: 100%;
+  height: 275px;
+  background: #09090b;
+  border: 2px solid #0A0A0A;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Customer VFD Pole Display (Layar Indomaret menghadap pembeli) */
+.pos-customer-pole {
+  position: absolute;
+  top: -42px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 15;
+  transform: translateZ(20px);
+}
+.pos-vfd-screen {
+  background: #09090b;
+  border: 2px solid #0A0A0A;
+  border-radius: 4px;
+  padding: 4px 8px;
+  box-shadow: 3px 3px 0 #0A0A0A;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  color: #00ff88;
+  text-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
+  line-height: 1.3;
+  width: 140px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+.pos-vfd-pole-arm {
+  width: 10px;
+  height: 22px;
+  background: #27272a;
+  border: 2px solid #0A0A0A;
+  border-top: none;
+}
+
+/* Cash register base / drawer */
+.pos-cash-drawer {
+  width: 100%;
+  height: 26px;
+  margin-top: 8px;
+  background: #27272a;
+  border: 2.5px solid #0A0A0A;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  box-shadow: 4px 4px 0 #0A0A0A;
+}
+.pos-drawer-slot {
+  width: 60px;
+  height: 4px;
+  background: #0A0A0A;
+  border-radius: 2px;
+}
+.pos-drawer-key {
+  width: 8px;
+  height: 8px;
+  background: #FFE500;
+  border: 1.5px solid #0A0A0A;
+  border-radius: 50%;
+}
+
+/* Thermal Receipt Printer (Indomaret printer) */
+.pos-thermal-printer {
+  position: relative;
+  width: 125px;
+  background: #27272a;
+  border: 2.5px solid #0A0A0A;
+  border-radius: 6px;
+  padding: 8px 6px;
+  box-shadow: 6px 6px 0 #0A0A0A;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateZ(10px);
+}
+.pos-printer-slot {
+  width: 90px;
+  height: 6px;
+  background: #0A0A0A;
+  border-radius: 2px;
+  margin-bottom: 2px;
+}
+.pos-printer-leds {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  align-self: flex-start;
+  padding-left: 4px;
+}
+.pos-led {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1px solid #0A0A0A;
+}
+.pos-led--green { background: #00C27C; box-shadow: 0 0 4px #00C27C; }
+.pos-led--red   { background: #FF3B3B; }
+
+/* Printed thermal paper receipt */
+.pos-receipt-paper {
+  width: 96px;
+  background: #ffffff;
+  border: 1.5px solid #0A0A0A;
+  border-top: none;
+  padding: 6px 5px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 6.5px;
+  line-height: 1.25;
+  color: #111;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.15);
+  clip-path: polygon(
+    0 0, 100% 0, 100% calc(100% - 4px),
+    90% 100%, 80% calc(100% - 4px), 70% 100%, 60% calc(100% - 4px),
+    50% 100%, 40% calc(100% - 4px), 30% 100%, 20% calc(100% - 4px),
+    10% 100%, 0 calc(100% - 4px)
+  );
+  animation: receiptFeed 1.2s ease-out;
+}
+@keyframes receiptFeed {
+  0% { transform: translateY(-12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Barcode scanner laser */
+@keyframes barcodeLaser {
+  0%   { top: 15%; opacity: 0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { top: 85%; opacity: 0; }
+}
+.barcode-laser-line {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  height: 2px;
+  background: #FF3B3B;
+  box-shadow: 0 0 8px #FF3B3B, 0 0 12px #FF3B3B;
+  animation: barcodeLaser 1.4s ease-in-out infinite;
+  z-index: 15;
+}
+
+/* Showcase section responsive */
+@media (max-width: 768px) {
+  .iphone-17-pro {
+    width: 210px;
+    height: 420px;
+    border-radius: 40px;
+    padding: 6px;
+  }
+  .ipad-pro {
+    width: 320px;
+    height: 230px;
+    padding: 6px;
+  }
+  .pos-retail-workstation {
+    flex-direction: column;
+    align-items: center;
+  }
+  .pos-retail-terminal {
+    width: 320px;
+  }
+  .pos-retail-screen-bezel {
+    height: 220px;
+  }
+  .pos-thermal-printer {
+    display: none;
+  }
+}
+
+/* ============================================================
    Dashboard specific
    ============================================================ */
 /* Recharts custom styles */

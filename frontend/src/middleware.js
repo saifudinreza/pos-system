@@ -80,5 +80,5 @@ export function middleware(request) {
 // di-exclude, bot di-redirect ke /login dan SEO/preview rusak (sudah
 // pernah terjadi 3×, lihat CLAUDE.md bagian "Gotcha Next.js / Vercel").
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|manifest.webmanifest|opengraph-image|apple-touch-icon|og-image|images/|sitemap.xml|robots.txt|web-app-manifest).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|manifest.webmanifest|opengraph-image|apple-touch-icon|og-image|images/|landing/|sitemap.xml|robots.txt|web-app-manifest).*)"],
 };

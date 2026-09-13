@@ -241,7 +241,13 @@ class SubscriptionController extends Controller
                         'subscription_plan' => $subscription->plan,
                         'role'              => 'admin',
                     ]);
-                    Log::info('Subscription activated: user_id=' . $subscription->user_id . ' plan=' . $subscription->plan . ' → role upgraded to admin');
+
+                    // Sinkronkan plan ke semua user lain di tenant yang sama
+                    User::where('tenant_id', $subscription->user->tenant_id)
+                        ->where('id', '!=', $subscription->user_id)
+                        ->update(['subscription_plan' => $subscription->plan]);
+
+                    Log::info('Subscription activated: user_id=' . $subscription->user_id . ' plan=' . $subscription->plan . ' → role upgraded to admin + synced to tenant');
                 }
             });
 

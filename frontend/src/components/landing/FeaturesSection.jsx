@@ -112,7 +112,20 @@ const FeatureCard = ({ Icon, title, description, tag, tagColor, iconBg, iconColo
  */
 export default function FeaturesSection() {
   return (
-    <section id="fitur" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray overflow-hidden">
+    <section id="fitur" className="relative z-[1] py-20 px-4 sm:px-6 overflow-hidden">
+      {/* Background Image — sama dengan hero, suasana toko */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/landing/bacground.jpeg')" }}
+      />
+      {/* Overlay — cream gradient supaya teks tetap terbaca */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(255,251,235,0.85) 0%, rgba(255,251,235,0.80) 50%, rgba(255,251,235,0.88) 100%)",
+        }}
+      />
       {/* Shape parallax dekoratif */}
       <Parallax speed={-0.45} aria-hidden="true" className="pointer-events-none absolute right-4 top-20 -z-0">
         <div className="w-24 h-24 bg-brand-yellow/30 border-3 border-brand-black/20 rotate-6" />
