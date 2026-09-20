@@ -11,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
 
 /**
  * Email berisi link reset password yang dikirim ke user.
- * {resetUrl} berbentuk: FRONTEND_URL/auth/reset-password?token=...&email=...
+ * {resetUrl} berbentuk: FRONTEND_URL/reset-password?token=...&email=...
  * (di-bangun di AuthController::forgotPassword)
  */
 class ResetPasswordMail extends Mailable
