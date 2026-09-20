@@ -60,7 +60,7 @@ SANCTUM_STATEFUL_DOMAINS="${SANCTUM_STATEFUL_DOMAINS:-sikasirai.com,localhost:30
 
 # Mail, kirim email reset password (SMTP Gmail)
 MAIL_MAILER="${MAIL_MAILER:-log}"
-MAIL_SCHEME="${MAIL_SCHEME:-tls}"
+MAIL_SCHEME="${MAIL_SCHEME:-smtp}"
 MAIL_HOST="${MAIL_HOST:-smtp.gmail.com}"
 MAIL_PORT="${MAIL_PORT:-587}"
 MAIL_USERNAME="${MAIL_USERNAME}"

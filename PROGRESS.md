@@ -72,7 +72,8 @@
   - `config/services.php` → `frontend_url` dari env `FRONTEND_URL`
     (`.env.example` sudah ada default `https://your-frontend.vercel.app`).
   - `.env.example`: blok Mail diganti SMTP Gmail (`MAIL_MAILER=smtp`,
-    `MAIL_SCHEME=tls`, Laravel 11 pakai `MAIL_SCHEME`, BUKAN `MAIL_ENCRYPTION`,
+    `MAIL_SCHEME=smtp` (BUKAN `tls`, Symfony Mailer hanya kenal `smtp`/`smtps`; port 587
+    otomatis STARTTLS), Laravel 11 pakai `MAIL_SCHEME`, BUKAN `MAIL_ENCRYPTION`,
     `smtp.gmail.com:587`, App Password 16 karakter).
 - **Frontend**:
   - `/forgot-password` (state idle → sending → sent; ajakan cek spam) &
