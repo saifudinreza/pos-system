@@ -60,6 +60,8 @@ services:
         value: poolside/laguna-s-2.1:free
       - key: FONNTE_TOKEN
         sync: false
+      - key: MAIL_MAILER
+        value: smtp
       - key: MAIL_USERNAME
         sync: false
       - key: MAIL_PASSWORD

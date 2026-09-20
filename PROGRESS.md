@@ -9,7 +9,7 @@
 - Tanggal: 19 Agustus 2026
 - Database: **100% TERMIGRASI & TERISI (SEEDED) KE TIDB CLOUD!** (Cluster: `kasirai-db`, Host: `gateway01.ap-southeast-1.prod.aws.tidbcloud.com`, SSL Active).
 - Git: Terakhir commit `docs & config: update database ssl settings and tidb migration progress`.
-- Backend Deployment: **Render.com** (bukan Railway/Fly), blueprint `render.yaml` + `backend/.dockerignore` + fix entrypoint env sudah siap di repo. Tinggal push & buat service di dashboard Render (langkah detail di bawah).
+- Backend Deployment: **Render.com** (bukan Railway/Fly), blueprint `render.yaml` + `backend/.dockerignore` + fix entrypoint env sudah siap di repo. **Sudah di-deploy & live (dikonfirmasi user).**
 - Frontend: Berjalan di Vercel (`sikasirai.com`), tinggal update `NEXT_PUBLIC_API_URL` begitu Render aktif.
 
 ---
@@ -83,8 +83,12 @@
   - `authService.js`: `forgotPassword()` & `resetPassword()`.
   - `middleware.js` PUBLIC_ROUTES: + `"/forgot-password"`, `"/reset-password"`.
 - Test: `PasswordResetTest` (7 test).
--  **Belum aktif di production**: butuh isi `MAIL_*` + `FRONTEND_URL` di .env
-  Render (backend), lihat langkah detail di bawah.
+- **Fix 21 Sep 2026**: link di email dulu `/auth/reset-password` (404), sekarang
+  `/reset-password` (URL asli halaman; `(auth)` cuma folder pengelompok). `render.yaml`
+  + `MAIL_MAILER=smtp` (sebelumnya default `log` = email tidak terkirim). 7 test lolos.
+- **Tinggal manual di Render**: isi `MAIL_USERNAME` + `MAIL_PASSWORD` (App Password Gmail
+  16 karakter), redeploy, lalu uji dari sikasirai.com/forgot-password. Kalau timeout,
+  kemungkinan port SMTP diblokir plan gratis Render → pindah ke Resend (HTTPS).
 
 ---
 
@@ -207,7 +211,7 @@
 
 ## TODO, Belum dikerjakan (lanjutkan dari sini)
 
-### Deploy backend ke Render.com (sesi berjalan)
+### ✅ SELESAI: Deploy backend ke Render.com (sudah dijalankan manual oleh user)
 - **Sudah disiapkan di repo**:
   1. `render.yaml` (blueprint) di root, Web Service docker `rootDir: backend`,
      health check `/up`, env var dengan `sync: false` untuk secret.

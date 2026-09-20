@@ -211,7 +211,7 @@ class AuthController extends Controller
             $token = PasswordBroker::broker()->createToken($user);
 
             $frontendUrl = rtrim((string) config('services.frontend_url'), '/');
-            $resetUrl    = $frontendUrl . '/auth/reset-password'
+            $resetUrl    = $frontendUrl . '/reset-password'
                 . '?token=' . $token
                 . '&email=' . urlencode($user->email);
 
