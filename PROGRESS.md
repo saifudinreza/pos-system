@@ -50,7 +50,16 @@
 ## Fitur yang SUDAH dikerjakan
 
 ### 11. Lupa Password (reset via email)
-- **Alur**: login page → "Lupa password?" → `/forgot-password` → isi email →
+- **UPDATE (OTP)**: alur link diganti **kode OTP 6 digit** (blok "Alur/Backend/Frontend" di
+  bawah ini adalah versi LINK LAMA, hanya untuk sejarah). Alur sekarang: `/forgot-password`
+  satu halaman 3 tahap (email → OTP + password baru → sukses). `POST /api/forgot-password`
+  buat OTP (`random_int`, disimpan **ter-hash** di Cache `pwd_otp:{email}`, TTL 10 menit,
+  hangus setelah 5 kali salah, jeda kirim ulang 60 detik `pwd_otp_cd:{email}`), lalu
+  `POST /api/reset-password {email, otp, password, password_confirmation}` verifikasi + ganti
+  password + cabut semua token Sanctum. Tanpa migration baru; `PasswordBroker` tidak dipakai
+  lagi. `ResetPasswordMail(user, otp, expiresMinutes=10)` tetap `ShouldQueue`. Halaman
+  `/reset-password` & route publiknya dihapus. 82 test lolos (`PasswordResetTest` 12 test).
+- **Alur (lama, versi link)**: login page → "Lupa password?" → `/forgot-password` → isi email →
   `POST /api/forgot-password` → email berisi link
   `{FRONTEND_URL}/auth/reset-password?token=...&email=...` (berlaku 60 menit,
   sekali pakai) → `POST /api/reset-password` → password diganti & semua token

@@ -8,7 +8,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password;
 use Tests\TestCase;
 
 class PasswordResetTest extends TestCase
@@ -26,11 +25,26 @@ class PasswordResetTest extends TestCase
         ]);
     }
 
-    private function resetPayload(User $user, string $token, string $password = 'passwordBaru123'): array
+    /** Minta OTP lewat endpoint, lalu ambil kodenya dari email yang di-queue. */
+    private function requestOtp(User $user): string
+    {
+        Mail::fake();
+        $this->postJson('/api/forgot-password', ['email' => $user->email])->assertOk();
+
+        $otp = null;
+        Mail::assertQueued(ResetPasswordMail::class, function ($mail) use (&$otp) {
+            $otp = $mail->otp;
+            return true;
+        });
+
+        return $otp;
+    }
+
+    private function resetPayload(User $user, string $otp, string $password = 'passwordBaru123'): array
     {
         return [
             'email'                 => $user->email,
-            'token'                 => $token,
+            'otp'                   => $otp,
             'password'              => $password,
             'password_confirmation' => $password,
         ];
@@ -38,14 +52,12 @@ class PasswordResetTest extends TestCase
 
     // ─── FORGOT PASSWORD ───
 
-    public function test_forgot_password_mengirim_email_ke_user_terdaftar(): void
+    public function test_forgot_password_mengirim_otp_6_digit_ke_user_terdaftar(): void
     {
-        Mail::fake();
         $user = $this->makeUser();
+        $otp  = $this->requestOtp($user);
 
-        $this->postJson('/api/forgot-password', ['email' => $user->email])
-            ->assertOk();
-
+        $this->assertMatchesRegularExpression('/^\d{6}$/', $otp);
         Mail::assertQueued(ResetPasswordMail::class, fn ($mail) => $mail->hasTo($user->email));
     }
 
@@ -56,6 +68,7 @@ class PasswordResetTest extends TestCase
         $this->postJson('/api/forgot-password', ['email' => 'tidak-ada@contoh.com'])
             ->assertOk();
 
+        Mail::assertNothingQueued();
         Mail::assertNothingSent();
     }
 
@@ -65,14 +78,25 @@ class PasswordResetTest extends TestCase
             ->assertStatus(422);
     }
 
+    public function test_kirim_ulang_dalam_60_detik_tidak_mengirim_email_kedua(): void
+    {
+        Mail::fake();
+        $user = $this->makeUser();
+
+        $this->postJson('/api/forgot-password', ['email' => $user->email])->assertOk();
+        $this->postJson('/api/forgot-password', ['email' => $user->email])->assertOk();
+
+        Mail::assertQueuedCount(1);
+    }
+
     // ─── RESET PASSWORD ───
 
-    public function test_reset_password_token_valid_mengganti_password(): void
+    public function test_reset_password_otp_valid_mengganti_password(): void
     {
-        $user  = $this->makeUser();
-        $token = Password::broker()->createToken($user);
+        $user = $this->makeUser();
+        $otp  = $this->requestOtp($user);
 
-        $this->postJson('/api/reset-password', $this->resetPayload($user, $token))
+        $this->postJson('/api/reset-password', $this->resetPayload($user, $otp))
             ->assertOk()
             ->assertJsonPath('message', 'Password berhasil diganti. Silakan login dengan password baru.');
 
@@ -81,11 +105,53 @@ class PasswordResetTest extends TestCase
         $this->assertFalse(Hash::check('rahasia123', $user->password));
     }
 
-    public function test_reset_password_token_palsu_ditolak(): void
+    public function test_reset_password_otp_salah_ditolak(): void
+    {
+        $user = $this->makeUser();
+        $otp  = $this->requestOtp($user);
+        $salah = $otp === '000000' ? '111111' : '000000';
+
+        $this->postJson('/api/reset-password', $this->resetPayload($user, $salah))
+            ->assertStatus(422);
+
+        $this->assertTrue(Hash::check('rahasia123', $user->fresh()->password));
+    }
+
+    public function test_reset_password_tanpa_meminta_otp_ditolak(): void
     {
         $user = $this->makeUser();
 
-        $this->postJson('/api/reset-password', $this->resetPayload($user, 'token-palsu'))
+        $this->postJson('/api/reset-password', $this->resetPayload($user, '123456'))
+            ->assertStatus(422);
+    }
+
+    public function test_otp_hangus_setelah_5_kali_salah_walau_akhirnya_benar(): void
+    {
+        // Throttle IP (5/menit) sengaja dimatikan agar yang teruji murni logika OTP hangus
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
+
+        $user  = $this->makeUser();
+        $otp   = $this->requestOtp($user);
+        $salah = $otp === '000000' ? '111111' : '000000';
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/reset-password', $this->resetPayload($user, $salah))
+                ->assertStatus(422);
+        }
+
+        $this->postJson('/api/reset-password', $this->resetPayload($user, $otp))
+            ->assertStatus(422);
+        $this->assertTrue(Hash::check('rahasia123', $user->fresh()->password));
+    }
+
+    public function test_otp_kedaluwarsa_setelah_10_menit(): void
+    {
+        $user = $this->makeUser();
+        $otp  = $this->requestOtp($user);
+
+        $this->travel(11)->minutes();
+
+        $this->postJson('/api/reset-password', $this->resetPayload($user, $otp))
             ->assertStatus(422);
     }
 
@@ -94,21 +160,29 @@ class PasswordResetTest extends TestCase
         $user = $this->makeUser();
         $user->createToken('sesi-lama-1');
         $user->createToken('sesi-lama-2');
-        $token = Password::broker()->createToken($user);
+        $otp = $this->requestOtp($user);
 
-        $this->postJson('/api/reset-password', $this->resetPayload($user, $token))
+        $this->postJson('/api/reset-password', $this->resetPayload($user, $otp))
             ->assertOk();
 
         $this->assertCount(0, $user->tokens()->get());
     }
 
-    public function test_token_reset_hanya_bisa_dipakai_sekali(): void
+    public function test_otp_hanya_bisa_dipakai_sekali(): void
     {
         $user    = $this->makeUser();
-        $token   = Password::broker()->createToken($user);
-        $payload = $this->resetPayload($user, $token);
+        $otp     = $this->requestOtp($user);
+        $payload = $this->resetPayload($user, $otp);
 
         $this->postJson('/api/reset-password', $payload)->assertOk();
         $this->postJson('/api/reset-password', $payload)->assertStatus(422);
+    }
+
+    public function test_otp_harus_6_digit_angka(): void
+    {
+        $user = $this->makeUser();
+
+        $this->postJson('/api/reset-password', $this->resetPayload($user, 'abc'))
+            ->assertStatus(422);
     }
 }

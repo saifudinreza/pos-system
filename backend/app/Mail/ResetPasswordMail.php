@@ -11,9 +11,8 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * Email berisi link reset password yang dikirim ke user.
- * {resetUrl} berbentuk: FRONTEND_URL/reset-password?token=...&email=...
- * (di-bangun di AuthController::forgotPassword)
+ * Email berisi kode OTP 6 digit untuk reset password (dibuat di
+ * AuthController::forgotPassword, user mengetiknya di halaman lupa password).
  */
 class ResetPasswordMail extends Mailable implements ShouldQueue
 {
@@ -21,13 +20,13 @@ class ResetPasswordMail extends Mailable implements ShouldQueue
 
     /**
      * @param User   $user            user pemilik akun yang minta reset
-     * @param string $resetUrl        link reset (sekali pakai, berlaku 60 menit)
-     * @param int    $expiresMinutes  masa berlaku link (default 60 menit)
+     * @param string $otp             kode 6 digit (sekali pakai)
+     * @param int    $expiresMinutes  masa berlaku kode (default 10 menit)
      */
     public function __construct(
         public User $user,
-        public string $resetUrl,
-        public int $expiresMinutes = 60,
+        public string $otp,
+        public int $expiresMinutes = 10,
     ) {}
 
     /**
@@ -36,13 +35,13 @@ class ResetPasswordMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Reset Password Akun KasirAI',
+            subject: 'Kode Reset Password KasirAI',
         );
     }
 
     /**
      * Isi email: render blade views/emails/reset-password.blade.php.
-     * Variabel $user, $resetUrl & $expiresMinutes otomatis tersedia di view.
+     * Variabel $user, $otp & $expiresMinutes otomatis tersedia di view.
      */
     public function content(): Content
     {

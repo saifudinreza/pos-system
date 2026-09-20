@@ -89,7 +89,7 @@ const authService = {
     return { token, user, is_new_store: isNewStore, message: data.message };
   },
 
-  // --- FORGOT PASSWORD (minta link reset via email) ---
+  // --- FORGOT PASSWORD (minta kode OTP 6 digit via email) ---
   // POST /api/forgot-password
   // Server selalu balas pesan yang sama, terdaftar atau tidak (anti user-enumeration)
   forgotPassword: async (email) => {
@@ -97,10 +97,10 @@ const authService = {
     return data;
   },
 
-  // --- RESET PASSWORD (ganti password pakai token dari email) ---
+  // --- RESET PASSWORD (ganti password pakai kode OTP dari email) ---
   // POST /api/reset-password
-  resetPassword: async ({ email, token, password, password_confirmation }) => {
-    const { data } = await api.post("/reset-password", { email, token, password, password_confirmation });
+  resetPassword: async ({ email, otp, password, password_confirmation }) => {
+    const { data } = await api.post("/reset-password", { email, otp, password, password_confirmation });
     return data;
   },
 

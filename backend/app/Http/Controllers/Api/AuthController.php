@@ -6,24 +6,28 @@ use App\Http\Controllers\Controller;
 use App\Mail\ResetPasswordMail;
 use App\Models\Tenant;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Password as PasswordBroker;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 /**
  * AuthController, autentikasi & profil: register, login, logout, reset
- * password via email, dan update profil (termasuk konfigurasi Midtrans
+ * password via kode OTP email, dan update profil (termasuk konfigurasi Midtrans
  * per-tenant untuk admin/developer).
- *
- * Catatan: Password reset memakai facade `Password` yang di-alias `PasswordBroker`
- * karena nama bentrok dengan `Illuminate\Validation\Rules\Password`.
  */
 class AuthController extends Controller
 {
+    /** Masa berlaku OTP reset password (menit). */
+    private const OTP_TTL_MINUTES = 10;
+
+    /** Batas salah input OTP sebelum OTP dihanguskan. */
+    private const OTP_MAX_ATTEMPTS = 5;
+
     // =============================================================
     // REGISTER, daftar akun baru (sekaligus buat tenant/toko)
     // POST /api/register
@@ -206,16 +210,19 @@ class AuthController extends Controller
         // orang jahat tidak boleh tahu apakah sebuah email terdaftar di sistem.
         $message = 'Kalau email kamu terdaftar, link reset password sudah dikirim. Cek kotak masuk (atau folder spam)!';
 
-        if ($user) {
-            // Buat token sekali pakai (otomatis disimpan di tabel password_reset_tokens)
-            $token = PasswordBroker::broker()->createToken($user);
+        // Jeda 60 detik per email: cegah banjir email ke korban. Diam-diam (respons tetap sama).
+        if ($user && !Cache::has(self::otpCooldownKey($request->email))) {
+            // OTP 6 digit acak (aman kriptografi), disimpan ter-hash, bukan teks asli
+            $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-            $frontendUrl = rtrim((string) config('services.frontend_url'), '/');
-            $resetUrl    = $frontendUrl . '/reset-password'
-                . '?token=' . $token
-                . '&email=' . urlencode($user->email);
+            Cache::put(self::otpKey($request->email), [
+                'hash'       => Hash::make($otp),
+                'attempts'   => 0,
+                'expires_at' => now()->addMinutes(self::OTP_TTL_MINUTES)->timestamp,
+            ], now()->addMinutes(self::OTP_TTL_MINUTES));
+            Cache::put(self::otpCooldownKey($request->email), true, now()->addSeconds(60));
 
-            Mail::to($user)->send(new ResetPasswordMail($user, $resetUrl));
+            Mail::to($user)->send(new ResetPasswordMail($user, $otp, self::OTP_TTL_MINUTES));
         }
 
         return response()->json(['message' => $message], 200);
@@ -237,38 +244,53 @@ class AuthController extends Controller
     {
         $request->validate([
             'email'    => ['required', 'string', 'email', 'max:255'],
-            'token'    => ['required', 'string'],
+            'otp'      => ['required', 'digits:6'],
             'password' => ['required', 'string', 'confirmed', Password::min(8)],
         ]);
 
-        // Password::broker()->reset():
-        // - cek token valid (ter-hash cocok) & belum kedaluwarsa (60 menit)
-        // - panggil callback untuk ganti password
-        // - otomatis HAPUS token → sekali pakai
-        $status = PasswordBroker::broker()->reset(
-            [
-                'email'                 => $request->email,
-                'token'                 => $request->token,
-                'password'              => $request->password,
-                'password_confirmation' => $request->password_confirmation,
-            ],
-            function (User $user, string $password) {
-                $user->forceFill(['password' => Hash::make($password)])->save();
-                // Cabut semua sesi login lama, user harus login ulang dengan password baru
-                $user->tokens()->delete();
-            }
-        );
+        $key    = self::otpKey($request->email);
+        $record = Cache::get($key);
+        $user   = User::where('email', $request->email)->first();
 
-        if ($status === PasswordBroker::PASSWORD_RESET) {
-            return response()->json([
-                'message' => 'Password berhasil diganti. Silakan login dengan password baru.',
-            ], 200);
+        // Pesan sengaja generik: tidak membedakan OTP salah / kedaluwarsa / email tak dikenal
+        $invalid = response()->json([
+            'message' => 'Kode salah atau sudah kedaluwarsa. Periksa kodenya, atau minta kode baru.',
+        ], 422);
+
+        if (!$record || !$user) {
+            return $invalid;
         }
 
+        if (!Hash::check($request->otp, $record['hash'])) {
+            $record['attempts']++;
+            if ($record['attempts'] >= self::OTP_MAX_ATTEMPTS) {
+                Cache::forget($key); // terlalu banyak salah → OTP hangus, harus minta baru
+            } else {
+                Cache::put($key, $record, Carbon::createFromTimestamp($record['expires_at']));
+            }
+            return $invalid;
+        }
+
+        $user->forceFill(['password' => Hash::make($request->password)])->save();
+        // Cabut semua sesi login lama, user harus login ulang dengan password baru
+        $user->tokens()->delete();
+        Cache::forget($key); // sekali pakai
+
         return response()->json([
-            'message' => 'Link reset sudah tidak valid atau sudah kedaluwarsa. Minta link baru di halaman login, ya!',
-            'status'  => $status,
-        ], 422);
+            'message' => 'Password berhasil diganti. Silakan login dengan password baru.',
+        ], 200);
+    }
+
+    /** Key cache OTP reset password (satu OTP aktif per email). */
+    private static function otpKey(string $email): string
+    {
+        return 'pwd_otp:' . Str::lower($email);
+    }
+
+    /** Key cache jeda kirim ulang OTP. */
+    private static function otpCooldownKey(string $email): string
+    {
+        return 'pwd_otp_cd:' . Str::lower($email);
     }
 
     // =============================================================

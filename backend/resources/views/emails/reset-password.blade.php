@@ -20,24 +20,21 @@
                             </p>
                             <p style="font-size:14px; color:#0A0A0A; line-height:1.6; margin:0 0 16px;">
                                 Kami menerima permintaan untuk mengganti password akun KasirAI kamu.
-                                Klik tombol di bawah ini untuk melanjutkan:
+                                Masukkan kode berikut di halaman lupa password:
                             </p>
 
                             <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;">
                                 <tr>
-                                    <td align="center" style="background-color:#FFCE3D; border:2px solid #0A0A0A; box-shadow:3px 3px 0 #0A0A0A;">
-                                        <a href="{{ $resetUrl }}"
-                                           style="display:inline-block; padding:12px 24px; font-size:14px; font-weight:700; color:#0A0A0A; text-decoration:none;">
-                                            Reset Password →
-                                        </a>
+                                    <td align="center" style="background-color:#FFCE3D; border:2px solid #0A0A0A; box-shadow:3px 3px 0 #0A0A0A; padding:14px 28px;">
+                                        <span style="font-family:'Courier New', monospace; font-size:32px; font-weight:900; letter-spacing:8px; color:#0A0A0A;">{{ $otp }}</span>
                                     </td>
                                 </tr>
                             </table>
 
                             <p style="font-size:13px; color:#0A0A0A; line-height:1.6; margin:0 0 8px;">
-                                Link ini berlaku selama <strong>{{ $expiresMinutes }} menit</strong> dan hanya bisa
-                                dipakai <strong>sekali</strong>. Kalau sudah kedaluwarsa, minta link baru lagi di halaman
-                                login → "Lupa password?".
+                                Kode ini berlaku selama <strong>{{ $expiresMinutes }} menit</strong> dan hanya bisa
+                                dipakai <strong>sekali</strong>. <strong>Jangan bagikan kode ini ke siapa pun</strong>,
+                                termasuk yang mengaku dari KasirAI.
                             </p>
                             <p style="font-size:13px; color:#0A0A0A; line-height:1.6; margin:0;">
                                 Kalau kamu tidak merasa minta reset password, abaikan email ini, password kamu aman.
