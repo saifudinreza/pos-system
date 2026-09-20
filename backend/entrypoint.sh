@@ -140,7 +140,7 @@ echo " Laravel ready"
 # kirim WhatsApp (webhook Midtrans) & panggilan AI (Groq/OpenRouter) supaya
 # tidak menahan worker PHP-FPM. Connection mengikuti QUEUE_CONNECTION dari .env
 # (database, atau redis kalau REDIS_URL tersedia).
-php artisan queue:work --tries=3 --timeout=300 > /var/log/queue-worker.log 2>&1 &
+php artisan queue:work --tries=3 --timeout=300 &
 echo " Queue worker started"
 
 # Start PHP-FPM di background
