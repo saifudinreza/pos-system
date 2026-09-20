@@ -86,6 +86,11 @@
 - **Fix 21 Sep 2026**: link di email dulu `/auth/reset-password` (404), sekarang
   `/reset-password` (URL asli halaman; `(auth)` cuma folder pengelompok). `render.yaml`
   + `MAIL_MAILER=smtp` (sebelumnya default `log` = email tidak terkirim). 7 test lolos.
+- **Fix 20 Sep 2026 (lanjutan)**: `POST forgot-password` 500 di production. `ResetPasswordMail`
+  kini `ShouldQueue` (email dikirim worker, request tidak lagi menunggu SMTP);
+  `entrypoint.sh` default `LOG_CHANNEL=stderr` supaya error Laravel tampil di tab Logs Render;
+  bug seeder `DatabaseSeeder` (`$this->call(RepairNabilaTenant)` → `$this->command->call('kasirai:repair-nabila')`).
+  77 test lolos. Email harus pakai **App Password Gmail** (bukan password akun).
 - **Tinggal manual di Render**: isi `MAIL_USERNAME` + `MAIL_PASSWORD` (App Password Gmail
   16 karakter), redeploy, lalu uji dari sikasirai.com/forgot-password. Kalau timeout,
   kemungkinan port SMTP diblokir plan gratis Render → pindah ke Resend (HTTPS).

@@ -46,7 +46,7 @@ class PasswordResetTest extends TestCase
         $this->postJson('/api/forgot-password', ['email' => $user->email])
             ->assertOk();
 
-        Mail::assertSent(ResetPasswordMail::class, fn ($mail) => $mail->hasTo($user->email));
+        Mail::assertQueued(ResetPasswordMail::class, fn ($mail) => $mail->hasTo($user->email));
     }
 
     public function test_forgot_password_email_tidak_terdaftar_tetap_ok_tanpa_mengirim_email(): void
