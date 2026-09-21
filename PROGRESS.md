@@ -59,6 +59,16 @@
   password + cabut semua token Sanctum. Tanpa migration baru; `PasswordBroker` tidak dipakai
   lagi. `ResetPasswordMail(user, otp, expiresMinutes=10)` tetap `ShouldQueue`. Halaman
   `/reset-password` & route publiknya dihapus. 82 test lolos (`PasswordResetTest` 12 test).
+- **AKAR MASALAH email tidak terkirim (21 Sep 2026)**: log Render `Unable to connect to
+  smtp.gmail.com:587 (Connection timed out)`, Render memblokir port SMTP keluar, jadi
+  Gmail SMTP tidak bisa dipakai (bukan soal App Password/OAuth). Solusi: kirim via **Resend
+  (HTTPS API)**: `composer require resend/resend-php`, `MAIL_MAILER=resend`, env `RESEND_API_KEY`,
+  `MAIL_FROM_ADDRESS=noreply@sikasirai.com` (harus domain terverifikasi di Resend), `render.yaml`
+  & `entrypoint.sh` disesuaikan. `ResetPasswordMail` diberi `$tries=2`/`$timeout=30` supaya
+  email macet tidak menyandera worker queue tunggal (job WhatsApp/AI ikut tertahan).
+  **Tinggal manual**: daftar Resend → verifikasi domain sikasirai.com di DNS Domainesia →
+  buat API key → isi env di Render (`MAIL_MAILER=resend`, `RESEND_API_KEY`, `MAIL_FROM_ADDRESS`),
+  hapus `MAIL_USERNAME`/`MAIL_PASSWORD`, cabut App Password Gmail lama.
 - **Alur (lama, versi link)**: login page → "Lupa password?" → `/forgot-password` → isi email →
   `POST /api/forgot-password` → email berisi link
   `{FRONTEND_URL}/auth/reset-password?token=...&email=...` (berlaku 60 menit,

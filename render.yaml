@@ -61,11 +61,11 @@ services:
       - key: FONNTE_TOKEN
         sync: false
       - key: MAIL_MAILER
-        value: smtp
-      - key: MAIL_USERNAME
+        value: resend
+      - key: RESEND_API_KEY
         sync: false
-      - key: MAIL_PASSWORD
-        sync: false
+      - key: MAIL_FROM_ADDRESS
+        value: noreply@sikasirai.com
       - key: R2_ACCESS_KEY_ID
         sync: false
       - key: R2_SECRET_ACCESS_KEY

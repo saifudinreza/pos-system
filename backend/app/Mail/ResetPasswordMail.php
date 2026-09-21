@@ -18,6 +18,10 @@ class ResetPasswordMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
+    /** Batasi percobaan & waktu supaya email macet tidak menyandera worker queue tunggal. */
+    public int $tries = 2;
+    public int $timeout = 30;
+
     /**
      * @param User   $user            user pemilik akun yang minta reset
      * @param string $otp             kode 6 digit (sekali pakai)

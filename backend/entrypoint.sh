@@ -58,14 +58,17 @@ OPENROUTER_MODEL="${OPENROUTER_MODEL:-meta-llama/llama-3.1-8b-instruct:free}"
 FRONTEND_URL="${FRONTEND_URL:-https://sikasirai.com}"
 SANCTUM_STATEFUL_DOMAINS="${SANCTUM_STATEFUL_DOMAINS:-sikasirai.com,localhost:3000}"
 
-# Mail, kirim email reset password (SMTP Gmail)
+# Mail, kirim email OTP reset password. Render memblokir port SMTP keluar
+# (Gmail smtp:587 = timeout), jadi pakai Resend lewat HTTPS API (MAIL_MAILER=resend).
+# MAIL_FROM_ADDRESS harus memakai domain yang sudah diverifikasi di Resend.
+RESEND_API_KEY="${RESEND_API_KEY}"
 MAIL_MAILER="${MAIL_MAILER:-log}"
 MAIL_SCHEME="${MAIL_SCHEME:-smtp}"
 MAIL_HOST="${MAIL_HOST:-smtp.gmail.com}"
 MAIL_PORT="${MAIL_PORT:-587}"
 MAIL_USERNAME="${MAIL_USERNAME}"
 MAIL_PASSWORD="${MAIL_PASSWORD}"
-MAIL_FROM_ADDRESS="${MAIL_FROM_ADDRESS:-noreply.kasirai@gmail.com}"
+MAIL_FROM_ADDRESS="${MAIL_FROM_ADDRESS:-noreply@sikasirai.com}"
 MAIL_FROM_NAME="${MAIL_FROM_NAME:-KasirAI}"
 
 # Fonnte, kirim struk digital via WhatsApp
