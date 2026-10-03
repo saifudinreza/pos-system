@@ -420,6 +420,7 @@
 - **Skala tipografi**: `text-display`, `text-h1..h4`, `text-body`, `text-small`, `text-caption` (responsif lewat `clamp`). Dipakai di judul landing dan judul halaman aplikasi. `font-mono` di landing dibatasi untuk angka/harga/kode (label & chip pindah ke Space Grotesk).
 - Kartu Wawasan KasirAI mengikuti gaya neobrutal. **Dokumentasi**: `frontend/DESIGN_SYSTEM.md` (aturan warna termasuk aturan pemakaian kuning, tipografi, komponen, spasi, ikon) dan katalog hidup `/dev/design-system` (khusus developer, di balik PIN).
 - Diuji: build sukses; landing, dashboard, dan katalog dicek di browser (stack lokal SQLite).
+<<<<<<< HEAD
 - **Temuan di luar issue** (PIN Developer Portal yang tertulis di kode): **sudah diperbaiki**, lihat bagian "Gerbang Developer Portal" di bawah.
 
 ---
@@ -440,3 +441,6 @@
 - Command `php artisan kasirai:developer-audit` mendaftar akun developer dan menandai yang tidak sah.
 - Test: `SingleDeveloperTest` (361 test lulus).
 - **TODO owner**: pastikan akun donojomi@gmail.com berperan `developer` di DB production; ganti sandi lewat Lupa Password (sandi lama `developer123` pernah ada di repo publik); jalankan `kasirai:developer-audit` di production; hapus env `NEXT_PUBLIC_DEV_PIN` di Vercel.
+=======
+- **Temuan di luar issue**: `app/dev/layout.jsx` punya PIN cadangan yang tertulis di kode (`NEXT_PUBLIC_DEV_PIN ?? "kasiradev2025"`); variabel `NEXT_PUBLIC_*` ikut terbundel ke browser, jadi PIN itu terbaca siapa saja. Set `NEXT_PUBLIC_DEV_PIN` di Vercel atau ganti gerbangnya dengan pengecekan role di server.
+>>>>>>> origin/main
