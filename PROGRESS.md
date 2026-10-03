@@ -69,6 +69,12 @@
   **Tinggal manual**: daftar Resend → verifikasi domain sikasirai.com di DNS Domainesia →
   buat API key → isi env di Render (`MAIL_MAILER=resend`, `RESEND_API_KEY`, `MAIL_FROM_ADDRESS`),
   hapus `MAIL_USERNAME`/`MAIL_PASSWORD`, cabut App Password Gmail lama.
+- **STATUS 22 Sep 2026: OTP via Resend BERHASIL di production & domain `sikasirai.com` sudah
+  VERIFIED di Resend** (DNS di Domainesia: DKIM TXT `resend._domainkey`, CNAME `rsend` & `send`,
+  TXT `_dmarc`). `MAIL_FROM_ADDRESS=noreply@sikasirai.com` (sama dengan `render.yaml`), jadi
+  OTP bisa dikirim ke SEMUA user, bukan hanya pemilik akun Resend. Jangan hapus record DNS
+  Resend tsb. **Tinggal**: tes kirim OTP ke email user selain pemilik akun Resend; pastikan
+  App Password Gmail lama & API key Resend lama sudah dicabut.
 - **Alur (lama, versi link)**: login page → "Lupa password?" → `/forgot-password` → isi email →
   `POST /api/forgot-password` → email berisi link
   `{FRONTEND_URL}/auth/reset-password?token=...&email=...` (berlaku 60 menit,
@@ -336,3 +342,13 @@
 -  **Catatan**: pembuatan produk/kategori oleh developer tetap `tenant_id = null`
   (perilaku lama di `store()`), di luar scope filter ini. Kalau mau developer membuat
   produk ke tenant tertentu, perlu tambah `tenant_id` di payload `store()` (TODO).
+
+---
+
+## 3 Oktober 2026, Unit & security testing Login / Register / Forgot Password (issue #2)
+
+- **Pest 4 terpasang** (dev dependency, `backend/composer.json`) berdampingan dengan PHPUnit; `tests/Pest.php` hanya mengatur folder `Feature/Auth/Pest`.
+- **263 test baru** di `backend/tests/Feature/Auth/` (PHPUnit: login, register, forgot/reset, batas input & karakter khusus, token kedaluwarsa; Pest: SQLi, brute force, credential stuffing, CSRF, XSS, token theft, enumeration, phishing). Suite penuh sekarang **345 test lulus**.
+- Helper `tests/Support/DisposableAuthUser.php`: data user/tenant baru per test, dihapus di akhir + `assertDatabaseMissing`, guard DB harus sqlite `:memory:`.
+- Test yang perilakunya belum sesuai ekspektasi **tidak di-commit** (`backend/tests-private/`, di-gitignore); laporan lengkap di `backend/tests/Feature/Auth/TEST_REPORT_AUTH.md` (di-gitignore, privat karena repo publik).
+- **TODO**: tindak lanjuti laporan privat, lalu pindahkan test yang sudah hijau dari `tests-private/` ke `tests/Feature/Auth/`.
