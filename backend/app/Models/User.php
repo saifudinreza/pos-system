@@ -32,6 +32,31 @@ class User extends Authenticatable
         static::addGlobalScope(new TenantScope);
     }
 
+    /**
+     * developerEmail, satu-satunya email yang boleh berperan developer
+     * (config/kasirai.php, env DEVELOPER_EMAIL). Dibandingkan tanpa peduli huruf besar/kecil.
+     */
+    public static function developerEmail(): string
+    {
+        return mb_strtolower(trim((string) config('kasirai.developer_email')));
+    }
+
+    /** True kalau email ini adalah akun developer yang sah. */
+    public static function isDeveloperEmail(?string $email): bool
+    {
+        return $email !== null && mb_strtolower(trim($email)) === self::developerEmail();
+    }
+
+    /**
+     * True kalau akun ini memegang peran developer TETAPI emailnya bukan email
+     * developer yang sah (mis. data lama atau penyisipan manual di database).
+     * Akun seperti ini ditolak di seluruh API oleh middleware single.developer.
+     */
+    public function isImpostorDeveloper(): bool
+    {
+        return $this->role === 'developer' && ! self::isDeveloperEmail($this->email);
+    }
+
     protected $fillable = [
         'tenant_id',
         'name',

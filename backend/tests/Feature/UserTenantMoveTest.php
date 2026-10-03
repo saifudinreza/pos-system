@@ -17,7 +17,7 @@ class UserTenantMoveTest extends TestCase
         $tenantA = Tenant::create(['name' => 'Toko A', 'slug' => 'toko-a']);
         $tenantB = Tenant::create(['name' => 'Toko B', 'slug' => 'toko-b']);
 
-        $dev    = User::factory()->create(['tenant_id' => null, 'role' => 'developer']);
+        $dev    = User::factory()->create(['tenant_id' => null, 'role' => 'developer', 'email' => User::developerEmail()]);
         $user   = User::factory()->create(['tenant_id' => $tenantA->id, 'role' => 'admin']);
 
         Sanctum::actingAs($dev);
@@ -51,7 +51,7 @@ class UserTenantMoveTest extends TestCase
     {
         $tenantA = Tenant::create(['name' => 'Toko A', 'slug' => 'toko-a']);
 
-        $dev  = User::factory()->create(['tenant_id' => null, 'role' => 'developer']);
+        $dev  = User::factory()->create(['tenant_id' => null, 'role' => 'developer', 'email' => User::developerEmail()]);
         $user = User::factory()->create(['tenant_id' => $tenantA->id, 'role' => 'admin']);
 
         Sanctum::actingAs($dev);

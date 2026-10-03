@@ -44,10 +44,12 @@ Route::get('/media/{path}', function (string $path) {
 // =============================================================
 // ============ PROTECTED (WAJIB LOGIN) ============
 // =============================================================
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'single.developer'])->group(function () {
     // ↑ Semua route di dalam sini wajib kirim header:
     // Authorization: Bearer {token}
     // Kalau tidak ada token → otomatis return 401
+    // single.developer: akun berperan developer yang emailnya BUKAN email developer
+    // resmi (config/kasirai.php) ditolak 403 di semua route di bawah ini.
 
     // ============ AUTH ============
     Route::post('/logout', [AuthController::class, 'logout']);

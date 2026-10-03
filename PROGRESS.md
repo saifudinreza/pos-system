@@ -420,4 +420,23 @@
 - **Skala tipografi**: `text-display`, `text-h1..h4`, `text-body`, `text-small`, `text-caption` (responsif lewat `clamp`). Dipakai di judul landing dan judul halaman aplikasi. `font-mono` di landing dibatasi untuk angka/harga/kode (label & chip pindah ke Space Grotesk).
 - Kartu Wawasan KasirAI mengikuti gaya neobrutal. **Dokumentasi**: `frontend/DESIGN_SYSTEM.md` (aturan warna termasuk aturan pemakaian kuning, tipografi, komponen, spasi, ikon) dan katalog hidup `/dev/design-system` (khusus developer, di balik PIN).
 - Diuji: build sukses; landing, dashboard, dan katalog dicek di browser (stack lokal SQLite).
-- **Temuan di luar issue**: `app/dev/layout.jsx` punya PIN cadangan yang tertulis di kode (`NEXT_PUBLIC_DEV_PIN ?? "kasiradev2025"`); variabel `NEXT_PUBLIC_*` ikut terbundel ke browser, jadi PIN itu terbaca siapa saja. Set `NEXT_PUBLIC_DEV_PIN` di Vercel atau ganti gerbangnya dengan pengecekan role di server.
+- **Temuan di luar issue** (PIN Developer Portal yang tertulis di kode): **sudah diperbaiki**, lihat bagian "Gerbang Developer Portal" di bawah.
+
+---
+
+## 4 Oktober 2026, Gerbang Developer Portal dipindah ke server (hapus PIN)
+
+- **Masalah**: `/dev/*` dijaga PIN di sisi browser (`NEXT_PUBLIC_DEV_PIN ?? "kasiradev2025"`) atau daftar email; variabel `NEXT_PUBLIC_*` terbundel ke JavaScript browser dan nilai cadangannya ada di repo publik, jadi siapa pun bisa membuka halaman portal. (Data tetap aman: semua endpoint API `/api/dev/*` sudah dikunci `role:developer`.)
+- **Perbaikan**: PIN, `DEV_EMAIL`, dan `sessionStorage dev_verified` dihapus total. `src/middleware.js` kini memverifikasi peran ke backend (`GET /api/me` dengan token dari cookie) untuk setiap permintaan `/dev/*`; hanya `role === "developer"` dan akun aktif yang lolos. Gagal verifikasi, backend tidak menjawab, atau timeout 8 detik: dialihkan ke `/dashboard` (fail closed). `dev/layout.jsx` tinggal lapis kedua (alihkan kalau user termuat tapi bukan developer, muat ulang user kalau kosong).
+- **Test**: `DevRoutesAccessTest` (5 test): tamu 401, admin/kasir/user 403, developer 200, developer nonaktif 403, dan kontrak `/me` (`data.role`, `data.is_active`) yang dipakai gerbang frontend. Total 351 test lulus.
+- Diuji di lokal: tanpa login ke /login, token palsu dan admin ke /dashboard, developer 200 tanpa PIN, backend mati ditolak, login developer di browser langsung masuk portal.
+- **TODO owner**: hapus env `NEXT_PUBLIC_DEV_PIN` di Vercel kalau ada (sudah tidak dipakai). Satu hal yang berubah: akun `donojomi@gmail.com` tidak lagi otomatis lolos lewat email; akun itu harus benar-benar berperan `developer` di database.
+
+### Satu-satunya developer = donojomi@gmail.com
+- Email resmi di `backend/config/kasirai.php` (env `DEVELOPER_EMAIL`, default donojomi@gmail.com). Helper `User::developerEmail()` / `isDeveloperEmail()`.
+- Middleware `single.developer` (di grup `auth:sanctum`): akun berperan developer dengan email lain ditolak 403 di semua endpoint.
+- `UserController` (store/update/patchRole) menolak memberi peran developer ke email lain (422); akun resmi tidak bisa diturunkan/dinonaktifkan/diganti emailnya.
+- `UserSeeder` tidak lagi menulis sandi `developer123` dan tidak mereset sandi akun yang sudah ada (sandi baru dari env `DEVELOPER_SEED_PASSWORD` atau acak).
+- Command `php artisan kasirai:developer-audit` mendaftar akun developer dan menandai yang tidak sah.
+- Test: `SingleDeveloperTest` (361 test lulus).
+- **TODO owner**: pastikan akun donojomi@gmail.com berperan `developer` di DB production; ganti sandi lewat Lupa Password (sandi lama `developer123` pernah ada di repo publik); jalankan `kasirai:developer-audit` di production; hapus env `NEXT_PUBLIC_DEV_PIN` di Vercel.

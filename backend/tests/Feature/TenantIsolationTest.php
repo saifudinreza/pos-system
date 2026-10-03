@@ -192,7 +192,7 @@ class TenantIsolationTest extends TestCase
     {
         $tenantA = $this->makeTenant('Toko A');
         $tenantB = $this->makeTenant('Toko B');
-        $dev = User::factory()->create(['tenant_id' => null, 'role' => 'developer']);
+        $dev = User::factory()->create(['tenant_id' => null, 'role' => 'developer', 'email' => User::developerEmail()]);
 
         $catA = Category::create(['tenant_id' => $tenantA->id, 'name' => 'Kat A', 'slug' => 'kat-a']);
         $catB = Category::create(['tenant_id' => $tenantB->id, 'name' => 'Kat B', 'slug' => 'kat-b']);
