@@ -21,6 +21,7 @@ import { CreditCard, User, CheckCircle2, ArrowLeft } from "lucide-react";
 import useAuthStore from "@/stores/authStore";
 import subscriptionService from "@/services/subscriptionService";
 import NeoButton from "@/components/ui/NeoButton";
+import { trackEvent } from "@/lib/analytics";
 import NeoInput  from "@/components/ui/NeoInput";
 import { getErrorMessage, formatCurrency } from "@/lib/utils";
 
@@ -101,6 +102,11 @@ function UpgradeContent() {
   }, [user]);
 
   const currentPrice = PRICES[plan]?.[billing] ?? PRICES.pro.monthly;
+
+  // Event funnel: user melihat halaman upgrade
+  useEffect(() => {
+    trackEvent("upgrade_view", { paket: plan });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * handlePay, Alur lengkap pembayaran:

@@ -16,6 +16,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import LogoMark from "@/components/brand/LogoMark";
+import UpgradeModal from "@/components/ui/UpgradeModal";
 
 export default function KasirLayout({ children }) {
   // ── State: hidrasi auth store + guard mounted (cegah mismatch SSR) ──
@@ -37,6 +38,7 @@ export default function KasirLayout({ children }) {
 
   return (
     <>
+    <UpgradeModal />
     {/* Catatan: Midtrans Snap JS TIDAK di-load di sini, dimuat on-demand oleh
         loadMidtransSnap() di kasir/page.jsx dengan data-client-key milik tenant,
         supaya tidak double-load dengan script inject manual. */}

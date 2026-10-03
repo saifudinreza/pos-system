@@ -30,6 +30,7 @@ import NeoBadge   from "@/components/ui/NeoBadge";
 import NeoModal   from "@/components/ui/NeoModal";
 import NeoInput   from "@/components/ui/NeoInput";
 import { formatCurrency, getErrorMessage } from "@/lib/utils";
+import { trackOnce } from "@/lib/analytics";
 
 // Form kosong sebagai nilai awal modal tambah produk
 const EMPTY_FORM = {
@@ -170,7 +171,10 @@ export default function ProductsPage() {
       if (!form.image) delete payload.image;
 
       if (modal.data) await productService.update(modal.data.id, payload);
-      else            await productService.create(payload);
+      else {
+        await productService.create(payload);
+        trackOnce("product_created_first");
+      }
 
       closeModal();
       refreshProducts();

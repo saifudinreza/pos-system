@@ -16,6 +16,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import useAiStore from "@/stores/aiStore";
+import useUpgradeModalStore from "@/stores/upgradeModalStore";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -175,8 +176,10 @@ const QUICK_PROMPTS = [
  *   onClose       : tutup panel (mode slide-in)
  *   alwaysVisible : true → panel menetap tanpa overlay/tombol 
  *   isDev         : true → tampil badge "DEV" (mode developer)
+ *   onCollapse    : (mode alwaysVisible) fungsi untuk menyembunyikan panel
  */
-export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDev = false }) {
+export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDev = false, onCollapse }) {
+  const showUpgrade = useUpgradeModalStore((st) => st.show);
   const [input, setInput] = useState("");
   const bottomRef = useRef(null);
   const {
@@ -274,8 +277,18 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
           >
             <ResetIcon className="w-3 h-3" /> Reset
           </button>
+          {alwaysVisible && onCollapse && (
+            <button
+              onClick={onCollapse}
+              title="Sembunyikan panel AI"
+              aria-label="Sembunyikan panel AI"
+              className="text-white/60 hover:text-brand-yellow text-xs font-black font-mono border border-white/20 px-2 py-0.5 hover:border-brand-yellow transition-colors rounded"
+            >
+              ›
+            </button>
+          )}
           {!alwaysVisible && (
-            <button onClick={onClose} className="text-white/60 hover:text-white font-black text-sm"></button>
+            <button onClick={onClose} aria-label="Tutup panel AI" className="text-white/60 hover:text-white font-black text-sm">✕</button>
           )}
         </div>
       </div>
@@ -318,9 +331,16 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
             <p className="text-xs font-bold text-red-800 leading-snug">
               {isDaily
                 ? "Kuota harian AI sudah habis. Coba lagi besok."
-                : "Kuota AI bulanan paket FREE sudah habis. Upgrade ke Pro untuk AI tak terbatas!"}
+                : "Kuota AI bulanan paket Free sudah habis. Paket Pro memberi 10 pertanyaan AI per hari."}
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => showUpgrade("ai")}
+            className="mt-2 w-full py-1.5 text-xs font-black bg-brand-black text-white border-2 border-brand-black hover:bg-brand-black/90"
+          >
+            {isDaily ? "Lihat paket dengan kuota lebih besar" : "Lihat paket Pro"}
+          </button>
         </div>
       )}
 

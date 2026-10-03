@@ -15,6 +15,7 @@ import { CheckCircle2, PartyPopper, ArrowRight, Loader2 } from "lucide-react";
 import useAuthStore from "@/stores/authStore";
 import NeoButton from "@/components/ui/NeoButton";
 import { formatCurrency } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 
 function SuccessContent() {
   const router       = useRouter();
@@ -29,6 +30,11 @@ function SuccessContent() {
   // activating: true selama webhook belum meng-update plan user
   const [activating, setActivating] = useState(true);
   const attemptsRef = useRef(0);
+
+  // Event funnel: pembayaran langganan berhasil
+  useEffect(() => {
+    trackEvent("upgrade_payment_success", { paket: plan });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * Polling aktivasi: beri webhook Midtrans ~2 detik head start, lalu cek

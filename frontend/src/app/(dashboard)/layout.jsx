@@ -27,9 +27,11 @@
 // ============================================================
 
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Sidebar    from "@/components/layout/Sidebar";
 import Navbar     from "@/components/layout/Navbar";
 import AISidebar  from "@/components/layout/AISidebar";
+import UpgradeModal from "@/components/ui/UpgradeModal";
 import useAuthStore from "@/stores/authStore";
 
 export default function DashboardLayout({ children }) {
@@ -44,6 +46,20 @@ export default function DashboardLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+
+  // Panel AI desktop: pilihan user ("open" | "closed") diingat di localStorage.
+  // Kalau belum pernah memilih, panel terbuka hanya di halaman Dashboard
+  // supaya area kerja kasir dan laporan lebih lega.
+  const [aiPref, setAiPref] = useState(null);
+  useEffect(() => {
+    try { setAiPref(window.localStorage.getItem("kasirai_ai_panel")); } catch {}
+  }, []);
+  const chooseAiPanel = (value) => {
+    setAiPref(value);
+    try { window.localStorage.setItem("kasirai_ai_panel", value); } catch {}
+  };
+  const aiDesktopOpen = aiPref ? aiPref === "open" : pathname === "/dashboard";
 
   useEffect(() => {
     hydrateFromStorage();
@@ -65,6 +81,8 @@ export default function DashboardLayout({ children }) {
     // flex h-screen: layout penuh tinggi layar, tidak scroll secara keseluruhan
     // overflow-hidden: scroll hanya terjadi di area konten tengah, bukan keseluruhan page
     <div className="flex h-screen bg-brand-gray overflow-hidden">
+      {/* Modal tawaran upgrade kontekstual (QRIS, export, kuota AI) */}
+      <UpgradeModal />
 
       {/* ── Sidebar kiri ──
           Di mobile: tersembunyi, muncul sebagai overlay saat sidebarOpen=true
@@ -138,10 +156,31 @@ export default function DashboardLayout({ children }) {
 
           {/* Desktop: panel AI selalu visible, ada di samping konten
               hidden lg:flex = sembunyikan di mobile, tampilkan di desktop */}
-          <div className="hidden lg:flex lg:flex-col lg:w-96 lg:shrink-0">
-            {/* alwaysVisible=true: panel tidak punya overlay/slide behavior */}
-            <AISidebar isOpen={true} onClose={() => {}} alwaysVisible isDev={isDev} />
-          </div>
+          {aiDesktopOpen ? (
+            <div className="hidden lg:flex lg:flex-col lg:w-96 lg:shrink-0">
+              {/* alwaysVisible=true: panel tidak punya overlay/slide behavior */}
+              <AISidebar
+                isOpen={true}
+                onClose={() => {}}
+                alwaysVisible
+                isDev={isDev}
+                onCollapse={() => chooseAiPanel("closed")}
+              />
+            </div>
+          ) : (
+            /* Panel disembunyikan: tab tipis di tepi kanan untuk membukanya lagi */
+            <button
+              type="button"
+              onClick={() => chooseAiPanel("open")}
+              aria-label="Buka AI Assistant"
+              className="hidden lg:flex shrink-0 w-10 flex-col items-center justify-center gap-3 bg-brand-black text-brand-yellow border-l-2 border-brand-black hover:bg-gray-900 transition-colors"
+            >
+              <span className="font-black font-mono text-xs [writing-mode:vertical-rl] rotate-180 tracking-widest">
+                AI ASSISTANT
+              </span>
+              <span aria-hidden="true" className="font-black">‹</span>
+            </button>
+          )}
 
           {/* Mobile/tablet: slide-over dari kanan (ada backdrop gelap di belakangnya)
               lg:hidden = sembunyikan di desktop (sudah ada yang atas) */}

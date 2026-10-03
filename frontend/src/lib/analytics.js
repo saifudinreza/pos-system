@@ -27,3 +27,21 @@ export function trackEvent(name, params = {}) {
     // analytics tidak boleh pernah merusak halaman
   }
 }
+
+/**
+ * trackOnce, kirim event HANYA SEKALI per browser (untuk event "pertama kali":
+ * product_created_first, shift_opened_first, order_paid_first).
+ * Penanda disimpan di localStorage, jadi ini perkiraan per perangkat. Untuk
+ * angka yang benar-benar "pertama per akun", hitung di GA4 lewat user_id.
+ */
+export function trackOnce(name, params = {}) {
+  try {
+    if (typeof window === "undefined") return;
+    const key = `kasirai_evt_${name}`;
+    if (window.localStorage.getItem(key)) return;
+    window.localStorage.setItem(key, "1");
+  } catch {
+    // localStorage tidak tersedia: lewati penandaan, tetap kirim event
+  }
+  trackEvent(name, params);
+}
