@@ -431,3 +431,12 @@
 - **Test**: `DevRoutesAccessTest` (5 test): tamu 401, admin/kasir/user 403, developer 200, developer nonaktif 403, dan kontrak `/me` (`data.role`, `data.is_active`) yang dipakai gerbang frontend. Total 351 test lulus.
 - Diuji di lokal: tanpa login ke /login, token palsu dan admin ke /dashboard, developer 200 tanpa PIN, backend mati ditolak, login developer di browser langsung masuk portal.
 - **TODO owner**: hapus env `NEXT_PUBLIC_DEV_PIN` di Vercel kalau ada (sudah tidak dipakai). Satu hal yang berubah: akun `donojomi@gmail.com` tidak lagi otomatis lolos lewat email; akun itu harus benar-benar berperan `developer` di database.
+
+### Satu-satunya developer = donojomi@gmail.com
+- Email resmi di `backend/config/kasirai.php` (env `DEVELOPER_EMAIL`, default donojomi@gmail.com). Helper `User::developerEmail()` / `isDeveloperEmail()`.
+- Middleware `single.developer` (di grup `auth:sanctum`): akun berperan developer dengan email lain ditolak 403 di semua endpoint.
+- `UserController` (store/update/patchRole) menolak memberi peran developer ke email lain (422); akun resmi tidak bisa diturunkan/dinonaktifkan/diganti emailnya.
+- `UserSeeder` tidak lagi menulis sandi `developer123` dan tidak mereset sandi akun yang sudah ada (sandi baru dari env `DEVELOPER_SEED_PASSWORD` atau acak).
+- Command `php artisan kasirai:developer-audit` mendaftar akun developer dan menandai yang tidak sah.
+- Test: `SingleDeveloperTest` (361 test lulus).
+- **TODO owner**: pastikan akun donojomi@gmail.com berperan `developer` di DB production; ganti sandi lewat Lupa Password (sandi lama `developer123` pernah ada di repo publik); jalankan `kasirai:developer-audit` di production; hapus env `NEXT_PUBLIC_DEV_PIN` di Vercel.

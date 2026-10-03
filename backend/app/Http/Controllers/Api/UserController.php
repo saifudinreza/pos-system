@@ -86,6 +86,11 @@ class UserController extends Controller
             'tenant_id'             => ['nullable', 'exists:tenants,id'],
         ]);
 
+        // Peran developer hanya untuk satu email resmi (config/kasirai.php)
+        if ($blocked = $this->rejectInvalidDeveloperRole($validated['role'], $validated['email'])) {
+            return $blocked;
+        }
+
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
@@ -118,6 +123,21 @@ class UserController extends Controller
             // dipakai untuk memperbaiki akun yang tersangkut di tenant salah.
             'tenant_id' => ['sometimes', 'nullable', 'exists:tenants,id'],
         ]);
+
+        // Peran developer hanya untuk satu email resmi, dan akun resmi itu tidak
+        // boleh diturunkan perannya atau dinonaktifkan (supaya tidak terkunci sendiri)
+        $newRole  = $validated['role']  ?? $user->role;
+        $newEmail = $validated['email'] ?? $user->email;
+        if ($blocked = $this->rejectInvalidDeveloperRole($newRole, $newEmail)) {
+            return $blocked;
+        }
+        if (User::isDeveloperEmail($user->email)) {
+            if ($newRole !== 'developer' || ($validated['is_active'] ?? true) === false) {
+                return response()->json([
+                    'message' => 'Akun developer resmi tidak bisa diturunkan perannya atau dinonaktifkan.',
+                ], 422);
+            }
+        }
 
         // Guard: tenant_id tidak boleh diubah oleh non-developer
         if (array_key_exists('tenant_id', $validated) && Auth::user()->role !== 'developer') {
@@ -171,6 +191,23 @@ class UserController extends Controller
         return response()->json(['message' => "User \"{$name}\" berhasil dihapus."], 200);
     }
 
+    /**
+     * Tolak (422) pemberian peran developer ke email selain developer resmi.
+     * Satu-satunya developer ditentukan config kasirai.developer_email.
+     *
+     * @return JsonResponse|null 422 kalau melanggar, null kalau boleh
+     */
+    private function rejectInvalidDeveloperRole(?string $role, ?string $email): ?JsonResponse
+    {
+        if ($role === 'developer' && ! User::isDeveloperEmail($email)) {
+            return response()->json([
+                'message' => 'Peran developer hanya untuk akun developer resmi.',
+            ], 422);
+        }
+
+        return null;
+    }
+
     // =============================================================
     // PATCH ROLE, ganti role user secara cepat
     // PATCH /api/users/{id}/role
@@ -186,6 +223,10 @@ class UserController extends Controller
         if (Auth::id() === $user->id) return response()->json(['message' => 'Tidak bisa mengubah role sendiri.'], 422);
         if ($user->role === 'developer' && $validated['role'] !== 'developer') {
             return response()->json(['message' => 'Role developer tidak bisa diturunkan melalui panel ini.'], 422);
+        }
+        // Peran developer hanya untuk satu email resmi (config/kasirai.php)
+        if ($blocked = $this->rejectInvalidDeveloperRole($validated['role'], $user->email)) {
+            return $blocked;
         }
 
         $user->update(['role' => $validated['role']]);

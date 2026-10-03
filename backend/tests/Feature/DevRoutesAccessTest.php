@@ -29,6 +29,8 @@ class DevRoutesAccessTest extends TestCase
             'tenant_id' => $role === 'developer' ? null : $tenant->id,
             'role'      => $role,
             'is_active' => $active,
+            // Hanya email resmi yang boleh berperan developer
+            'email'     => $role === 'developer' ? User::developerEmail() : fake()->unique()->safeEmail(),
         ]);
     }
 

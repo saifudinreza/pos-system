@@ -25,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            // Hanya satu email yang boleh berperan developer (config/kasirai.php)
+            'single.developer' => \App\Http\Middleware\EnsureSingleDeveloper::class,
         ]);
 
         // Rate limiting GLOBAL di semua route /api/*, memakai named limiter 'api'
