@@ -14,6 +14,7 @@
 
 import { NotebookPen, PackageX, FileSpreadsheet } from "lucide-react";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
+import NeoCard from "@/components/ui/NeoCard";
 
 // Daftar "rasa sakit" (pain points), tiap objek = satu kartu
 const PAINS = [
@@ -43,10 +44,10 @@ export default function ProblemSection() {
     <section id="masalah" className="relative z-[1] py-20 px-4 sm:px-6 overflow-hidden scroll-mt-28">
       {/* Shape parallax dekoratif, melayang berlawanan arah scroll */}
       <Parallax speed={0.5} aria-hidden="true" className="pointer-events-none absolute -left-10 top-24 -z-0">
-        <div className="w-28 h-28 bg-[#FF3B3B]/15 border-3 border-[#FF3B3B]/30 rotate-12" />
+        <div className="w-28 h-28 bg-danger/15 border-3 border-danger/30 rotate-12" />
       </Parallax>
       <Parallax speed={-0.4} aria-hidden="true" className="pointer-events-none absolute right-6 bottom-16 -z-0">
-        <div className="w-20 h-20 rounded-full bg-[#FFE500]/30 border-3 border-brand-black/20" />
+        <div className="w-20 h-20 rounded-full bg-brand-yellow/30 border-3 border-brand-black/20" />
       </Parallax>
 
       <div className="relative max-w-6xl mx-auto">
@@ -54,17 +55,17 @@ export default function ProblemSection() {
         {/* Header */}
         <Reveal className="mb-12 max-w-2xl">
           <div
-            className="inline-block bg-[#FF3B3B] text-white px-3 py-1 text-xs font-mono font-black tracking-wider mb-4 border-2 border-brand-black"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            className="inline-block bg-danger text-white px-3 py-1 text-xs font-grotesk font-black tracking-wider mb-4 border-2 border-brand-black"
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
              MASALAHNYA
           </div>
-          <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk leading-tight">
+          <h2 className="text-h2 text-brand-black font-grotesk">
             Kelola toko manual itu{" "}
             <span className="relative inline-block">
               <span className="relative z-10">melelahkan.</span>
               <span
-                className="absolute left-0 right-0 bottom-1 h-3 bg-[#FF3B3B]/30 -z-0"
+                className="absolute left-0 right-0 bottom-1 h-3 bg-danger/30 -z-0"
                 aria-hidden="true"
               />
             </span>
@@ -79,23 +80,17 @@ export default function ProblemSection() {
         <Stagger className="grid md:grid-cols-3 gap-5" gap={0.08}>
           {PAINS.map((p) => (
             <StaggerItem key={p.title}>
-              <div
-                className="h-full bg-white border-3 border-brand-black p-6 flex flex-col gap-3 transition-transform duration-150 hover:-translate-y-1"
-                style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
-              >
-                <div
-                  className="w-12 h-12 bg-[#FFE5E5] border-2 border-brand-black flex items-center justify-center"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-                >
-                  <p.Icon size={22} className="text-[#FF3B3B]" strokeWidth={2.5} />
+              <NeoCard size="lg" className="h-full flex flex-col gap-3 transition-transform duration-150 hover:-translate-y-1">
+                <div className="w-12 h-12 bg-danger/15 border-2 border-brand-black shadow-[2px_2px_0_var(--ink)] flex items-center justify-center">
+                  <p.Icon size={22} className="text-danger" strokeWidth={2.5} />
                 </div>
-                <h3 className="font-black text-lg text-brand-black leading-tight font-grotesk">
+                <h3 className="font-black text-h4 text-brand-black font-grotesk">
                   {p.title}
                 </h3>
                 <p className="text-sm text-brand-black/60 font-medium leading-relaxed">
                   {p.desc}
                 </p>
-              </div>
+              </NeoCard>
             </StaggerItem>
           ))}
         </Stagger>

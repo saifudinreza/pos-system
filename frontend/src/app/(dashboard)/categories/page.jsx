@@ -157,7 +157,7 @@ export default function CategoriesPage() {
           <label className="text-sm font-bold text-brand-black">Tenant</label>
             <select onChange={handleTenantChange} value={selectedTenant}
               className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               <option value="">Semua Tenant</option>
               {tenants.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -168,7 +168,7 @@ export default function CategoriesPage() {
             <label className="text-sm font-bold text-brand-black">Urut</label>
             <select onChange={handleSortChange} value={`${sort.sort_by}:${sort.sort_order}`}
               className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               <option value="name:asc">Nama A-Z</option>
               <option value="created_at:desc">Terbaru</option>
               <option value="tenant:asc">Tenant A-Z</option>

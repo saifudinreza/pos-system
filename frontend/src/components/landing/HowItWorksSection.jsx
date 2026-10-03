@@ -47,7 +47,7 @@ const StepCard = ({ step, isLast }) => (
     <div className="flex-shrink-0">
       <div
         className="w-16 h-16 bg-brand-yellow border-3 border-brand-black flex items-center justify-center font-black text-2xl font-mono"
-        style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+        style={{ boxShadow: "3px 3px 0 var(--ink)" }}
       >
         {step.number}
       </div>
@@ -60,7 +60,7 @@ const StepCard = ({ step, isLast }) => (
       <div className="flex items-center gap-3 mb-3">
         <div
           className="w-9 h-9 bg-brand-black border-2 border-brand-black flex items-center justify-center shrink-0"
-          style={{ boxShadow: "2px 2px 0 #FFE500" }}
+          style={{ boxShadow: "2px 2px 0 var(--yellow)" }}
         >
           <step.Icon size={16} className="text-brand-yellow" strokeWidth={2.5} />
         </div>
@@ -76,7 +76,7 @@ const StepCard = ({ step, isLast }) => (
           <span
             key={d}
             className="flex items-center gap-1.5 text-xs font-bold bg-white border-2 border-brand-black px-2 py-1"
-            style={{ boxShadow: "1px 1px 0 #0A0A0A" }}
+            style={{ boxShadow: "1px 1px 0 var(--ink)" }}
           >
             <span className="text-green-600"></span> {d}
           </span>
@@ -95,8 +95,8 @@ export default function HowItWorksSection() {
           {/* Kolom kiri, sticky: judul tetap terlihat saat scroll deretan langkah */}
           <div className="lg:sticky lg:top-24">
             <div
-              className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-6"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-grotesk font-black tracking-wider mb-6"
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >
                CARA KERJA
             </div>
@@ -116,7 +116,7 @@ export default function HowItWorksSection() {
 
             <div
               className="bg-brand-black text-white p-5 border-2 border-brand-black"
-              style={{ boxShadow: "4px 4px 0 #FFE500" }}
+              style={{ boxShadow: "4px 4px 0 var(--yellow)" }}
             >
               <p className="font-black text-lg mb-1">Butuh bantuan setup?</p>
               <p className="text-white/70 text-sm font-medium">
@@ -147,7 +147,7 @@ export default function HowItWorksSection() {
               <a
                 href="/register"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-brand-yellow border-2 border-brand-black font-bold neo-hover"
-                style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
+                style={{ boxShadow: "4px 4px 0 var(--ink)" }}
               >
                 Mulai Sekarang, Gratis →
               </a>

@@ -147,13 +147,13 @@ export default function AISpotlightSection() {
         {/* ===== KIRI: Narasi ===== */}
         <Reveal>
           <div
-            className="inline-flex items-center gap-2 bg-brand-yellow text-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-5 border-2 border-brand-yellow rounded-md"
+            className="inline-flex items-center gap-2 bg-brand-yellow text-brand-black px-3 py-1 text-xs font-grotesk font-black tracking-wider mb-5 border-2 border-brand-yellow rounded-md"
           >
-            <span className="inline-block w-2 h-2 rounded-full bg-[#00C27C] animate-pulse" />
+            <span className="inline-block w-2 h-2 rounded-full bg-success animate-pulse" />
              PEMBEDA UTAMA · AI ASSISTANT
           </div>
 
-          <h2 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-black tracking-tight font-grotesk leading-[0.98] rounded-md">
+          <h2 className="text-display font-grotesk rounded-md">
             Punya{" "}
             <span className="text-brand-yellow">analis bisnis</span>
             <br />
@@ -187,11 +187,11 @@ export default function AISpotlightSection() {
             <Link
               href="/register"
               className="btn-shine relative overflow-hidden px-6 py-3.5 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black neo-hover inline-block rounded-md"
-              style={{ boxShadow: "4px 4px 0 #FFE500" }}
+              style={{ boxShadow: "4px 4px 0 var(--yellow)" }}
             >
               Coba AI Assistant →
             </Link>
-            <span className="font-mono text-xs text-white/40 tracking-wider rounded-md">
+            <span className="text-xs font-medium text-white/50 rounded-md">
               Paket Free: 5 pertanyaan AI per bulan
             </span>
           </div>
@@ -201,12 +201,12 @@ export default function AISpotlightSection() {
         <Reveal delay={0.1} y={32}>
           <div
             className="relative bg-[#0d0d0d] border-3 border-brand-yellow rounded-md"
-            style={{ boxShadow: "10px 10px 0 #FFE500" }}
+            style={{ boxShadow: "10px 10px 0 var(--yellow)" }}
           >
             {/* Header sidebar */}
             <div className="flex items-center justify-between px-4 py-3 border-b-2 border-white/10 bg-[#141414] rounded-md">
               <div className="flex items-center gap-2 font-mono text-[11px] font-bold tracking-widest uppercase text-brand-yellow">
-                <span className="inline-block w-2 h-2 rounded-full bg-[#00C27C]" style={{ boxShadow: "0 0 8px #00C27C" }} />
+                <span className="inline-block w-2 h-2 rounded-full bg-success" style={{ boxShadow: "0 0 8px #00C27C" }} />
                 AI Assistant
               </div>
               <div className="flex items-center gap-1.5 font-mono text-[10px] text-white/40">
@@ -224,13 +224,13 @@ export default function AISpotlightSection() {
               <ChatBubble role="user">Produk apa yang paling laku minggu ini?</ChatBubble>
               <ChatBubble role="ai">
                 <b className="text-brand-yellow">Nasi Goreng Spesial</b>, 312 porsi (Rp 4,7jt).
-                Naik <b className="text-[#00C27C]">+18%</b> dari minggu lalu. 
+                Naik <b className="text-success">+18%</b> dari minggu lalu. 
               </ChatBubble>
 
               <ChatBubble role="user">Ada saran biar margin naik?</ChatBubble>
               <ChatBubble role="ai">
                 Bundling <b>Nasi Goreng + Es Teh</b> bisa angkat margin{" "}
-                <b className="text-[#00C27C]">+23%</b>. 68% pembeli nasi goreng juga beli minuman.
+                <b className="text-success">+23%</b>. 68% pembeli nasi goreng juga beli minuman.
               </ChatBubble>
 
               <ChatBubble role="user">Stok mana yang harus direorder?</ChatBubble>

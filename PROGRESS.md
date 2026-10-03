@@ -409,3 +409,15 @@
 - **Navbar** diratakan: judul halaman, nama, peran, paket tidak lagi diulang (ada di judul halaman & kartu akun sidebar). Tersisa menu/logo (mobile), tombol "Upgrade ke Pro" (khusus admin paket Free), dan Keluar.
 - **Event GA4 funnel** lengkap: `register_start`, `register_success`, `product_created_first`, `shift_opened_first`, `order_paid_first`, `upgrade_view`, `upgrade_payment_success` (+ `upgrade_prompt_view`). Event "first" memakai `trackOnce` (penanda localStorage per browser, jadi perkiraan per perangkat).
 - Diuji end-to-end di lokal dengan SQLite sementara (tanpa Midtrans): login, checklist 0/4 → 3/4 setelah transaksi tunai, modal upgrade dari kasir & laporan, panel AI tersimpan lintas halaman. Backend: 346 test lulus.
+
+---
+
+## 4 Oktober 2026, Audit desain: P2 design system (issue #10)
+
+- **Token warna satu sumber** di `src/app/globals.css` (`:root`, triplet `--x-rgb` + versi penuh `--ink`, `--yellow`, `--success`, `--danger`, `--warning`, `--info`, `--accent`); `tailwind.config.js` membacanya dengan `rgb(var(--x-rgb) / <alpha-value>)` sehingga `bg-brand-black/50` tetap jalan. Token semantik baru: `success`, `danger`, `warning`, `info`, `accent`, `text-ink-muted`.
+- **Hex tertanam turun 464 -> ~138** lewat codemod mekanis (222 string shadow, 35 class arbitrary, 77 style-object, 87 warna di CSS). Sisa hex sengaja dibiarkan: grafik Recharts, logo SVG, HTML struk cetak (konteks tanpa CSS variable), putih murni.
+- **Komponen bersatu**: `NeoButton` (varian `cta`, `inverse`, `primary`, `secondary`, `dark`, `outlineLight`, `ghost`, `danger`; ukuran sm-xl; `loading`; fokus keyboard; helper `neoButtonClass()` untuk `<Link>`) dan `NeoCard` (varian default/highlight/dark, ukuran md/lg). **Kartu kini bersudut tegas** (sebelumnya `rounded-md` di dashboard, tegas di landing). Dipakai di landing (hero, navbar, harga, CTA, fitur, masalah), modal upgrade, checklist, navbar aplikasi. `NeoBadge` memakai token semantik (nama lama green/red/blue/orange tetap alias).
+- **Skala tipografi**: `text-display`, `text-h1..h4`, `text-body`, `text-small`, `text-caption` (responsif lewat `clamp`). Dipakai di judul landing dan judul halaman aplikasi. `font-mono` di landing dibatasi untuk angka/harga/kode (label & chip pindah ke Space Grotesk).
+- Kartu Wawasan KasirAI mengikuti gaya neobrutal. **Dokumentasi**: `frontend/DESIGN_SYSTEM.md` (aturan warna termasuk aturan pemakaian kuning, tipografi, komponen, spasi, ikon) dan katalog hidup `/dev/design-system` (khusus developer, di balik PIN).
+- Diuji: build sukses; landing, dashboard, dan katalog dicek di browser (stack lokal SQLite).
+- **Temuan di luar issue**: `app/dev/layout.jsx` punya PIN cadangan yang tertulis di kode (`NEXT_PUBLIC_DEV_PIN ?? "kasiradev2025"`); variabel `NEXT_PUBLIC_*` ikut terbundel ke browser, jadi PIN itu terbaca siapa saja. Set `NEXT_PUBLIC_DEV_PIN` di Vercel atau ganti gerbangnya dengan pengecekan role di server.

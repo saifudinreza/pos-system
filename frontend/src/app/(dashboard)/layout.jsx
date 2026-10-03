@@ -130,7 +130,7 @@ export default function DashboardLayout({ children }) {
               transition-all duration-150 hover:bg-gray-900 active:scale-95
               lg:hidden
             "
-            style={{ boxShadow: "3px 3px 0 #FFE500" }}
+            style={{ boxShadow: "3px 3px 0 var(--yellow)" }}
             aria-label="Buka AI Assistant"
           >
             {aiPanelOpen ? (

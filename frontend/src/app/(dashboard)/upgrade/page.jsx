@@ -169,7 +169,7 @@ function UpgradeContent() {
             <ArrowLeft size={20} />
           </button>
           <div>
-            <h2 className="text-2xl sm:text-3xl font-black font-grotesk">Upgrade ke {PLAN_LABELS[plan] ?? "Pro"}</h2>
+            <h2 className="text-h1 font-grotesk">Upgrade ke {PLAN_LABELS[plan] ?? "Pro"}</h2>
             <p className="text-sm text-brand-black/50">Isi data identitas dan lanjutkan ke pembayaran.</p>
           </div>
         </div>
@@ -177,7 +177,7 @@ function UpgradeContent() {
         <div className="grid lg:grid-cols-5 gap-6">
 
           {/* ── Form identitas ── */}
-          <div className="lg:col-span-3 border-2 border-brand-black bg-white p-6" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+          <div className="lg:col-span-3 border-2 border-brand-black bg-white p-6" style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
             <div className="flex items-center gap-2 mb-5">
               <User size={18} strokeWidth={2.5} />
               <h3 className="font-black font-grotesk">Data Identitas</h3>
@@ -203,7 +203,7 @@ function UpgradeContent() {
               {/* Toggle billing cycle */}
               <div className="pt-1">
                 <p className="text-xs font-black uppercase tracking-wider text-brand-black/60 mb-2">Siklus Pembayaran</p>
-                <div className="inline-flex border-2 border-brand-black overflow-hidden" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                <div className="inline-flex border-2 border-brand-black overflow-hidden" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                   <button type="button" onClick={() => setBilling("monthly")}
                     className={`px-4 py-2 text-sm font-bold transition-colors ${billing === "monthly" ? "bg-brand-black text-white" : "bg-white hover:bg-brand-yellow/30"}`}>
                     Bulanan
@@ -230,7 +230,7 @@ function UpgradeContent() {
 
           {/* ── Ringkasan paket ── */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="border-2 border-brand-black bg-brand-yellow p-5" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+            <div className="border-2 border-brand-black bg-brand-yellow p-5" style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
               <p className="text-xs font-black uppercase tracking-wider mb-1">Paket Dipilih</p>
               <p className="text-2xl font-black font-grotesk">KasirAI {PLAN_LABELS[plan]}</p>
               <p className="text-3xl font-black font-mono mt-2">{formatCurrency(currentPrice)}</p>
@@ -242,7 +242,7 @@ function UpgradeContent() {
               )}
             </div>
 
-            <div className="border-2 border-brand-black bg-white p-5" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+            <div className="border-2 border-brand-black bg-white p-5" style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
               <p className="text-xs font-black uppercase tracking-wider mb-3">Yang Kamu Dapat</p>
               <ul className="space-y-2">
                 {features.map((f) => (

@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Check, X } from "lucide-react";
 import NeoCard from "@/components/ui/NeoCard";
+import { neoButtonClass } from "@/components/ui/NeoButton";
 
 const DISMISS_KEY = "kasirai_onboarding_dismissed";
 
@@ -65,7 +66,7 @@ export default function OnboardingChecklist({ steps }) {
       {/* Bilah kemajuan */}
       <div className="h-2 bg-white border-b-2 border-brand-black" aria-hidden="true">
         <div
-          className="h-full bg-[#00C27C] transition-all"
+          className="h-full bg-success transition-all"
           style={{ width: `${(doneCount / steps.length) * 100}%` }}
         />
       </div>
@@ -75,7 +76,7 @@ export default function OnboardingChecklist({ steps }) {
           <li key={s.key} className="px-5 py-3.5 flex items-center gap-4">
             <span
               className={`shrink-0 w-7 h-7 border-2 border-brand-black flex items-center justify-center font-black text-sm ${
-                s.done ? "bg-[#00C27C]" : i === nextIndex ? "bg-brand-yellow" : "bg-white"
+                s.done ? "bg-success" : i === nextIndex ? "bg-brand-yellow" : "bg-white"
               }`}
             >
               {s.done ? <Check size={16} strokeWidth={3} /> : i + 1}
@@ -87,8 +88,7 @@ export default function OnboardingChecklist({ steps }) {
             {!s.done && i === nextIndex && s.href && (
               <Link
                 href={s.href}
-                className="shrink-0 px-3.5 py-1.5 text-xs font-black bg-brand-black text-white border-2 border-brand-black hover:bg-brand-black/90"
-                style={{ boxShadow: "2px 2px 0 #FFE500" }}
+                className={neoButtonClass({ variant: "cta", size: "sm", className: "shrink-0" })}
               >
                 {s.cta} →
               </Link>

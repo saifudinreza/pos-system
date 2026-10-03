@@ -134,7 +134,7 @@ const MessageBubble = ({ msg }) => {
               : "bg-white text-brand-black"
           }
         `}
-        style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+        style={{ boxShadow: "2px 2px 0 var(--ink)" }}
       >
         {isUser ? (
           msg.content
@@ -350,7 +350,7 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
         {isLoading && (
           <div
             className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-2 border-brand-black rounded-md w-fit"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
             <div className="flex gap-1">
               {[0, 1, 2].map((i) => (
@@ -395,13 +395,13 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
             rows={2}
             disabled={isLoading || limitReached}
             className="flex-1 text-xs font-medium resize-none border-2 border-brand-black rounded-md px-2.5 py-2 outline-none focus:border-brand-yellow placeholder:text-brand-black/25 disabled:opacity-50 bg-white"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           />
           <button
             onClick={handleSend}
             disabled={!input.trim() || isLoading || limitReached}
             className="px-3 bg-brand-yellow border-2 border-brand-black rounded-md disabled:opacity-30 hover:bg-yellow-300 transition-colors flex items-center"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
             <SendIcon className="w-4 h-4" />
           </button>

@@ -214,7 +214,7 @@ export default function OrdersPage() {
     <div className="space-y-5 page-fade">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black font-grotesk">Pesanan</h2>
+          <h2 className="text-h1 font-grotesk">Pesanan</h2>
           <p className="text-sm text-brand-black/50">{meta?.total ?? 0} pesanan</p>
         </div>
       </div>
@@ -223,7 +223,7 @@ export default function OrdersPage() {
         <select
           onChange={(e) => updateFilters({ status: e.target.value, page: 1 })}
           className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         >
           <option value="">Semua Status</option>
           <option value="pending">Menunggu Bayar</option>
@@ -231,10 +231,10 @@ export default function OrdersPage() {
           <option value="cancelled">Dibatalkan</option>
         </select>
         <input type="date" className="px-3 py-2 text-sm border-2 border-brand-black outline-none"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           onChange={(e) => updateFilters({ date_from: e.target.value, page: 1 })} />
         <input type="date" className="px-3 py-2 text-sm border-2 border-brand-black outline-none"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           onChange={(e) => updateFilters({ date_to: e.target.value, page: 1 })} />
       </div>
 
@@ -245,7 +245,7 @@ export default function OrdersPage() {
           {Array.from({ length: Math.min(meta.last_page, 10) }, (_, i) => i + 1).map((p) => (
             <button key={p} onClick={() => goToPage(p)}
               className={`w-9 h-9 text-sm font-bold border-2 border-brand-black ${p === meta.current_page ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"}`}
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >{p}</button>
           ))}
         </div>

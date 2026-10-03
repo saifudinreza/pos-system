@@ -18,6 +18,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 import { trackEvent } from "@/lib/analytics";
+import { neoButtonClass } from "@/components/ui/NeoButton";
 
 // Data paket harga, tiap objek = satu paket
 // Harga harus sinkron dengan backend (SubscriptionController::PRICES)
@@ -99,7 +100,7 @@ function ComparisonTable() {
       <div className="overflow-x-auto">
         <table
           className="w-full min-w-[640px] bg-white border-3 border-brand-black text-sm"
-          style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
+          style={{ boxShadow: "4px 4px 0 var(--ink)" }}
         >
           <thead>
             <tr className="bg-brand-black text-white text-left">
@@ -149,15 +150,15 @@ const PricingCard = ({ plan, billing }) => {
       `}
       style={{
         boxShadow: plan.highlighted
-          ? "6px 6px 0 #0A0A0A"
-          : "4px 4px 0 #0A0A0A",
+          ? "6px 6px 0 var(--ink)"
+          : "4px 4px 0 var(--ink)",
       }}
     >
       {/* Badge "Paling Populer", hanya di plan yang highlighted */}
       {plan.highlighted && (
         <div
-          className="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-black text-white px-4 py-1 text-xs font-black font-mono whitespace-nowrap"
-          style={{ boxShadow: "2px 2px 0 #FFE500" }}
+          className="absolute -top-4 left-1/2 -translate-x-1/2 bg-brand-black text-white px-4 py-1 text-xs font-black font-grotesk whitespace-nowrap"
+          style={{ boxShadow: "2px 2px 0 var(--yellow)" }}
         >
            PALING POPULER
         </div>
@@ -207,13 +208,7 @@ const PricingCard = ({ plan, billing }) => {
       <Link
         href={plan.ctaHref}
         onClick={() => trackEvent("cta_click", { posisi: "pricing", paket: plan.name.toLowerCase() })}
-        className={`block text-center py-3 font-bold border-2 border-brand-black mb-6 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-brand-black
-          ${plan.highlighted
-            ? "bg-brand-black text-white hover:bg-brand-black/90"
-            : "bg-white hover:bg-brand-yellow/50"
-          }
-        `}
-        style={{ boxShadow: plan.highlighted ? "3px 3px 0 #FFFBEB" : "2px 2px 0 #0A0A0A" }}
+        className={neoButtonClass({ variant: plan.highlighted ? "dark" : "secondary", size: "lg", className: "w-full mb-6" })}
       >
         {plan.cta} →
       </Link>
@@ -252,7 +247,7 @@ export default function PricingSection() {
         <div className="w-20 h-20 bg-brand-yellow/25 border-3 border-brand-black/15 rotate-6" />
       </Parallax>
       <Parallax speed={0.4} aria-hidden="true" className="pointer-events-none absolute right-6 bottom-20 -z-0">
-        <div className="w-16 h-16 rounded-full bg-[#8B5CF6]/15 border-3 border-[#8B5CF6]/30" />
+        <div className="w-16 h-16 rounded-full bg-accent/15 border-3 border-accent/30" />
       </Parallax>
 
       <div className="relative max-w-6xl mx-auto rounded-md">
@@ -260,12 +255,12 @@ export default function PricingSection() {
         {/* === HEADER === */}
         <Reveal className="text-center mb-12">
           <div
-            className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-4 rounded-md"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            className="inline-block bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-grotesk font-black tracking-wider mb-4 rounded-md"
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
              HARGA
           </div>
-          <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk mb-4">
+          <h2 className="text-h2 text-brand-black font-grotesk mb-4">
             Pilih paket yang pas
             <br />
             untuk bisnis kamu
@@ -278,7 +273,7 @@ export default function PricingSection() {
               Analogi: seperti tombol pilih ukuran baju, pilih salah satu */}
           <div
             className="inline-flex mt-6 border-2 border-brand-black overflow-hidden rounded-md"
-            style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+            style={{ boxShadow: "3px 3px 0 var(--ink)" }}
           >
             <button
               onClick={() => setBilling("monthly")}

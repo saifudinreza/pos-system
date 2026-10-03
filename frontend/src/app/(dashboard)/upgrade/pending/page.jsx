@@ -21,10 +21,10 @@ function PendingContent() {
   // ── Render: kartu status pending + info langkah selanjutnya ──
   return (
     <div className="max-w-lg mx-auto py-16 px-4 text-center page-fade">
-      <div className="border-2 border-brand-black bg-white p-10" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+      <div className="border-2 border-brand-black bg-white p-10" style={{ boxShadow: "6px 6px 0 var(--ink)" }}>
 
         <div className="w-20 h-20 bg-brand-yellow border-3 border-brand-black mx-auto mb-6 flex items-center justify-center"
-          style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+          style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
           <Clock size={40} className="text-brand-black" strokeWidth={2.5} />
         </div>
 

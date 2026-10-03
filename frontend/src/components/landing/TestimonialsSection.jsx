@@ -81,7 +81,7 @@ const StarRating = ({ count }) => (
 const Avatar = ({ initials }) => (
   <div
     className="w-10 h-10 bg-brand-yellow border-2 border-brand-black flex items-center justify-center font-black text-sm shrink-0"
-    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
   >
     {initials}
   </div>
@@ -96,7 +96,7 @@ const Avatar = ({ initials }) => (
 const TestimonialCard = ({ t }) => (
   <div
     className="bg-white border-3 border-brand-black p-6 flex flex-col gap-4 h-full hover:-translate-x-1 hover:-translate-y-1 transition-transform"
-    style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
+    style={{ boxShadow: "4px 4px 0 var(--ink)" }}
   >
     {/* Baris atas: rating bintang */}
     <StarRating count={t.rating} />
@@ -109,7 +109,7 @@ const TestimonialCard = ({ t }) => (
     {/* Highlight dampak, angka/fakta yang diringkas */}
     <div
       className="bg-brand-yellow border-2 border-brand-black px-3 py-1 text-xs font-black font-mono inline-block self-start"
-      style={{ boxShadow: "1px 1px 0 #0A0A0A" }}
+      style={{ boxShadow: "1px 1px 0 var(--ink)" }}
     >
        {t.highlight}
     </div>
@@ -141,7 +141,7 @@ export default function TestimonialsSection() {
           <div>
             <div
               className="inline-block bg-brand-black text-white px-3 py-1 text-xs font-mono font-black tracking-wider mb-4"
-              style={{ boxShadow: "2px 2px 0 #FFE500" }}
+              style={{ boxShadow: "2px 2px 0 var(--yellow)" }}
             >
                TESTIMONI
             </div>
@@ -156,7 +156,7 @@ export default function TestimonialsSection() {
           {/* Rating ringkasan, seperti score agregat di review platform */}
           <div
             className="bg-brand-yellow border-3 border-brand-black p-4 text-center shrink-0"
-            style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
+            style={{ boxShadow: "4px 4px 0 var(--ink)" }}
           >
             <p className="text-5xl font-black text-brand-black font-mono">4.9</p>
             <div className="flex justify-center my-1">

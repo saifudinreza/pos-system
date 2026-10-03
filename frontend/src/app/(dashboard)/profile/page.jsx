@@ -160,17 +160,17 @@ export default function ProfilePage() {
   return (
     <div className="space-y-6 page-fade">
       <div>
-        <h2 className="text-2xl sm:text-3xl font-black font-grotesk">Profil & Langganan</h2>
+        <h2 className="text-h1 font-grotesk">Profil & Langganan</h2>
         <p className="text-sm text-brand-black/50">Kelola informasi akun dan paket langganan kamu.</p>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
 
         {/* ── Kiri: Form Profil ── */}
-        <div className="border-2 border-brand-black bg-white p-6" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+        <div className="border-2 border-brand-black bg-white p-6" style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
           <div className="flex items-center gap-3 mb-5">
             <div className="w-10 h-10 bg-brand-yellow border-2 border-brand-black flex items-center justify-center"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               <UserCircle size={20} strokeWidth={2.5} />
             </div>
             <h3 className="font-black text-base font-grotesk">Informasi Akun</h3>
@@ -230,7 +230,7 @@ export default function ProfilePage() {
                     placeholder="Ceritakan sedikit tentang toko kamu..."
                     rows={3}
                     className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none resize-none focus:border-brand-yellow placeholder:text-brand-black/25"
-                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                   />
                 </div>
               </div>
@@ -271,7 +271,7 @@ export default function ProfilePage() {
                     onChange={(e) => setForm((p) => ({ ...p, midtrans_server_key: e.target.value }))}
                     placeholder={user?.midtrans_configured ? "••••••••••••••••• (sudah tersimpan)" : "Mid-server-..."}
                     className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono placeholder:text-brand-black/25"
-                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                     autoComplete="off"
                   />
                 </div>
@@ -286,7 +286,7 @@ export default function ProfilePage() {
                     onChange={(e) => setForm((p) => ({ ...p, midtrans_client_key: e.target.value }))}
                     placeholder="Mid-client-..."
                     className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono placeholder:text-brand-black/25"
-                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                     autoComplete="off"
                   />
                 </div>
@@ -304,7 +304,7 @@ export default function ProfilePage() {
                     aria-checked={form.midtrans_is_production}
                     onClick={() => setForm((p) => ({ ...p, midtrans_is_production: !p.midtrans_is_production }))}
                     className={`shrink-0 w-14 h-8 border-2 border-brand-black transition-colors relative outline-none flex items-center ${form.midtrans_is_production ? "bg-brand-yellow" : "bg-brand-gray"}`}
-                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                   >
                     <span
                       className={`block w-5 h-5 bg-white border-2 border-brand-black transition-transform duration-200 ease-in-out ${form.midtrans_is_production ? "translate-x-7" : "translate-x-1.5"}`}
@@ -321,10 +321,10 @@ export default function ProfilePage() {
         </div>
 
         {/* ── Kanan: Status Langganan ── */}
-        <div className="border-2 border-brand-black bg-white p-6" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+        <div className="border-2 border-brand-black bg-white p-6" style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
           <div className="flex items-center gap-3 mb-5">
             <div className="w-10 h-10 bg-brand-yellow border-2 border-brand-black flex items-center justify-center"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               <CreditCard size={20} strokeWidth={2.5} />
             </div>
             <h3 className="font-black text-base font-grotesk">
@@ -335,7 +335,7 @@ export default function ProfilePage() {
           {!hasActiveSub && pending ? (
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 border-2 border-brand-black bg-brand-yellow font-black text-sm"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                 <Clock size={14} />
                 KasirAI {PLAN_LABELS[pending.plan] ?? pending.plan}
               </div>
@@ -363,7 +363,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               {/* Badge plan aktif */}
               <div className={`inline-flex items-center gap-2 px-3 py-1.5 border-2 font-black text-sm ${PLAN_COLORS[plan] ?? PLAN_COLORS.free}`}
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                 <CheckCircle2 size={14} />
                 KasirAI {PLAN_LABELS[plan] ?? "Free"}
               </div>
@@ -400,7 +400,7 @@ export default function ProfilePage() {
           ) : (
             <div className="space-y-4">
               <div className={`inline-flex items-center gap-2 px-3 py-1.5 border-2 font-black text-sm ${PLAN_COLORS.free}`}
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                 <Zap size={14} />
                 Free
               </div>
@@ -410,7 +410,7 @@ export default function ProfilePage() {
               </p>
 
               {/* Pro card */}
-              <div className="border-2 border-brand-black p-4 space-y-3" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              <div className="border-2 border-brand-black p-4 space-y-3" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                 <div className="flex items-center justify-between">
                   <span className="font-black text-sm">Pro, Rp{PLANS.pro.price.toLocaleString("id-ID")}/bln</span>
                   <span className="text-xs font-mono bg-brand-yellow px-2 py-0.5 font-bold border border-brand-black">Populer</span>
@@ -429,7 +429,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Enterprise card */}
-              <div className="border-2 border-brand-black p-4 space-y-3 bg-brand-black text-white" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              <div className="border-2 border-brand-black p-4 space-y-3 bg-brand-black text-white" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                 <span className="font-black text-sm">Enterprise, Rp{PLANS.enterprise.price.toLocaleString("id-ID")}/bln</span>
                 <ul className="space-y-1">
                   {PLAN_FEATURES.enterprise.slice(0, 3).map((f) => (

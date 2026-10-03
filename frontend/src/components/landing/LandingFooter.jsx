@@ -189,7 +189,7 @@ export default function LandingFooter() {
           {/* Link columns */}
           {LINK_GROUPS.map((group) => (
             <div key={group.title}>
-              <h4 className="font-black text-xs uppercase tracking-widest text-white/40 mb-5 font-mono">
+              <h4 className="font-black text-xs uppercase tracking-widest text-white/40 mb-5 font-grotesk">
                 {group.title}
               </h4>
               <ul className="space-y-3">

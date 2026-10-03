@@ -14,7 +14,7 @@ export default function NotFound() {
       <div className="text-center">
         <div
           className="inline-block bg-brand-yellow border-3 border-brand-black px-6 py-4 mb-6"
-          style={{ boxShadow: "6px 6px 0 #0A0A0A" }}
+          style={{ boxShadow: "6px 6px 0 var(--ink)" }}
         >
           <p className="font-black text-6xl font-mono">404</p>
         </div>
@@ -23,7 +23,7 @@ export default function NotFound() {
         <Link
           href="/"
           className="inline-block px-5 py-2.5 bg-brand-black text-white font-bold border-2 border-brand-black"
-          style={{ boxShadow: "3px 3px 0 #FFE500" }}
+          style={{ boxShadow: "3px 3px 0 var(--yellow)" }}
         >
           ← Kembali ke Beranda
         </Link>

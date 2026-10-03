@@ -85,7 +85,7 @@ function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
-      <div className="bg-white border-2 border-brand-black w-full max-w-sm" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+      <div className="bg-white border-2 border-brand-black w-full max-w-sm" style={{ boxShadow: "6px 6px 0 var(--ink)" }}>
         <div className="px-5 py-4 bg-brand-yellow border-b-2 border-brand-black">
           <h3 className="font-black text-lg font-grotesk"> Bayar Tunai</h3>
         </div>
@@ -102,7 +102,7 @@ function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
               onChange={(e) => setCashInput(e.target.value)}
               placeholder="0"
               className="w-full px-3 py-3 text-2xl font-black font-mono border-2 border-brand-black outline-none focus:border-brand-yellow text-right"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
               autoFocus
             />
           </div>
@@ -110,7 +110,7 @@ function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
             {QUICK.map((amt) => (
               <button key={amt} onClick={() => setCashInput(String(amt))}
                 className="py-1.5 text-xs font-bold border-2 border-brand-black hover:bg-brand-yellow transition-colors"
-                style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>
+                style={{ boxShadow: "1px 1px 0 var(--ink)" }}>
                 {formatCurrency(amt)}
               </button>
             ))}
@@ -127,12 +127,12 @@ function CashPaymentModal({ isOpen, onClose, total, onConfirm }) {
         <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream">
           <button onClick={onClose}
             className="flex-1 py-2.5 font-bold text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             Batal
           </button>
           <button onClick={() => enough && onConfirm(cash)} disabled={!enough}
             className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ boxShadow: enough ? "2px 2px 0 #0A0A0A" : "none" }}>
+            style={{ boxShadow: enough ? "2px 2px 0 var(--ink)" : "none" }}>
             Proses Bayar
           </button>
         </div>
@@ -255,7 +255,7 @@ function ReceiptModal({ isOpen, data, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
       <div className="bg-white border-2 border-brand-black w-full max-w-sm flex flex-col max-h-[92vh]"
-        style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        style={{ boxShadow: "6px 6px 0 var(--ink)" }}>
         {/* Header */}
         <div className="px-5 py-4 bg-green-400 border-b-2 border-brand-black text-center shrink-0">
           <div className="text-4xl mb-1 font-black text-green-900"></div>
@@ -303,18 +303,18 @@ function ReceiptModal({ isOpen, data, onClose }) {
           <div className="flex gap-2">
             <button onClick={handlePrint}
               className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               Print Struk
             </button>
             <button onClick={handleWhatsApp} disabled={sending}
               className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-green-400 hover:bg-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               {sending ? "Mengirim..." : "WhatsApp"}
             </button>
           </div>
           <button onClick={onClose}
             className="w-full py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             Transaksi Baru
           </button>
         </div>
@@ -454,10 +454,10 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
           <>
             <div className="p-3 border-b-2 border-brand-black flex gap-2 shrink-0">
               <input value={search} onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari produk..." className="flex-1 px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow" style={{ boxShadow: "2px 2px 0 #0A0A0A" }} />
+                placeholder="Cari produk..." className="flex-1 px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow" style={{ boxShadow: "2px 2px 0 var(--ink)" }} />
               <button onClick={openNew}
                 className="px-3 py-2 bg-brand-yellow border-2 border-brand-black font-black text-sm hover:bg-yellow-300 transition-colors"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                 + Tambah
               </button>
             </div>
@@ -477,7 +477,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
                   <div className="flex gap-1.5 shrink-0">
                     <button onClick={() => openEdit(p)}
                       className="px-2.5 py-1 text-xs font-bold border-2 border-brand-black bg-white hover:bg-brand-yellow transition-colors"
-                      style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>Edit</button>
+                      style={{ boxShadow: "1px 1px 0 var(--ink)" }}>Edit</button>
                     <button onClick={() => handleDelete(p)}
                       className="px-2.5 py-1 text-xs font-bold border-2 border-red-400 text-red-500 hover:bg-red-50 transition-colors">Hapus</button>
                   </div>
@@ -516,7 +516,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
               <input required value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                 placeholder="Contoh: Es Teh Manis, Kopi Susu Gula Aren..."
                 className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }} />
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }} />
             </div>
 
             <div className="flex flex-col gap-1">
@@ -524,7 +524,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
               <input value={form.sku} onChange={(e) => setForm((p) => ({ ...p, sku: e.target.value }))}
                 placeholder="ETM-001 (bisa dikosongkan)"
                 className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }} />
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }} />
             </div>
 
             {/* Harga dan stok dalam 2 kolom */}
@@ -535,7 +535,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
                   onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
                   placeholder="15000"
                   className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }} />
+                  style={{ boxShadow: "2px 2px 0 var(--ink)" }} />
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-bold">Stok *</label>
@@ -543,7 +543,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
                   onChange={(e) => setForm((p) => ({ ...p, stock: e.target.value }))}
                   placeholder="50"
                   className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }} />
+                  style={{ boxShadow: "2px 2px 0 var(--ink)" }} />
               </div>
             </div>
 
@@ -554,7 +554,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
                 <select value={form.category_id}
                   onChange={(e) => setForm((p) => ({ ...p, category_id: e.target.value }))}
                   className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none bg-white focus:border-brand-yellow"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                  style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                   <option value="">-- Pilih Kategori --</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
@@ -572,12 +572,12 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={backToList}
                 className="flex-1 py-2.5 border-2 border-brand-black font-bold text-sm bg-white hover:bg-brand-cream transition-colors"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                 Batal
               </button>
               <button type="submit" disabled={saving}
                 className="flex-1 py-2.5 bg-brand-yellow border-2 border-brand-black font-black text-sm disabled:opacity-50 hover:bg-yellow-300 transition-colors"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                 {saving ? "Menyimpan..." : "Simpan"}
               </button>
             </div>
@@ -611,7 +611,7 @@ const ProductCard = ({ product, onAdd }) => {
           : "hover:bg-brand-yellow hover:-translate-x-0.5 hover:-translate-y-0.5 cursor-pointer active:translate-x-0 active:translate-y-0"
         }
       `}
-      style={{ boxShadow: outOfStock ? "none" : "3px 3px 0 #0A0A0A" }}
+      style={{ boxShadow: outOfStock ? "none" : "3px 3px 0 var(--ink)" }}
     >
       {/* Gambar produk */}
       <div className="relative w-full aspect-square bg-brand-cream overflow-hidden">
@@ -794,7 +794,7 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
-      <div className="bg-white border-2 border-brand-black w-full max-w-md flex flex-col max-h-[92vh]" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+      <div className="bg-white border-2 border-brand-black w-full max-w-md flex flex-col max-h-[92vh]" style={{ boxShadow: "6px 6px 0 var(--ink)" }}>
         <div className="px-5 py-4 bg-brand-yellow border-b-2 border-brand-black shrink-0">
           <h3 className="font-black text-lg font-grotesk">Buka Kasir / Shift Baru</h3>
         </div>
@@ -816,7 +816,7 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
                 {SHIFT_PRESETS.map(p => (
                   <button key={p.label} onClick={() => applyPreset(p)}
                     className={`px-3 py-1 text-xs font-black border-2 border-brand-black transition-colors ${shiftName === p.label ? "bg-brand-yellow" : "bg-white hover:bg-brand-cream"}`}
-                    style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>
+                    style={{ boxShadow: "1px 1px 0 var(--ink)" }}>
                     {p.label}
                   </button>
                 ))}
@@ -824,7 +824,7 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
               <input type="text" value={shiftName} onChange={e => setShiftName(e.target.value)}
                 placeholder="Atau ketik nama shift..."
                 className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow"
-                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+                style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -832,13 +832,13 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
                 <label className="text-sm font-bold block mb-1">Jam Mulai</label>
                 <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)}
                   className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow font-mono"
-                  style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+                  style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
               </div>
               <div>
                 <label className="text-sm font-bold block mb-1">Jam Selesai</label>
                 <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
                   className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow font-mono"
-                  style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+                  style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
               </div>
             </div>
             <p className="text-xs text-brand-black/50">Kasir hanya bisa diakses selama jam shift berlangsung.</p>
@@ -849,7 +849,7 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
             <label className="text-sm font-bold block mb-1">Rincian Uang Laci (Modal Awal)</label>
             <DenominationCounter value={denoms} onChange={(d, t) => { setDenoms(d); setTotal(t); }} />
           </div>
-          <div className="flex justify-between items-center py-3 px-4 border-2 border-brand-black bg-brand-yellow" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+          <div className="flex justify-between items-center py-3 px-4 border-2 border-brand-black bg-brand-yellow" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             <span className="font-black text-sm">TOTAL MODAL</span>
             <span className="font-black text-2xl font-mono">{formatCurrency(total)}</span>
           </div>
@@ -860,19 +860,19 @@ function ShiftOpenModal({ isOpen, onClose, onConfirm, user }) {
             <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2}
               placeholder="Misal: tukar uang receh Rp 50.000 di awal shift..."
               className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow resize-none"
-              style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+              style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
           </div>
         </div>
 
         <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream shrink-0">
           <button onClick={() => { reset(); onClose(); }}
             className="flex-1 py-2.5 font-bold text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             Nanti
           </button>
           <button onClick={handleOpen} disabled={loading}
             className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300 disabled:opacity-40"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             {loading ? "Membuka..." : "Buka Shift"}
           </button>
         </div>
@@ -945,7 +945,7 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
       <div className="bg-white border-2 border-brand-black w-full max-w-2xl flex flex-col max-h-[95vh]"
-        style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        style={{ boxShadow: "6px 6px 0 var(--ink)" }}>
         <div className="px-5 py-4 bg-brand-black text-white border-b-2 border-brand-black shrink-0">
           <h3 className="font-black text-lg font-grotesk"> Tutup Shift, {shift.shift_name}</h3>
         </div>
@@ -994,11 +994,11 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
             <div>
               <p className="text-sm font-bold mb-2">Metode Pembayaran</p>
               <div className="grid grid-cols-2 gap-2 mb-2">
-                <div className="p-3 border-2 border-brand-black bg-white text-center" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                <div className="p-3 border-2 border-brand-black bg-white text-center" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                   <p className="text-[10px] font-bold text-brand-black/50 uppercase">Tunai</p>
                   <p className="font-black font-mono">{formatCurrency(groups.cash)}</p>
                 </div>
-                <div className="p-3 border-2 border-brand-black bg-white text-center" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                <div className="p-3 border-2 border-brand-black bg-white text-center" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                   <p className="text-[10px] font-bold text-brand-black/50 uppercase">Non-Tunai</p>
                   <p className="font-black font-mono">{formatCurrency(groups.non_cash)}</p>
                 </div>
@@ -1023,7 +1023,7 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
           <div>
             <p className="text-sm font-bold mb-2">Hitung Uang Fisik di Laci</p>
             <DenominationCounter value={closingDenoms} onChange={(d, t) => { setClosingDenoms(d); setClosingTotal(t); }} />
-            <div className="flex justify-between items-center py-2.5 px-4 border-2 border-brand-black bg-brand-yellow mt-2" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            <div className="flex justify-between items-center py-2.5 px-4 border-2 border-brand-black bg-brand-yellow mt-2" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               <span className="font-black text-sm">SALDO FISIK (LACI)</span>
               <span className="font-black text-xl font-mono">{formatCurrency(closingTotal)}</span>
             </div>
@@ -1036,14 +1036,14 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
               <input type="number" min="0" value={pettyCash} onChange={(e) => setPettyCash(e.target.value)}
                 placeholder="0"
                 className="w-full text-right px-3 py-2 font-black font-mono border-2 border-brand-black outline-none focus:border-brand-yellow text-sm"
-                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+                style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
             </div>
             <div>
               <label className="text-sm font-bold block mb-1">Catatan Pengeluaran</label>
               <input value={pettyNote} onChange={(e) => setPettyNote(e.target.value)}
                 placeholder="Misal: beli lakban, bayar kurir"
                 className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
-                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+                style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
             </div>
           </div>
 
@@ -1083,7 +1083,7 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
               <input value={verifiedBy} onChange={(e) => setVerifiedBy(e.target.value)}
                 placeholder="Nama supervisor (opsional)"
                 className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
-                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+                style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
             </div>
           </div>
 
@@ -1094,7 +1094,7 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
               placeholder="Catatan untuk shift ini..."
               rows={2}
               className="w-full text-sm border-2 border-brand-black px-3 py-2 outline-none focus:border-brand-yellow resize-none"
-              style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+              style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
           </div>
 
           {err && <p className="text-sm text-red-600 font-semibold bg-red-50 p-3 border-2 border-red-300">{err}</p>}
@@ -1132,12 +1132,12 @@ function ShiftCloseModal({ isOpen, shift, report, onClose, onConfirm }) {
         <div className="px-5 py-4 border-t-2 border-brand-black flex gap-3 bg-brand-cream shrink-0">
           <button onClick={onClose}
             className="flex-1 py-2.5 font-bold text-sm border-2 border-brand-black bg-white hover:bg-gray-50"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             Kembali
           </button>
           <button onClick={handleClose} disabled={loading}
             className="flex-1 py-2.5 font-black text-sm border-2 border-brand-black bg-brand-yellow hover:bg-yellow-300 disabled:opacity-40"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             {loading ? "Menutup..." : "Tutup Shift"}
           </button>
         </div>
@@ -1157,7 +1157,7 @@ function ShiftHistoryModal({ isOpen, onClose, shifts, onSelectShift }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,10,10,0.7)" }}>
       <div className="bg-white border-2 border-brand-black w-full max-w-lg flex flex-col max-h-[80vh]"
-        style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        style={{ boxShadow: "6px 6px 0 var(--ink)" }}>
         <div className="px-5 py-4 bg-brand-black text-white border-b-2 border-brand-black flex items-center justify-between shrink-0">
           <h3 className="font-black text-lg font-grotesk">Riwayat Shift</h3>
           <button onClick={onClose} className="text-white/60 hover:text-white font-black"></button>
@@ -1613,13 +1613,13 @@ export default function KasirPage() {
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Cari produk atau SKU..."
               className="flex-1 px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow bg-white"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             />
             {/* Tombol kelola produk, hanya di sm+ (tersembunyi di mobile kecil) */}
             <button
               onClick={() => setProdPanel(true)}
               className="px-3 py-2 border-2 border-brand-black font-black text-sm bg-white hover:bg-brand-yellow transition-colors hidden sm:flex items-center"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
               title="Kelola Produk"
             >
               Produk
@@ -1628,7 +1628,7 @@ export default function KasirPage() {
             <button
               onClick={() => setCartVisible(true)}
               className="lg:hidden relative px-3 py-2 bg-brand-yellow border-2 border-brand-black font-black text-sm"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >
               Keranjang
               {/* Badge jumlah item, hanya tampil kalau ada item */}
@@ -1648,7 +1648,7 @@ export default function KasirPage() {
               className={`shrink-0 px-3 py-1.5 text-xs font-black border-2 border-brand-black transition-colors whitespace-nowrap ${
                 !selCategory ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"
               }`}
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >
               Semua
             </button>
@@ -1660,7 +1660,7 @@ export default function KasirPage() {
                 className={`shrink-0 px-3 py-1.5 text-xs font-black border-2 border-brand-black transition-colors whitespace-nowrap ${
                   selCategory === String(c.id) ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"
                 }`}
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}
               >
                 {c.name}
               </button>
@@ -1761,7 +1761,7 @@ export default function KasirPage() {
         <div className="px-4 py-4 border-t-2 border-brand-black bg-brand-cream shrink-0 space-y-3">
           {/* Nomor HP customer untuk struk WhatsApp */}
           <div className="flex items-center gap-2 border-2 border-brand-black bg-white"
-            style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>
+            style={{ boxShadow: "1px 1px 0 var(--ink)" }}>
             <input
               type="tel"
               value={customerPhone}
@@ -1782,7 +1782,7 @@ export default function KasirPage() {
             placeholder="Catatan pesanan (opsional)..."
             rows={2}
             className="w-full text-xs border-2 border-brand-black px-2.5 py-2 outline-none focus:border-brand-yellow resize-none bg-white"
-            style={{ boxShadow: "1px 1px 0 #0A0A0A" }}
+            style={{ boxShadow: "1px 1px 0 var(--ink)" }}
           />
 
           {/* Ringkasan harga */}
@@ -1809,7 +1809,7 @@ export default function KasirPage() {
               onClick={() => { if (items.length > 0) setCashModal(true); }}
               disabled={items.length === 0 || paying}
               className="flex-1 py-3 bg-white border-2 border-brand-black font-black text-sm disabled:opacity-40 hover:bg-gray-50 active:translate-y-0.5 transition-all"
-              style={{ boxShadow: items.length > 0 ? "2px 2px 0 #0A0A0A" : "none" }}
+              style={{ boxShadow: items.length > 0 ? "2px 2px 0 var(--ink)" : "none" }}
             >
               TUNAI
             </button>
@@ -1818,7 +1818,7 @@ export default function KasirPage() {
               disabled={items.length === 0 || paying}
               title={isFreePlan ? "Pembayaran QRIS/digital untuk paket Pro & Enterprise" : undefined}
               className="flex-1 py-3 bg-brand-yellow border-2 border-brand-black font-black text-sm disabled:opacity-40 hover:bg-yellow-300 active:translate-y-0.5 transition-all"
-              style={{ boxShadow: items.length > 0 ? "3px 3px 0 #0A0A0A" : "none" }}
+              style={{ boxShadow: items.length > 0 ? "3px 3px 0 var(--ink)" : "none" }}
             >
               {paying ? "Memproses..." : isFreePlan ? "DIGITAL (Pro)" : "DIGITAL"}
             </button>
@@ -1838,8 +1838,8 @@ export default function KasirPage() {
     {/* Overlay kunci: tampil selama belum ada shift aktif */}
     {!shiftLoading && !currentShift && (
       <div className="absolute inset-0 z-20 flex items-center justify-center bg-brand-black/10">
-        <div className="bg-white border-2 border-brand-black px-6 py-5 text-center max-w-xs" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
-          <div className="w-12 h-12 mx-auto mb-3 bg-brand-yellow border-2 border-brand-black rounded-full flex items-center justify-center" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+        <div className="bg-white border-2 border-brand-black px-6 py-5 text-center max-w-xs" style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
+          <div className="w-12 h-12 mx-auto mb-3 bg-brand-yellow border-2 border-brand-black rounded-full flex items-center justify-center" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="5" y="11" width="14" height="10" rx="1.5" stroke="#0A0A0A" strokeWidth="2.2" strokeLinejoin="round" />
               <path d="M8 11V7.5a4 4 0 0 1 8 0V11" stroke="#0A0A0A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1851,7 +1851,7 @@ export default function KasirPage() {
           <p className="text-xs text-brand-black/60 mb-4">Buka shift terlebih dahulu untuk mulai bertransaksi.</p>
           <button onClick={() => setShiftOpenModal(true)}
             className="w-full py-2.5 bg-brand-yellow border-2 border-brand-black font-black text-sm hover:bg-yellow-300 transition-colors"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             Buka Shift
           </button>
         </div>

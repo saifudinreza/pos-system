@@ -84,7 +84,7 @@ const NavItem = ({ href, Icon, label, isActive, badge }) => (
       }
     `}
     // Shadow hanya untuk item aktif (efek neobrutalism)
-    style={isActive ? { boxShadow: "2px 2px 0 #0A0A0A" } : undefined}
+    style={isActive ? { boxShadow: "2px 2px 0 var(--ink)" } : undefined}
   >
     {/* Icon dari Lucide React, size 16px, stroke lebih tebal (2.5) */}
     <Icon size={16} className="shrink-0" strokeWidth={2.5} />
@@ -245,7 +245,7 @@ export default function Sidebar({ isOpen, onClose }) {
             {/* Avatar */}
             <div
               className="w-10 h-10 bg-brand-yellow border-2 border-brand-black flex items-center justify-center font-black text-sm shrink-0"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
               suppressHydrationWarning
             >
               {mounted ? (user?.name?.[0]?.toUpperCase() ?? "?") : "?"}

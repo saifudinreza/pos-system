@@ -115,7 +115,7 @@ export default function ForgotPasswordPage() {
           <span className="font-black text-3xl font-grotesk">KasirAI</span>
         </div>
 
-        <div className="bg-white border-3 border-brand-black p-8" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        <div className="bg-white border-3 border-brand-black p-8" style={{ boxShadow: "6px 6px 0 var(--ink)" }}>
           {step === "done" && (
             <>
               <h1 className="font-black text-2xl font-grotesk mb-3">Password Berhasil Diganti</h1>
@@ -126,7 +126,7 @@ export default function ForgotPasswordPage() {
               <Link
                 href="/login"
                 className="block w-full text-center py-3 bg-brand-yellow border-2 border-brand-black font-black text-base hover:bg-yellow-300 transition-colors"
-                style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+                style={{ boxShadow: "3px 3px 0 var(--ink)" }}
               >
                 Masuk Sekarang →
               </Link>
@@ -155,11 +155,11 @@ export default function ForgotPasswordPage() {
                     value={email} onChange={(e) => setEmail(e.target.value)}
                     placeholder="nama@email.com"
                     className={inputClass}
-                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                   />
                 </div>
 
-                <button type="submit" disabled={busy} className={primaryBtn} style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
+                <button type="submit" disabled={busy} className={primaryBtn} style={{ boxShadow: "3px 3px 0 var(--ink)" }}>
                   {busy ? "Mengirim kode..." : "Kirim Kode →"}
                 </button>
               </form>
@@ -199,7 +199,7 @@ export default function ForgotPasswordPage() {
                     value={form.otp} onChange={handleChange}
                     placeholder="123456"
                     className={`${inputClass} text-center text-2xl font-black tracking-[0.5em] font-mono`}
-                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                   />
                 </div>
 
@@ -210,7 +210,7 @@ export default function ForgotPasswordPage() {
                     value={form.password} onChange={handleChange}
                     placeholder="min. 8 karakter"
                     className={inputClass}
-                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                   />
                 </div>
 
@@ -221,11 +221,11 @@ export default function ForgotPasswordPage() {
                     value={form.password_confirmation} onChange={handleChange}
                     placeholder="ulangi password baru"
                     className={inputClass}
-                    style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                    style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                   />
                 </div>
 
-                <button type="submit" disabled={busy} className={primaryBtn} style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
+                <button type="submit" disabled={busy} className={primaryBtn} style={{ boxShadow: "3px 3px 0 var(--ink)" }}>
                   {busy ? "Menyimpan..." : "Ganti Password →"}
                 </button>
               </form>

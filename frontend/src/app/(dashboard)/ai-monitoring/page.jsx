@@ -218,7 +218,7 @@ export default function AiMonitoringPage() {
           <button
             onClick={fetchStats}
             className="flex items-center gap-1.5 text-xs font-black rounded-md border-2 border-brand-black px-3 py-1.5 hover:bg-brand-yellow transition-colors"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
             <IcoRefresh /> Refresh
           </button>

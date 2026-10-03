@@ -56,7 +56,7 @@ const PRESETS = [
 const ChartTooltip = ({ active, payload, label, currency }) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border-2 border-brand-black px-3 py-2" style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
+    <div className="bg-white border-2 border-brand-black px-3 py-2" style={{ boxShadow: "3px 3px 0 var(--ink)" }}>
       <p className="text-xs font-black mb-1">{label}</p>
       <p className="text-sm font-black font-mono">
         {currency ? formatCurrency(payload[0]?.value ?? 0) : `${payload[0]?.value ?? 0} item`}
@@ -225,7 +225,7 @@ export default function ReportsPage() {
   if (denied) return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 page-fade">
       <div className="w-20 h-20 bg-red-100 border-2 border-brand-black flex items-center justify-center"
-        style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+        style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
         <span className="text-4xl"></span>
       </div>
       <h2 className="text-2xl font-black font-grotesk">Akses Ditolak</h2>
@@ -241,7 +241,7 @@ export default function ReportsPage() {
       {/* ── Header ── */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black font-grotesk">Laporan</h2>
+          <h2 className="text-h1 font-grotesk">Laporan</h2>
           <p className="text-sm text-brand-black/50">Analisis penjualan &amp; kondisi stok</p>
         </div>
         <div className="flex gap-2">
@@ -295,7 +295,7 @@ export default function ReportsPage() {
                 onClick={() => setPreset(p.id)}
                 className={`px-3 py-1.5 text-sm font-bold border-2 border-brand-black transition-colors
                   ${preset === p.id ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"}`}
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}
               >
                 {p.label}
               </button>
@@ -309,7 +309,7 @@ export default function ReportsPage() {
                 onChange={(e) => setFilterYear(e.target.value)}
                 min="2020" max="2099"
                 className="w-24 px-3 py-1.5 text-sm font-mono border-2 border-brand-black outline-none"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}
               />
             )}
           </div>
@@ -317,15 +317,15 @@ export default function ReportsPage() {
           {/* Custom date range */}
           {preset === "custom" && (
             <div className="flex items-center gap-3 flex-wrap p-3 bg-brand-cream border-2 border-brand-black"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               <Calendar size={16} className="text-brand-black/50 shrink-0" />
               <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)}
                 className="px-3 py-1.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow bg-white"
-                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+                style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
               <span className="font-bold text-brand-black/50">s/d</span>
               <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)}
                 className="px-3 py-1.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow bg-white"
-                style={{ boxShadow: "1px 1px 0 #0A0A0A" }} />
+                style={{ boxShadow: "1px 1px 0 var(--ink)" }} />
               <NeoButton size="sm" variant="primary" onClick={fetchSales}>Tampilkan</NeoButton>
             </div>
           )}

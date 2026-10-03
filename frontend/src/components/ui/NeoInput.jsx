@@ -38,7 +38,7 @@ export default function NeoInput({
             : "border-brand-black focus:border-brand-yellow"
           }
         `}
-        style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+        style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         {...props}
       />
       {error && <p className="text-xs font-semibold text-red-500">{error}</p>}

@@ -14,6 +14,7 @@ import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import LogoMark from "@/components/brand/LogoMark";
 import { trackEvent } from "@/lib/analytics";
+import { neoButtonClass } from "@/components/ui/NeoButton";
 import { LogOut, Menu, Sparkles } from "lucide-react";
 
 export default function Navbar({ onMenuToggle }) {
@@ -37,7 +38,7 @@ export default function Navbar({ onMenuToggle }) {
         <button
           onClick={onMenuToggle}
           className="lg:hidden w-9 h-9 border-2 border-brand-black flex items-center justify-center bg-white hover:bg-brand-yellow transition-all duration-150 shrink-0 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           aria-label="Buka menu"
         >
           <Menu size={16} strokeWidth={2.5} className="text-brand-black" />
@@ -54,8 +55,7 @@ export default function Navbar({ onMenuToggle }) {
           <Link
             href="/upgrade?plan=pro"
             onClick={() => trackEvent("cta_click", { posisi: "navbar_app", tujuan: "upgrade" })}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-brand-yellow border-2 border-brand-black hover:bg-yellow-300 transition-colors"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            className={neoButtonClass({ variant: "primary", size: "sm", className: "font-black" })}
           >
             <Sparkles size={13} strokeWidth={2.5} />
             <span>Upgrade ke Pro</span>
@@ -65,7 +65,7 @@ export default function Navbar({ onMenuToggle }) {
         <button
           onClick={handleLogout}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-brand-black bg-white hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-all duration-150 whitespace-nowrap active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         >
           <LogOut size={13} strokeWidth={2.5} />
           <span className="hidden sm:inline">Keluar</span>

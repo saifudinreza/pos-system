@@ -40,7 +40,7 @@ const Field = ({ name, label, type = "text", placeholder, value, onChange, error
       placeholder={placeholder}
       className={`w-full px-3 py-2.5 text-sm border-2 outline-none transition-colors rounded-md
         ${error ? "border-red-500" : "border-brand-black focus:border-brand-yellow"}`}
-      style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+      style={{ boxShadow: "2px 2px 0 var(--ink)" }}
     />
     {error && <p className="text-xs text-red-500 font-semibold">{Array.isArray(error) ? error[0] : error}</p>}
   </div>
@@ -192,12 +192,12 @@ function RegisterForm() {
           <span className="font-black text-3xl font-grotesk">KasirAI</span>
         </div>
 
-        <div className="bg-white border-3 border-brand-black p-8 rounded-md" style={{ boxShadow: "6px 6px 0 #0A0A0A" }}>
+        <div className="bg-white border-3 border-brand-black p-8 rounded-md" style={{ boxShadow: "6px 6px 0 var(--ink)" }}>
           <h1 className="font-black text-2xl font-grotesk mb-1">Daftar Akun</h1>
           <div className="flex items-center gap-2 mb-6">
             <p className="text-sm text-brand-black/50 font-medium">Paket dipilih:</p>
             <span className={`text-xs font-black px-2 py-0.5 border-2 border-brand-black rounded ${plan === "pro" ? "bg-brand-yellow" : "bg-white"}`}
-              style={{ boxShadow: "1px 1px 0 #0A0A0A" }}>
+              style={{ boxShadow: "1px 1px 0 var(--ink)" }}>
               {planLabel}
             </span>
           </div>
@@ -225,7 +225,7 @@ function RegisterForm() {
                     : tenantStatus === "join" ? "border-blue-400"
                     : tenantStatus === "new"  ? "border-green-400"
                     : "border-brand-black focus:border-brand-yellow"}`}
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}
               />
               {errors.store_name && <p className="text-xs text-red-500 font-semibold">{errors.store_name}</p>}
               <TenantStatus status={tenantStatus} tenantInfo={tenantInfo} />
@@ -244,7 +244,7 @@ function RegisterForm() {
             <button
               type="submit" disabled={isLoading || tenantStatus === "checking"}
               className="w-full py-3 bg-brand-yellow border-2 border-brand-black font-black text-base disabled:opacity-50 hover:bg-yellow-300 transition-colors rounded-md"
-              style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+              style={{ boxShadow: "3px 3px 0 var(--ink)" }}
             >
               {isLoading ? "Mendaftar..." : tenantStatus === "join" ? "Bergabung ke Toko →" : "Buat Toko & Daftar →"}
             </button>

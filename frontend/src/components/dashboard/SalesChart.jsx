@@ -27,7 +27,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   return (
     <div
       className="bg-white border-2 border-brand-black px-3 py-2"
-      style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+      style={{ boxShadow: "3px 3px 0 var(--ink)" }}
     >
       <p className="text-xs font-black text-brand-black mb-1">{label}</p>
       <p className="text-sm font-black font-mono text-brand-black">

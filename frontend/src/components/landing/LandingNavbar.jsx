@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import LogoMark from "@/components/brand/LogoMark";
 import { trackEvent } from "@/lib/analytics";
+import { neoButtonClass } from "@/components/ui/NeoButton";
 
 // --- Logo komponen ---
 const Logo = () => (
@@ -86,7 +87,7 @@ export default function LandingNavbar() {
             {/* Tombol Masuk — neo-brutalist style */}
             <Link
               href="/login"
-              className="relative px-5 py-2 text-sm font-bold text-brand-black border-2 border-brand-black bg-white neo-btn rounded-md"
+              className={neoButtonClass({ variant: "secondary", size: "md" })}
             >
               Masuk
             </Link>
@@ -95,8 +96,7 @@ export default function LandingNavbar() {
             <Link
               href="/register"
               onClick={() => trackEvent("cta_click", { posisi: "navbar", tujuan: "daftar" })}
-              className="relative px-5 py-2 text-sm font-bold text-white bg-brand-black border-2 border-brand-black neo-hover overflow-hidden rounded-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-brand-black"
-              style={{ boxShadow: "3px 3px 0 #FFFBEB" }}
+              className={neoButtonClass({ variant: "cta", size: "md" })}
             >
               Mulai Gratis
             </Link>
@@ -152,7 +152,7 @@ export default function LandingNavbar() {
               <Link
                 href="/login"
                 onClick={handleNavClick}
-                className="text-center py-2.5 font-bold border-2 border-brand-black bg-white neo-btn text-sm rounded-md"
+                className={neoButtonClass({ variant: "secondary", size: "md", className: "w-full" })}
               >
                 Masuk
               </Link>
@@ -162,8 +162,7 @@ export default function LandingNavbar() {
                   trackEvent("cta_click", { posisi: "navbar", tujuan: "daftar" });
                   handleNavClick();
                 }}
-                className="text-center py-2.5 font-bold text-white bg-brand-black border-2 border-brand-black neo-hover text-sm overflow-hidden rounded-md"
-                style={{ boxShadow: "3px 3px 0 #FFE500" }}
+                className={neoButtonClass({ variant: "cta", size: "md", className: "w-full" })}
               >
                 Mulai Gratis
               </Link>

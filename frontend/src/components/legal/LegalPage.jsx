@@ -38,7 +38,7 @@ export default function LegalPage({ title, updated, intro, children }) {
           <Link
             href="/"
             className="px-4 py-2 bg-white border-2 border-brand-black font-bold text-sm focus-visible:outline focus-visible:outline-4 focus-visible:outline-brand-black"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
             ← Kembali
           </Link>

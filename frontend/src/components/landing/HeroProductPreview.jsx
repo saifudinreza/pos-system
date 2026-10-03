@@ -40,7 +40,7 @@ function KasirPanel() {
           <div
             key={p.name}
             className={`relative border-2 border-brand-black p-2.5 ${p.qty ? "bg-brand-yellow" : "bg-white"}`}
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
             {p.qty && (
               <span className="absolute -top-2 -right-2 w-6 h-6 bg-brand-black text-white text-xs font-mono font-bold flex items-center justify-center">
@@ -64,7 +64,7 @@ function KasirPanel() {
           <div className="flex justify-between"><span>PPN 11%</span><span>{rp(5720)}</span></div>
           <div className="flex justify-between font-bold text-[13px]"><span>Total</span><span>{rp(57720)}</span></div>
         </div>
-        <div className="mt-2.5 bg-brand-yellow border-2 border-brand-black text-center font-grotesk font-black py-1.5" style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+        <div className="mt-2.5 bg-brand-yellow border-2 border-brand-black text-center font-grotesk font-black py-1.5" style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
           Bayar Tunai
         </div>
         <div className="mt-2 bg-brand-black text-white border-2 border-brand-black text-center font-grotesk font-bold py-1.5">
@@ -79,7 +79,7 @@ function KasirPanel() {
 function StrukPanel() {
   return (
     <div className="flex flex-col sm:flex-row items-center justify-center gap-4 h-full p-4">
-      <div className="w-full sm:w-[48%] bg-white border-2 border-brand-black p-3 font-mono text-[12px]" style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
+      <div className="w-full sm:w-[48%] bg-white border-2 border-brand-black p-3 font-mono text-[12px]" style={{ boxShadow: "3px 3px 0 var(--ink)" }}>
         <div className="text-center font-grotesk font-black text-sm">Kopi Senja</div>
         <div className="text-center text-[10px] opacity-60 mb-1.5">Struk Digital</div>
         <div className="border-t border-dashed border-brand-black my-1.5" />
@@ -88,7 +88,7 @@ function StrukPanel() {
         <div className="border-t border-dashed border-brand-black my-1.5" />
         <div className="flex justify-between"><span>PPN 11%</span><span>5.720</span></div>
         <div className="flex justify-between font-bold"><span>Total</span><span>{rp(57720)}</span></div>
-        <div className="mt-2 -rotate-2 text-center bg-[#00C27C] border-2 border-brand-black font-grotesk font-black py-0.5">LUNAS</div>
+        <div className="mt-2 -rotate-2 text-center bg-success border-2 border-brand-black font-grotesk font-black py-0.5">LUNAS</div>
       </div>
       <div className="flex sm:flex-col items-center gap-2">
         <span className="font-grotesk font-black text-2xl rotate-90 sm:rotate-0" aria-hidden="true">→</span>
@@ -124,10 +124,10 @@ function LaporanPanel() {
       <div className="grid grid-cols-3 gap-2.5">
         {[
           ["Pendapatan 7 hari", "Rp 17,5 jt", "bg-brand-yellow"],
-          ["Laba kotor", "Rp 8,6 jt", "bg-[#00C27C]"],
+          ["Laba kotor", "Rp 8,6 jt", "bg-success"],
           ["Margin laba", "49,1%", "bg-white"],
         ].map(([k, v, bg]) => (
-          <div key={k} className={`${bg} border-2 border-brand-black p-2`} style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+          <div key={k} className={`${bg} border-2 border-brand-black p-2`} style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             <div className="font-mono text-[9px] uppercase tracking-wider opacity-70 leading-tight">{k}</div>
             <div className="font-mono font-bold text-[15px] leading-tight mt-0.5">{v}</div>
           </div>
@@ -164,7 +164,7 @@ function AIPanel() {
       </div>
       <div className="self-start max-w-[92%] bg-white border-2 border-brand-black px-3 py-2 text-[12.5px] leading-snug font-medium">
         <b>Es Kopi Susu</b> paling laku minggu ini: <b>186 gelas</b> terjual dengan omzet Rp 3,35 juta. Disusul Croissant (124 pcs).
-        <br />Stok Croissant tinggal <b className="text-[#FF9F1C]">18</b>, sebaiknya segera restock.
+        <br />Stok Croissant tinggal <b className="text-warning">18</b>, sebaiknya segera restock.
       </div>
       <div className="self-end max-w-[85%] bg-brand-yellow border-2 border-brand-black px-3 py-2 font-grotesk font-bold text-[13px]">
         Berapa laba kotor minggu ini?
@@ -206,13 +206,13 @@ export default function HeroProductPreview() {
     >
       <div
         className="bg-brand-cream border-[3px] border-brand-black"
-        style={{ boxShadow: "8px 8px 0 #0A0A0A" }}
+        style={{ boxShadow: "8px 8px 0 var(--ink)" }}
       >
         {/* Bilah judul jendela */}
         <div className="bg-brand-yellow border-b-[3px] border-brand-black px-3 py-2 flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-[#FF3B3B] border border-brand-black" />
-          <span className="w-3 h-3 rounded-full bg-[#FF9F1C] border border-brand-black" />
-          <span className="w-3 h-3 rounded-full bg-[#00C27C] border border-brand-black" />
+          <span className="w-3 h-3 rounded-full bg-danger border border-brand-black" />
+          <span className="w-3 h-3 rounded-full bg-warning border border-brand-black" />
+          <span className="w-3 h-3 rounded-full bg-success border border-brand-black" />
           <span className="ml-2 flex-1 bg-white border-2 border-brand-black font-mono text-[11px] px-2 py-0.5 truncate">
             {TABS[active].url}
           </span>
@@ -253,7 +253,7 @@ export default function HeroProductPreview() {
         </div>
       </div>
 
-      <p className="mt-3 text-center font-mono text-[11px] text-brand-black/60">
+      <p className="mt-3 text-center text-caption font-medium text-brand-black/60">
         Contoh tampilan dengan data fiktif toko &quot;Kopi Senja&quot;
       </p>
     </div>

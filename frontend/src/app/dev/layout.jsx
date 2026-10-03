@@ -61,12 +61,12 @@ export default function DevLayout({ children }) {
       <div className="min-h-screen bg-brand-black flex items-center justify-center px-4">
         <div
           className="bg-white border-2 border-brand-black w-full max-w-sm p-8"
-          style={{ boxShadow: "6px 6px 0 #FFE500" }}
+          style={{ boxShadow: "6px 6px 0 var(--yellow)" }}
         >
           <div className="text-center mb-6">
             <div
               className="inline-block bg-brand-yellow border-2 border-brand-black px-4 py-2 mb-4"
-              style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+              style={{ boxShadow: "3px 3px 0 var(--ink)" }}
             >
               <span className="font-black text-2xl"></span>
             </div>
@@ -83,13 +83,13 @@ export default function DevLayout({ children }) {
                 placeholder="Masukkan PIN developer..."
                 autoFocus
                 className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow font-mono"
-                style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                style={{ boxShadow: "2px 2px 0 var(--ink)" }}
               />
             </div>
             <button
               type="submit"
               className="w-full py-2.5 bg-brand-yellow border-2 border-brand-black font-black text-sm hover:bg-yellow-300 transition-colors"
-              style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+              style={{ boxShadow: "3px 3px 0 var(--ink)" }}
             >
               Masuk ke Developer Portal
             </button>
@@ -114,7 +114,7 @@ export default function DevLayout({ children }) {
         <div className="flex items-center gap-3">
           <div
             className="bg-brand-black text-brand-yellow px-3 py-1 text-xs font-black font-mono border-2 border-brand-black"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
             DEV
           </div>
@@ -125,7 +125,7 @@ export default function DevLayout({ children }) {
           <Link
             href="/dashboard"
             className="text-xs font-bold text-brand-black border-2 border-brand-black px-3 py-1 hover:bg-brand-black hover:text-white transition-colors"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           >
             ← Dashboard
           </Link>
@@ -149,6 +149,7 @@ export default function DevLayout({ children }) {
           <div className="space-y-1">
             {[
               { href: "/dev/subscriptions", label: " Subscriptions" },
+              { href: "/dev/design-system", label: " Design System" },
             ].map((item) => (
               <Link
                 key={item.href}
