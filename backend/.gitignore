@@ -28,3 +28,6 @@ Thumbs.db
 
 .postman
 /postman
+# Laporan hasil test auth (privat, jangan di-commit)
+/tests/Feature/Auth/TEST_REPORT_AUTH.md
+/tests-private/
