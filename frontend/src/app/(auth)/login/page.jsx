@@ -86,7 +86,7 @@ function LoadingOverlay({ visible, onExitComplete }) {
         position: "fixed",
         inset: 0,
         zIndex: 50,
-        background: "#FFFBEB",
+        background: "var(--cream)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -219,7 +219,7 @@ function LoadingOverlay({ visible, onExitComplete }) {
               fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 800,
               fontSize: "17px",
-              color: "#0A0A0A",
+              color: "var(--ink)",
               textAlign: "center",
             }}
           >
@@ -228,7 +228,7 @@ function LoadingOverlay({ visible, onExitComplete }) {
         </AnimatePresence>
 
         {/* Progress bar */}
-        <div className="loading-progress-track" style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
+        <div className="loading-progress-track" style={{ boxShadow: "3px 3px 0 var(--ink)" }}>
           <div className="loading-progress-bar" />
         </div>
 
@@ -352,7 +352,7 @@ export default function LoginPage() {
           {/* Form box */}
           <div
             className="bg-white border-3 border-brand-black p-8"
-            style={{ boxShadow: "6px 6px 0 #0A0A0A" }}
+            style={{ boxShadow: "6px 6px 0 var(--ink)" }}
           >
             <h1 className="font-black text-2xl font-grotesk mb-1">Masuk</h1>
             <p className="text-sm text-brand-black/50 font-medium mb-6">
@@ -375,7 +375,7 @@ export default function LoginPage() {
                   value={form.email} onChange={handleChange}
                   placeholder="nama@email.com"
                   className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                  style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                 />
               </div>
 
@@ -387,7 +387,7 @@ export default function LoginPage() {
                   value={form.password} onChange={handleChange}
                   placeholder="••••••••"
                   className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                  style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                 />
               </div>
 
@@ -423,7 +423,7 @@ export default function LoginPage() {
                 type="submit"
                 disabled={isLoading}
                 className="w-full py-3 bg-brand-yellow border-2 border-brand-black font-black text-base disabled:opacity-50 hover:bg-yellow-300 transition-colors"
-                style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+                style={{ boxShadow: "3px 3px 0 var(--ink)" }}
               >
                 {isLoading ? "Masuk..." : "Masuk →"}
               </button>

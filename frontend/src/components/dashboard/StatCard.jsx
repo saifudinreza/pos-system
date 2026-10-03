@@ -5,11 +5,11 @@ import NeoCard from "@/components/ui/NeoCard";
 
 // Warna latar & teks kartu, key dipakai sebagai prop `color` (fallback: white)
 const BG_STYLE = {
-  yellow: { backgroundColor: "#FFE500", color: "#0A0A0A" },
-  black:  { backgroundColor: "#0A0A0A", color: "#ffffff" },
-  white:  { backgroundColor: "#ffffff", color: "#0A0A0A" },
-  green:  { backgroundColor: "#dcfce7", color: "#0A0A0A" },
-  orange: { backgroundColor: "#ffedd5", color: "#0A0A0A" },
+  yellow: { backgroundColor: "var(--yellow)", color: "var(--ink)" },
+  black:  { backgroundColor: "var(--ink)", color: "#ffffff" },
+  white:  { backgroundColor: "#ffffff", color: "var(--ink)" },
+  green:  { backgroundColor: "#dcfce7", color: "var(--ink)" },
+  orange: { backgroundColor: "#ffedd5", color: "var(--ink)" },
 };
 
 /**

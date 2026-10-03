@@ -39,11 +39,11 @@ export default function DemoVideoModal({ open, onClose }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-4xl bg-[#0A0A0A] border-3 border-[#FFE500] shadow-[8px_8px_0_#0A0A0A] p-2 rounded-md overflow-hidden"
+            className="relative w-full max-w-4xl bg-brand-black border-3 border-brand-yellow shadow-[8px_8px_0_var(--ink)] p-2 rounded-md overflow-hidden"
           >
             <div className="flex items-center justify-between p-3 border-b-2 border-neutral-800 bg-neutral-900">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 rounded-full bg-[#00C27C]" />
+                <span className="w-3 h-3 rounded-full bg-success" />
                 <span className="font-grotesk font-extrabold text-sm text-white">
                   Demo Operasional Kasir & AI Asisten
                 </span>

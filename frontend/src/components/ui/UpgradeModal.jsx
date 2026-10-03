@@ -18,6 +18,7 @@ import useAuthStore from "@/stores/authStore";
 import { PLANS } from "@/stores/subscriptionStore";
 import { formatCurrency } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
+import { neoButtonClass } from "@/components/ui/NeoButton";
 
 // Isi per fitur. `target` = paket yang ditawarkan.
 function getCopy(feature, plan) {
@@ -94,7 +95,7 @@ export default function UpgradeModal() {
     >
       <div
         className="w-full max-w-md bg-white border-3 border-brand-black p-6"
-        style={{ boxShadow: "8px 8px 0 #0A0A0A" }}
+        style={{ boxShadow: "8px 8px 0 var(--ink)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 mb-4">
@@ -145,15 +146,14 @@ export default function UpgradeModal() {
                 close();
               }}
               autoFocus
-              className="flex-1 text-center px-5 py-3 bg-brand-black text-white font-bold border-2 border-brand-black focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-brand-black"
-              style={{ boxShadow: "3px 3px 0 #FFE500" }}
+              className={neoButtonClass({ variant: "cta", size: "lg", className: "flex-1" })}
             >
               Lihat paket {target.name} →
             </Link>
             <button
               type="button"
               onClick={close}
-              className="px-5 py-3 bg-white font-bold border-2 border-brand-black hover:bg-brand-yellow/40"
+              className={neoButtonClass({ variant: "secondary", size: "lg" })}
             >
               Nanti saja
             </button>

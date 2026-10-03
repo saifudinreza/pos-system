@@ -138,7 +138,7 @@ export default function TenantsPage() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black font-grotesk flex items-center gap-2">
+          <h2 className="text-h1 font-grotesk flex items-center gap-2">
             <IcoBuilding className="w-7 h-7" /> Manage Tenant
           </h2>
           <p className="text-sm text-brand-black/50 mt-0.5">Semua toko/tenant yang terdaftar di sistem</p>
@@ -153,7 +153,7 @@ export default function TenantsPage() {
           { label: "Total User",   value: stats.totalUsers, bg: "bg-brand-yellow" },
           { label: "Nonaktif",     value: stats.total - stats.active, bg: "bg-brand-black text-white" },
         ].map((s) => (
-          <div key={s.label} className={`${s.bg} border-2 border-brand-black p-4 rounded-md`} style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
+          <div key={s.label} className={`${s.bg} border-2 border-brand-black p-4 rounded-md`} style={{ boxShadow: "3px 3px 0 var(--ink)" }}>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-60 font-mono">{s.label}</p>
             <p className="text-3xl font-black font-mono">{s.value}</p>
           </div>
@@ -166,7 +166,7 @@ export default function TenantsPage() {
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Cari nama tenant..."
         className="w-full max-w-sm px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow rounded-md"
-        style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+        style={{ boxShadow: "2px 2px 0 var(--ink)" }}
       />
 
       {/* ── Tenant List ── */}
@@ -179,7 +179,7 @@ export default function TenantsPage() {
       ) : (
         <div className="space-y-3">
           {tenants.map((tenant) => (
-            <div key={tenant.id} className="border-2 border-brand-black bg-white rounded-md overflow-hidden" style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
+            <div key={tenant.id} className="border-2 border-brand-black bg-white rounded-md overflow-hidden" style={{ boxShadow: "3px 3px 0 var(--ink)" }}>
 
               {/* ── Tenant Row ── */}
               <div className="flex items-center gap-3 px-4 py-3">
@@ -193,7 +193,7 @@ export default function TenantsPage() {
 
                 {/* Avatar */}
                 <div className="w-10 h-10 bg-brand-yellow border-2 border-brand-black rounded flex items-center justify-center font-black text-lg shrink-0"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+                  style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
                   {tenant.name[0]?.toUpperCase()}
                 </div>
 
@@ -292,7 +292,7 @@ export default function TenantsPage() {
               placeholder="Deskripsi toko (opsional)"
               rows={3}
               className="w-full px-3 py-2.5 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow rounded-md resize-none"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             />
           </div>
           <label className="flex items-center gap-3 cursor-pointer">

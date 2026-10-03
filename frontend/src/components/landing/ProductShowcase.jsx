@@ -93,7 +93,7 @@ const IphoneScreen = () => {
       <div
         style={{
           padding: "36px 16px 8px",
-          background: "#0A0A0A",
+          background: "var(--ink)",
           color: "#fff",
           display: "flex",
           justifyContent: "space-between",
@@ -106,7 +106,7 @@ const IphoneScreen = () => {
         <span style={{ letterSpacing: "0.5px" }}>09:41</span>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
           <Wifi size={10} color="#00C27C" />
-          <span style={{ fontSize: "8px", color: "#FFE500" }}>5G</span>
+          <span style={{ fontSize: "8px", color: "var(--yellow)" }}>5G</span>
           <Battery size={12} color="#fff" />
         </div>
       </div>
@@ -115,8 +115,8 @@ const IphoneScreen = () => {
       <div
         style={{
           padding: "8px 12px",
-          background: "#FFE500",
-          borderBottom: "2px solid #0A0A0A",
+          background: "var(--yellow)",
+          borderBottom: "2px solid var(--ink)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -127,7 +127,7 @@ const IphoneScreen = () => {
             style={{
               width: "16px",
               height: "16px",
-              background: "#0A0A0A",
+              background: "var(--ink)",
               display: "grid",
               placeItems: "center",
               borderRadius: "3px",
@@ -140,7 +140,7 @@ const IphoneScreen = () => {
               fontFamily: "'Space Grotesk', sans-serif",
               fontSize: "11px",
               fontWeight: 800,
-              color: "#0A0A0A",
+              color: "var(--ink)",
             }}
           >
             Kasir Mobile
@@ -151,8 +151,8 @@ const IphoneScreen = () => {
             fontFamily: "'JetBrains Mono', monospace",
             fontSize: "8px",
             fontWeight: 700,
-            background: "#0A0A0A",
-            color: "#00C27C",
+            background: "var(--ink)",
+            color: "var(--success)",
             padding: "2px 6px",
             borderRadius: "2px",
           }}
@@ -167,7 +167,7 @@ const IphoneScreen = () => {
           margin: "8px",
           height: "85px",
           background: "#111114",
-          border: "2px solid #0A0A0A",
+          border: "2px solid var(--ink)",
           borderRadius: "6px",
           position: "relative",
           overflow: "hidden",
@@ -245,7 +245,7 @@ const IphoneScreen = () => {
                 style={{
                   padding: "6px 8px",
                   background: "#fff",
-                  border: "1.5px solid #0A0A0A",
+                  border: "1.5px solid var(--ink)",
                   borderRadius: "4px",
                   display: "flex",
                   justifyContent: "space-between",
@@ -258,7 +258,7 @@ const IphoneScreen = () => {
                       fontFamily: "'Space Grotesk', sans-serif",
                       fontWeight: 700,
                       fontSize: "10px",
-                      color: "#0A0A0A",
+                      color: "var(--ink)",
                     }}
                   >
                     {item.name}
@@ -268,8 +268,8 @@ const IphoneScreen = () => {
                       style={{
                         fontFamily: "'JetBrains Mono', monospace",
                         fontSize: "7px",
-                        background: "#FFFBEB",
-                        border: "1px solid #FFE500",
+                        background: "var(--cream)",
+                        border: "1px solid var(--yellow)",
                         padding: "1px 4px",
                         fontWeight: 700,
                       }}
@@ -293,7 +293,7 @@ const IphoneScreen = () => {
                     fontFamily: "'JetBrains Mono', monospace",
                     fontWeight: 800,
                     fontSize: "10px",
-                    color: "#0A0A0A",
+                    color: "var(--ink)",
                   }}
                 >
                   Rp {item.price}
@@ -309,7 +309,7 @@ const IphoneScreen = () => {
         style={{
           padding: "8px",
           background: "#fff",
-          borderTop: "2px solid #0A0A0A",
+          borderTop: "2px solid var(--ink)",
         }}
       >
         <div
@@ -335,7 +335,7 @@ const IphoneScreen = () => {
               fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 800,
               fontSize: "13px",
-              color: "#0A0A0A",
+              color: "var(--ink)",
             }}
           >
             Rp {total}
@@ -346,15 +346,15 @@ const IphoneScreen = () => {
           animate={{ scale: [1, 1.02, 1] }}
           transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
           style={{
-            background: "#FFE500",
-            border: "2px solid #0A0A0A",
+            background: "var(--yellow)",
+            border: "2px solid var(--ink)",
             borderRadius: "4px",
             padding: "7px",
             textAlign: "center",
             fontFamily: "'Space Grotesk', sans-serif",
             fontWeight: 800,
             fontSize: "10px",
-            boxShadow: "2px 2px 0 #0A0A0A",
+            boxShadow: "2px 2px 0 var(--ink)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -398,12 +398,12 @@ const IpadScreen = () => {
       <div
         style={{
           padding: "8px 14px",
-          background: "#0A0A0A",
+          background: "var(--ink)",
           color: "#fff",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "2px solid #FFE500",
+          borderBottom: "2px solid var(--yellow)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -411,8 +411,8 @@ const IpadScreen = () => {
             style={{
               width: "20px",
               height: "20px",
-              background: "#FFE500",
-              border: "1.5px solid #0A0A0A",
+              background: "var(--yellow)",
+              border: "1.5px solid var(--ink)",
               display: "grid",
               placeItems: "center",
               borderRadius: "4px",
@@ -426,7 +426,7 @@ const IpadScreen = () => {
                 fontFamily: "'Space Grotesk', sans-serif",
                 fontWeight: 800,
                 fontSize: "11px",
-                color: "#FFE500",
+                color: "var(--yellow)",
                 lineHeight: 1.1,
               }}
             >
@@ -450,7 +450,7 @@ const IpadScreen = () => {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "8px",
               fontWeight: 700,
-              color: "#00C27C",
+              color: "var(--success)",
               display: "flex",
               alignItems: "center",
               gap: "4px",
@@ -460,7 +460,7 @@ const IpadScreen = () => {
               style={{
                 width: "6px",
                 height: "6px",
-                background: "#00C27C",
+                background: "var(--success)",
                 borderRadius: "50%",
                 boxShadow: "0 0 6px #00C27C",
               }}
@@ -502,11 +502,11 @@ const IpadScreen = () => {
               <div
                 key={k.label}
                 style={{
-                  border: "1.5px solid #0A0A0A",
+                  border: "1.5px solid var(--ink)",
                   background: k.bg,
                   padding: "6px 8px",
                   borderRadius: "4px",
-                  boxShadow: "2px 2px 0 #0A0A0A",
+                  boxShadow: "2px 2px 0 var(--ink)",
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -528,7 +528,7 @@ const IpadScreen = () => {
                     fontFamily: "'Space Grotesk', sans-serif",
                     fontWeight: 800,
                     fontSize: "12px",
-                    color: "#0A0A0A",
+                    color: "var(--ink)",
                     margin: "2px 0",
                   }}
                 >
@@ -539,7 +539,7 @@ const IpadScreen = () => {
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: "7.5px",
                     fontWeight: 700,
-                    color: "#00C27C",
+                    color: "var(--success)",
                   }}
                 >
                   {k.trend} vs kemarin
@@ -552,7 +552,7 @@ const IpadScreen = () => {
           <div
             style={{
               flex: 1,
-              border: "1.5px solid #0A0A0A",
+              border: "1.5px solid var(--ink)",
               background: "#fff",
               padding: "8px",
               borderRadius: "4px",
@@ -573,7 +573,7 @@ const IpadScreen = () => {
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontWeight: 700,
                   fontSize: "9px",
-                  color: "#0A0A0A",
+                  color: "var(--ink)",
                 }}
               >
                 Tren Penjualan Mingguan
@@ -621,7 +621,7 @@ const IpadScreen = () => {
                       style={{
                         width: "100%",
                         background: isMax ? "#FFE500" : "#0A0A0A",
-                        border: "1.5px solid #0A0A0A",
+                        border: "1.5px solid var(--ink)",
                         borderRadius: "2px 2px 0 0",
                         minHeight: "6px",
                       }}
@@ -648,7 +648,7 @@ const IpadScreen = () => {
         {/* Right Column: Live Orders Queue */}
         <div
           style={{
-            border: "1.5px solid #0A0A0A",
+            border: "1.5px solid var(--ink)",
             background: "#fff",
             borderRadius: "4px",
             padding: "8px",
@@ -679,7 +679,7 @@ const IpadScreen = () => {
               style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "7px",
-                background: "#00C27C",
+                background: "var(--success)",
                 color: "#fff",
                 padding: "1px 4px",
                 fontWeight: 700,
@@ -692,9 +692,9 @@ const IpadScreen = () => {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
             {[
-              { id: "#108", item: "2x Kopi Susu Aren", price: "44.000", status: "SIAP", color: "#00C27C" },
-              { id: "#107", item: "1x Toast Srikaya", price: "28.000", status: "PROSES", color: "#FFE500" },
-              { id: "#106", item: "3x Matcha Latte", price: "84.000", status: "LUNAS", color: "#0A0A0A" },
+              { id: "#108", item: "2x Kopi Susu Aren", price: "44.000", status: "SIAP", color: "var(--success)" },
+              { id: "#107", item: "1x Toast Srikaya", price: "28.000", status: "PROSES", color: "var(--yellow)" },
+              { id: "#106", item: "3x Matcha Latte", price: "84.000", status: "LUNAS", color: "var(--ink)" },
             ].map((o) => (
               <div
                 key={o.id}
@@ -736,8 +736,8 @@ const IpadScreen = () => {
           <div
             style={{
               marginTop: "6px",
-              background: "#FFE500",
-              border: "1.5px solid #0A0A0A",
+              background: "var(--yellow)",
+              border: "1.5px solid var(--ink)",
               padding: "4px",
               textAlign: "center",
               fontFamily: "'Space Grotesk', sans-serif",
@@ -799,13 +799,13 @@ const RetailPosScreen = () => {
       {/* Top Header - Authentic Minimarket Kasir Bar */}
       <div
         style={{
-          background: "#0A0A0A",
+          background: "var(--ink)",
           color: "#fff",
           padding: "5px 10px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          borderBottom: "2px solid #FFE500",
+          borderBottom: "2px solid var(--yellow)",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -815,7 +815,7 @@ const RetailPosScreen = () => {
               fontFamily: "'Space Grotesk', sans-serif",
               fontWeight: 800,
               fontSize: "10px",
-              color: "#FFE500",
+              color: "var(--yellow)",
             }}
           >
             SIKASIR RETAIL POS
@@ -843,15 +843,15 @@ const RetailPosScreen = () => {
         >
           <span>KASIR: 01 (DEVI)</span>
           <span>SHIFT: 1</span>
-          <span style={{ color: "#00C27C", fontWeight: 700 }}>● TERKONEKSI</span>
+          <span style={{ color: "var(--success)", fontWeight: 700 }}>● TERKONEKSI</span>
         </div>
       </div>
 
       {/* Member Barcode Banner */}
       <div
         style={{
-          background: "#FFFBEB",
-          borderBottom: "1.5px solid #0A0A0A",
+          background: "var(--cream)",
+          borderBottom: "1.5px solid var(--ink)",
           padding: "4px 10px",
           display: "flex",
           justifyContent: "space-between",
@@ -865,7 +865,7 @@ const RetailPosScreen = () => {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "8px",
               fontWeight: 700,
-              color: "#0A0A0A",
+              color: "var(--ink)",
             }}
           >
             MEMBER: 0812-9876-XXXX (POIN: 350)
@@ -878,7 +878,7 @@ const RetailPosScreen = () => {
             alignItems: "center",
             gap: "4px",
             background: "#fff",
-            border: "1px solid #0A0A0A",
+            border: "1px solid var(--ink)",
             padding: "2px 6px",
             borderRadius: "2px",
           }}
@@ -907,7 +907,7 @@ const RetailPosScreen = () => {
           }}
         >
           <thead>
-            <tr style={{ background: "#f0f0eb", borderBottom: "1.5px solid #0A0A0A" }}>
+            <tr style={{ background: "#f0f0eb", borderBottom: "1.5px solid var(--ink)" }}>
               <th style={{ padding: "3px 4px", textAlign: "left" }}>NO</th>
               <th style={{ padding: "3px 4px", textAlign: "left" }}>BARCODE</th>
               <th style={{ padding: "3px 4px", textAlign: "left" }}>NAMA BARANG</th>
@@ -941,8 +941,8 @@ const RetailPosScreen = () => {
       {/* Big Brutalist Total Display (Khas Mesin Kasir Ritel) */}
       <div
         style={{
-          background: "#FFE500",
-          borderTop: "2.5px solid #0A0A0A",
+          background: "var(--yellow)",
+          borderTop: "2.5px solid var(--ink)",
           padding: "6px 12px",
           display: "flex",
           justifyContent: "space-between",
@@ -955,7 +955,7 @@ const RetailPosScreen = () => {
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "7.5px",
               fontWeight: 800,
-              color: "#0A0A0A",
+              color: "var(--ink)",
               textTransform: "uppercase",
             }}
           >
@@ -966,7 +966,7 @@ const RetailPosScreen = () => {
               fontFamily: "'Space Grotesk', sans-serif",
               fontSize: "16px",
               fontWeight: 900,
-              color: "#0A0A0A",
+              color: "var(--ink)",
               letterSpacing: "-0.5px",
             }}
           >
@@ -986,8 +986,8 @@ const RetailPosScreen = () => {
           </span>
           <span
             style={{
-              background: "#0A0A0A",
-              color: "#FFE500",
+              background: "var(--ink)",
+              color: "var(--yellow)",
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "7.5px",
               fontWeight: 800,
@@ -1004,7 +1004,7 @@ const RetailPosScreen = () => {
       {/* Hotkey Shortcuts Bar */}
       <div
         style={{
-          background: "#0A0A0A",
+          background: "var(--ink)",
           color: "#fff",
           padding: "4px 8px",
           display: "flex",
@@ -1091,7 +1091,7 @@ export default function ProductShowcase() {
     <section
       style={{
         padding: "96px 24px",
-        background: "#FFFBEB",
+        background: "var(--cream)",
         position: "relative",
         zIndex: 1,
         overflow: "hidden",
@@ -1122,9 +1122,9 @@ export default function ProductShowcase() {
               display: "inline-flex",
               alignItems: "center",
               gap: "6px",
-              background: "#0A0A0A",
-              color: "#FFE500",
-              border: "2px solid #0A0A0A",
+              background: "var(--ink)",
+              color: "var(--yellow)",
+              border: "2px solid var(--ink)",
               padding: "6px 14px",
               fontFamily: "'JetBrains Mono', monospace",
               fontSize: "11px",
@@ -1132,7 +1132,7 @@ export default function ProductShowcase() {
               letterSpacing: ".08em",
               textTransform: "uppercase",
               marginBottom: "20px",
-              boxShadow: "3px 3px 0 #FFE500",
+              boxShadow: "3px 3px 0 var(--yellow)",
             }}
           >
             <Sparkles size={13} color="#FFE500" />
@@ -1152,11 +1152,11 @@ export default function ProductShowcase() {
             Bebas Pakai Perangkat Apa Saja,{" "}
             <span
               style={{
-                background: "#FFE500",
+                background: "var(--yellow)",
                 padding: "2px 10px",
-                border: "2.5px solid #0A0A0A",
+                border: "2.5px solid var(--ink)",
                 display: "inline-block",
-                boxShadow: "4px 4px 0 #0A0A0A",
+                boxShadow: "4px 4px 0 var(--ink)",
               }}
             >
               Dari HP Hingga Mesin Kasir Ritel
@@ -1206,9 +1206,9 @@ export default function ProductShowcase() {
             position: "absolute",
             top: "10px",
             right: "2%",
-            background: "#FFE500",
-            border: "2.5px solid #0A0A0A",
-            boxShadow: "4px 4px 0 #0A0A0A",
+            background: "var(--yellow)",
+            border: "2.5px solid var(--ink)",
+            boxShadow: "4px 4px 0 var(--ink)",
             padding: "8px 12px",
             borderRadius: "6px",
             display: "flex",
@@ -1236,8 +1236,8 @@ export default function ProductShowcase() {
             bottom: "30px",
             left: "2%",
             background: "#ffffff",
-            border: "2.5px solid #0A0A0A",
-            boxShadow: "4px 4px 0 #0A0A0A",
+            border: "2.5px solid var(--ink)",
+            boxShadow: "4px 4px 0 var(--ink)",
             padding: "8px 12px",
             borderRadius: "6px",
             display: "flex",
@@ -1467,8 +1467,8 @@ export default function ProductShowcase() {
             <motion.button
               key={s.id}
               onClick={() => setActiveIdx(i)}
-              whileHover={{ y: -3, boxShadow: "5px 5px 0 #0A0A0A" }}
-              whileTap={{ y: 0, boxShadow: "2px 2px 0 #0A0A0A" }}
+              whileHover={{ y: -3, boxShadow: "5px 5px 0 var(--ink)" }}
+              whileTap={{ y: 0, boxShadow: "2px 2px 0 var(--ink)" }}
               transition={{ type: "spring", stiffness: 400, damping: 18 }}
               style={{
                 display: "flex",
@@ -1477,8 +1477,8 @@ export default function ProductShowcase() {
                 gap: "6px",
                 padding: "14px 18px",
                 background: isActive ? "#FFE500" : "#ffffff",
-                border: "2.5px solid #0A0A0A",
-                boxShadow: isActive ? "4px 4px 0 #0A0A0A" : "3px 3px 0 #0A0A0A",
+                border: "2.5px solid var(--ink)",
+                boxShadow: isActive ? "4px 4px 0 var(--ink)" : "3px 3px 0 var(--ink)",
                 cursor: "pointer",
                 flex: "1 1 220px",
                 maxWidth: "260px",
@@ -1496,7 +1496,7 @@ export default function ProductShowcase() {
                     left: 0,
                     right: 0,
                     height: "4px",
-                    background: "#0A0A0A",
+                    background: "var(--ink)",
                   }}
                 />
               )}
@@ -1507,7 +1507,7 @@ export default function ProductShowcase() {
                     width: "28px",
                     height: "28px",
                     background: isActive ? "#0A0A0A" : "#FFFBEB",
-                    border: "1.5px solid #0A0A0A",
+                    border: "1.5px solid var(--ink)",
                     borderRadius: "4px",
                     display: "grid",
                     placeItems: "center",
@@ -1520,7 +1520,7 @@ export default function ProductShowcase() {
                     fontFamily: "'Space Grotesk', sans-serif",
                     fontWeight: 800,
                     fontSize: "13px",
-                    color: "#0A0A0A",
+                    color: "var(--ink)",
                   }}
                 >
                   {s.name}
@@ -1532,7 +1532,7 @@ export default function ProductShowcase() {
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontWeight: 700,
                   fontSize: "11px",
-                  color: "#0A0A0A",
+                  color: "var(--ink)",
                 }}
               >
                 {s.title}
@@ -1566,7 +1566,7 @@ export default function ProductShowcase() {
             transition={{ duration: 0.3 }}
             style={{
               height: "10px",
-              border: "1.5px solid #0A0A0A",
+              border: "1.5px solid var(--ink)",
               cursor: "pointer",
               padding: 0,
             }}

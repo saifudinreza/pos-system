@@ -287,7 +287,7 @@ export default function ProductsPage() {
             type="button"
             onClick={() => handleToggleStatus(row)}
             className={`relative w-10 h-5 border-2 border-brand-black transition-colors shrink-0 ${v ? "bg-brand-yellow" : "bg-brand-gray"}`}
-            style={{ boxShadow: "1px 1px 0 #0A0A0A" }}
+            style={{ boxShadow: "1px 1px 0 var(--ink)" }}
             title={v ? "Nonaktifkan" : "Aktifkan"}
           >
             <span
@@ -354,7 +354,7 @@ export default function ProductsPage() {
         {isDeveloper && (
           <select onChange={handleTenantChange} value={selectedTenant}
             className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             <option value="">Semua Tenant</option>
             {tenants.map((t) => (
               <option key={t.id} value={t.id}>
@@ -366,24 +366,24 @@ export default function ProductsPage() {
         <input value={search} onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari produk atau SKU..."
           className="flex-1 min-w-[200px] px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }} />
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }} />
         <select onChange={(e) => updateFilters({ is_active: e.target.value, page: 1 })}
           className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
           <option value="">Semua Status</option>
           <option value="true">Aktif</option>
           <option value="false">Nonaktif</option>
         </select>
         <select onChange={(e) => updateFilters({ category_id: e.target.value, page: 1 })}
           className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
           <option value="">Semua Kategori</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
         {isDeveloper && (
           <select onChange={handleSortChange} defaultValue="created_at:desc"
             className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white font-bold"
-            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+            style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
             <option value="created_at:desc">Terbaru</option>
             <option value="name:asc">Nama A-Z</option>
             <option value="price:asc">Harga Terendah</option>
@@ -397,14 +397,14 @@ export default function ProductsPage() {
         <button
           onClick={() => handleStockFilter("all")}
           className={`px-3 py-1.5 text-sm font-bold border-2 border-brand-black transition-colors ${activeFilter === "all" ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"}`}
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         >
           Semua
         </button>
         <button
           onClick={() => handleStockFilter("low")}
           className={`px-3 py-1.5 text-sm font-bold border-2 border-brand-black transition-colors ${activeFilter === "low" ? "bg-orange-300" : "bg-white hover:bg-orange-100"}`}
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         >
           Stok Rendah
         </button>
@@ -417,7 +417,7 @@ export default function ProductsPage() {
           {Array.from({ length: Math.min(meta.last_page, 10) }, (_, i) => i + 1).map((p) => (
             <button key={p} onClick={() => goToPage(p)}
               className={`w-9 h-9 text-sm font-bold border-2 border-brand-black ${p === meta.current_page ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"}`}
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>{p}</button>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>{p}</button>
           ))}
         </div>
       )}
@@ -455,13 +455,13 @@ export default function ProductsPage() {
                   onChange={handleFieldChange("sku")}
                   placeholder="Contoh: ETM-001"
                   className="flex-1 px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                  style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                 />
                 <button
                   type="button"
                   onClick={handleAutoSku}
                   className="px-3 py-2 text-xs font-bold border-2 border-brand-black bg-brand-yellow hover:bg-brand-yellow/70 shrink-0"
-                  style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+                  style={{ boxShadow: "2px 2px 0 var(--ink)" }}
                   title="Generate SKU dari nama produk"
                 >
                   Auto
@@ -491,7 +491,7 @@ export default function ProductsPage() {
               value={form.category_id}
               onChange={handleFieldChange("category_id")}
               className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white focus:border-brand-yellow"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >
               <option value="">-- Pilih Kategori --</option>
               {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -506,7 +506,7 @@ export default function ProductsPage() {
               placeholder="Deskripsi produk (opsional)..."
               rows={3}
               className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow resize-none"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             />
           </div>
 

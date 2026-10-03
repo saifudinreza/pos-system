@@ -18,6 +18,7 @@ import {
   Clock4,
 } from "lucide-react";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
+import NeoCard from "@/components/ui/NeoCard";
 
 // Fitur utama, tampil besar
 const MAIN_FEATURES = [
@@ -63,37 +64,31 @@ const SUPPORT_FEATURES = [
 
 /** Kartu fitur utama (besar). `dark` = versi hitam untuk AI. */
 const MainCard = ({ Icon, title, description, dark }) => (
-  <div
-    className={`h-full border-3 border-brand-black p-7 flex flex-col gap-4 transition-all duration-150 hover:-translate-x-1 hover:-translate-y-1 ${
-      dark ? "bg-brand-black text-white" : "bg-white text-brand-black"
-    }`}
-    style={{ boxShadow: dark ? "6px 6px 0 #FFE500" : "6px 6px 0 #0A0A0A" }}
+  <NeoCard
+    size="lg"
+    variant={dark ? "dark" : "default"}
+    noPad
+    className="h-full p-7 flex flex-col gap-4 transition-all duration-150 hover:-translate-x-1 hover:-translate-y-1"
   >
-    <div
-      className="w-14 h-14 bg-brand-yellow border-2 border-brand-black flex items-center justify-center"
-      style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
-    >
+    <div className="w-14 h-14 bg-brand-yellow border-2 border-brand-black shadow-[2px_2px_0_var(--ink)] flex items-center justify-center">
       <Icon size={26} className="text-brand-black" strokeWidth={2.5} />
     </div>
-    <h3 className="font-black text-2xl leading-tight font-grotesk">{title}</h3>
+    <h3 className="font-black text-h3 font-grotesk">{title}</h3>
     <p className={`font-medium leading-relaxed ${dark ? "text-white/75" : "text-brand-black/65"}`}>{description}</p>
-  </div>
+  </NeoCard>
 );
 
 /** Kartu fitur pendukung (ringkas, ikon di kiri). */
 const SupportCard = ({ Icon, title, description }) => (
-  <div
-    className="h-full bg-white border-2 border-brand-black p-5 flex gap-4"
-    style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
-  >
+  <NeoCard noPad className="h-full p-5 flex gap-4 shadow-[3px_3px_0_var(--ink)]">
     <div className="shrink-0 w-10 h-10 bg-brand-gray border-2 border-brand-black flex items-center justify-center">
       <Icon size={20} className="text-brand-black" strokeWidth={2.5} />
     </div>
     <div>
-      <h3 className="font-black text-base leading-tight font-grotesk mb-1">{title}</h3>
+      <h3 className="font-black text-h4 font-grotesk mb-1">{title}</h3>
       <p className="text-sm text-brand-black/65 font-medium leading-relaxed">{description}</p>
     </div>
-  </div>
+  </NeoCard>
 );
 
 /**
@@ -107,18 +102,18 @@ export default function FeaturesSection() {
         <div className="w-24 h-24 bg-brand-yellow/30 border-3 border-brand-black/20 rotate-6" />
       </Parallax>
       <Parallax speed={0.4} aria-hidden="true" className="pointer-events-none absolute -left-8 bottom-24 -z-0">
-        <div className="w-16 h-16 rounded-full bg-[#0066FF]/15 border-3 border-[#0066FF]/30" />
+        <div className="w-16 h-16 rounded-full bg-info/15 border-3 border-info/30" />
       </Parallax>
 
       <div className="relative max-w-6xl mx-auto">
         <Reveal className="mb-12">
           <div
-            className="inline-block bg-brand-black text-white px-3 py-1 text-xs font-mono font-black tracking-wider mb-4"
-            style={{ boxShadow: "2px 2px 0 #FFE500" }}
+            className="inline-block bg-brand-black text-white px-3 py-1 text-xs font-grotesk font-black tracking-wider mb-4"
+            style={{ boxShadow: "2px 2px 0 var(--yellow)" }}
           >
             SOLUSINYA
           </div>
-          <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk max-w-xl">
+          <h2 className="text-h2 text-brand-black font-grotesk max-w-xl">
             Semua yang kamu
             <br />
             butuhkan,{" "}

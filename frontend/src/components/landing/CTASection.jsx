@@ -20,6 +20,7 @@ import { Play } from "lucide-react";
 import { Reveal } from "./motion";
 import DemoVideoModal from "./DemoVideoModal";
 import { trackEvent } from "@/lib/analytics";
+import { neoButtonClass } from "@/components/ui/NeoButton";
 
 /**
  * CTASection, panggilan aksi terakhir sebelum footer (lihat header file).
@@ -36,7 +37,7 @@ export default function CTASection() {
         <Reveal
           y={32}
           className="bg-brand-black text-white border-3 border-brand-black p-12 sm:p-16 text-center relative overflow-hidden rounded-md"
-          style={{ boxShadow: "8px 8px 0 #FFE500" }}
+          style={{ boxShadow: "8px 8px 0 var(--yellow)" }}
         >
           {/* Dekorasi latar, titik-titik kecil ala neobrutalist */}
           <div className="absolute inset-0 opacity-5 rounded-md"
@@ -48,12 +49,12 @@ export default function CTASection() {
 
           <div className="relative z-10">
             <div
-              className="inline-block bg-brand-yellow text-brand-black border-2 border-brand-yellow px-3 py-1 text-xs font-mono font-black tracking-wider mb-6 rounded-md"
+              className="inline-block bg-brand-yellow text-brand-black border-2 border-brand-yellow px-3 py-1 text-xs font-grotesk font-black tracking-wider mb-6 rounded-md"
             >
               MULAI SEKARANG
             </div>
 
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-grotesk leading-tight mb-4 rounded-md">
+            <h2 className="text-display font-grotesk mb-4 rounded-md">
               Tingkatkan bisnis kamu
               <br />
               <span className="text-brand-yellow">hari ini juga.</span>
@@ -69,8 +70,7 @@ export default function CTASection() {
               <Link
                 href="/register"
                 onClick={() => trackEvent("cta_click", { posisi: "cta_akhir", tujuan: "daftar" })}
-                className="btn-shine relative overflow-hidden px-8 py-4 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black text-lg neo-hover inline-block rounded-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-white"
-                style={{ boxShadow: "4px 4px 0 #FFE500" }}
+                className={neoButtonClass({ variant: "inverse", size: "xl", className: "font-black" })}
               >
                 Mulai Gratis →
               </Link>
@@ -80,7 +80,7 @@ export default function CTASection() {
                   trackEvent("cta_click", { posisi: "cta_akhir", tujuan: "demo" });
                   setDemoOpen(true);
                 }}
-                className="px-8 py-4 bg-transparent text-white border-2 border-white/60 font-bold text-lg hover:border-white hover:bg-white/10 transition-colors inline-flex items-center gap-2 rounded-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-white"
+                className={neoButtonClass({ variant: "outlineLight", size: "xl" })}
               >
                 <Play size={16} fill="currentColor" />
                 Lihat Demo

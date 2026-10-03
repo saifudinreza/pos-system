@@ -116,7 +116,7 @@ function TransactionDetailModal({ txId, onClose, onCancelled }) {
         <div className="space-y-5">
           {/* Status + amount hero */}
           <div className="flex items-start justify-between gap-3 p-4 border-2 border-brand-black rounded-md bg-brand-cream"
-               style={{ boxShadow: "3px 3px 0 #0A0A0A" }}>
+               style={{ boxShadow: "3px 3px 0 var(--ink)" }}>
             <div>
               <p className="text-xs font-mono text-brand-black/40 mb-1">Status Pembayaran</p>
               <NeoBadge color={STATUS_COLOR[tx.status] ?? "gray"}>
@@ -324,7 +324,7 @@ export default function TransactionsPage() {
         <select
           onChange={(e) => setFilters((p) => ({ ...p, status: e.target.value, page: 1 }))}
           className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white rounded-md"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         >
           <option value="">Semua Status</option>
           <option value="pending">Menunggu</option>
@@ -335,13 +335,13 @@ export default function TransactionsPage() {
         <input
           type="date"
           className="px-3 py-2 text-sm border-2 border-brand-black outline-none rounded-md"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           onChange={(e) => setFilters((p) => ({ ...p, date_from: e.target.value, page: 1 }))}
         />
         <input
           type="date"
           className="px-3 py-2 text-sm border-2 border-brand-black outline-none rounded-md"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           onChange={(e) => setFilters((p) => ({ ...p, date_to: e.target.value, page: 1 }))}
         />
       </div>
@@ -364,7 +364,7 @@ export default function TransactionsPage() {
               className={`w-9 h-9 text-sm font-bold border-2 border-brand-black rounded-md ${
                 p === meta.current_page ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"
               }`}
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >
               {p}
             </button>

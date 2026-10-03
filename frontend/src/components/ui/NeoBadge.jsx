@@ -9,11 +9,17 @@ import { memo } from "react";
 const COLORS = {
   yellow:  "bg-brand-yellow text-brand-black border-brand-black",
   black:   "bg-brand-black text-white border-brand-black",
-  green:   "bg-green-100 text-green-800 border-green-600",
-  red:     "bg-red-100 text-red-700 border-red-500",
-  gray:    "bg-gray-100 text-gray-600 border-gray-400",
-  blue:    "bg-blue-100 text-blue-700 border-blue-500",
-  orange:  "bg-orange-100 text-orange-700 border-orange-500",
+  // Warna semantik (token): teks tetap hitam supaya kontras aman di latar tint
+  success: "bg-success/15 text-brand-black border-success",
+  danger:  "bg-danger/15 text-brand-black border-danger",
+  warning: "bg-warning/20 text-brand-black border-warning",
+  info:    "bg-info/10 text-brand-black border-info",
+  gray:    "bg-brand-gray text-brand-black/70 border-brand-black/30",
+  // Alias nama lama (dipakai di banyak halaman, jangan dihapus)
+  green:   "bg-success/15 text-brand-black border-success",
+  red:     "bg-danger/15 text-brand-black border-danger",
+  blue:    "bg-info/10 text-brand-black border-info",
+  orange:  "bg-warning/20 text-brand-black border-warning",
 };
 
 /**
@@ -21,7 +27,7 @@ const COLORS = {
  *
  * Props:
  *   children : teks isi badge
- *   color    : key dari COLORS, yellow|black|green|red|gray|blue|orange
+ *   color    : key dari COLORS, yellow|black|success|danger|warning|info|gray (alias lama: green|red|blue|orange)
  *              (kalau tidak dikenal → fallback gray)
  *   className: class Tailwind tambahan, ditempel di paling akhir
  */

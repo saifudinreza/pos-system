@@ -54,10 +54,10 @@ export default function FAQSection() {
     <section id="faq" className="relative z-[1] py-20 px-4 sm:px-6 scroll-mt-28">
       <div className="max-w-3xl mx-auto">
         <Reveal className="text-center mb-10">
-          <div className="inline-block bg-brand-black text-brand-yellow px-3 py-1 text-xs font-mono font-black tracking-wider mb-4">
+          <div className="inline-block bg-brand-black text-brand-yellow px-3 py-1 text-xs font-grotesk font-black tracking-wider mb-4">
             FAQ
           </div>
-          <h2 className="text-4xl sm:text-5xl font-black text-brand-black tracking-tight font-grotesk">
+          <h2 className="text-h2 text-brand-black font-grotesk">
             Pertanyaan yang sering ditanyakan
           </h2>
         </Reveal>
@@ -67,7 +67,7 @@ export default function FAQSection() {
             <details
               key={item.q}
               className="group bg-white border-3 border-brand-black"
-              style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
+              style={{ boxShadow: "4px 4px 0 var(--ink)" }}
             >
               <summary className="cursor-pointer list-none flex items-center justify-between gap-4 px-5 py-4 font-black font-grotesk text-lg text-brand-black focus-visible:outline focus-visible:outline-4 focus-visible:outline-brand-yellow">
                 {item.q}

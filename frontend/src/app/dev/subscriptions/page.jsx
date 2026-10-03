@@ -441,7 +441,7 @@ export default function SubscriptionsPage() {
         >
           <div
             className="rounded-md bg-brand-black border-2 border-brand-yellow w-full max-w-sm p-6"
-            style={{ boxShadow: "6px 6px 0 #FFE500" }}
+            style={{ boxShadow: "6px 6px 0 var(--yellow)" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-2 mb-1">

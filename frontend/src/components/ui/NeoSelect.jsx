@@ -30,7 +30,7 @@ export default function NeoSelect({ label, error, className = "", options = [], 
           border-2 outline-none transition-colors appearance-none
           ${error ? "border-red-500" : "border-brand-black focus:border-brand-yellow"}
         `}
-        style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+        style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         {...props}
       >
         {options.map((opt) => (

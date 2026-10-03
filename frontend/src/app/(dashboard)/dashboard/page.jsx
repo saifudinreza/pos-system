@@ -184,7 +184,7 @@ export default function DashboardPage() {
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-brand-black font-grotesk">Dashboard</h2>
+          <h2 className="text-h1 text-brand-black font-grotesk">Dashboard</h2>
           <p className="text-sm text-brand-black/50 font-medium mt-0.5 capitalize">{today}</p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -213,7 +213,7 @@ export default function DashboardPage() {
       {!loading && stock.length > 0 && (
         <div
           className="flex items-center justify-between gap-4 px-4 py-3 bg-brand-yellow border-2 border-brand-black slide-up"
-          style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+          style={{ boxShadow: "3px 3px 0 var(--ink)" }}
         >
           <div className="flex items-center gap-3">
             <AlertTriangle
@@ -281,7 +281,7 @@ export default function DashboardPage() {
               {insights.map((ins) => (
                 <div
                   key={ins.id}
-                  className="border-2 border-brand-black/15 p-4 rounded-md hover:border-brand-black/40 transition-colors"
+                  className="border-2 border-brand-black bg-white p-4 shadow-[2px_2px_0_var(--ink)] transition-transform hover:-translate-y-0.5"
                 >
                   <p className="text-[10px] font-black uppercase tracking-wider text-brand-black/40 mb-1">
                     {ins.type === "sales" ? "Penjualan" : ins.type === "stock" ? "Stok" : "Pelanggan"}
@@ -325,7 +325,7 @@ export default function DashboardPage() {
                       className="w-full bg-brand-yellow border-2 border-brand-black transition-all"
                       style={{
                         height: `${Math.max(10, (d.predicted / max) * 100)}%`,
-                        boxShadow: "1px 1px 0 #0A0A0A",
+                        boxShadow: "1px 1px 0 var(--ink)",
                       }}
                       title={`${d.weekday} ${formatCurrency(d.predicted)}`}
                     />

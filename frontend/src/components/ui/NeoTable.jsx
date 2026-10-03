@@ -15,7 +15,7 @@ export default function NeoTable({ columns, data, isLoading, emptyText = "Tidak 
   // Guard: kalau data bukan array (undefined/null dari API), jadikan [] dulu
   const rows = Array.isArray(data) ? data : [];
   return (
-    <div className="border-2 border-brand-black overflow-hidden" style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+    <div className="border-2 border-brand-black overflow-hidden" style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm">
           {/* Header tabel */}

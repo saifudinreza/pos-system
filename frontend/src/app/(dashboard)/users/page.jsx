@@ -57,7 +57,7 @@ function UserAvatar({ name }) {
   return (
     <div
       className={`w-9 h-9 ${colorCls} border-2 border-brand-black flex items-center justify-center font-black text-xs shrink-0`}
-      style={{ boxShadow: "1px 1px 0 #0A0A0A" }}
+      style={{ boxShadow: "1px 1px 0 var(--ink)" }}
     >
       {initials}
     </div>
@@ -261,7 +261,7 @@ export default function UsersPage() {
   if (denied) return (
     <div className="flex flex-col items-center justify-center py-24 gap-4 page-fade">
       <div className="w-20 h-20 bg-red-100 border-2 border-brand-black flex items-center justify-center"
-        style={{ boxShadow: "4px 4px 0 #0A0A0A" }}>
+        style={{ boxShadow: "4px 4px 0 var(--ink)" }}>
         <ShieldOff size={36} className="text-red-500" strokeWidth={2} />
       </div>
       <h2 className="text-2xl font-black font-grotesk">Akses Ditolak</h2>
@@ -277,7 +277,7 @@ export default function UsersPage() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black font-grotesk">Pengguna</h2>
+          <h2 className="text-h1 font-grotesk">Pengguna</h2>
           <p className="text-sm text-brand-black/50">{meta?.total ?? users.length} pengguna terdaftar</p>
         </div>
         <NeoButton onClick={() => openModal()}>
@@ -309,12 +309,12 @@ export default function UsersPage() {
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari nama atau email..."
           className="flex-1 min-w-[200px] px-3 py-2 text-sm border-2 border-brand-black outline-none focus:border-brand-yellow"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         />
         <select
           onChange={(e) => setFilters((p) => ({ ...p, role: e.target.value, page: 1 }))}
           className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         >
           <option value="">Semua Role</option>
           <option value="admin">Admin</option>
@@ -325,7 +325,7 @@ export default function UsersPage() {
         <select
           onChange={(e) => setFilters((p) => ({ ...p, is_active: e.target.value, page: 1 }))}
           className="px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white"
-          style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         >
           <option value="">Semua Status</option>
           <option value="true">Aktif</option>
@@ -345,7 +345,7 @@ export default function UsersPage() {
               onClick={() => setFilters((prev) => ({ ...prev, page: p }))}
               className={`w-9 h-9 text-sm font-bold border-2 border-brand-black
                 ${p === meta.current_page ? "bg-brand-yellow" : "bg-white hover:bg-brand-yellow/30"}`}
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >
               {p}
             </button>
@@ -411,7 +411,7 @@ export default function UsersPage() {
           {/* Self-edit warning */}
           {modal.data?.id === currentUser?.id && (
             <div className="flex items-center gap-2 bg-brand-yellow/40 border-2 border-brand-black p-3"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}>
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}>
               <span className="text-sm font-bold">Kamu sedang mengedit akunmu sendiri.</span>
             </div>
           )}
@@ -463,7 +463,7 @@ export default function UsersPage() {
               onChange={(e) => setForm((p) => ({ ...p, role: e.target.value }))}
               disabled={modal.data?.id === currentUser?.id}
               className="w-full px-3 py-2 text-sm border-2 border-brand-black outline-none bg-white focus:border-brand-yellow disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >
               <option value="kasir">Kasir</option>
               <option value="admin">Admin</option>
@@ -483,7 +483,7 @@ export default function UsersPage() {
               disabled={modal.data?.id === currentUser?.id}
               onClick={() => setForm((p) => ({ ...p, is_active: !p.is_active }))}
               className={`shrink-0 w-14 h-8 border-2 border-brand-black transition-colors relative outline-none flex items-center disabled:opacity-50 disabled:cursor-not-allowed ${form.is_active ? "bg-brand-yellow" : "bg-brand-gray"}`}
-              style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+              style={{ boxShadow: "2px 2px 0 var(--ink)" }}
             >
               <span
                 className={`block w-5 h-5 bg-white border-2 border-brand-black transition-transform duration-200 ease-in-out ${form.is_active ? "translate-x-7" : "translate-x-1.5"}`}

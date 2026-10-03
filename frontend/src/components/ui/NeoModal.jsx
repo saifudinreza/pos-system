@@ -49,7 +49,7 @@ export default function NeoModal({ isOpen, onClose, title, children, footer, siz
       {/* Kotak modal, stopPropagation agar klik dalam modal tidak tutup modal */}
       <div
         className={`bg-white border-3 border-brand-black rounded-md w-full ${WIDTH[size] ?? WIDTH.md} flex flex-col max-h-[90vh]`}
-        style={{ boxShadow: "6px 6px 0 #0A0A0A" }}
+        style={{ boxShadow: "6px 6px 0 var(--ink)" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b-2 border-brand-black shrink-0">
