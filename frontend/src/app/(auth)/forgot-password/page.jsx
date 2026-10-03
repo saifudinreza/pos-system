@@ -21,6 +21,7 @@ import Link from "next/link";
 import LogoMark from "@/components/brand/LogoMark";
 import authService from "@/services/authService";
 import { getErrorMessage } from "@/lib/utils";
+import { warmUpBackend } from "@/lib/warmup";
 
 const RESEND_SECONDS = 60; // sama dengan jeda kirim ulang di backend
 
@@ -36,6 +37,11 @@ export default function ForgotPasswordPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(0);
+
+  // Bangunkan backend Render diam-diam supaya kirim OTP tidak kena cold start
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
 
   // Hitung mundur tombol "Kirim ulang kode"
   useEffect(() => {

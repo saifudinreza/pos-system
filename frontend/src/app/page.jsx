@@ -23,6 +23,7 @@ import dynamic from "next/dynamic";
 
 import LandingNavbar from "@/components/landing/LandingNavbar";
 import HeroSection   from "@/components/landing/HeroSection";
+import BackendWarmup from "@/components/landing/BackendWarmup";
 
 // Skeleton ringan sebagai placeholder saat chunk section dimuat
 const SectionFallback = () => (
@@ -49,6 +50,9 @@ export default function HomePage() {
     <main className="min-h-screen bg-brand-cream overflow-x-hidden">
       {/* Grid background pattern, tipis */}
       <div className="bg-grid" aria-hidden="true" />
+
+      {/* Bangunkan backend Render di latar belakang (tanpa tampilan) */}
+      <BackendWarmup />
 
       {/* 1. Navbar sticky */}
       <LandingNavbar />
