@@ -7,19 +7,12 @@
 // mengangguk, "iya, ini masalahku", sebelum kita tunjukkan
 // solusinya di section berikutnya.
 //
-// Visual: kartu-kartu "rasa sakit" (pain points) yang muncul
-// berurutan saat scroll. Nuansa sengaja sedikit "berantakan"
-// (rotasi miring, warna alarm) untuk mewakili kekacauan manual.
+// Visual: tiga kartu "rasa sakit" (pain points) yang muncul
+// berurutan saat scroll. Sengaja hanya tiga yang paling kuat dan
+// dibuat lurus supaya cepat dibaca (audit desain, issue #10).
 // ============================================================
 
-import {
-  NotebookPen,
-  PackageX,
-  FileSpreadsheet,
-  Clock4,
-  TrendingDown,
-  HelpCircle,
-} from "lucide-react";
+import { NotebookPen, PackageX, FileSpreadsheet } from "lucide-react";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
 
 // Daftar "rasa sakit" (pain points), tiap objek = satu kartu
@@ -28,37 +21,16 @@ const PAINS = [
     Icon: NotebookPen,
     title: "Catat penjualan manual",
     desc: "Tulis di buku atau Excel satu per satu. Salah hitung, lupa catat, dan rawan selisih kas.",
-    tilt: "-1.5deg",
   },
   {
     Icon: PackageX,
     title: "Stok sering meleset",
     desc: "Baru sadar barang habis saat pelanggan sudah di depan kasir. Reorder telat, omzet hilang.",
-    tilt: "1.2deg",
   },
   {
     Icon: FileSpreadsheet,
     title: "Laporan bikin pusing",
     desc: "Tutup buku tiap malam, rekap manual berjam-jam, dan tetap tidak yakin angkanya benar.",
-    tilt: "-1deg",
-  },
-  {
-    Icon: Clock4,
-    title: "Antrian makin panjang",
-    desc: "Proses transaksi lambat saat ramai. Pelanggan kabur sebelum sempat bayar.",
-    tilt: "1.4deg",
-  },
-  {
-    Icon: TrendingDown,
-    title: "Tidak tahu yang laku",
-    desc: "Produk mana yang untung, mana yang bikin rugi? Keputusan cuma berdasar feeling.",
-    tilt: "-1.3deg",
-  },
-  {
-    Icon: HelpCircle,
-    title: "Data tersebar di mana-mana",
-    desc: "Catatan di HP, nota di laci, stok di kepala. Tidak ada satu sumber kebenaran.",
-    tilt: "1deg",
   },
 ];
 
@@ -68,20 +40,7 @@ const PAINS = [
  */
 export default function ProblemSection() {
   return (
-    <section id="masalah" className="relative z-[1] py-20 px-4 sm:px-6 overflow-hidden">
-      {/* Background Image — sama dengan hero, suasana toko */}
-      <div
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/landing/bacground.jpeg')" }}
-      />
-      {/* Overlay — cream gradient supaya teks tetap terbaca */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(255,251,235,0.88) 0%, rgba(255,251,235,0.82) 50%, rgba(255,251,235,0.90) 100%)",
-        }}
-      />
+    <section id="masalah" className="relative z-[1] py-20 px-4 sm:px-6 overflow-hidden scroll-mt-28">
       {/* Shape parallax dekoratif, melayang berlawanan arah scroll */}
       <Parallax speed={0.5} aria-hidden="true" className="pointer-events-none absolute -left-10 top-24 -z-0">
         <div className="w-28 h-28 bg-[#FF3B3B]/15 border-3 border-[#FF3B3B]/30 rotate-12" />
@@ -117,12 +76,12 @@ export default function ProblemSection() {
         </Reveal>
 
         {/* Grid pain points, muncul berurutan saat scroll */}
-        <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" gap={0.08}>
+        <Stagger className="grid md:grid-cols-3 gap-5" gap={0.08}>
           {PAINS.map((p) => (
             <StaggerItem key={p.title}>
               <div
-                className="h-full bg-white border-3 border-brand-black p-6 flex flex-col gap-3 transition-transform duration-150 hover:rotate-0 hover:-translate-y-1"
-                style={{ boxShadow: "4px 4px 0 #0A0A0A", transform: `rotate(${p.tilt})` }}
+                className="h-full bg-white border-3 border-brand-black p-6 flex flex-col gap-3 transition-transform duration-150 hover:-translate-y-1"
+                style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
               >
                 <div
                   className="w-12 h-12 bg-[#FFE5E5] border-2 border-brand-black flex items-center justify-center"

@@ -5,23 +5,29 @@
 // setelah pelanggan sudah keliling toko. Satu kesempatan terakhir
 // sebelum mereka pergi, harus kuat dan meyakinkan.
 //
-// Desain: Section ini mencolok dengan background hitam +
-// shadow kuning, kontras maksimal supaya tidak terlewat.
+// Desain: background hitam + shadow kuning, kontras maksimal.
+// Satu tombol = satu niat: "Mulai Gratis" (utama), "Lihat Demo"
+// (membuka video), dan tautan kecil "Masuk" untuk yang sudah punya akun.
 //
-// Relasi: Diletakkan setelah Testimoni, sebelum Footer.
-// Tidak ada state atau data, murni UI statis.
+// Relasi: Diletakkan setelah FAQ, sebelum Footer.
 // ============================================================
 
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { Play } from "lucide-react";
 import { Reveal } from "./motion";
+import DemoVideoModal from "./DemoVideoModal";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * CTASection, panggilan aksi terakhir sebelum footer (lihat header file).
- * Tanpa props & state, murni UI statis dalam bungkus animasi Reveal.
+ * State: demoOpen (modal video).
  */
 export default function CTASection() {
+  const [demoOpen, setDemoOpen] = useState(false);
+
   return (
     <section className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray ">
       <div className="max-w-6xl mx-auto rounded-md">
@@ -33,7 +39,6 @@ export default function CTASection() {
           style={{ boxShadow: "8px 8px 0 #FFE500" }}
         >
           {/* Dekorasi latar, titik-titik kecil ala neobrutalist */}
-          {/* Analogi: seperti motif di kemasan produk premium */}
           <div className="absolute inset-0 opacity-5 rounded-md"
             style={{
               backgroundImage: "radial-gradient(circle, #FFE500 1px, transparent 1px)",
@@ -41,54 +46,65 @@ export default function CTASection() {
             }}
           />
 
-          {/* Konten CTA, di atas layer dekorasi */}
           <div className="relative z-10">
-            {/* Label */}
             <div
               className="inline-block bg-brand-yellow text-brand-black border-2 border-brand-yellow px-3 py-1 text-xs font-mono font-black tracking-wider mb-6 rounded-md"
             >
-               MULAI SEKARANG
+              MULAI SEKARANG
             </div>
 
-            {/* Headline CTA, sesimpel dan sekuat mungkin */}
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-grotesk leading-tight mb-4 rounded-md">
               Tingkatkan bisnis kamu
               <br />
               <span className="text-brand-yellow">hari ini juga.</span>
             </h2>
 
-            {/* Sub-teks, hilangkan keraguan terakhir */}
-            <p className="text-white/60 font-medium text-lg max-w-lg mx-auto mb-10 rounded-md">
+            <p className="text-white/75 font-medium text-lg max-w-lg mx-auto mb-10 rounded-md">
               Mulai dari paket Free, tidak perlu kartu kredit. Upgrade ke Pro
               kapan saja saat tokomu butuh QRIS dan laporan lengkap.
             </p>
 
-            {/* Tombol CTA, besar, kuning, mencolok */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center rounded-md">
+            {/* Satu tombol = satu niat */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center rounded-md">
               <Link
                 href="/register"
-                className="btn-shine relative overflow-hidden px-8 py-4 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black text-lg neo-hover inline-block rounded-md"
+                onClick={() => trackEvent("cta_click", { posisi: "cta_akhir", tujuan: "daftar" })}
+                className="btn-shine relative overflow-hidden px-8 py-4 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black text-lg neo-hover inline-block rounded-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-white"
                 style={{ boxShadow: "4px 4px 0 #FFE500" }}
               >
                 Mulai Gratis →
               </Link>
-              <Link
-                href="/login"
-                className="px-8 py-4 bg-transparent text-white border-2 border-white/40 font-bold text-lg hover:border-white hover:bg-white/10 transition-colors inline-block rounded-md"
+              <button
+                type="button"
+                onClick={() => {
+                  trackEvent("cta_click", { posisi: "cta_akhir", tujuan: "demo" });
+                  setDemoOpen(true);
+                }}
+                className="px-8 py-4 bg-transparent text-white border-2 border-white/60 font-bold text-lg hover:border-white hover:bg-white/10 transition-colors inline-flex items-center gap-2 rounded-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                Masuk / Lihat Demo
-              </Link>
+                <Play size={16} fill="currentColor" />
+                Lihat Demo
+              </button>
             </div>
 
-            {/* Trust badges terakhir, pengingat final */}
-            <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm font-semibold text-white/40 rounded-md">
-              <span> Tanpa kartu kredit</span>
-              <span> Paket Free gratis selamanya</span>
-              <span> Upgrade kapan saja</span>
+            <p className="mt-6 text-sm text-white/70 font-medium">
+              Sudah punya akun?{" "}
+              <Link href="/login" className="font-bold text-white underline underline-offset-2">
+                Masuk
+              </Link>
+            </p>
+
+            {/* Jaminan terakhir, kontras dinaikkan agar terbaca di latar hitam */}
+            <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-semibold text-white/70 rounded-md">
+              <span>✓ Tanpa kartu kredit</span>
+              <span>✓ Paket Free gratis selamanya</span>
+              <span>✓ Upgrade kapan saja</span>
             </div>
           </div>
         </Reveal>
       </div>
+
+      <DemoVideoModal open={demoOpen} onClose={() => setDemoOpen(false)} />
     </section>
   );
 }
