@@ -16,6 +16,12 @@
 //   Browser minta halaman baru → browser kirim Cookie ke Next.js server
 //   Middleware baca Cookie → boleh masuk atau tidak
 //
+// KHUSUS /dev/* (Developer Portal): selain punya token, PERAN user diverifikasi
+// ke backend (GET /me) di sini, di server. Peran TIDAK dibaca dari cookie atau
+// localStorage karena keduanya bisa diubah user. Hasil bukan "developer",
+// backend tidak menjawab, atau timeout → ditolak (fail closed). Selain itu
+// semua endpoint API /dev/* tetap dikunci role:developer di backend.
+//
 // Relasi:
 //   - middleware.js ← membaca cookie "token" yang diset oleh authService.js
 //   - authService.js → setTokenCookie() setiap login/register
@@ -33,7 +39,36 @@ const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password"];
 // (tidak di-redirect ke /dashboard seperti PUBLIC_ROUTES lainnya)
 const OPEN_ROUTES = ["/kebijakan-privasi", "/syarat-ketentuan"];
 
-export function middleware(request) {
+// Alamat API (di-inline Next.js saat build dari NEXT_PUBLIC_API_URL, mis. https://x.onrender.com/api)
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+/**
+ * isDeveloper, tanya backend siapa pemilik token ini (GET /me), lalu cek
+ * role === "developer" dan akun aktif. Tidak pernah melempar error:
+ * semua kegagalan dianggap "bukan developer".
+ */
+async function isDeveloper(token) {
+  if (!API_URL) return false;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 8000); // cold start Render bisa lambat
+  try {
+    const res = await fetch(`${API_URL}/me`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    if (!res.ok) return false;
+    const body = await res.json();
+    const user = body?.data ?? body?.user ?? body;
+    return user?.role === "developer" && user?.is_active !== false;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function middleware(request) {
   const { pathname } = request.nextUrl;
 
   // Baca cookie "token", ini yang diset saat login di authService.js
@@ -53,9 +88,8 @@ export function middleware(request) {
     r === "/" ? pathname === "/" : pathname.startsWith(r)
   );
 
-  // /dev/* memerlukan login, tapi kontrol akses lebih detail
-  // ditangani di dalam dev layout sendiri (bukan di sini)
-  const isDev   = pathname.startsWith("/dev");
+  // /dev/* = Developer Portal: wajib login DAN berperan developer (diverifikasi ke backend)
+  const isDev   = pathname === "/dev" || pathname.startsWith("/dev/");
   // /kasir memerlukan login (kasir dan admin saja)
   const isKasir = pathname === "/kasir";
 
@@ -66,9 +100,15 @@ export function middleware(request) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  // Kasus 1b: /dev/* hanya untuk akun berperan developer.
+  // Non-developer dialihkan ke /dashboard (bukan ke halaman yang membocorkan adanya portal).
+  if (isDev && !(await isDeveloper(token))) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   // Kasus 2: sudah punya token DAN minta halaman publik
   // → Redirect ke /dashboard (sudah login, tidak perlu login lagi)
-  // Pengecualian: /dev tidak di-redirect (developer perlu akses dev tools)
+  // (/dev bukan halaman publik; dijaga di Kasus 1b)
   // Contoh: user sudah login tapi buka /login lagi → /dashboard
   if (token && isPublic && !isDev) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
