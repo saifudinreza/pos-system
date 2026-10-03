@@ -59,8 +59,8 @@ export default function CTASection() {
 
             {/* Sub-teks, hilangkan keraguan terakhir */}
             <p className="text-white/60 font-medium text-lg max-w-lg mx-auto mb-10 rounded-md">
-              Bergabung dengan 2.000+ pebisnis yang sudah merasakan manfaat KasirAI.
-              Gratis 14 hari, tidak perlu kartu kredit.
+              Mulai dari paket Free, tidak perlu kartu kredit. Upgrade ke Pro
+              kapan saja saat tokomu butuh QRIS dan laporan lengkap.
             </p>
 
             {/* Tombol CTA, besar, kuning, mencolok */}
@@ -70,7 +70,7 @@ export default function CTASection() {
                 className="btn-shine relative overflow-hidden px-8 py-4 bg-brand-yellow text-brand-black border-2 border-brand-yellow font-black text-lg neo-hover inline-block rounded-md"
                 style={{ boxShadow: "4px 4px 0 #FFE500" }}
               >
-                Coba Gratis 14 Hari →
+                Mulai Gratis →
               </Link>
               <Link
                 href="/login"
@@ -83,9 +83,8 @@ export default function CTASection() {
             {/* Trust badges terakhir, pengingat final */}
             <div className="mt-8 flex flex-wrap justify-center gap-6 text-sm font-semibold text-white/40 rounded-md">
               <span> Tanpa kartu kredit</span>
-              <span> Batalkan kapan saja</span>
-              <span> Support 7 hari seminggu</span>
-              <span> Setup dalam 5 menit</span>
+              <span> Paket Free gratis selamanya</span>
+              <span> Upgrade kapan saja</span>
             </div>
           </div>
         </Reveal>

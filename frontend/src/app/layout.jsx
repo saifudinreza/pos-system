@@ -31,7 +31,7 @@ export const metadata = {
     template: "%s | KasirAI",
   },
   description:
-    "Kasir POS + AI Assistant yang jawab pertanyaan bisnismu, \"produk apa paling laku?\" langsung dijawab AI. Kelola stok, transaksi, pajak otomatis, & laporan PDF/Excel. QRIS, kartu, transfer. Coba gratis 14 hari, tanpa kartu kredit.",
+    "Kasir POS + AI Assistant yang jawab pertanyaan bisnismu, \"produk apa paling laku?\" langsung dijawab AI. Kelola stok, transaksi, pajak otomatis, & laporan PDF/Excel. QRIS, kartu, transfer. Mulai gratis, tanpa kartu kredit.",
   keywords: [
     "pos system", "kasir online", "software kasir", "manajemen stok",
     "laporan penjualan", "AI assistant", "kasir pintar", "point of sale",
@@ -58,13 +58,13 @@ export const metadata = {
     siteName: "KasirAI",
     title: "KasirAI, Kasir yang Ngerti Bisnis Kamu",
     description:
-      "Tanya \"produk apa paling laku bulan ini?\", AI Assistant KasirAI langsung jawab. Kelola stok, transaksi, pajak otomatis, & laporan PDF/Excel dalam satu platform. Coba gratis 14 hari.",
+      "Tanya \"produk apa paling laku bulan ini?\", AI Assistant KasirAI langsung jawab. Kelola stok, transaksi, pajak otomatis, & laporan PDF/Excel dalam satu platform. Mulai gratis.",
     // ↑ Gambar og:image di-generate otomatis oleh app/opengraph-image.js, tidak perlu didaftarkan manual di sini
   },
   twitter: {
     card: "summary_large_image",
     title: "KasirAI, Kasir yang Ngerti Bisnis Kamu",
-    description: "AI Assistant jawab \"produk apa paling laku?\" dalam hitungan detik. Kelola stok, kasir, laporan otomatis. Coba gratis 14 hari!",
+    description: "AI Assistant jawab \"produk apa paling laku?\" dalam hitungan detik. Kelola stok, kasir, laporan otomatis. Mulai gratis!",
     creator: "@kasiraai",
   },
   alternates: {
@@ -91,7 +91,7 @@ export default function RootLayout({ children }) {
       "@type": "Offer",
       price: "0",
       priceCurrency: "IDR",
-      description: "Gratis 14 hari, tidak perlu kartu kredit",
+      description: "Paket Free gratis selamanya, tidak perlu kartu kredit",
     },
   };
 

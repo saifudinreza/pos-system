@@ -31,7 +31,7 @@ const BENEFITS = [
   {
     Icon: Zap,
     title: "Jawaban instan",
-    desc: "Ditenagai Groq LPU, respon dalam hitungan detik, bukan menit.",
+    desc: "Jawaban dalam hitungan detik, bukan menit.",
   },
   {
     Icon: Database,
@@ -150,7 +150,7 @@ export default function AISpotlightSection() {
             className="inline-flex items-center gap-2 bg-brand-yellow text-brand-black px-3 py-1 text-xs font-mono font-black tracking-wider mb-5 border-2 border-brand-yellow rounded-md"
           >
             <span className="inline-block w-2 h-2 rounded-full bg-[#00C27C] animate-pulse" />
-             PEMBEDA UTAMA · GROQ AI
+             PEMBEDA UTAMA · AI ASSISTANT
           </div>
 
           <h2 className="text-4xl sm:text-5xl lg:text-[3.4rem] font-black tracking-tight font-grotesk leading-[0.98] rounded-md">
@@ -192,7 +192,7 @@ export default function AISpotlightSection() {
               Coba AI Assistant →
             </Link>
             <span className="font-mono text-xs text-white/40 tracking-wider rounded-md">
-              Powered by Groq · LLaMA 3.3 70B
+              Paket Free: 5 pertanyaan AI per bulan
             </span>
           </div>
         </Reveal>
@@ -211,7 +211,7 @@ export default function AISpotlightSection() {
               </div>
               <div className="flex items-center gap-1.5 font-mono text-[10px] text-white/40">
                 <Zap size={11} className="text-brand-yellow" />
-                Groq · 0.4s
+                Contoh percakapan
               </div>
             </div>
 

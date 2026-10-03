@@ -374,3 +374,14 @@
 - **Narasi masih PLACEHOLDER** (TTS `id-ID-GadisNeural` via paket tidak resmi `msedge-tts`). **Wajib diganti** (rekaman suara manusia atau TTS berlisensi komersial) sebelum dipublikasikan. Waktu kalimat narasi disimpan di `src/data/vo-timing.json` supaya animasi & caption tersinkron.
 - Teruji: `tsc` bersih, render penuh sukses, frame hasil MP4 dicek, audio dicek (puncak 0,94, tanpa clipping). **Belum didengar/ditonton oleh manusia**, jadi sinkron audio-visual dan kenyaringan belum dikonfirmasi.
 - **TODO owner** (pertanyaan issue #7 bagian 11): sumber suara final & persetujuan naskah, nama merek "KasirAI" (logo) vs "SiKasirAI" (narasi/domain), maskot kura-kura (tidak dipakai), lokasi unggah video final, review draf.
+
+---
+
+## 3 Oktober 2026, Audit desain: P0 kepercayaan & kebenaran klaim (issue #10)
+
+- **Klaim yang tidak sesuai kode dihapus/dibetulkan** di landing: "trial 14 hari" (tidak ada fitur trial, backend `is_trial => false`), "2.000+ pebisnis", "Multi-Outlet" (diganti kartu "Struk ke WhatsApp" yang memang ada), "Support 7 hari seminggu", "Setup 5 menit", nama model AI ("Groq/LLaMA") di UI pengguna (kini hanya tampil untuk developer), badge "Sistem berjalan normal" (statis), serta teks "14 hari" di meta SEO & JSON-LD (`app/layout.jsx`).
+- **Halaman baru**: `/kebijakan-privasi` dan `/syarat-ketentuan` (route group `app/(legal)`, komponen `components/legal/LegalPage.jsx`), ditambahkan ke `OPEN_ROUTES` di `middleware.js` (tidak di-redirect walau sudah login) dan `sitemap.js`. **Isi masih DRAF** dari alur data aplikasi, wajib ditinjau owner/penasihat hukum.
+- **FAQ**: `components/landing/FAQSection.jsx` (`#faq`, 8 pertanyaan, semua jawaban dicek ke kode). Link footer yang `href="#"` diganti link nyata; "Dokumentasi" & "Status" dihapus.
+- Kontak dipusatkan di `src/lib/contact.js`.
+- **Belum dikerjakan (butuh keputusan owner)**: testimoni (komponen `TestimonialsSection` tidak dipasang di `page.jsx`, jadi tidak tampil), email resmi domain (P0-9), nama merek KasirAI vs SiKasirAI, klaim fitur Enterprise (lintas cabang, API kustom, training on-site) & "outlet" di halaman Profil, kebijakan pembatalan/refund.
+- **Temuan di luar issue**: tidak ada proses otomatis yang menurunkan paket saat langganan berakhir (`expires_at` hanya dipakai untuk tampilan status). Perlu diputuskan apakah user kembali ke Free otomatis.

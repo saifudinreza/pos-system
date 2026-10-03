@@ -111,7 +111,7 @@ export default function HowItWorksSection() {
 
             <p className="text-brand-black/60 font-medium leading-relaxed mb-8 max-w-sm">
               Tidak perlu pelatihan khusus. Tidak perlu tim IT. Siapapun
-              bisa setup KasirAI sendiri dalam waktu kurang dari 10 menit.
+              bisa mulai memakai KasirAI sendiri.
             </p>
 
             <div
@@ -120,7 +120,7 @@ export default function HowItWorksSection() {
             >
               <p className="font-black text-lg mb-1">Butuh bantuan setup?</p>
               <p className="text-white/70 text-sm font-medium">
-                Tim support kami siap membantu via WhatsApp & email, 7 hari seminggu.
+                Hubungi kami lewat WhatsApp atau email, kami bantu langkah awalnya.
               </p>
               <a
                 href="https://wa.me/6281294508057?text=Halo%20KasirAI%2C%20saya%20butuh%20bantuan%20setup%20aplikasi."

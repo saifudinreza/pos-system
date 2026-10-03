@@ -6,19 +6,14 @@
 //   - CTA strip: "Ada pertanyaan?" → tombol Email & WhatsApp
 //   - Grid utama: brand column (logo, tagline, kontak, sosmed)
 //     + 3 grup link (Produk, Dukungan, Legal)
-//   - Bottom bar: copyright, status sistem, versi
+//   - Bottom bar: copyright dan catatan pembayaran
 //
 // Kontak & sosmed dikonfigurasi lewat konstanta CONTACT di bawah.
 // ============================================================
 
+import Link from "next/link";
 import LogoMark from "@/components/brand/LogoMark";
-
-// ─── Contact & social config, ganti sesuai data bisnis kamu ────
-const CONTACT = {
-  email:     "donojomi@gmail.com",
-  whatsapp:  "6281294508057", // ganti dengan nomor WA kamu (format: 62xxx tanpa +)
-  instagram: "https://instagram.com/zareddicted_",   // ganti dengan akun Instagram kamu
-};
+import { CONTACT } from "@/lib/contact"; // kontak dipusatkan di src/lib/contact.js
 
 // ─── SVG Icons ──────────────────────────────────────────────────
 const IconMail = () => (
@@ -55,24 +50,23 @@ const LINK_GROUPS = [
   {
     title: "Produk",
     links: [
-      { label: "Fitur",      href: "#fitur" },
-      { label: "Harga",      href: "#harga" },
-      { label: "Cara Kerja", href: "#cara-kerja" },
+      { label: "Fitur", href: "/#fitur" },
+      { label: "Harga", href: "/#harga" },
+      { label: "Tanya Jawab (FAQ)", href: "/#faq" },
     ],
   },
   {
     title: "Dukungan",
     links: [
-      { label: "FAQ",          href: "#" },
-      { label: "Dokumentasi",  href: "#" },
-      { label: "Status",       href: "#" },
+      { label: "Tanya Jawab (FAQ)", href: "/#faq" },
+      { label: "Hubungi via WhatsApp", href: `https://wa.me/${CONTACT.whatsapp}`, external: true },
     ],
   },
   {
     title: "Legal",
     links: [
-      { label: "Kebijakan Privasi", href: "#" },
-      { label: "Syarat & Ketentuan", href: "#" },
+      { label: "Kebijakan Privasi", href: "/kebijakan-privasi" },
+      { label: "Syarat & Ketentuan", href: "/syarat-ketentuan" },
     ],
   },
 ];
@@ -201,12 +195,23 @@ export default function LandingFooter() {
               <ul className="space-y-3">
                 {group.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm font-medium text-white/60 hover:text-white hover:translate-x-0.5 transition-all inline-block"
-                    >
-                      {link.label}
-                    </a>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-white/60 hover:text-white hover:translate-x-0.5 transition-all inline-block"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm font-medium text-white/60 hover:text-white hover:translate-x-0.5 transition-all inline-block"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -221,15 +226,9 @@ export default function LandingFooter() {
           <p className="text-xs text-white/35 font-medium text-center sm:text-left">
             © {new Date().getFullYear()} KasirAI by Saifudin Reza. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
-            {/* System status */}
-            <div className="flex items-center gap-1.5 text-xs font-mono text-white/35">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              Sistem berjalan normal
-            </div>
-            {/* Made with love */}
-            <span className="text-xs text-white/20 font-mono">v1.0.0</span>
-          </div>
+          <p className="text-xs text-white/35 font-medium">
+            Pembayaran langganan diproses lewat Midtrans.
+          </p>
         </div>
       </div>
     </footer>
