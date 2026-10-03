@@ -1078,3 +1078,72 @@ input[type="checkbox"]:checked::after {
   font-weight: 900;
   color: #0A0A0A;
 }
+
+/* ============================================================
+   Hero: animasi masuk, idle, dan reduced motion (design.md bagian 8)
+   Dijalankan lewat CSS supaya headline tidak menunggu JS (LCP),
+   dan perangkat tampil walau Framer belum hydrate.
+   Lapisan entrance berakhir di transform none; kemiringan
+   perangkat datang dari lapisan scroll di DeviceStage.jsx.
+   ============================================================ */
+@keyframes hero-up-12 { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes hero-up-16 { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes hero-up-24 { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes hero-tab-in {
+  from { opacity: 0; transform: translateY(60px) rotateY(-21deg) rotateX(8deg) scale(0.92); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes hero-phone-in {
+  from { opacity: 0; transform: translateY(80px) rotateY(24deg) rotateZ(8deg) scale(0.9); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes hero-block-in {
+  from { opacity: 0; transform: rotate(-6deg) scale(0.8); }
+  to   { opacity: 1; transform: rotate(-6deg) scale(1); }
+}
+@keyframes hero-float-8  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes hero-float-12 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.hero-badge-in { animation: hero-up-12 400ms ease-out both; }
+.hero-line-in  { animation: hero-up-24 600ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hero-sub-in   { animation: hero-up-16 500ms ease-out 320ms both; }
+.hero-cta-in   { animation: hero-up-16 500ms ease-out 420ms both; }
+.hero-tab-in   { animation: hero-tab-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both; }
+.hero-phone-in { animation: hero-phone-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) 380ms both; }
+.hero-block-in { animation: hero-block-in 800ms ease-out 150ms both; }
+.hero-float-slow { animation: hero-float-8 6s ease-in-out 1300ms infinite; }
+.hero-float      { animation: hero-float-12 5s ease-in-out 2300ms infinite; }
+
+/* Pola titik tipis di belakang hero, memudar ke tepi */
+.hero-dots {
+  background-image: radial-gradient(#E7E5DC 1.4px, transparent 1.4px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 75% 70% at 60% 45%, #000 30%, transparent 80%);
+  mask-image: radial-gradient(ellipse 75% 70% at 60% 45%, #000 30%, transparent 80%);
+}
+
+/* Mobile: sudut rotasi masuk dibagi dua */
+@media (max-width: 639px) {
+  @keyframes hero-tab-in {
+    from { opacity: 0; transform: translateY(40px) rotateY(-10.5deg) rotateX(4deg) scale(0.92); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes hero-phone-in {
+    from { opacity: 0; transform: translateY(50px) rotateY(12deg) rotateZ(4deg) scale(0.9); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+/* Reduced motion: perangkat langsung di posisi akhir, fade 200ms saja */
+@media (prefers-reduced-motion: reduce) {
+  .hero-tab-in,
+  .hero-phone-in { animation: hero-fade 200ms ease-out both !important; }
+  .hero-badge-in,
+  .hero-line-in,
+  .hero-sub-in,
+  .hero-cta-in,
+  .hero-float-slow,
+  .hero-float { animation: none !important; }
+  .hero-block-in { animation: none !important; transform: rotate(-6deg); }
+}
