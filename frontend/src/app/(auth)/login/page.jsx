@@ -14,6 +14,8 @@
 // Enhancement: Turtle pet loading overlay saat Render backend cold-starting.
 // Overlay menampilkan animasi kura-kura berjalan + tips berganti +
 // progress bar animatif supaya user sabar menunggu server bangun.
+// Overlay hanya muncul kalau /up belum menjawab setelah 800 ms; kalau
+// server tidak terjangkau, form tetap bisa dipakai dengan pesan error.
 // ============================================================
 
 import { useState, useEffect, useCallback } from "react";
@@ -21,6 +23,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import useAuthStore from "@/stores/authStore";
 import { getErrorMessage } from "@/lib/utils";
+import { warmUpBackend } from "@/lib/warmup";
 import LogoMark from "@/components/brand/LogoMark";
 import {
   CheckCircle2,
@@ -262,15 +265,32 @@ export default function LoginPage() {
   const [form, setForm]         = useState({ email: "", password: "" });
   const [error, setError]       = useState("");
   const [serverWarm, setServerWarm] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(true);
+  const [showOverlay, setShowOverlay] = useState(false);
 
   // ── Efek saat halaman terbuka ──
-  // Ping backend saat halaman login terbuka supaya Render "bangun"
-  // sebelum user klik tombol Masuk, mengurangi cold start delay
+  // Bangunkan backend Render lewat /up. Overlay kura-kura baru muncul kalau
+  // server belum menjawab setelah 800 ms, jadi saat server sudah bangun
+  // user langsung melihat form tanpa kedipan overlay.
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/login`, { method: "GET" })
-      .then(() => setServerWarm(true))
-      .catch(() => setServerWarm(true));
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      if (!cancelled) setShowOverlay(true);
+    }, 800);
+
+    warmUpBackend().then(({ ok }) => {
+      if (cancelled) return;
+      clearTimeout(timer);
+      setServerWarm(true);
+      // Form tetap bisa dipakai walau server tidak terjangkau
+      if (!ok) {
+        setError("Server sedang tidak bisa dihubungi. Coba muat ulang halaman dalam beberapa saat.");
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, []);
 
   // Callback saat overlay selesai exit animation
@@ -319,7 +339,7 @@ export default function LoginPage() {
         <motion.div
           className="w-full max-w-md"
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: serverWarm ? 1 : 0.3, y: serverWarm ? 0 : 20 }}
+          animate={{ opacity: showOverlay && !serverWarm ? 0.3 : 1, y: showOverlay && !serverWarm ? 20 : 0 }}
           transition={{ duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }}
         >
 

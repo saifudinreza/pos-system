@@ -352,3 +352,14 @@
 - Helper `tests/Support/DisposableAuthUser.php`: data user/tenant baru per test, dihapus di akhir + `assertDatabaseMissing`, guard DB harus sqlite `:memory:`.
 - Test yang perilakunya belum sesuai ekspektasi **tidak di-commit** (`backend/tests-private/`, di-gitignore); laporan lengkap di `backend/tests/Feature/Auth/TEST_REPORT_AUTH.md` (di-gitignore, privat karena repo publik).
 - **TODO**: tindak lanjuti laporan privat, lalu pindahkan test yang sudah hijau dari `tests-private/` ke `tests/Feature/Auth/`.
+
+---
+
+## 3 Oktober 2026, Kurangi cold start Render (issue #5)
+
+- **Bagian A (keep-alive) AKTIF**: monitor UptimeRobot (HEAD `https://kasirai-backend-56l1.onrender.com/up`, tiap 5 menit, email alert). Jangan tambah monitor kedua. Catatan: URL backend asli ada akhiran `-56l1`, beda dengan komentar di `render.yaml`. **TODO owner**: verifikasi 1 jam (tidak ada event tidur di Render) & cek ada/tidaknya service gratis lain (jatah ±750 jam/bulan).
+- **Bagian B (frontend) selesai**: helper baru `frontend/src/lib/warmup.js` (`warmUpBackend()` → `GET {origin}/up`, tidak pernah throw, dedupe request bersamaan, dianggap hangat 5 menit via `sessionStorage`, timeout 90 dtk; origin diturunkan dari `NEXT_PUBLIC_API_URL`, tidak di-hardcode).
+- Login: ping lama `GET /api/login` (405) diganti `warmUpBackend()`; overlay kura-kura baru muncul kalau `/up` belum menjawab setelah 800 ms; kalau server tidak terjangkau tampil pesan error dan form tetap bisa dipakai.
+- Warm-up diam-diam juga di landing (`components/landing/BackendWarmup.jsx`), register, dan forgot-password.
+- CORS dicek langsung di production: `/up` mengirim `access-control-allow-origin: *`, jadi `fetch` biasa cukup (tanpa `no-cors`).
+- Teruji: `npm run build` sukses; logika `warmup.js` diuji dengan script Node (dedupe, cache 5 menit, gagal, timeout, env kosong). **Belum diuji manual di browser** (T1-T8 di issue #5, terutama T4/T5 untuk tampilan overlay & pesan error).

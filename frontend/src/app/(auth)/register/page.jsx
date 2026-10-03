@@ -20,6 +20,7 @@ import { useSearchParams } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
 import { getErrorMessage } from "@/lib/utils";
 import api from "@/lib/axios";
+import { warmUpBackend } from "@/lib/warmup";
 
 // ── Input Field component ────────────────────────────────────
 /**
@@ -138,6 +139,11 @@ function RegisterForm() {
   // Bersihkan timer debounce kalau komponen di-unmount (hindari setState
   // setelah komponen hilang dari layar)
   useEffect(() => () => clearTimeout(debounceRef.current), []);
+
+  // Bangunkan backend Render diam-diam supaya daftar tidak kena cold start
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
 
   /**
    * handleSubmit, Validasi lokal (konfirmasi password cocok) lalu kirim
