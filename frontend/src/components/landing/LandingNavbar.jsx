@@ -10,6 +10,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import LogoMark from "@/components/brand/LogoMark";
+import { trackEvent } from "@/lib/analytics";
 
 // --- Logo komponen ---
 const Logo = () => (
@@ -30,6 +31,7 @@ const NAV_LINKS = [
   { label: "Fitur",   href: "#fitur" },
   { label: "AI",      href: "#ai" },
   { label: "Harga",   href: "#harga" },
+  { label: "FAQ",     href: "#faq" },
 ];
 
 /**
@@ -92,10 +94,11 @@ export default function LandingNavbar() {
             {/* Tombol Coba Gratis — shine + neo-hover */}
             <Link
               href="/register"
-              className="btn-shine relative px-5 py-2 text-sm font-bold text-brand-black bg-brand-yellow border-2 border-brand-black neo-hover overflow-hidden rounded-md"
-              style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+              onClick={() => trackEvent("cta_click", { posisi: "navbar", tujuan: "daftar" })}
+              className="relative px-5 py-2 text-sm font-bold text-white bg-brand-black border-2 border-brand-black neo-hover overflow-hidden rounded-md focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-brand-black"
+              style={{ boxShadow: "3px 3px 0 #FFFBEB" }}
             >
-              Coba Gratis
+              Mulai Gratis
             </Link>
           </div>
 
@@ -155,11 +158,14 @@ export default function LandingNavbar() {
               </Link>
               <Link
                 href="/register"
-                onClick={handleNavClick}
-                className="btn-shine text-center py-2.5 font-bold bg-brand-yellow border-2 border-brand-black neo-hover text-sm overflow-hidden rounded-md"
-                style={{ boxShadow: "3px 3px 0 #0A0A0A" }}
+                onClick={() => {
+                  trackEvent("cta_click", { posisi: "navbar", tujuan: "daftar" });
+                  handleNavClick();
+                }}
+                className="text-center py-2.5 font-bold text-white bg-brand-black border-2 border-brand-black neo-hover text-sm overflow-hidden rounded-md"
+                style={{ boxShadow: "3px 3px 0 #FFE500" }}
               >
-                Coba Gratis
+                Mulai Gratis
               </Link>
             </div>
           </div>

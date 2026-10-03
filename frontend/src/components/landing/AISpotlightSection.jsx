@@ -107,7 +107,7 @@ export default function AISpotlightSection() {
     <section
       ref={ref}
       id="ai"
-      className="relative z-[1] overflow-hidden bg-brand-black text-white py-24 px-4 sm:px-6 rounded-md"
+      className="relative z-[1] overflow-hidden bg-brand-black text-white py-24 px-4 sm:px-6 rounded-md scroll-mt-28"
     >
       {/* Sorotan radial kuning, "lampu panggung" */}
       <motion.div

@@ -385,3 +385,15 @@
 - Kontak dipusatkan di `src/lib/contact.js`.
 - **Belum dikerjakan (butuh keputusan owner)**: testimoni (komponen `TestimonialsSection` tidak dipasang di `page.jsx`, jadi tidak tampil), email resmi domain (P0-9), nama merek KasirAI vs SiKasirAI, klaim fitur Enterprise (lintas cabang, API kustom, training on-site) & "outlet" di halaman Profil, kebijakan pembatalan/refund.
 - **Temuan di luar issue**: tidak ada proses otomatis yang menurunkan paket saat langganan berakhir (`expires_at` hanya dipakai untuk tampilan status). Perlu diputuskan apakah user kembali ke Free otomatis.
+
+---
+
+## 4 Oktober 2026, Audit desain: P1 konversi landing page (issue #10)
+
+- **Hero**: foto AI (teks acak, hologram) diganti `HeroProductPreview.jsx`, jendela aplikasi contoh 4 tab (Kasir, Struk WhatsApp, Laporan, AI) dengan label "Contoh tampilan, data fiktif Kopi Senja". Foto latar toko dihapus (juga di section Masalah/Fitur), coretan merah tebal diganti `line-through` tipis, statistik "11%/PDF-XLSX/24/7" diganti tiga manfaat nyata (Rp 0, struk WhatsApp otomatis, QRIS paket Pro).
+- **Hierarki CTA**: satu tombol utama hitam per layar ("Mulai Gratis", juga di navbar). Di harga hanya Pro yang hitam. CTA akhir dipisah: Mulai Gratis / Lihat Demo (modal video bersama `DemoVideoModal.jsx`) / tautan kecil Masuk. Kontras teks jaminan dinaikkan.
+- **Masalah**: 6 kartu miring jadi 3 kartu lurus. **Fitur**: 3 utama besar (Kasir+struk WA, Laporan laba, AI hitam) + 3 pendukung ringkas; chip label & panel "Fitur Unggulan AI" (duplikat AI Spotlight) dihapus.
+- **Harga**: **bug diperbaiki**, toggle Tahunan menampilkan Rp 1.290.000 berlabel "/bulan"; kini "/tahun" + setara per bulan + hemat. Label toggle "Hemat 2 bulan", tabel perbandingan Free/Pro/Enterprise (sinkronkan dengan batas di backend), tanda ✓/✕ pada daftar fitur (sebelumnya ikon kosong).
+- `scroll-mt-28` di semua section anchor agar tidak tertutup navbar. Gambar yang tak terpakai (frame1-4, bacground.jpeg) dihapus.
+- **Analytics**: `src/lib/analytics.js` (`trackEvent`, aman jika GA belum termuat). Event terpasang: `landing_view`, `cta_click {posisi, tujuan/paket}`. Event aplikasi (register, pesanan pertama, upgrade) menyusul di PR P1-aplikasi.
+- Diuji: build sukses; hero, fitur, harga bulanan/tahunan dicek di browser desktop; layout HP 390 px dicek lewat iframe (tanpa overflow horizontal).

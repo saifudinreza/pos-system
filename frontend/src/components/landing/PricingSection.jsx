@@ -17,6 +17,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
+import { trackEvent } from "@/lib/analytics";
 
 // Data paket harga, tiap objek = satu paket
 // Harga harus sinkron dengan backend (SubscriptionController::PRICES)
@@ -80,6 +81,50 @@ const PLANS = [
 const formatRupiah = (num) =>
   "Rp " + num.toLocaleString("id-ID");
 
+// Tabel perbandingan singkat. SINKRONKAN dengan batas di backend
+// (Controller::productReadLimits/categoryReadLimits, config/ai.php) dan PLANS di atas.
+const COMPARE_ROWS = [
+  { label: "Produk", free: "Hingga 50", pro: "Tak terbatas", ent: "Tak terbatas" },
+  { label: "Kategori", free: "Hingga 15", pro: "Tak terbatas", ent: "Tak terbatas" },
+  { label: "Pembayaran", free: "Tunai", pro: "Tunai, QRIS, e-wallet, VA, kartu", ent: "Tunai, QRIS, e-wallet, VA, kartu" },
+  { label: "Unduh laporan PDF/Excel", free: "Tidak", pro: "Ya", ent: "Ya" },
+  { label: "Pertanyaan AI", free: "5 per bulan", pro: "10 per hari", ent: "50 per hari" },
+];
+
+/** ComparisonTable, perbandingan Free vs Pro vs Enterprise (bisa digeser di layar kecil). */
+function ComparisonTable() {
+  return (
+    <div className="mt-14">
+      <h3 className="text-center font-grotesk font-black text-2xl text-brand-black mb-5">Bandingkan paket</h3>
+      <div className="overflow-x-auto">
+        <table
+          className="w-full min-w-[640px] bg-white border-3 border-brand-black text-sm"
+          style={{ boxShadow: "4px 4px 0 #0A0A0A" }}
+        >
+          <thead>
+            <tr className="bg-brand-black text-white text-left">
+              <th scope="col" className="p-3 font-bold">Fitur</th>
+              <th scope="col" className="p-3 font-bold">Free</th>
+              <th scope="col" className="p-3 font-bold bg-brand-yellow text-brand-black">Pro</th>
+              <th scope="col" className="p-3 font-bold">Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            {COMPARE_ROWS.map((r) => (
+              <tr key={r.label} className="border-t-2 border-brand-black/15">
+                <th scope="row" className="p-3 text-left font-bold">{r.label}</th>
+                <td className="p-3 font-medium">{r.free}</td>
+                <td className="p-3 font-bold bg-brand-yellow/30">{r.pro}</td>
+                <td className="p-3 font-medium">{r.ent}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 /**
  * PricingCard, satu kartu paket harga (lihat header file).
  *
@@ -142,12 +187,15 @@ const PricingCard = ({ plan, billing }) => {
             <span className="text-4xl font-black text-brand-black font-mono">
               {formatRupiah(price)}
             </span>
-            <span className="text-sm font-semibold text-brand-black/60">/bulan</span>
-            {/* Badge "Hemat": selisih (monthly × 12 − yearly) dibagi 12 → nilai per bulan
-                yang dihemat dibandingkan membayar bulanan */}
+            <span className="text-sm font-semibold text-brand-black/60">
+              {billing === "yearly" ? "/tahun" : "/bulan"}
+            </span>
+            {/* Tahunan = ditagih sekali setahun. Tampilkan setara per bulan dan
+                nilai hemat (monthly × 12 − yearly) dibanding membayar bulanan */}
             {billing === "yearly" && (
-              <div className="mt-1 text-xs font-bold text-green-700 bg-green-100 px-2 py-0.5 inline-block">
-                Hemat {formatRupiah(Math.round((plan.price.monthly * 12 - plan.price.yearly) / 12))}/bln
+              <div className="mt-1 text-xs font-bold text-green-800 bg-green-100 border border-green-300 px-2 py-0.5 inline-block">
+                Setara {formatRupiah(Math.round(plan.price.yearly / 12))}/bulan · hemat{" "}
+                {formatRupiah(plan.price.monthly * 12 - plan.price.yearly)}
               </div>
             )}
           </>
@@ -155,15 +203,17 @@ const PricingCard = ({ plan, billing }) => {
       </div>
 
       {/* Tombol CTA plan ini */}
+      {/* Hanya paket sorotan (Pro) yang hitam = tombol utama; sisanya putih */}
       <Link
         href={plan.ctaHref}
-        className={`block text-center py-3 font-bold border-2 border-brand-black mb-6 transition-all
+        onClick={() => trackEvent("cta_click", { posisi: "pricing", paket: plan.name.toLowerCase() })}
+        className={`block text-center py-3 font-bold border-2 border-brand-black mb-6 transition-all focus-visible:outline focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-brand-black
           ${plan.highlighted
             ? "bg-brand-black text-white hover:bg-brand-black/90"
-            : "bg-brand-yellow hover:bg-brand-yellow/90"
+            : "bg-white hover:bg-brand-yellow/50"
           }
         `}
-        style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+        style={{ boxShadow: plan.highlighted ? "3px 3px 0 #FFFBEB" : "2px 2px 0 #0A0A0A" }}
       >
         {plan.cta} →
       </Link>
@@ -172,13 +222,13 @@ const PricingCard = ({ plan, billing }) => {
       <ul className="space-y-2.5 flex-1">
         {plan.features.map((f) => (
           <li key={f} className="flex items-start gap-2 text-sm font-medium text-brand-black">
-            <span className="shrink-0 font-black text-green-600"></span> {f}
+            <span aria-hidden="true" className="shrink-0 font-black text-green-700">✓</span> {f}
           </li>
         ))}
         {/* Fitur yang tidak tersedia */}
         {plan.missing.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm font-medium text-brand-black/30 line-through">
-            <span className="shrink-0"></span> {f}
+          <li key={f} className="flex items-start gap-2 text-sm font-medium text-brand-black/50 line-through">
+            <span aria-hidden="true" className="shrink-0 no-underline">✕</span> {f}
           </li>
         ))}
       </ul>
@@ -196,7 +246,7 @@ export default function PricingSection() {
   const [billing, setBilling] = useState("monthly");
 
   return (
-    <section id="harga" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray overflow-hidden">
+    <section id="harga" className="relative z-[1] py-20 px-4 sm:px-6 bg-brand-gray overflow-hidden scroll-mt-28">
       {/* Shape parallax dekoratif */}
       <Parallax speed={-0.45} aria-hidden="true" className="pointer-events-none absolute left-4 top-24 -z-0">
         <div className="w-20 h-20 bg-brand-yellow/25 border-3 border-brand-black/15 rotate-6" />
@@ -251,7 +301,7 @@ export default function PricingSection() {
               Tahunan
               {/* Badge hemat, insentif memilih tahunan */}
               <span className="bg-green-400 text-green-900 text-[10px] font-black px-1.5 py-0.5 border border-green-600">
-                HEMAT
+                Hemat 2 bulan
               </span>
             </button>
           </div>
@@ -266,7 +316,9 @@ export default function PricingSection() {
           ))}
         </Stagger>
 
-        {/* Catatan garansi di bawah, mengurangi kekhawatiran */}
+        <ComparisonTable />
+
+        {/* Catatan di bawah tabel */}
         <div className="text-center mt-10 text-sm text-brand-black/50 font-medium">
           Paket Free gratis selamanya &nbsp;·&nbsp; Upgrade kapan saja &nbsp;·&nbsp; Pembayaran langganan lewat Midtrans
         </div>
