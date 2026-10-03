@@ -5,7 +5,7 @@
 //   1. Hero        → value proposition + entrance bold
 //   2. Problem     → ribetnya kelola toko manual
 //   3. Solution    → fitur POS (di-reveal saat scroll)
-//   4. AI Spotlight→ sorotan pembeda: AI sidebar (Groq)
+//   4. AI Spotlight→ sorotan pembeda: AI sidebar
 //   5. Pricing     → pilihan paket
 //   6. CTA         → ajakan login / demo
 //   7. Footer      → info & link
@@ -42,6 +42,7 @@ const ProblemSection     = dynamic(() => import("@/components/landing/ProblemSec
 const FeaturesSection    = dynamic(() => import("@/components/landing/FeaturesSection"),    { loading: SectionFallback });
 const AISpotlightSection = dynamic(() => import("@/components/landing/AISpotlightSection"), { loading: SectionFallback });
 const PricingSection     = dynamic(() => import("@/components/landing/PricingSection"),     { loading: SectionFallback });
+const FAQSection         = dynamic(() => import("@/components/landing/FAQSection"),         { loading: SectionFallback });
 const CTASection         = dynamic(() => import("@/components/landing/CTASection"));
 const LandingFooter      = dynamic(() => import("@/components/landing/LandingFooter"));
 
@@ -66,16 +67,19 @@ export default function HomePage() {
       {/* 4. Solution, fitur POS, di-reveal saat scroll */}
       <FeaturesSection />
 
-      {/* 5. AI Spotlight, pembeda utama (Groq) */}
+      {/* 5. AI Spotlight, pembeda utama (AI Assistant) */}
       <AISpotlightSection />
 
       {/* 6. Pricing, pilihan paket */}
       <PricingSection />
 
-      {/* 7. CTA, ajakan login / demo */}
+      {/* 7. FAQ, jawab keraguan sebelum daftar */}
+      <FAQSection />
+
+      {/* 8. CTA, ajakan login / demo */}
       <CTASection />
 
-      {/* 8. Footer */}
+      {/* 9. Footer */}
       <LandingFooter />
     </main>
   );

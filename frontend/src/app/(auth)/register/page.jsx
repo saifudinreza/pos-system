@@ -173,7 +173,7 @@ function RegisterForm() {
     }
   };
 
-  const planLabel = { free: "Free Trial", pro: "Pro", enterprise: "Enterprise" }[plan] ?? "Free";
+  const planLabel = { free: "Free", pro: "Pro", enterprise: "Enterprise" }[plan] ?? "Free";
 
   // ── Render: form registrasi + indikator tenant ──
   return (

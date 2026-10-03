@@ -252,9 +252,9 @@ export default function AISidebar({ isOpen, onClose, alwaysVisible = false, isDe
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <p className="text-[10px] text-white/40 font-mono">
-              {isOpenRouter ? "Fallback: OpenRouter LLaMA 3.1" : "Powered by Groq LLaMA 3.3"}
+              {isDev ? (isOpenRouter ? "Fallback: OpenRouter LLaMA 3.1" : "Powered by Groq LLaMA 3.3") : "Asisten bisnis untuk tokomu"}
             </p>
-            {isOpenRouter && (
+            {isDev && isOpenRouter && (
               <span className="text-[8px] bg-purple-400 text-white font-black px-1.5 py-0.5 font-mono animate-pulse">
                 FALLBACK
               </span>

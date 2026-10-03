@@ -32,7 +32,7 @@ const PLANS = [
       "Kasir & manajemen pesanan",
       "Shift & rekonsiliasi kas",
       "Laporan harian & bulanan",
-      "5 prompt AI/bulan (trial)",
+      "5 prompt AI/bulan",
     ],
     missing:     ["Pembayaran QRIS/digital", "Export laporan PDF/Excel", "Kuota AI harian"],
     cta:         "Mulai Gratis",
@@ -221,7 +221,7 @@ export default function PricingSection() {
             untuk bisnis kamu
           </h2>
           <p className="text-brand-black/60 font-medium max-w-md mx-auto">
-            Semua paket termasuk free trial 14 hari. Tidak perlu kartu kredit.
+            Mulai dari paket Free tanpa kartu kredit. Upgrade ke Pro kapan saja.
           </p>
 
           {/* Toggle bulanan / tahunan
@@ -268,7 +268,7 @@ export default function PricingSection() {
 
         {/* Catatan garansi di bawah, mengurangi kekhawatiran */}
         <div className="text-center mt-10 text-sm text-brand-black/50 font-medium">
-          Semua paket termasuk  14 hari free trial &nbsp;·&nbsp;  Batalkan kapan saja &nbsp;·&nbsp;  Tanpa biaya tersembunyi
+          Paket Free gratis selamanya &nbsp;·&nbsp; Upgrade kapan saja &nbsp;·&nbsp; Pembayaran langganan lewat Midtrans
         </div>
       </div>
     </section>

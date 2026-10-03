@@ -13,7 +13,7 @@ import {
   BrainCircuit,
   BarChart3,
   Package,
-  Building2,
+  MessageCircle,
   Wallet,
 } from "lucide-react";
 import { Reveal, Stagger, StaggerItem, Parallax } from "./motion";
@@ -40,7 +40,7 @@ const FEATURES = [
   {
     Icon:        BarChart3,
     title:       "Laporan Otomatis",
-    description: "Laporan penjualan, laba-rugi, dan stok dibuat otomatis. Tidak perlu Excel lagi.",
+    description: "Laporan penjualan, laba kotor, dan stok dibuat otomatis. Unduh PDF atau Excel dengan paket Pro.",
     tag:         "Laporan",
     tagColor:    "bg-brand-yellow",
     iconBg:      "bg-brand-yellow",
@@ -48,23 +48,23 @@ const FEATURES = [
   {
     Icon:        Package,
     title:       "Manajemen Stok Real-time",
-    description: "Stok berkurang otomatis setiap transaksi. Dapat notifikasi saat stok hampir habis.",
+    description: "Stok berkurang otomatis setiap transaksi. Produk menipis dan habis langsung terlihat, lengkap dengan riwayat pergerakan stok.",
     tag:         "Stok",
     tagColor:    "bg-brand-yellow",
     iconBg:      "bg-brand-yellow",
   },
   {
-    Icon:        Building2,
-    title:       "Multi-Outlet",
-    description: "Kelola banyak cabang dari satu dashboard. Lihat performa setiap outlet dalam satu layar.",
-    tag:         "Outlet",
+    Icon:        MessageCircle,
+    title:       "Struk ke WhatsApp",
+    description: "Begitu pembayaran lunas, struk digital terkirim otomatis ke WhatsApp pelanggan.",
+    tag:         "Struk",
     tagColor:    "bg-brand-yellow",
     iconBg:      "bg-brand-yellow",
   },
   {
     Icon:        Wallet,
     title:       "Berbagai Metode Bayar",
-    description: "Terima tunai, QRIS, transfer bank, kartu debit/kredit. Semua terintegrasi otomatis.",
+    description: "Terima tunai, atau QRIS, e-wallet, transfer bank (Virtual Account), dan kartu kredit lewat Midtrans dengan paket Pro.",
     tag:         "Pembayaran",
     tagColor:    "bg-brand-yellow",
     iconBg:      "bg-brand-yellow",

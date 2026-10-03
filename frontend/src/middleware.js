@@ -29,6 +29,10 @@ import { NextResponse } from "next/server";
 // "/forgot-password" = lupa password (minta kode OTP lalu ganti password)
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password"];
 
+// Halaman hukum: bisa dibuka SIAPA PUN, termasuk yang sudah login
+// (tidak di-redirect ke /dashboard seperti PUBLIC_ROUTES lainnya)
+const OPEN_ROUTES = ["/kebijakan-privasi", "/syarat-ketentuan"];
+
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
@@ -37,6 +41,11 @@ export function middleware(request) {
   // Sanitasi: anggap tidak ada token kalau nilainya "undefined" atau "null" (string)
   // Ini bisa terjadi kalau ada bug saat simpan token sebelumnya
   const token = raw && raw !== "undefined" && raw !== "null" ? raw : null;
+
+  // Halaman hukum selalu lolos tanpa pengecekan token
+  if (OPEN_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"))) {
+    return NextResponse.next();
+  }
 
   // Cek apakah halaman yang diminta adalah halaman publik
   // "/" perlu exact match, yang lain cukup startsWith (misal /login/reset tetap masuk PUBLIC)
