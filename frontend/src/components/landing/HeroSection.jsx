@@ -466,10 +466,9 @@ export default function HeroSection() {
               {/* Video Player */}
               <div className="relative aspect-video w-full bg-black">
                 <video
-                  src="/landing/dreamina-2026-09-12-6380-The camera smoothly pans down from the h.mp4"
+                  src="/landing/sikasirai-demo.mp4"
                   controls
                   autoPlay
-                  loop
                   playsInline
                   className="w-full h-full object-contain"
                 />
