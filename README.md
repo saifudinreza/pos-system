@@ -52,7 +52,10 @@ Kebanyakan project bootcamp berhenti di CRUD. KasirAI melangkah lebih jauh ke ar
 | Shift management per-tenant, custom time range + realtime enforcement |  |
 | Landing page marketing dengan Framer Motion (parallax, reveal, stagger) |  |
 | Server-side WhatsApp proxy (token tidak expose ke browser) |  |
+| Job queue async untuk AI, struk WhatsApp & email OTP |  |
+| Rate limiting global + throttle per-route (login, AI, OTP) |  |
 | E2E Testing dengan TestSprite (20/20 PASSED) |  |
+| Unit & security test backend (PHPUnit + Pest): SQLi, XSS, brute force, CSRF, dll |  |
 
 ---
 
@@ -80,15 +83,18 @@ Kebanyakan project bootcamp berhenti di CRUD. KasirAI melangkah lebih jauh ke ar
 | **DomPDF** | Generate laporan PDF server-side |
 | **Maatwebsite Excel** | Export data ke .xlsx |
 | **Midtrans PHP SDK** | Payment gateway, transaksi kasir & subscription billing |
+| **Laravel Queue** (database driver, Redis opsional) | Job async: panggilan AI, struk WhatsApp, email OTP |
+| **PHPUnit 12 + Pest 4** | Unit, feature & security test (SQLite in-memory) |
 
 ### Infrastructure & Services
 | | Platform / Service |
 |---|---|
 | Frontend | **Vercel** + Speed Insights |
-| Backend | **Render** (Docker + Nginx + PHP-FPM) |
-| Database | **TiDB Cloud MySQL** |
-| AI Primary | **Groq API**, LLaMA 3.3 70B (gratis & cepat) |
-| AI Fallback | **OpenRouter**, LLaMA 3.1 8B (auto-switch) |
+| Backend | **Render** (Docker + Nginx + PHP-FPM, region Singapore, blueprint `render.yaml`) |
+| Database | **TiDB Cloud** (MySQL-compatible, koneksi TLS) |
+| AI Primary | **Groq API**, default `openai/gpt-oss-20b` (bisa diganti via env `GROQ_MODEL`) |
+| AI Fallback | **OpenRouter**, default `poolside/laguna-s-2.1:free` (auto-switch saat Groq rate limit) |
+| Email | **Resend** (HTTPS API), OTP lupa password dari `noreply@sikasirai.com` |
 | Payment | **Midtrans Snap (Production)**, QRIS, GoPay, OVO, VA, kartu kredit |
 | Storage | **Cloudflare R2**, upload & serve foto produk (S3-compatible) |
 | WhatsApp | **Fonnte API**, struk digital otomatis |
@@ -195,7 +201,7 @@ Selisih     =  Saldo Fisik (dari hitung pecahan) − Seharusnya
 
 **Masalah:** Kalau dipanggil langsung dari client, token pihak ketiga bisa dicuri lewat Network tab browser siapa saja.
 
-**Solusi:** Kedua integrasi selalu lewat lapisan server, WhatsApp lewat **Next.js API Route** (token di env server Next.js), Midtrans server key hanya pernah dipakai di controller Laravel, tidak pernah dikirim ke response API.
+**Solusi:** Kedua integrasi selalu lewat lapisan server. Struk WhatsApp otomatis dikirim dari **backend Laravel** lewat job queue (`SendWhatsAppReceipt`) begitu pembayaran lunas, sedangkan kirim ulang manual dari halaman struk lewat **Next.js API Route** (token di env server Next.js). Midtrans server key hanya pernah dipakai di controller Laravel, tidak pernah dikirim ke response API.
 
 ### 8. "Webhook Midtrans untuk tenant yang pakai server key sendiri diam-diam selalu gagal, status transaksi tidak pernah ter-update otomatis."
 
@@ -219,6 +225,18 @@ $notification = new Notification(); // baru verifikasi, SDK panggil API pakai ke
 
 **Solusi:** Hitung 3 rentang waktu sekaligus (hari ini/minggu ini/bulan ini, pakai `whereBetween` bukan `whereMonth`) dan kirim semuanya ke LLM dengan instruksi eksplisit untuk mencocokkan periode sesuai kata di pertanyaan user. Divalidasi dengan skenario nyata: buat transaksi dummy di 3 rentang waktu berbeda, tanya AI satu-satu, pastikan jawabannya berbeda dan sesuai, bukan cuma percaya kode "kelihatan benar".
 
+### 10. "Email OTP lupa password tidak pernah sampai ke user di production."
+
+**Masalah:** Di lokal email lewat SMTP Gmail jalan normal, tapi di production log Render menunjukkan `Unable to connect to smtp.gmail.com:587 (Connection timed out)`. Ternyata Render memblokir port SMTP keluar, jadi masalahnya bukan di App Password atau kode, melainkan di jaringan platform.
+
+**Solusi:** Ganti pengiriman email ke **Resend lewat HTTPS API** (`MAIL_MAILER=resend`), dengan domain `sikasirai.com` diverifikasi di Resend (DKIM, SPF, DMARC di DNS Domainesia). Email dikirim async lewat queue (`ResetPasswordMail implements ShouldQueue`) dengan `$tries` & `$timeout` terbatas, supaya email yang macet tidak menyandera worker yang juga melayani job AI dan WhatsApp.
+
+### 11. "Request AI bisa makan belasan detik, worker PHP tertahan dan request lain ikut lambat."
+
+**Masalah:** Panggilan LLM dan kirim WhatsApp dulu dijalankan langsung di dalam request. Webhook Midtrans ikut menunggu respons Fonnte, dan satu chat AI yang lambat menahan satu worker PHP-FPM.
+
+**Solusi:** Dipindah ke **job queue**. Endpoint AI langsung membalas `202 + job_id`, frontend mem-poll `GET /api/ai/jobs/{id}` sampai selesai. Prompt tetap disusun di controller (yang masih tahu siapa user dan tenant-nya), worker hanya memanggil LLM tanpa menyentuh data tenant, jadi isolasi data tetap aman.
+
 ---
 
 ## Fitur Lengkap
@@ -228,14 +246,20 @@ $notification = new Notification(); // baru verifikasi, SDK panggil API pakai ke
 - Animasi scroll (parallax, reveal, stagger) dengan Framer Motion
 - Alur daftar → pilih paket → dashboard, siap dipakai calon pelanggan asli
 
+### Akun & Lupa Password
+- Lupa password dengan **kode OTP 6 digit** via email (satu halaman: email → OTP + password baru → selesai)
+- OTP disimpan ter-hash, berlaku 10 menit, hangus setelah 5 kali salah, jeda kirim ulang 60 detik
+- Setelah reset, semua token login lama dicabut (harus login ulang di semua perangkat)
+- Pesan respons sama untuk email terdaftar maupun tidak (anti account enumeration)
+
 ### Subscription & Billing (SaaS Model)
 - 3 paket dengan harga **terpusat di backend** (`SubscriptionController::PRICES`), frontend membaca angka yang sama saat initiate, jadi tidak mungkin mis-match:
   - **Free** (Rp 0): 1 outlet, maks. 50 produk & 15 kategori, transaksi tanpa batas, 5 prompt AI/bulan, pembayaran tunai saja (tanpa QRIS/digital, tanpa export PDF/Excel)
-  - **Pro**, Rp 129.000/bulan (Rp 100.000/bulan jika bayar tahunan): produk/kategori unlimited, transaksi tak terbatas, AI Assistant 10 prompt/hari, export laporan PDF/Excel, QRIS & e-wallet
-  - **Enterprise**, Rp 499.000/bulan (Rp 399.000/bulan jika bayar tahunan): semua fitur Pro + AI Assistant 50 prompt/hari, outlet unlimited, API & integrasi kustom, account manager, SLA
+  - **Pro**, Rp 129.000/bulan atau Rp 1.290.000/tahun (2 bulan gratis): produk/kategori unlimited, transaksi tak terbatas, AI Assistant 10 prompt/hari, export laporan PDF/Excel, QRIS & e-wallet
+  - **Enterprise**, Rp 499.000/bulan atau Rp 4.990.000/tahun (2 bulan gratis): semua fitur Pro + AI Assistant 50 prompt/hari, outlet unlimited, API & integrasi kustom, account manager, SLA
 - **Enforcement berlapis**: backend memblokir (QRIS free → 422 `plan_required`, export free → 403, AI free > 5/bulan → 429 `limit_reached`), frontend juga memblokir/menyembunyikan tombolnya
 - **Kasir mengikuti plan admin tenant-nya** (`effective_plan` di response `/me`), bukan plan kolom user sendiri
-- Upgrade paket dibayar langsung via **Midtrans Snap** (bulanan/tahunan, harga tahunan diskon)
+- Upgrade paket dibayar langsung via **Midtrans Snap** (bulanan/tahunan, tahunan = 10× bulanan)
 - Webhook otomatis aktivasi paket + upgrade role user begitu pembayaran `settlement`
 - User bisa batalkan transaksi pending sendiri; developer bisa monitor semua tenant, ubah plan, atau suspend akun dari panel khusus
 
@@ -260,6 +284,8 @@ $notification = new Notification(); // baru verifikasi, SDK panggil API pakai ke
 - Revenue, order, stok kritis, total produk, stat cards real-time
 - Line chart tren 7 hari, bar chart top produk, pie chart metode pembayaran
 - 10 transaksi terbaru
+- **Forecast penjualan 7 hari** (deterministik, rata-rata per hari dari 35 hari terakhir, tanpa LLM)
+- **Wawasan KasirAI**: insight penjualan, stok, dan pelanggan yang ditulis AI, dengan fallback templated kalau AI sedang offline
 
 ### AI Assistant (Sidebar)
 - Chat bahasa Indonesia, tanya apa saja tentang bisnis
@@ -273,11 +299,21 @@ $notification = new Notification(); // baru verifikasi, SDK panggil API pakai ke
 - Filter: hari ini, 7 hari, 30 hari, custom range
 - Download **PDF** & **Excel** (generate di backend)
 - Tab penjualan + tab stok
+- **Laba kotor**: COGS, gross profit, dan margin %, dihitung dari harga modal yang di-snapshot saat transaksi (ikut di export PDF/Excel)
 
 ### Manajemen Produk, Kategori, Pesanan, Transaksi
 - CRUD lengkap + upload foto
+- Harga modal per produk + badge margin %
 - Badge stok: Normal / Menipis / Habis
+- **Riwayat pergerakan stok** (penjualan, pembatalan, restock) dengan snapshot stok sebelum & sesudah
 - Update status order, void, batalkan transaksi
+
+### Pelanggan (CRM ringan)
+- Kasir cukup isi No. HP di POS, pelanggan otomatis dibuat atau dicari (nomor dinormalisasi ke format 62)
+- Halaman `/customers`: daftar pelanggan, total belanja, jumlah order, dan 20 order terakhir per pelanggan
+
+### Audit Log
+- Aksi penting admin tercatat: ubah/hapus produk, restock, ganti role, aktif/nonaktif user, ubah tenant, ganti plan
 
 ### User & Tenant Management, AI Monitoring
 - CRUD user dengan role-based guard (Developer only)
@@ -319,7 +355,14 @@ Diuji menggunakan **TestSprite**, AI testing agent yang menjalankan test end-to-
 | Search produk real-time |  PASSED |
 | Riwayat shift |  PASSED |
 
-**PHPUnit (backend): 22/22 test PASSED** , `php artisan test` di folder `backend/` (memakai SQLite :memory:, termasuk test isolasi tenant AI/report, shift per-tenant, gating plan Free vs Pro (kuota AI harian & bulanan), dan sinkronisasi harga paket).
+**Backend (PHPUnit + Pest): 345/345 test PASSED, 2.239 assertion**. Jalankan dengan `php artisan test` di folder `backend/` (memakai SQLite `:memory:`, tidak menyentuh database asli).
+
+| Kelompok | Yang diuji |
+|---|---|
+| Bisnis & multi-tenant | Isolasi tenant (AI, laporan, produk), shift per-tenant, gating plan Free vs Pro, kuota AI harian & bulanan, sinkronisasi harga paket, COGS/profit, forecast & insight, inventory ledger, daftar pelanggan |
+| Infrastruktur | Job queue (AI & WhatsApp), rate limit global, konfigurasi Redis |
+| Auth (PHPUnit) | Login, register, lupa password via OTP, batas panjang input & karakter khusus, token kedaluwarsa |
+| Security (Pest) | SQL injection, brute force, credential stuffing, CSRF, XSS, token theft, account enumeration, phishing |
 
 ---
 
@@ -339,11 +382,16 @@ cp .env.example .env
 # MIDTRANS_SERVER_KEY=Mid-server-...      # production (SB-Mid-server-... untuk sandbox)
 # MIDTRANS_CLIENT_KEY=Mid-client-...      # production (SB-Mid-client-... untuk sandbox)
 # MIDTRANS_IS_PRODUCTION=true
+# OPENROUTER_API_KEY=sk-or-...            # fallback AI
+# MAIL_MAILER=resend                      # atau "log" untuk lokal
+# RESEND_API_KEY=re_...
+# FRONTEND_URL=http://localhost:3000
 
 php artisan key:generate
 php artisan migrate --seed
 php artisan storage:link
 php artisan serve
+php artisan queue:work   # terminal terpisah, untuk job AI, WhatsApp & email
 ```
 
 ### Frontend (Next.js)
@@ -378,6 +426,9 @@ npm run dev
 | File Upload | Validasi MIME + max 2MB, disimpan di Cloudflare R2 |
 | Gambar Produk | Diproksikan via backend, URL R2 tidak pernah terekspos ke browser |
 | SQL Injection | Eloquent ORM + parameter binding |
+| Rate Limiting | Global 120 req/menit per user & 60 req/menit per IP publik, plus throttle login/register/OTP 5 req/menit dan AI 10 req/menit |
+| Lupa Password | OTP 6 digit ter-hash, kedaluwarsa 10 menit, maks. 5 percobaan, semua token dicabut setelah reset |
+| Diuji otomatis | Test SQLi, XSS, CSRF, brute force, credential stuffing, token theft, account enumeration, phishing |
 
 ---
 
@@ -405,7 +456,8 @@ npm run dev
 `Midtrans Split Payment (Production)` `WhatsApp API` `PDF & Excel Export`
 `Cloudflare R2 (S3-compatible)` `Backend Media Proxy` `Cloud Storage`
 `Shift Management & Cash Reconciliation` `Realtime Time Enforcement`
-`Role-based Access Control` `E2E Testing (TestSprite)` `Docker` `Vercel` `Render`
+`Role-based Access Control` `E2E Testing (TestSprite)` `PHPUnit` `Pest` `Security Testing`
+`Laravel Queue` `Rate Limiting` `Resend Email API` `Docker` `Vercel` `Render` `TiDB Cloud`
 
 ---
 
