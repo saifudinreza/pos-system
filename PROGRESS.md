@@ -397,3 +397,15 @@
 - `scroll-mt-28` di semua section anchor agar tidak tertutup navbar. Gambar yang tak terpakai (frame1-4, bacground.jpeg) dihapus.
 - **Analytics**: `src/lib/analytics.js` (`trackEvent`, aman jika GA belum termuat). Event terpasang: `landing_view`, `cta_click {posisi, tujuan/paket}`. Event aplikasi (register, pesanan pertama, upgrade) menyusul di PR P1-aplikasi.
 - Diuji: build sukses; hero, fitur, harga bulanan/tahunan dicek di browser desktop; layout HP 390 px dicek lewat iframe (tanpa overflow horizontal).
+
+---
+
+## 4 Oktober 2026, Audit desain: P1 aktivasi & upgrade di aplikasi (issue #10)
+
+- **Checklist onboarding** (`components/dashboard/OnboardingChecklist.jsx`) di dashboard: tambah produk, buka shift, transaksi pertama, coba AI (khusus yang punya akses AI). Status dari data nyata (total produk, riwayat shift, pesanan lunas, flag `kasirai_ai_used` di localStorage yang di-set `aiStore`). Hilang otomatis kalau selesai atau ditutup (`kasirai_onboarding_dismissed`).
+- **Empty state Wawasan**: toko tanpa pesanan lunas melihat ajakan "Wawasan muncul setelah transaksi pertama". **Backend** `InsightService::generateForTenant()` kini tidak memanggil LLM dan menghapus insight lama kalau tidak ada transaksi lunas 30 hari terakhir (sumber teks "Revenu minggu ini 0" yang tadi tampil); test baru `test_generate_insight_skips_llm_when_no_recent_sales`.
+- **Upgrade kontekstual**: `stores/upgradeModalStore.js` + `components/ui/UpgradeModal.jsx` (dipasang di layout dashboard & kasir). Dipicu dari kasir (tombol DIGITAL kini AKTIF untuk Free dan membuka modal, sebelumnya `disabled` sehingga tidak pernah terlihat; juga untuk 422 `plan_required`), laporan (tombol PDF/Excel terkunci, juga 403), dan banner kuota AI habis. Harga dibaca dari `PLANS`. Kasir (bukan admin) diarahkan menghubungi pemilik toko.
+- **Panel AI desktop** bisa disembunyikan (tombol `›`, tab "AI ASSISTANT" di tepi kanan). Pilihan diingat (`kasirai_ai_panel`); default terbuka hanya di `/dashboard`. Teks banner kuota yang salah ("AI tak terbatas") dibetulkan, tombol tutup panel mobile yang kosong diberi ikon.
+- **Navbar** diratakan: judul halaman, nama, peran, paket tidak lagi diulang (ada di judul halaman & kartu akun sidebar). Tersisa menu/logo (mobile), tombol "Upgrade ke Pro" (khusus admin paket Free), dan Keluar.
+- **Event GA4 funnel** lengkap: `register_start`, `register_success`, `product_created_first`, `shift_opened_first`, `order_paid_first`, `upgrade_view`, `upgrade_payment_success` (+ `upgrade_prompt_view`). Event "first" memakai `trackOnce` (penanda localStorage per browser, jadi perkiraan per perangkat).
+- Diuji end-to-end di lokal dengan SQLite sementara (tanpa Midtrans): login, checklist 0/4 → 3/4 setelah transaksi tunai, modal upgrade dari kasir & laporan, panel AI tersimpan lintas halaman. Backend: 346 test lulus.

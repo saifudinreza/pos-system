@@ -30,6 +30,19 @@ class InsightService
      */
     public function generateForTenant(?int $tenantId): array
     {
+        // Toko tanpa transaksi lunas 30 hari terakhir: tidak ada yang bisa dianalisis.
+        // Jangan panggil LLM (hasilnya hanya kalimat kosong seperti "Revenue 0"),
+        // cukup hapus insight lama. Dashboard menampilkan ajakan transaksi pertama.
+        $hasRecentSales = Order::where('tenant_id', $tenantId)
+            ->where('status', 'paid')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->exists();
+
+        if (! $hasRecentSales) {
+            AiInsight::where('tenant_id', $tenantId)->delete();
+            return [];
+        }
+
         $metrics  = $this->computeMetrics($tenantId);
         $insights = $this->narrate($metrics);
 

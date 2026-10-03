@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import reportService, { triggerFileDownload } from "@/services/reportService";
 import useAuthStore from "@/stores/authStore";
+import useUpgradeModalStore from "@/stores/upgradeModalStore";
+import { Lock } from "lucide-react";
 import StatCard  from "@/components/dashboard/StatCard";
 import NeoButton from "@/components/ui/NeoButton";
 import NeoCard   from "@/components/ui/NeoCard";
@@ -77,6 +79,9 @@ export default function ReportsPage() {
   const [loading,      setLoading]      = useState(false);
   const [denied,       setDenied]       = useState(false);        // 403 → halaman akses ditolak
   const [downloading,  setDownloading]  = useState(false);
+
+  // Tawaran upgrade kontekstual saat user Free menyentuh export
+  const showUpgrade = useUpgradeModalStore((st) => st.show);
 
   // Export PDF/Excel hanya untuk paket Pro/Enterprise (back-end juga memblokir)
   const isFreePlan = useAuthStore((s) =>
@@ -145,7 +150,11 @@ export default function ReportsPage() {
         : await reportService.downloadStock(params);
       const ext = format === "excel" ? "xlsx" : "pdf";
       triggerFileDownload(res, `laporan-${tab}-${Date.now()}.${ext}`);
-    } catch { alert("Gagal mengunduh laporan"); }
+    } catch (err) {
+      // 403 = paket Free diblokir backend → tawarkan upgrade, bukan alert error
+      if (err.response?.status === 403) showUpgrade("export");
+      else alert("Gagal mengunduh laporan");
+    }
     finally { setDownloading(false); }
   };
 
@@ -237,11 +246,14 @@ export default function ReportsPage() {
         </div>
         <div className="flex gap-2">
           {isFreePlan ? (
-            <div className="text-[10px] font-mono font-bold text-brand-black/50 border border-dashed border-brand-black/30 px-3 py-2 flex items-center gap-1.5 max-w-[240px]">
-              <AlertTriangle size={12} className="shrink-0" />
-              Export PDF/Excel untuk paket <b>Pro &amp; Enterprise</b>,{" "}
-              <a href="/upgrade?plan=pro" className="underline font-black">upgrade</a>
-            </div>
+            <>
+              <NeoButton variant="secondary" size="sm" onClick={() => showUpgrade("export")} title="Export PDF untuk paket Pro & Enterprise">
+                <Lock size={13} />PDF
+              </NeoButton>
+              <NeoButton variant="secondary" size="sm" onClick={() => showUpgrade("export")} title="Export Excel untuk paket Pro & Enterprise">
+                <Lock size={13} />Excel
+              </NeoButton>
+            </>
           ) : (
             <>
               <NeoButton variant="secondary" size="sm" onClick={() => handleDownload("pdf")} disabled={downloading}>

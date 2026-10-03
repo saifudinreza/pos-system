@@ -45,6 +45,8 @@ import useCartStore       from "@/stores/cartStore";
 import useAuthStore       from "@/stores/authStore";
 import { formatCurrency, getErrorMessage } from "@/lib/utils";
 import { useDebounce }    from "@/hooks/useDebounce";
+import useUpgradeModalStore from "@/stores/upgradeModalStore";
+import { trackOnce }         from "@/lib/analytics";
 
 // ============================================================
 // QuickProductPanel, Panel slide-over untuk kelola produk
@@ -1233,6 +1235,8 @@ export default function KasirPage() {
   const isFreePlan = user
     ? (user.effective_plan ?? user.subscription_plan ?? "free") === "free"
     : true;
+  // Buka modal tawaran upgrade (QRIS dll.) alih-alih alert biasa
+  const showUpgrade = useUpgradeModalStore((st) => st.show);
 
   // Fetch kategori & shift SEKALI saat halaman pertama load
   useEffect(() => {
@@ -1331,6 +1335,7 @@ export default function KasirPage() {
       const orderId = orderRes.data?.id ?? orderRes.order?.id ?? orderRes.id;
       if (orderId) await orderService.updateStatus(orderId, "paid", "cash");
       showReceipt(buildReceipt(orderRes, cashAmount, "Tunai"));
+      trackOnce("order_paid_first", { metode: "tunai" });
       loadCurrentShift();
     } catch (err) {
       alert(err.response?.data?.message ?? "Gagal checkout. Coba lagi.");
@@ -1372,7 +1377,7 @@ export default function KasirPage() {
       return;
     }
     if (isFreePlan) {
-      alert("Pembayaran QRIS/digital hanya tersedia untuk paket Pro & Enterprise. Upgrade di menu Profil → Langganan.");
+      showUpgrade("qris");
       return;
     }
     if (!user?.midtrans_client_key) {
@@ -1396,6 +1401,7 @@ export default function KasirPage() {
         window.snap.pay(snapToken, {
           onSuccess: () => {
             showReceipt(buildReceipt(orderRes, getTotal(), "QRIS"));
+            trackOnce("order_paid_first", { metode: "qris" });
             loadCurrentShift();
           },
           onPending: () => alert("Menunggu pembayaran..."),
@@ -1408,7 +1414,9 @@ export default function KasirPage() {
         showReceipt(buildReceipt(orderRes, getTotal(), "Tunai"));
       }
     } catch (err) {
-      alert(err.response?.data?.message ?? "Gagal checkout. Coba lagi.");
+      // Backend memblokir pembayaran digital untuk paket Free (422 plan_required)
+      if (err.response?.data?.plan_required) showUpgrade("qris");
+      else alert(err.response?.data?.message ?? "Gagal checkout. Coba lagi.");
     } finally { setPaying(false); }
   };
 
@@ -1441,6 +1449,7 @@ export default function KasirPage() {
     const res = await shiftService.open(payload);
     setCurrentShift(res.data);
     setShiftOpenModal(false);
+    trackOnce("shift_opened_first");
   };
 
   /**
@@ -1806,17 +1815,17 @@ export default function KasirPage() {
             </button>
             <button
               onClick={handleDigitalCheckout}
-              disabled={items.length === 0 || paying || isFreePlan}
-              title={isFreePlan ? "Pembayaran QRIS/digital hanya untuk paket Pro & Enterprise" : undefined}
+              disabled={items.length === 0 || paying}
+              title={isFreePlan ? "Pembayaran QRIS/digital untuk paket Pro & Enterprise" : undefined}
               className="flex-1 py-3 bg-brand-yellow border-2 border-brand-black font-black text-sm disabled:opacity-40 hover:bg-yellow-300 active:translate-y-0.5 transition-all"
               style={{ boxShadow: items.length > 0 ? "3px 3px 0 #0A0A0A" : "none" }}
             >
-              {paying ? "Memproses..." : "DIGITAL"}
+              {paying ? "Memproses..." : isFreePlan ? "DIGITAL (Pro)" : "DIGITAL"}
             </button>
           </div>
           {isFreePlan && (
             <p className="text-[10px] font-mono text-brand-black/40 text-center border border-dashed border-brand-black/30 px-2 py-1">
-               Pembayaran QRIS/digital untuk paket <b>Pro & Enterprise</b>, <a href="/upgrade?plan=pro" className="underline font-bold">upgrade sekarang</a>
+               Pembayaran QRIS/digital untuk paket <b>Pro & Enterprise</b>, <button type="button" onClick={() => showUpgrade("qris")} className="underline font-bold">lihat paket Pro</button>
             </p>
           )}
           <p className="text-[10px] font-mono text-brand-black/30 text-center">

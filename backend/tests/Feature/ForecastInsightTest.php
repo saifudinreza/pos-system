@@ -122,6 +122,23 @@ class ForecastInsightTest extends TestCase
         $this->assertDatabaseHas('ai_insights', ['tenant_id' => $tenant->id]);
     }
 
+    public function test_generate_insight_skips_llm_when_no_recent_sales(): void
+    {
+        $tenant = $this->makeTenant('Toko Baru');
+        $admin  = $this->makeUser($tenant);
+
+        // Toko tanpa transaksi: LLM TIDAK boleh dipanggil dan tidak ada insight tersimpan
+        $this->mock(GroqService::class, function ($mock) {
+            $mock->shouldNotReceive('ask');
+        });
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->postJson('/api/insights/generate')->assertStatus(200);
+        $this->assertCount(0, $response->json('data'));
+        $this->assertDatabaseMissing('ai_insights', ['tenant_id' => $tenant->id]);
+    }
+
     public function test_insights_only_returned_for_own_tenant(): void
     {
         $tenantA = $this->makeTenant('Toko A');

@@ -21,6 +21,7 @@ import useAuthStore from "@/stores/authStore";
 import { getErrorMessage } from "@/lib/utils";
 import api from "@/lib/axios";
 import { warmUpBackend } from "@/lib/warmup";
+import { trackEvent } from "@/lib/analytics";
 
 // ── Input Field component ────────────────────────────────────
 /**
@@ -140,10 +141,12 @@ function RegisterForm() {
   // setelah komponen hilang dari layar)
   useEffect(() => () => clearTimeout(debounceRef.current), []);
 
-  // Bangunkan backend Render diam-diam supaya daftar tidak kena cold start
+  // Bangunkan backend Render diam-diam supaya daftar tidak kena cold start,
+  // dan catat bahwa pengunjung membuka form daftar (event funnel).
   useEffect(() => {
     warmUpBackend();
-  }, []);
+    trackEvent("register_start", { paket: plan });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
    * handleSubmit, Validasi lokal (konfirmasi password cocok) lalu kirim
@@ -161,6 +164,9 @@ function RegisterForm() {
 
     try {
       await register(form);
+      trackEvent("register_success", { paket: plan });
+      // Beri waktu singkat agar event terkirim sebelum halaman berpindah
+      await new Promise((r) => setTimeout(r, 250));
       if (plan === "pro" || plan === "enterprise") {
         window.location.href = `/upgrade?plan=${plan}&cycle=monthly`;
       } else {

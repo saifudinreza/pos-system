@@ -355,7 +355,7 @@ Diuji menggunakan **TestSprite**, AI testing agent yang menjalankan test end-to-
 | Search produk real-time |  PASSED |
 | Riwayat shift |  PASSED |
 
-**Backend (PHPUnit + Pest): 345/345 test PASSED, 2.239 assertion**. Jalankan dengan `php artisan test` di folder `backend/` (memakai SQLite `:memory:`, tidak menyentuh database asli).
+**Backend (PHPUnit + Pest): 346/346 test PASSED, 2.243 assertion**. Jalankan dengan `php artisan test` di folder `backend/` (memakai SQLite `:memory:`, tidak menyentuh database asli).
 
 | Kelompok | Yang diuji |
 |---|---|

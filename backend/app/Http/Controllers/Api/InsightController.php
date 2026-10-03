@@ -57,7 +57,9 @@ class InsightController extends Controller
         $insights = app(InsightService::class)->generateForTenant($request->user()->tenant_id);
 
         return response()->json([
-            'message'      => 'Wawasan AI berhasil diperbarui.',
+            'message'      => empty($insights)
+                ? 'Belum ada transaksi 30 hari terakhir, wawasan muncul setelah ada penjualan.'
+                : 'Wawasan AI berhasil diperbarui.',
             'data'         => collect($insights)->map(fn($i) => $this->format($i)),
             'generated_at' => now()->format('d M Y H:i'),
         ]);

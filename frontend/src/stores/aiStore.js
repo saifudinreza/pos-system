@@ -109,6 +109,9 @@ const useAiStore = create((set) => ({
         model:       data.model,
       };
 
+      // Tandai bahwa user pernah memakai AI (untuk checklist onboarding di dashboard)
+      try { window.localStorage.setItem("kasirai_ai_used", "1"); } catch {}
+
       const usageUpdate = data._usage ?? null;
       set((state) => ({
         messages:        [...state.messages, aiMessage],

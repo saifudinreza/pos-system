@@ -3,49 +3,27 @@
 // ============================================================
 // Navbar, bar atas halaman dashboard
 //
-// Neobrutalist style: border tebal, shadow kotak, animasi hover.
+// Sengaja ramping (audit desain, issue #10): judul halaman, nama,
+// peran, dan paket TIDAK diulang di sini karena sudah ada di judul
+// halaman dan kartu akun di sidebar. Yang tersisa: tombol menu (mobile),
+// logo (mobile), ajakan upgrade untuk paket Free, dan tombol Keluar.
 // ============================================================
 
-import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import useAuthStore from "@/stores/authStore";
-import { LogOut, Menu } from "lucide-react";
-
-const PAGE_TITLES = {
-  "/dashboard":    "Dashboard",
-  "/products":     "Produk",
-  "/categories":   "Kategori",
-  "/orders":       "Pesanan",
-  "/transactions": "Transaksi",
-  "/reports":      "Laporan",
-  "/users":        "Pengguna",
-  "/kasir":        "Kasir",
-  "/profile":      "Profil & Langganan",
-  "/upgrade":      "Upgrade Plan",
-};
-
-const PLAN_BADGE = {
-  free:       { label: "FREE",       cls: "bg-white/80 text-brand-black/60 border-brand-black/20" },
-  pro:        { label: "PRO",        cls: "bg-brand-yellow text-brand-black border-brand-black" },
-  enterprise: { label: "ENTERPRISE", cls: "bg-brand-black text-white border-brand-black" },
-  developer:  { label: "DEV",        cls: "bg-brand-yellow text-brand-black border-brand-black" },
-};
-
-const ROLE_COLORS = {
-  admin:     "bg-brand-yellow text-brand-black border-brand-black",
-  kasir:     "bg-brand-black text-white border-brand-black",
-  user:      "bg-white text-brand-black border-brand-black",
-  developer: "bg-brand-black text-brand-yellow border-brand-black",
-};
+import LogoMark from "@/components/brand/LogoMark";
+import { trackEvent } from "@/lib/analytics";
+import { LogOut, Menu, Sparkles } from "lucide-react";
 
 export default function Navbar({ onMenuToggle }) {
-  const router   = useRouter();
-  const pathname = usePathname();
+  const router = useRouter();
   const { user, logout } = useAuthStore();
 
-  const pageTitle    = PAGE_TITLES[pathname] ?? "KasirAI";
-  const isDev        = user?.role === "developer";
-  const effectivePlan = isDev ? "developer" : (user?.effective_plan ?? user?.subscription_plan ?? "free");
-  const planBadge     = PLAN_BADGE[effectivePlan] ?? PLAN_BADGE.free;
+  const isDev  = user?.role === "developer";
+  const plan   = user?.effective_plan ?? user?.subscription_plan ?? "free";
+  // Ajakan upgrade hanya untuk pemilik/admin paket Free (kasir tidak bisa membayar langganan)
+  const canUpgrade = !isDev && plan === "free" && user?.role !== "kasir";
 
   const handleLogout = async () => {
     await logout();
@@ -54,9 +32,8 @@ export default function Navbar({ onMenuToggle }) {
 
   return (
     <header className="h-14 bg-white border-b-2 border-brand-black flex items-center justify-between px-4 shrink-0 z-10">
-      {/* Left */}
+      {/* Kiri: menu + logo hanya di mobile (di desktop sidebar sudah memuat logo) */}
       <div className="flex items-center gap-3 min-w-0">
-        {/* Hamburger — neobrutalist button */}
         <button
           onClick={onMenuToggle}
           className="lg:hidden w-9 h-9 border-2 border-brand-black flex items-center justify-center bg-white hover:bg-brand-yellow transition-all duration-150 shrink-0 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
@@ -65,39 +42,26 @@ export default function Navbar({ onMenuToggle }) {
         >
           <Menu size={16} strokeWidth={2.5} className="text-brand-black" />
         </button>
-
-        <h1 className="font-black text-base sm:text-lg text-brand-black font-grotesk truncate">
-          {pageTitle}
-        </h1>
+        <div className="lg:hidden flex items-center gap-2 min-w-0">
+          <LogoMark size={26} />
+          <span className="font-black text-base font-grotesk">KasirAI</span>
+        </div>
       </div>
 
-      {/* Right */}
+      {/* Kanan */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* Plan badge */}
-        <span
-          suppressHydrationWarning
-          className={`hidden sm:inline-flex items-center text-[10px] font-black border px-2 py-0.5 font-mono tracking-wider ${planBadge.cls}`}
-        >
-          {planBadge.label}
-        </span>
+        {canUpgrade && (
+          <Link
+            href="/upgrade?plan=pro"
+            onClick={() => trackEvent("cta_click", { posisi: "navbar_app", tujuan: "upgrade" })}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-black bg-brand-yellow border-2 border-brand-black hover:bg-yellow-300 transition-colors"
+            style={{ boxShadow: "2px 2px 0 #0A0A0A" }}
+          >
+            <Sparkles size={13} strokeWidth={2.5} />
+            <span>Upgrade ke Pro</span>
+          </Link>
+        )}
 
-        {/* Role badge */}
-        <span
-          suppressHydrationWarning
-          className={`hidden sm:inline-flex items-center text-[10px] font-black border px-2 py-0.5 uppercase font-mono ${isDev ? ROLE_COLORS.developer : (ROLE_COLORS[user?.role] ?? ROLE_COLORS.user)}`}
-        >
-          {isDev ? "DEVELOPER" : (user?.role ?? "")}
-        </span>
-
-        {/* User name */}
-        <span
-          suppressHydrationWarning
-          className="text-sm font-bold text-brand-black hidden md:block truncate max-w-[100px]"
-        >
-          {user?.name ?? ""}
-        </span>
-
-        {/* Logout — neobrutalist button with red hover */}
         <button
           onClick={handleLogout}
           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-brand-black bg-white hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-all duration-150 whitespace-nowrap active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"

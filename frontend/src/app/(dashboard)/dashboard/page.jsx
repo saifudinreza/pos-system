@@ -26,6 +26,9 @@ import TopProductsChart from "@/components/dashboard/TopProductsChart";
 import NeoCard          from "@/components/ui/NeoCard";
 import NeoButton            from "@/components/ui/NeoButton";
 import NeoBadge             from "@/components/ui/NeoBadge";
+import OnboardingChecklist  from "@/components/dashboard/OnboardingChecklist";
+import shiftService         from "@/services/shiftService";
+import useAuthStore         from "@/stores/authStore";
 import reportService        from "@/services/reportService";
 import orderService         from "@/services/orderService";
 import insightService       from "@/services/insightService";
@@ -50,6 +53,10 @@ export default function DashboardPage() {
   const [insightsLoading, setInsightsLoading] = useState(true);
   const [insightsGeneratedAt, setInsightsGeneratedAt] = useState(null);
   const [generatingInsights, setGeneratingInsights] = useState(false);
+  // Data untuk checklist onboarding: pernah buka shift? pernah tanya AI?
+  const [hasShift, setHasShift] = useState(false);
+  const [aiUsed,   setAiUsed]   = useState(false);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
     /**
@@ -60,11 +67,16 @@ export default function DashboardPage() {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [salesRes, stockRes, ordersRes] = await Promise.allSettled([
+        const [salesRes, stockRes, ordersRes, shiftsRes] = await Promise.allSettled([
           reportService.getSales({ period: "daily" }),
           reportService.getStock(),
           orderService.getAll({ per_page: 10, sort: "created_at", order: "desc" }),
+          shiftService.getAll({ per_page: 1 }),
         ]);
+
+        if (shiftsRes.status === "fulfilled") {
+          setHasShift((shiftsRes.value?.data ?? []).length > 0);
+        }
 
         if (salesRes.status === "fulfilled") {
           const d = salesRes.value;
@@ -105,6 +117,7 @@ export default function DashboardPage() {
       }
     };
     fetchAll();
+    try { setAiUsed(window.localStorage.getItem("kasirai_ai_used") === "1"); } catch {}
 
     // Forecast & insight dimuat terpisah (punya state loading sendiri)
     reportService.getForecast()
@@ -139,6 +152,23 @@ export default function DashboardPage() {
       setGeneratingInsights(false);
     }
   };
+
+  // ── Checklist onboarding: status tiap langkah dari data nyata ──
+  const hasProducts  = (stockSummary?.total_products ?? 0) > 0;
+  const hasPaidOrder = orders.some((o) => o.status === "paid");
+  const role  = user?.role ?? "kasir";
+  const plan  = user?.effective_plan ?? user?.subscription_plan ?? "free";
+  const hasAI = role === "developer" || role === "admin" || plan === "pro" || plan === "enterprise";
+  const onboardingSteps = [
+    { key: "produk", title: "Tambah produk pertama", desc: "Masukkan produk yang kamu jual beserta harga dan stoknya.", href: "/products", cta: "Tambah Produk", done: hasProducts },
+    { key: "shift", title: "Buka kasir (shift)", desc: "Isi modal awal supaya kas harian terhitung rapi.", href: "/kasir", cta: "Buka Kasir", done: hasShift },
+    { key: "transaksi", title: "Catat transaksi pertama", desc: "Pilih produk di kasir lalu bayar. Struk bisa dikirim ke WhatsApp pelanggan.", href: "/kasir", cta: "Ke Kasir", done: hasPaidOrder },
+    ...(hasAI
+      ? [{ key: "ai", title: "Coba tanya AI Assistant", desc: "Ketik pertanyaan di panel AI sebelah kanan, mis. \"produk apa yang paling laku minggu ini?\"", done: aiUsed }]
+      : []),
+  ];
+  // Tanpa transaksi lunas, AI belum punya bahan untuk dianalisis
+  const noSales = !loading && !hasPaidOrder;
 
   const today = new Date().toLocaleDateString("id-ID", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
@@ -175,6 +205,9 @@ export default function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* ── Panduan langkah awal (hilang otomatis kalau semua selesai) ── */}
+      {!loading && <OnboardingChecklist steps={onboardingSteps} />}
 
       {/* ── Low Stock Alert Banner ── */}
       {!loading && stock.length > 0 && (
@@ -216,14 +249,26 @@ export default function DashboardPage() {
               </p>
             </div>
           </div>
-          <NeoButton size="sm" variant="secondary" onClick={handleGenerateInsights} disabled={generatingInsights}>
-            <RefreshCw size={13} className={`${generatingInsights ? "animate-spin" : ""} inline mr-1`} />
-            {insights.length > 0 ? "Perbarui" : "Generate"}
-          </NeoButton>
+          {!noSales && (
+            <NeoButton size="sm" variant="secondary" onClick={handleGenerateInsights} disabled={generatingInsights}>
+              <RefreshCw size={13} className={`${generatingInsights ? "animate-spin" : ""} inline mr-1`} />
+              {insights.length > 0 ? "Perbarui" : "Generate"}
+            </NeoButton>
+          )}
         </div>
         <div className="p-4">
           {insightsLoading ? (
             <div className="h-[140px] skeleton" />
+          ) : noSales ? (
+            <div className="text-center py-6 space-y-3">
+              <p className="text-sm font-bold text-brand-black/70">Wawasan muncul setelah transaksi pertama.</p>
+              <p className="text-xs text-brand-black/50 max-w-md mx-auto">
+                KasirAI menganalisis penjualan, stok, dan pelangganmu. Catat satu transaksi dulu, lalu kembali ke sini.
+              </p>
+              <Link href="/kasir">
+                <NeoButton size="sm" variant="primary">Buka Kasir →</NeoButton>
+              </Link>
+            </div>
           ) : insights.length === 0 ? (
             <div className="text-center py-6 space-y-2">
               <p className="text-sm font-bold text-brand-black/60">Belum ada wawasan AI.</p>
