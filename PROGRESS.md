@@ -363,3 +363,14 @@
 - Warm-up diam-diam juga di landing (`components/landing/BackendWarmup.jsx`), register, dan forgot-password.
 - CORS dicek langsung di production: `/up` mengirim `access-control-allow-origin: *`, jadi `fetch` biasa cukup (tanpa `no-cors`).
 - Teruji: `npm run build` sukses; logika `warmup.js` diuji dengan script Node (dedupe, cache 5 menit, gagal, timeout, env kosong). **Belum diuji manual di browser** (T1-T8 di issue #5, terutama T4/T5 untuk tampilan overlay & pesan error).
+
+---
+
+## 3 Oktober 2026, Video demo marketing Remotion (issue #7)
+
+- Project baru di folder **`video/`** (terpisah dari `frontend/` & `backend/`, `package.json` sendiri, Remotion 4.0.532 dipin). Hasil render: `video/out/sikasirai-demo.mp4` (H.264, 1920x1080, 30 fps, 2:16, audio AAC), **tidak di-commit** (`.gitignore`).
+- 8 scene: Intro, Problem, Solution, Demo Login, Demo Kasir (buka shift + keranjang), Demo Transaksi (tunai, QRIS, struk WhatsApp), Demo Laporan (dashboard, laba kotor, export, AI), Outro (manfaat + harga + CTA). Layar aplikasi **dibuat ulang sebagai komponen React** (bukan rekaman layar), data fiktif toko "Kopi Senja" di `video/src/data/demo.ts`. PPN 11% ikut ditampilkan sesuai aplikasi (total contoh Rp 57.720, bukan Rp 52.000 seperti draf issue).
+- Musik latar & semua sound effect **dibuat sendiri lewat sintesis** (`npm run audio`), tanpa lisensi pihak ketiga. Detail di `video/CREDITS.md`.
+- **Narasi masih PLACEHOLDER** (TTS `id-ID-GadisNeural` via paket tidak resmi `msedge-tts`). **Wajib diganti** (rekaman suara manusia atau TTS berlisensi komersial) sebelum dipublikasikan. Waktu kalimat narasi disimpan di `src/data/vo-timing.json` supaya animasi & caption tersinkron.
+- Teruji: `tsc` bersih, render penuh sukses, frame hasil MP4 dicek, audio dicek (puncak 0,94, tanpa clipping). **Belum didengar/ditonton oleh manusia**, jadi sinkron audio-visual dan kenyaringan belum dikonfirmasi.
+- **TODO owner** (pertanyaan issue #7 bagian 11): sumber suara final & persetujuan naskah, nama merek "KasirAI" (logo) vs "SiKasirAI" (narasi/domain), maskot kura-kura (tidak dipakai), lokasi unggah video final, review draf.
