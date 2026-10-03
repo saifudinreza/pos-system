@@ -1,0 +1,118 @@
+{
+  "s1": [
+    {
+      "start": 0.1,
+      "end": 3.78,
+      "text": "Kenalkan, Si Kasir A I."
+    },
+    {
+      "start": 3.73,
+      "end": 8.68,
+      "text": "Aplikasi kasir pintar untuk UMKM Indonesia."
+    }
+  ],
+  "s2": [
+    {
+      "start": 0.1,
+      "end": 3.42,
+      "text": "Mengelola toko itu tidak mudah."
+    },
+    {
+      "start": 3.37,
+      "end": 12.01,
+      "text": "Catatan penjualan tercecer, stok habis tanpa disadari, dan uang kas sering tidak cocok di akhir hari."
+    },
+    {
+      "start": 12.01,
+      "end": 18.17,
+      "text": "Semuanya menyita waktu yang seharusnya bisa Anda pakai untuk melayani pelanggan."
+    }
+  ],
+  "s3": [
+    {
+      "start": 0.1,
+      "end": 8.48,
+      "text": "Si Kasir A I hadir untuk merapikan semuanya, cukup dari laptop, tablet, atau HP Anda."
+    }
+  ],
+  "s4": [
+    {
+      "start": 0.1,
+      "end": 4.24,
+      "text": "Mulai cukup dengan masuk ke akun toko Anda."
+    },
+    {
+      "start": 4.19,
+      "end": 8.93,
+      "text": "Aman, dan setiap toko punya datanya sendiri."
+    }
+  ],
+  "s5": [
+    {
+      "start": 0.1,
+      "end": 3.9,
+      "text": "Buka shift, lalu layani pembeli."
+    },
+    {
+      "start": 3.85,
+      "end": 8.92,
+      "text": "Pilih produk, dan keranjang langsung menghitung totalnya."
+    },
+    {
+      "start": 8.92,
+      "end": 13.18,
+      "text": "Stok pun ikut diperiksa secara otomatis."
+    }
+  ],
+  "s6": [
+    {
+      "start": 0.1,
+      "end": 5.52,
+      "text": "Pembeli bisa membayar tunai, kembaliannya langsung dihitung."
+    },
+    {
+      "start": 5.47,
+      "end": 10.14,
+      "text": "Atau bayar digital lewat QRIS dan dompet digital."
+    },
+    {
+      "start": 10.14,
+      "end": 15.66,
+      "text": "Setelah lunas, struk dikirim otomatis ke WhatsApp pelanggan."
+    }
+  ],
+  "s7": [
+    {
+      "start": 0.1,
+      "end": 8.26,
+      "text": "Di akhir hari, lihat ringkasan penjualan, produk terlaris, sampai laba kotor Anda."
+    },
+    {
+      "start": 8.21,
+      "end": 12.76,
+      "text": "Laporan bisa diunduh ke PDF atau Excel."
+    },
+    {
+      "start": 12.76,
+      "end": 15.19,
+      "text": "Bingung membaca angka?"
+    },
+    {
+      "start": 15.19,
+      "end": 18.77,
+      "text": "Tanyakan saja ke asisten A I."
+    }
+  ],
+  "s8": [
+    {
+      "start": 0.1,
+      "end": 6.09,
+      "text": "Si Kasir A I. Kasir lebih rapi, bisnis lebih pasti."
+    },
+    {
+      "start": 6.04,
+      "end": 10.47,
+      "text": "Coba gratis sekarang di si kasir A I titik com."
+    }
+  ]
+}
