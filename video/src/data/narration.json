@@ -1,0 +1,46 @@
+{
+  "voice": "id-ID-GadisNeural",
+  "rate": 0.95,
+  "scenes": [
+    {
+      "id": "s1",
+      "text": "Kenalkan, SiKasirAI. Aplikasi kasir pintar untuk UMKM Indonesia.",
+      "tts": "Kenalkan, Si Kasir A I. Aplikasi kasir pintar untuk UMKM Indonesia."
+    },
+    {
+      "id": "s2",
+      "text": "Mengelola toko itu tidak mudah. Catatan penjualan tercecer, stok habis tanpa disadari, dan uang kas sering tidak cocok di akhir hari. Semuanya menyita waktu yang seharusnya bisa Anda pakai untuk melayani pelanggan.",
+      "tts": "Mengelola toko itu tidak mudah. Catatan penjualan tercecer, stok habis tanpa disadari, dan uang kas sering tidak cocok di akhir hari. Semuanya menyita waktu yang seharusnya bisa Anda pakai untuk melayani pelanggan."
+    },
+    {
+      "id": "s3",
+      "text": "SiKasirAI hadir untuk merapikan semuanya, cukup dari laptop, tablet, atau HP Anda.",
+      "tts": "Si Kasir A I hadir untuk merapikan semuanya, cukup dari laptop, tablet, atau HP Anda."
+    },
+    {
+      "id": "s4",
+      "text": "Mulai cukup dengan masuk ke akun toko Anda. Aman, dan setiap toko punya datanya sendiri.",
+      "tts": "Mulai cukup dengan masuk ke akun toko Anda. Aman, dan setiap toko punya datanya sendiri."
+    },
+    {
+      "id": "s5",
+      "text": "Buka shift, lalu layani pembeli. Pilih produk, dan keranjang langsung menghitung totalnya. Stok pun ikut diperiksa secara otomatis.",
+      "tts": "Buka shift, lalu layani pembeli. Pilih produk, dan keranjang langsung menghitung totalnya. Stok pun ikut diperiksa secara otomatis."
+    },
+    {
+      "id": "s6",
+      "text": "Pembeli bisa membayar tunai, kembaliannya langsung dihitung. Atau bayar digital lewat QRIS dan dompet digital. Setelah lunas, struk dikirim otomatis ke WhatsApp pelanggan.",
+      "tts": "Pembeli bisa membayar tunai, kembaliannya langsung dihitung. Atau bayar digital lewat QRIS dan dompet digital. Setelah lunas, struk dikirim otomatis ke WhatsApp pelanggan."
+    },
+    {
+      "id": "s7",
+      "text": "Di akhir hari, lihat ringkasan penjualan, produk terlaris, sampai laba kotor Anda. Laporan bisa diunduh ke PDF atau Excel. Bingung membaca angka? Tanyakan saja ke asisten AI.",
+      "tts": "Di akhir hari, lihat ringkasan penjualan, produk terlaris, sampai laba kotor Anda. Laporan bisa diunduh ke PDF atau Excel. Bingung membaca angka? Tanyakan saja ke asisten A I."
+    },
+    {
+      "id": "s8",
+      "text": "SiKasirAI. Kasir lebih rapi, bisnis lebih pasti. Coba gratis sekarang di sikasirai.com.",
+      "tts": "Si Kasir A I. Kasir lebih rapi, bisnis lebih pasti. Coba gratis sekarang di si kasir A I titik com."
+    }
+  ]
+}

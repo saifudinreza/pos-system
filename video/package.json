@@ -1,0 +1,28 @@
+{
+  "name": "sikasirai-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Video demo marketing SiKasirAI (Remotion)",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "audio": "node scripts/gen-audio.mjs",
+    "vo": "node scripts/gen-vo.mjs",
+    "prepare-audio": "npm run audio && npm run vo",
+    "render": "remotion render src/index.ts SiKasirAIDemo out/sikasirai-demo.mp4 --codec h264",
+    "render:draft": "remotion render src/index.ts SiKasirAIDemo out/sikasirai-demo-720p.mp4 --codec h264 --scale 0.6667",
+    "still": "remotion still src/index.ts SiKasirAIDemo out/frame.png"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.532",
+    "@remotion/google-fonts": "4.0.532",
+    "@remotion/media-utils": "4.0.532",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.532"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.12",
+    "msedge-tts": "latest",
+    "typescript": "5.6.3"
+  }
+}
