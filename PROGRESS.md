@@ -458,3 +458,10 @@
 - Test: `ExpireSubscriptionsTest` (9 test); total 370 lulus.
 - **Belum / catatan**: tidak ada email pengingat sebelum berakhir; perpanjangan memulai `expires_at` dari hari pembayaran (sisa hari langganan lama tidak ditambahkan); data di atas limit Free (mis. >50 produk) tetap tersimpan, hanya pembacaannya dibatasi.
 - **TODO owner**: setelah deploy, cek log Render ada "Scheduler started", lalu jalankan `php artisan subscriptions:expire --dry-run` di Shell Render untuk melihat langganan lama yang kedaluwarsa SEBELUM benar-benar diturunkan.
+
+## 4 Oktober 2026, Email kontak dan pengingat langganan
+- **Footer/kontak**: email kontak publik diganti ke `sikasirai0@gmail.com` di satu tempat (`frontend/src/lib/contact.js`), otomatis berlaku di footer, Kebijakan Privasi, dan Syarat & Ketentuan.
+- **Pengingat langganan**: `php artisan subscriptions:remind [--dry-run]` (`app/Console/Commands/RemindSubscriptions.php`), dijadwalkan harian 02:00 UTC (09:00 WIB). Email (`SubscriptionReminderMail`, antrean) dikirim saat sisa 7, 3, dan 1 hari, plus sekali saat sudah berakhir (masa tenggang). Kolom baru `subscriptions.last_reminder_days` mencegah email ganda; tidak mengirim ke akun nonaktif atau setelah tenggang lewat. Tahap diatur env `SUBSCRIPTION_REMINDER_DAYS`.
+- **Pengirim**: tetap `MAIL_FROM_ADDRESS` (Resend, noreply@sikasirai.com). `sikasirai0@gmail.com` dipasang sebagai **Reply-To** (env `SUPPORT_EMAIL`) dan tertulis di isi email, supaya balasan pelanggan masuk ke sana. Gmail TIDAK dipakai sebagai pengirim: tidak bisa diverifikasi di Resend dan SMTP keluar diblokir di Render.
+- Test: `RemindSubscriptionsTest` (9 test); total 379 lulus.
+- **TODO owner**: pastikan kotak masuk sikasirai0@gmail.com benar-benar dipantau; pastikan `MAIL_MAILER=resend` dan `RESEND_API_KEY` terisi di Render; setelah deploy jalankan `php artisan subscriptions:remind --dry-run` untuk melihat siapa yang akan menerima email.

@@ -23,4 +23,18 @@ return [
     */
     'subscription_grace_days' => (int) env('SUBSCRIPTION_GRACE_DAYS', 3),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Pengingat langganan & email dukungan
+    |--------------------------------------------------------------------------
+    | Email pengingat dikirim (subscriptions:remind) saat sisa masa berlaku
+    | mencapai tiap angka hari di bawah, dan sekali lagi saat sudah berakhir.
+    | Pengirim memakai MAIL_FROM_ADDRESS (Resend, domain terverifikasi); alamat
+    | dukungan ini dipasang sebagai Reply-To dan dicantumkan di isi email.
+    | Jangan jadikan alamat Gmail sebagai pengirim: tidak terverifikasi di
+    | Resend dan SMTP keluar diblokir di Render.
+    */
+    'subscription_reminder_days' => array_map('intval', explode(',', (string) env('SUBSCRIPTION_REMINDER_DAYS', '7,3,1'))),
+    'support_email' => env('SUPPORT_EMAIL', 'sikasirai0@gmail.com'),
+
 ];
