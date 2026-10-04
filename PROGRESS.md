@@ -440,3 +440,9 @@
 - Command `php artisan kasirai:developer-audit` mendaftar akun developer dan menandai yang tidak sah.
 - Test: `SingleDeveloperTest` (361 test lulus).
 - **TODO owner**: pastikan akun donojomi@gmail.com berperan `developer` di DB production; ganti sandi lewat Lupa Password (sandi lama `developer123` pernah ada di repo publik); jalankan `kasirai:developer-audit` di production; hapus env `NEXT_PUBLIC_DEV_PIN` di Vercel.
+
+## 4 Oktober 2026, P3 polish (issue #10)
+- **Keputusan nama merek: KasirAI** (domain tetap sikasirai.com). Di kode aplikasi sudah konsisten; "SiKasirAI" hanya ada di `video/` dan kini diganti (komposisi `KasirAIDemo`, output `kasirai-demo*.mp4`). **TODO**: suara narasi video masih menyebut "Si Kasir A I"; rekam ulang narasi lalu render ulang sebelum mengganti video di landing.
+- **Fokus keyboard**: aturan `:focus-visible` global di `globals.css` (garis luar hitam, kuning di latar gelap; input tidak lagi hanya berganti border kuning).
+- **Landing**: audit 360/390/768px, tidak ada scroll horizontal; target sentuh link footer diperbesar. Gambar produk di kasir & produk di-lazy-load.
+- **Belum**: audit mobile kasir & dashboard (butuh login/backend lokal), ukur LCP dengan Lighthouse di production, tombol navbar mobile masih 36-40px.

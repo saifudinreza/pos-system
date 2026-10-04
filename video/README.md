@@ -1,6 +1,6 @@
-# Video Demo SiKasirAI (Remotion)
+# Video Demo KasirAI (Remotion)
 
-Project video marketing SiKasirAI: intro, problem, solution (demo login, kasir, transaksi,
+Project video marketing KasirAI: intro, problem, solution (demo login, kasir, transaksi,
 laporan), dan outro. Hasil: `out/sikasirai-demo.mp4` (H.264, 1920x1080, 30 fps, ±2:15).
 
 Folder ini terpisah dari `frontend/` dan `backend/`, dengan `package.json` sendiri, supaya
@@ -35,7 +35,7 @@ Render pertama mengunduh Chrome Headless Shell (±115 MB).
 ```
 src/
   Root.tsx              Composition + durasi tiap scene dari panjang narasi
-  SiKasirAIDemo.tsx     Menyusun 8 scene + musik latar (volume turun saat narasi)
+  KasirAIDemo.tsx     Menyusun 8 scene + musik latar (volume turun saat narasi)
   theme.ts              Token warna/font/shadow neobrutalism (dari frontend/tailwind.config.js)
   timing.ts             Durasi scene + sinkronisasi dengan kalimat narasi
   data/demo.ts          Data fiktif toko "Kopi Senja" (satu sumber untuk semua scene)
@@ -77,5 +77,5 @@ Layar aplikasi **dibuat ulang sebagai komponen React**, bukan rekaman layar. Jad
 - Narasi masih **placeholder**, lihat `CREDITS.md`.
 - Harga paket di scene S8 mengikuti `SubscriptionController::PRICES` (Pro Rp 129.000/bulan,
   Enterprise Rp 499.000/bulan). Cek ulang kalau harga berubah.
-- Nama merek: logo di aplikasi bertuliskan "KasirAI", sedangkan narasi dan domain memakai
-  "SiKasirAI". Samakan sesuai keputusan pemilik.
+- Nama merek diputuskan **KasirAI** (domain tetap sikasirai.com). Suara narasi hasil rekaman lama
+  masih menyebut "Si Kasir A I"; rekam ulang narasi lalu render ulang video sebelum dipublikasikan.

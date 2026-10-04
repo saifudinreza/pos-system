@@ -1,7 +1,7 @@
 import React from "react";
 import { Composition, staticFile } from "remotion";
 import { getAudioDurationInSeconds } from "@remotion/media-utils";
-import { DemoProps, SiKasirAIDemo } from "./SiKasirAIDemo";
+import { DemoProps, KasirAIDemo } from "./KasirAIDemo";
 import { DEFAULT_VO_SECONDS, SCENE_CONFIG, sceneFrames } from "./timing";
 import { VIDEO } from "./theme";
 
@@ -9,8 +9,8 @@ const defaultFrames = sceneFrames(DEFAULT_VO_SECONDS);
 
 export const RemotionRoot: React.FC = () => (
   <Composition
-    id="SiKasirAIDemo"
-    component={SiKasirAIDemo}
+    id="KasirAIDemo"
+    component={KasirAIDemo}
     width={VIDEO.width}
     height={VIDEO.height}
     fps={VIDEO.fps}

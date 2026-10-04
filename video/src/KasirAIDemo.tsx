@@ -1,5 +1,5 @@
 // ============================================================
-// SiKasirAIDemo.tsx, Menyusun 8 scene berurutan + musik latar.
+// KasirAIDemo.tsx, Menyusun 8 scene berurutan + musik latar.
 // Durasi tiap scene dihitung di Root.tsx (calculateMetadata) dari panjang narasi.
 // ============================================================
 
@@ -20,7 +20,7 @@ const SCENES = [S1Intro, S2Problem, S3Solution, S4Login, S5Kasir, S6Transaksi, S
 // Volume musik per scene: lebih keras di intro/outro, pelan (ducking) saat narasi
 const MUSIC_LEVEL = [0.34, 0.16, 0.2, 0.15, 0.15, 0.15, 0.15, 0.3];
 
-export const SiKasirAIDemo: React.FC<DemoProps> = ({ sceneFrames }) => {
+export const KasirAIDemo: React.FC<DemoProps> = ({ sceneFrames }) => {
   const { durationInFrames } = useVideoConfig();
 
   // Titik-titik volume: tahan level scene, ubah halus di sekitar batas scene

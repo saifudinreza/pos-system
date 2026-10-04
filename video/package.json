@@ -2,15 +2,15 @@
   "name": "sikasirai-video",
   "version": "1.0.0",
   "private": true,
-  "description": "Video demo marketing SiKasirAI (Remotion)",
+  "description": "Video demo marketing KasirAI (Remotion)",
   "scripts": {
     "studio": "remotion studio src/index.ts",
     "audio": "node scripts/gen-audio.mjs",
     "vo": "node scripts/gen-vo.mjs",
     "prepare-audio": "npm run audio && npm run vo",
-    "render": "remotion render src/index.ts SiKasirAIDemo out/sikasirai-demo.mp4 --codec h264",
-    "render:draft": "remotion render src/index.ts SiKasirAIDemo out/sikasirai-demo-720p.mp4 --codec h264 --scale 0.6667",
-    "still": "remotion still src/index.ts SiKasirAIDemo out/frame.png"
+    "render": "remotion render src/index.ts KasirAIDemo out/kasirai-demo.mp4 --codec h264",
+    "render:draft": "remotion render src/index.ts KasirAIDemo out/kasirai-demo-720p.mp4 --codec h264 --scale 0.6667",
+    "still": "remotion still src/index.ts KasirAIDemo out/frame.png"
   },
   "dependencies": {
     "@remotion/cli": "4.0.532",

@@ -1,5 +1,5 @@
 // ============================================================
-// AppMock.tsx, Tiruan tampilan aplikasi SiKasirAI (bukan rekaman layar).
+// AppMock.tsx, Tiruan tampilan aplikasi KasirAI (bukan rekaman layar).
 // Mengikuti layout & label aplikasi asli (frontend/src/app/...), disederhanakan.
 // Semua angka berasal dari data/demo.ts.
 // ============================================================

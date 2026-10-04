@@ -6,7 +6,7 @@ import { mkdirSync } from "node:fs";
 
 const frames = process.argv.slice(2).map(Number);
 const serveUrl = await bundle({ entryPoint: path.resolve("src/index.ts"), publicDir: path.resolve("public") });
-const comp = await selectComposition({ serveUrl, id: "SiKasirAIDemo" });
+const comp = await selectComposition({ serveUrl, id: "KasirAIDemo" });
 console.log("durasi:", comp.durationInFrames, "frame =", (comp.durationInFrames / comp.fps).toFixed(1), "detik; sceneFrames =", JSON.stringify(comp.props.sceneFrames));
 mkdirSync("out/stills", { recursive: true });
 for (const f of frames) {
