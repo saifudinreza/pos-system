@@ -448,3 +448,13 @@
 - **Audit mobile kasir & dashboard (390px, stack lokal SQLite)**: tidak ada overflow horizontal di dashboard, kasir, produk, order; drawer menu dan keranjang berfungsi. Diperbaiki: kartu produk kasir lebih pendek di ponsel (3:2) dan teksnya diperbesar (8-11px jadi 10-12px, kontras stok dinaikkan), tombol menu/Keluar/Upgrade di topbar minimal 40-44px, tombol Keluar diberi aria-label.
 - **Belum**: ukur LCP dengan Lighthouse di production; tombol sekunder di topbar kasir (31px) dan chip filter (35px) masih di bawah 40px.
 - **Temuan terpisah (bukan bagian P3)**: form login tanpa JS yang belum ter-hydrate mengirim email+password sebagai query string (GET). Perlu `method="post"` atau `noValidate` + guard supaya kredensial tidak masuk URL/riwayat browser.
+
+## 4 Oktober 2026, Penurunan paket otomatis saat langganan berakhir
+- **Masalah**: `subscriptions.expires_at` terisi saat bayar tapi tidak pernah dicek, jadi Pro/Enterprise tetap aktif selamanya.
+- **Perbaikan**: `php artisan subscriptions:expire` (`app/Console/Commands/ExpireSubscriptions.php`). Langganan `active` yang lewat `expires_at` + masa tenggang ditandai `expired`; kalau pemilik tak punya langganan aktif lain, `subscription_plan` pemilik dan semua user se-tenant kembali `free` (kalau ada langganan lain yang masih berlaku, mengikuti paket itu). Opsi `--dry-run`. Aman diulang (idempoten).
+- **Tidak menyentuh** akun dengan paket yang diberikan manual lewat panel developer (tanpa baris langganan), dan user `tenant_id` null tidak ikut menyinkron user lain.
+- **Masa tenggang**: env `SUBSCRIPTION_GRACE_DAYS` (default 3 hari, `config/kasirai.php`).
+- **Jadwal**: `routes/console.php` (tiap jam, `withoutOverlapping`); `entrypoint.sh` menjalankan `php artisan schedule:work &` di samping `queue:work`. Jadwal ini ikut mati-hidup bersama container Render.
+- Test: `ExpireSubscriptionsTest` (9 test); total 370 lulus.
+- **Belum / catatan**: tidak ada email pengingat sebelum berakhir; perpanjangan memulai `expires_at` dari hari pembayaran (sisa hari langganan lama tidak ditambahkan); data di atas limit Free (mis. >50 produk) tetap tersimpan, hanya pembacaannya dibatasi.
+- **TODO owner**: setelah deploy, cek log Render ada "Scheduler started", lalu jalankan `php artisan subscriptions:expire --dry-run` di Shell Render untuk melihat langganan lama yang kedaluwarsa SEBELUM benar-benar diturunkan.

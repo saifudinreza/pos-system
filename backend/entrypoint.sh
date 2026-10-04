@@ -146,6 +146,11 @@ echo " Laravel ready"
 php artisan queue:work --tries=3 --timeout=300 &
 echo " Queue worker started"
 
+# Scheduler: menurunkan paket ke Free saat langganan berakhir (subscriptions:expire,
+# tiap jam). schedule:work menjalankan jadwal di background tanpa cron.
+php artisan schedule:work &
+echo " Scheduler started"
+
 # Start PHP-FPM di background
 php-fpm -D
 echo " PHP-FPM started"
