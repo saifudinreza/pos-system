@@ -13,4 +13,14 @@ return [
     */
     'developer_email' => env('DEVELOPER_EMAIL', 'donojomi@gmail.com'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Masa tenggang langganan
+    |--------------------------------------------------------------------------
+    | Berapa hari paket berbayar tetap aktif setelah `expires_at` sebelum
+    | diturunkan ke Free oleh `php artisan subscriptions:expire` (dijadwalkan
+    | tiap jam). 0 = turun segera setelah berakhir.
+    */
+    'subscription_grace_days' => (int) env('SUBSCRIPTION_GRACE_DAYS', 3),
+
 ];
