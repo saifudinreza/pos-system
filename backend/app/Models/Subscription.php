@@ -16,7 +16,7 @@ class Subscription extends Model
     protected $fillable = [
         'user_id', 'plan', 'billing_cycle', 'amount', 'status',
         'midtrans_order_id', 'snap_token', 'payment_method',
-        'paid_at', 'expires_at', 'midtrans_response',
+        'paid_at', 'expires_at', 'last_reminder_days', 'midtrans_response',
     ];
 
     protected $casts = [
