@@ -208,7 +208,7 @@ function RegisterForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form method="post" onSubmit={handleSubmit} className="space-y-4">
             <Field name="name"  label="Nama Lengkap"  placeholder="Budi Santoso"  value={form.name}  onChange={handleChange} error={errors.name} />
 
             {/* Store name dengan real-time tenant check */}

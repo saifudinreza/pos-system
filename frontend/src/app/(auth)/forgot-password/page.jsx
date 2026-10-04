@@ -147,7 +147,7 @@ export default function ForgotPasswordPage() {
                 </div>
               )}
 
-              <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <form method="post" onSubmit={handleEmailSubmit} className="space-y-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-bold">Email <span className="text-red-500">*</span></label>
                   <input
@@ -190,7 +190,7 @@ export default function ForgotPasswordPage() {
                 </div>
               )}
 
-              <form onSubmit={handleResetSubmit} className="space-y-4">
+              <form method="post" onSubmit={handleResetSubmit} className="space-y-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-bold">Kode 6 Digit <span className="text-red-500">*</span></label>
                   <input
