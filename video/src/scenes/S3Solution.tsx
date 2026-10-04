@@ -1,6 +1,6 @@
 // ============================================================
-// S3Solution, Perkenalan solusi: tampilan laptop + HP SiKasirAI.
-// Narasi: "SiKasirAI hadir untuk merapikan semuanya, cukup dari laptop, tablet, atau HP Anda."
+// S3Solution, Perkenalan solusi: tampilan laptop + HP KasirAI.
+// Narasi: "KasirAI hadir untuk merapikan semuanya, cukup dari laptop, tablet, atau HP Anda."
 // ============================================================
 
 import React from "react";

@@ -1,6 +1,6 @@
 // ============================================================
 // S8Outro, Penutup: 3 manfaat, harga paket, ajakan coba gratis.
-// Narasi: "SiKasirAI. Kasir lebih rapi, bisnis lebih pasti. Coba gratis sekarang di sikasirai.com."
+// Narasi: "KasirAI. Kasir lebih rapi, bisnis lebih pasti. Coba gratis sekarang di sikasirai.com."
 // Harga mengikuti SubscriptionController::PRICES (cek ulang sebelum render final).
 // ============================================================
 

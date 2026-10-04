@@ -240,7 +240,7 @@ export default function ProductsPage() {
       render: (val, row) => (
         <div className="flex items-center gap-3">
           {row.image_url
-            ? <img src={row.image_url} alt={val} className="w-9 h-9 object-cover border-2 border-brand-black/20 shrink-0" />
+            ? <img loading="lazy" decoding="async" src={row.image_url} alt={val} className="w-9 h-9 object-cover border-2 border-brand-black/20 shrink-0" />
             : <div className="w-9 h-9 bg-brand-gray border-2 border-brand-black/10 shrink-0 flex items-center justify-center text-xs text-brand-black/30"></div>
           }
           <div>
@@ -514,7 +514,7 @@ export default function ProductsPage() {
             <label className="text-sm font-bold text-brand-black">Foto Produk</label>
             <div className="flex items-center gap-4">
               {preview && (
-                <img src={preview} alt="preview"
+                <img loading="lazy" decoding="async" src={preview} alt="preview"
                   className="w-16 h-16 object-cover border-2 border-brand-black shrink-0" />
               )}
               <label className="cursor-pointer flex-1">

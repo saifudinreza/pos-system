@@ -51,7 +51,7 @@ export const captionsOf = (id: SceneId) => {
   const display = (t: string) =>
     t
       .replace(/si kasir A I titik com/gi, "sikasirai.com")
-      .replace(/Si Kasir A I/g, "SiKasirAI")
+      .replace(/Si Kasir A I/g, "KasirAI")
       .replace(/asisten A I/g, "asisten AI");
   return (timing[id] ?? []).map((s) => ({
     from: Math.round((c.voStart + s.start) * VIDEO.fps),

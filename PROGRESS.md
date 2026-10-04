@@ -440,3 +440,11 @@
 - Command `php artisan kasirai:developer-audit` mendaftar akun developer dan menandai yang tidak sah.
 - Test: `SingleDeveloperTest` (361 test lulus).
 - **TODO owner**: pastikan akun donojomi@gmail.com berperan `developer` di DB production; ganti sandi lewat Lupa Password (sandi lama `developer123` pernah ada di repo publik); jalankan `kasirai:developer-audit` di production; hapus env `NEXT_PUBLIC_DEV_PIN` di Vercel.
+
+## 4 Oktober 2026, P3 polish (issue #10)
+- **Keputusan nama merek: KasirAI** (domain tetap sikasirai.com). Di kode aplikasi sudah konsisten; "SiKasirAI" hanya ada di `video/` dan kini diganti (komposisi `KasirAIDemo`, output `kasirai-demo*.mp4`). **TODO**: suara narasi video masih menyebut "Si Kasir A I"; rekam ulang narasi lalu render ulang sebelum mengganti video di landing.
+- **Fokus keyboard**: aturan `:focus-visible` global di `globals.css` (garis luar hitam, kuning di latar gelap; input tidak lagi hanya berganti border kuning).
+- **Landing**: audit 360/390/768px, tidak ada scroll horizontal; target sentuh link footer diperbesar. Gambar produk di kasir & produk di-lazy-load.
+- **Audit mobile kasir & dashboard (390px, stack lokal SQLite)**: tidak ada overflow horizontal di dashboard, kasir, produk, order; drawer menu dan keranjang berfungsi. Diperbaiki: kartu produk kasir lebih pendek di ponsel (3:2) dan teksnya diperbesar (8-11px jadi 10-12px, kontras stok dinaikkan), tombol menu/Keluar/Upgrade di topbar minimal 40-44px, tombol Keluar diberi aria-label.
+- **Belum**: ukur LCP dengan Lighthouse di production; tombol sekunder di topbar kasir (31px) dan chip filter (35px) masih di bawah 40px.
+- **Temuan terpisah (bukan bagian P3)**: form login tanpa JS yang belum ter-hydrate mengirim email+password sebagai query string (GET). Perlu `method="post"` atau `noValidate` + guard supaya kredensial tidak masuk URL/riwayat browser.

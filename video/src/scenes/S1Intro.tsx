@@ -1,6 +1,6 @@
 // ============================================================
 // S1Intro, Pembuka: blok kuning menyapu, logo "mendarat", tagline per kata.
-// Narasi: "Kenalkan, SiKasirAI. Aplikasi kasir pintar untuk UMKM Indonesia."
+// Narasi: "Kenalkan, KasirAI. Aplikasi kasir pintar untuk UMKM Indonesia."
 // ============================================================
 
 import React from "react";

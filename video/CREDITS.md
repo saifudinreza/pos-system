@@ -1,4 +1,4 @@
-# CREDITS, lisensi aset video SiKasirAI
+# CREDITS, lisensi aset video KasirAI
 
 Catatan lisensi semua komponen yang dipakai di video demo. **Perbarui file ini setiap kali
 mengganti narasi, musik, atau efek suara.**
@@ -8,7 +8,7 @@ mengganti narasi, musik, atau efek suara.**
 - Paket: `remotion` dan `@remotion/*` versi **4.0.532** (dipin tanpa `^`).
 - Lisensi: https://remotion.dev/license (dicek pada **3 Oktober 2026**).
 - Kesimpulan: **Free License** berlaku untuk individu, perusahaan for-profit dengan maksimal
-  3 karyawan, dan organisasi nirlaba, termasuk untuk penggunaan komersial. SiKasirAI dikerjakan
+  3 karyawan, dan organisasi nirlaba, termasuk untuk penggunaan komersial. KasirAI dikerjakan
   solo oleh pemilik, jadi memenuhi syarat.
 - **Cek ulang syaratnya sebelum tim bertambah lebih dari 3 orang.** Dokumen lisensi menyebut
   bahwa ketentuan akan sedikit berubah di Remotion 5.0.
@@ -24,7 +24,7 @@ Keduanya sama dengan font yang dipakai aplikasi (`frontend/tailwind.config.js`).
 
 ## Logo dan gambar
 
-- `public/logo/logo-primary.png`, `public/logo/logo-icon.png`: milik SiKasirAI/KasirAI,
+- `public/logo/logo-primary.png`, `public/logo/logo-icon.png`: milik KasirAI,
   disalin dari `frontend/public/logo/`.
 - Emoji pada kartu produk dirender oleh font emoji sistem tempat video dirender.
 - Maskot kura-kura **tidak dipakai** (lisensi sumber belum jelas, lihat pertanyaan ke owner di issue #7).

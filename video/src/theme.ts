@@ -1,5 +1,5 @@
 // ============================================================
-// theme.ts, Token desain neobrutalism SiKasirAI
+// theme.ts, Token desain neobrutalism KasirAI
 // Sumber: frontend/tailwind.config.js. Semua komponen mengambil
 // warna/font/shadow dari sini, jangan menulis hex langsung.
 // ============================================================

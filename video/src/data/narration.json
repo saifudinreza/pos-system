@@ -4,7 +4,7 @@
   "scenes": [
     {
       "id": "s1",
-      "text": "Kenalkan, SiKasirAI. Aplikasi kasir pintar untuk UMKM Indonesia.",
+      "text": "Kenalkan, KasirAI. Aplikasi kasir pintar untuk UMKM Indonesia.",
       "tts": "Kenalkan, Si Kasir A I. Aplikasi kasir pintar untuk UMKM Indonesia."
     },
     {
@@ -14,7 +14,7 @@
     },
     {
       "id": "s3",
-      "text": "SiKasirAI hadir untuk merapikan semuanya, cukup dari laptop, tablet, atau HP Anda.",
+      "text": "KasirAI hadir untuk merapikan semuanya, cukup dari laptop, tablet, atau HP Anda.",
       "tts": "Si Kasir A I hadir untuk merapikan semuanya, cukup dari laptop, tablet, atau HP Anda."
     },
     {
@@ -39,7 +39,7 @@
     },
     {
       "id": "s8",
-      "text": "SiKasirAI. Kasir lebih rapi, bisnis lebih pasti. Coba gratis sekarang di sikasirai.com.",
+      "text": "KasirAI. Kasir lebih rapi, bisnis lebih pasti. Coba gratis sekarang di sikasirai.com.",
       "tts": "Si Kasir A I. Kasir lebih rapi, bisnis lebih pasti. Coba gratis sekarang di si kasir A I titik com."
     }
   ]
