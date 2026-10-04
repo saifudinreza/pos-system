@@ -37,7 +37,7 @@ export default function Navbar({ onMenuToggle }) {
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onMenuToggle}
-          className="lg:hidden w-9 h-9 border-2 border-brand-black flex items-center justify-center bg-white hover:bg-brand-yellow transition-all duration-150 shrink-0 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+          className="lg:hidden w-11 h-11 border-2 border-brand-black flex items-center justify-center bg-white hover:bg-brand-yellow transition-all duration-150 shrink-0 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
           style={{ boxShadow: "2px 2px 0 var(--ink)" }}
           aria-label="Buka menu"
         >
@@ -55,7 +55,7 @@ export default function Navbar({ onMenuToggle }) {
           <Link
             href="/upgrade?plan=pro"
             onClick={() => trackEvent("cta_click", { posisi: "navbar_app", tujuan: "upgrade" })}
-            className={neoButtonClass({ variant: "primary", size: "sm", className: "font-black" })}
+            className={neoButtonClass({ variant: "primary", size: "sm", className: "font-black min-h-[40px]" })}
           >
             <Sparkles size={13} strokeWidth={2.5} />
             <span>Upgrade ke Pro</span>
@@ -64,7 +64,8 @@ export default function Navbar({ onMenuToggle }) {
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold border-2 border-brand-black bg-white hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-all duration-150 whitespace-nowrap active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+          aria-label="Keluar"
+          className="flex items-center justify-center gap-1.5 min-h-[40px] min-w-[40px] px-3 py-1.5 text-xs font-bold border-2 border-brand-black bg-white hover:bg-red-50 hover:border-red-500 hover:text-red-600 transition-all duration-150 whitespace-nowrap active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
           style={{ boxShadow: "2px 2px 0 var(--ink)" }}
         >
           <LogOut size={13} strokeWidth={2.5} />

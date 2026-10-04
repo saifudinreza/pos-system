@@ -614,7 +614,7 @@ const ProductCard = ({ product, onAdd }) => {
       style={{ boxShadow: outOfStock ? "none" : "3px 3px 0 var(--ink)" }}
     >
       {/* Gambar produk */}
-      <div className="relative w-full aspect-square bg-brand-cream overflow-hidden">
+      <div className="relative w-full aspect-[3/2] sm:aspect-square bg-brand-cream overflow-hidden">
         {product.image_url ? (
           <img loading="lazy" decoding="async" src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
         ) : (
@@ -622,7 +622,7 @@ const ProductCard = ({ product, onAdd }) => {
         )}
         {/* Badge stok menipis */}
         {lowStock && (
-          <span className="absolute top-1.5 right-1.5 bg-orange-400 border border-orange-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full leading-none">
+          <span className="absolute top-1.5 right-1.5 bg-orange-400 border border-orange-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none">
             TIPIS
           </span>
         )}
@@ -636,12 +636,12 @@ const ProductCard = ({ product, onAdd }) => {
 
       {/* Info produk */}
       <div className="p-2.5 flex flex-col gap-0.5 flex-1">
-        <p className="font-bold text-[11px] text-brand-black line-clamp-2 leading-tight">{product.name}</p>
-        <p className="text-[11px] text-brand-black font-black font-mono mt-auto pt-1">
+        <p className="font-bold text-xs text-brand-black line-clamp-2 leading-tight">{product.name}</p>
+        <p className="text-xs text-brand-black font-black font-mono mt-auto pt-1">
           {formatCurrency(product.price)}
         </p>
-        <p className={`text-[9px] font-mono ${
-          outOfStock ? "text-red-500 font-black" : lowStock ? "text-orange-500" : "text-brand-black/30"
+        <p className={`text-[10px] font-mono ${
+          outOfStock ? "text-red-500 font-black" : lowStock ? "text-orange-500" : "text-brand-black/60"
         }`}>
           {outOfStock ? "Stok habis" : `Stok: ${product.stock}`}
         </p>
