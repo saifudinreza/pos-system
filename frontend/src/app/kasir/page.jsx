@@ -467,7 +467,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
               {list.map((p) => (
                 <div key={p.id} className="flex items-center gap-3 px-4 py-3 hover:bg-brand-cream transition-colors">
                   {p.image_url
-                    ? <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover border-2 border-brand-black/20 shrink-0" />
+                    ? <img loading="lazy" decoding="async" src={p.image_url} alt={p.name} className="w-10 h-10 object-cover border-2 border-brand-black/20 shrink-0" />
                     : <div className="w-10 h-10 bg-brand-cream border-2 border-brand-black/10 shrink-0 flex items-center justify-center text-lg"></div>
                   }
                   <div className="flex-1 min-w-0">
@@ -497,7 +497,7 @@ function QuickProductPanel({ isOpen, onClose, categories, onProductSaved }) {
               <label className="text-sm font-bold">Foto Produk</label>
               <div className="flex items-center gap-3">
                 {preview
-                  ? <img src={preview} alt="preview" className="w-16 h-16 object-cover border-2 border-brand-black shrink-0" />
+                  ? <img loading="lazy" decoding="async" src={preview} alt="preview" className="w-16 h-16 object-cover border-2 border-brand-black shrink-0" />
                   : <div className="w-16 h-16 bg-brand-cream border-2 border-brand-black shrink-0 flex items-center justify-center text-2xl"></div>
                 }
                 {/* Label wrapper untuk input file, klik area → buka file picker */}
@@ -616,7 +616,7 @@ const ProductCard = ({ product, onAdd }) => {
       {/* Gambar produk */}
       <div className="relative w-full aspect-square bg-brand-cream overflow-hidden">
         {product.image_url ? (
-          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-3xl select-none"></div>
         )}

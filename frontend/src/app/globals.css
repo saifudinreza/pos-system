@@ -1173,3 +1173,25 @@ input[type="checkbox"]:checked::after {
   .hero-float { animation: none !important; }
   .hero-block-in { animation: none !important; transform: rotate(-6deg); }
 }
+
+/* ============================================================
+   Fokus keyboard (issue #10, P3)
+   Satu aturan dasar untuk semua elemen interaktif. Kelas Tailwind
+   focus-visible:outline-* tetap menang karena spesifisitasnya lebih
+   tinggi. Input memakai border kuning saat fokus, yang di atas putih
+   hampir tak terlihat, jadi diberi garis luar hitam. Di latar gelap
+   garis luarnya kuning.
+   ============================================================ */
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 1px;
+}
+.bg-brand-black :focus-visible {
+  outline-color: var(--yellow);
+}

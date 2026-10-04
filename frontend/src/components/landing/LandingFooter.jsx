@@ -140,7 +140,7 @@ export default function LandingFooter() {
             <div className="space-y-2.5 mb-6">
               <a
                 href={`mailto:${CONTACT.email}`}
-                className="flex items-center gap-2.5 text-sm text-white/60 hover:text-brand-yellow transition-colors group"
+                className="flex items-center gap-2.5 py-1 text-sm text-white/60 hover:text-brand-yellow transition-colors group"
               >
                 <span className="w-7 h-7 bg-white/10 border border-white/20 rounded flex items-center justify-center group-hover:bg-brand-yellow group-hover:text-brand-black group-hover:border-brand-yellow transition-colors">
                   <IconMail />
@@ -151,7 +151,7 @@ export default function LandingFooter() {
                 href={`https://wa.me/${CONTACT.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2.5 text-sm text-white/60 hover:text-green-400 transition-colors group"
+                className="flex items-center gap-2.5 py-1 text-sm text-white/60 hover:text-green-400 transition-colors group"
               >
                 <span className="w-7 h-7 bg-white/10 border border-white/20 rounded flex items-center justify-center group-hover:bg-green-500 group-hover:text-white group-hover:border-green-400 transition-colors">
                   <IconWhatsApp />
@@ -200,14 +200,14 @@ export default function LandingFooter() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-white/60 hover:text-white hover:translate-x-0.5 transition-all inline-block"
+                        className="text-sm font-medium text-white/60 hover:text-white hover:translate-x-0.5 transition-all inline-block py-2"
                       >
                         {link.label}
                       </a>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-sm font-medium text-white/60 hover:text-white hover:translate-x-0.5 transition-all inline-block"
+                        className="text-sm font-medium text-white/60 hover:text-white hover:translate-x-0.5 transition-all inline-block py-2"
                       >
                         {link.label}
                       </Link>
