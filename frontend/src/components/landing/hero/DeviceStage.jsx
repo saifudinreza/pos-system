@@ -82,11 +82,20 @@ export default function DeviceStage() {
       style={{ perspective: 1400 }}
     >
       <motion.div className="relative" style={{ rotateX: tiltX, rotateY: tiltY, transformStyle: "preserve-3d" }}>
-        {/* Blok kuning jangkar visual di belakang iPad */}
+        {/* Blok kuning jangkar visual di belakang iPad.
+            Dalam konteks preserve-3d, z-index diabaikan dan urutan lapisan
+            ditentukan kedalaman nyata. Bidang datar di z=0 akan memotong iPad
+            yang berputar (terlihat di Safari iOS sebagai segitiga kuning), jadi
+            blok didorong jauh ke belakang. Skala 1.115 mengimbangi perspektif
+            (1400 / (1400 + 160)) supaya ukuran tampilnya tetap. Pembungkus
+            terpisah karena animasi masuk memakai transform sendiri. */}
         <div
           aria-hidden="true"
-          className="hero-block-in absolute left-[6%] top-[16%] w-[80%] h-[90%] bg-brand-yellow border-2 border-brand-black rounded-[36px]"
-        />
+          className="absolute left-[6%] top-[16%] w-[80%] h-[90%]"
+          style={{ transform: "translateZ(-160px) scale(1.115)" }}
+        >
+          <div className="hero-block-in w-full h-full bg-brand-yellow border-2 border-brand-black rounded-[36px]" />
+        </div>
 
         {/* ===== iPad landscape ===== */}
         <div className="hero-tab-in relative z-[1] w-[92%] ml-[8%]" style={{ transformStyle: "preserve-3d" }}>
