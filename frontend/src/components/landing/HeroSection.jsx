@@ -4,9 +4,9 @@
 // HeroSection.jsx, bagian pertama landing page (design.md)
 //
 // Kolom kiri (5/12): badge, headline, subheadline, dua CTA, dan
-// penanda kepercayaan. Kolom kanan (7/12): DeviceStage, iPad
-// dengan layar Mode Kasir dan HP Android dengan layar Laporan,
-// berputar 3D saat dibuka dan saat digulir.
+// penanda kepercayaan. Kolom kanan (7/12): DeviceStage, mesin POS,
+// tablet di stand, dan HP pemilik yang menjalankan satu alur
+// transaksi demo (issue #22).
 // Animasi teks lewat CSS (globals.css, blok "Hero") supaya
 // headline langsung dirender server tanpa menunggu JS.
 // ============================================================
@@ -49,7 +49,8 @@ export default function HeroSection() {
 
           <h1 className="font-grotesk font-extrabold text-[38px] sm:text-5xl lg:text-[56px] leading-[1.1] tracking-[-0.02em] text-brand-black mb-6">
             <span className="hero-line-in block" style={{ animationDelay: "80ms" }}>
-              Kasir yang{" "}
+              {/* relative z-[1]: saat baris patah, ekor huruf "y"/"g" tidak tertutup sorotan kuning di baris bawah */}
+              <span className="relative z-[1]">Kasir yang</span>{" "}
               <span className="bg-brand-yellow rounded-lg px-2.5 whitespace-nowrap">ngerti bisnis</span>
             </span>
             <span className="hero-line-in block" style={{ animationDelay: "160ms" }}>
@@ -64,8 +65,9 @@ export default function HeroSection() {
           </h1>
 
           <p className="hero-sub-in text-base sm:text-lg lg:text-[19px] leading-relaxed text-[#5B5B5B] max-w-[52ch] mb-8">
-            Penjualan, stok, dan laporan di satu layar, di tablet maupun HP. Tanya asisten AI dalam
-            Bahasa Indonesia dan dapat jawabannya dalam hitungan detik.
+            Satu aplikasi kasir yang jalan di perangkat yang sudah kamu punya: mesin POS Android,
+            tablet, atau HP. Penjualan, stok, dan laporan langsung sinkron, plus asisten AI yang
+            menjawab dalam Bahasa Indonesia.
           </p>
 
           <div className="hero-cta-in flex flex-col items-center lg:items-start gap-3.5">

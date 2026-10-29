@@ -1,20 +1,15 @@
 // ============================================================
-// LaporanScreen.jsx, isi layar HP Android di hero
+// LaporanScreen.jsx, isi layar HP pemilik di hero
 //
-// Tiruan statis halaman /reports versi mobile: tab Penjualan,
-// filter periode, 4 StatCard, grafik tren, dan produk terlaris.
+// Tiruan halaman /reports versi mobile: 4 StatCard, grafik tren,
+// dan produk terlaris. Digerakkan `step` dari demoFlow.js: toast
+// "Struk terkirim ke WhatsApp" turun (langkah 4), lalu angka laporan
+// bertambah sebesar transaksi tadi (langkah 5).
 // Ukuran memakai em dengan font dasar 4.1cqw (ikut lebar layar).
-// Angka demo dibuat konsisten: 8.640.000 / 312 = 27.692.
 // ============================================================
 
 import LogoMark from "@/components/brand/LogoMark";
-
-const STATS = [
-  { label: "TOTAL PENDAPATAN",    value: "Rp 8.640.000", sub: "7 hari terakhir", cls: "bg-brand-yellow text-brand-black" },
-  { label: "TOTAL TRANSAKSI",     value: "312",          sub: "order dibayar",   cls: "bg-brand-black text-white" },
-  { label: "RATA-RATA TRANSAKSI", value: "Rp 27.692",    sub: "per order",       cls: "bg-white text-brand-black" },
-  { label: "PRODUK TERJUAL",      value: "587",          sub: "total item",      cls: "bg-green-100 text-brand-black" },
-];
+import { FINAL_STEP, angka, cartAt, reportAt, rupiah } from "./demoFlow";
 
 const TOP = [
   { rank: "#1", name: "Kopi Susu Gula Aren", pct: "19.1%" },
@@ -22,20 +17,48 @@ const TOP = [
   { rank: "#3", name: "Nasi Goreng Spesial", pct: "12.1%" },
 ];
 
-// Titik grafik: 7 hari terakhir (juta rupiah), sudah dipetakan ke viewBox 220x100
-const POINTS = [[12, 66], [45, 60], [78, 73], [111, 51], [144, 37], [177, 22], [210, 34]];
-const DATES  = ["27/09", "28/09", "29/09", "30/09", "01/10", "02/10", "03/10"];
+// Titik grafik 7 hari terakhir, dipetakan ke viewBox 220x100.
+// Titik terakhir (hari ini) naik setelah transaksi masuk.
+const POINTS = [[12, 66], [45, 60], [78, 73], [111, 51], [144, 37], [177, 22]];
+const TODAY_X = 210;
+const DATES = ["27/09", "28/09", "29/09", "30/09", "01/10", "02/10", "03/10"];
 
 const card = "border-[0.15em] border-brand-black rounded-[0.3em]";
-const cardShadow = { boxShadow: "0.22em 0.22em 0 #0A0A0A" };
-const chipShadow = { boxShadow: "0.15em 0.15em 0 #0A0A0A" };
+const cardShadow = { boxShadow: "0.22em 0.22em 0 var(--ink)" };
 
-export default function LaporanScreen() {
+export default function LaporanScreen({ step = FINAL_STEP }) {
+  const r = reportAt(step);
+  const total = cartAt(FINAL_STEP).total;
+  const todayY = r.delta ? 26 : 34;
+  const last = POINTS[POINTS.length - 1];
+
+  const stats = [
+    { label: "TOTAL PENDAPATAN",    value: rupiah(r.revenue), sub: "7 hari terakhir", cls: "bg-brand-yellow text-brand-black" },
+    { label: "TOTAL TRANSAKSI",     value: angka(r.orders),   sub: "order dibayar",   cls: "bg-brand-black text-white" },
+    { label: "RATA-RATA TRANSAKSI", value: rupiah(r.average), sub: "per order",       cls: "bg-white text-brand-black" },
+    { label: "PRODUK TERJUAL",      value: angka(r.items),    sub: "total item",      cls: "bg-success/15 text-brand-black" },
+  ];
+
   return (
-    <div aria-hidden="true" className="h-full bg-brand-gray text-brand-black font-grotesk text-[length:4.1cqw] leading-normal select-none">
+    <div aria-hidden="true" className="relative h-full bg-brand-gray text-brand-black font-grotesk text-[length:4.1cqw] leading-normal select-none">
+      {/* Notifikasi struk WhatsApp */}
+      <div
+        className={`absolute z-[2] left-[0.6em] right-[0.6em] top-[2.2em] transition-[transform,opacity] duration-300 ease-out ${
+          r.receiptSent ? "translate-y-0 opacity-100" : "-translate-y-[140%] opacity-0"
+        }`}
+      >
+        <div className="bg-white border-[0.15em] border-brand-black px-[0.6em] py-[0.5em] flex items-center gap-[0.5em]" style={cardShadow}>
+          <span className="w-[1.7em] h-[1.7em] shrink-0 rounded-[0.35em] bg-success border-[0.12em] border-brand-black flex items-center justify-center text-white text-[0.8em] font-black">✓</span>
+          <span className="min-w-0 flex flex-col">
+            <span className="text-[0.62em] font-bold leading-tight">Struk terkirim ke WhatsApp</span>
+            <span className="text-[0.52em] font-mono text-brand-black/60 truncate">0812-3456-7890 · {rupiah(total)}</span>
+          </span>
+        </div>
+      </div>
+
       {/* App bar (ruang atas untuk kamera punch-hole) */}
       <div className="bg-white border-b-[0.15em] border-brand-black px-[1.1em] pt-[2.6em] pb-[0.7em] flex items-center gap-[0.7em]">
-        <svg className="w-[1.3em] h-[1.3em]" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2.5" strokeLinecap="round">
+        <svg className="w-[1.3em] h-[1.3em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
         <LogoMark size="1.6em" title="" />
@@ -48,23 +71,17 @@ export default function LaporanScreen() {
           <div className="text-[0.68em] text-brand-black/50">Analisis penjualan &amp; kondisi stok</div>
         </div>
 
-        <div className="flex border-b-[0.15em] border-brand-black text-[0.75em] font-bold">
-          <span className="bg-brand-yellow border-b-[0.2em] border-brand-black -mb-[0.2em] px-[1.1em] py-[0.5em]">Penjualan</span>
-          <span className="px-[1.1em] py-[0.5em]">Stok</span>
-        </div>
-
-        <div className="flex gap-[0.45em] text-[0.65em] font-bold">
-          <span className="bg-white border-[0.15em] border-brand-black px-[0.7em] py-[0.35em]" style={chipShadow}>Hari Ini</span>
-          <span className="bg-brand-yellow border-[0.15em] border-brand-black px-[0.7em] py-[0.35em]" style={chipShadow}>7 Hari</span>
-          <span className="bg-white border-[0.15em] border-brand-black px-[0.7em] py-[0.35em]" style={chipShadow}>30 Hari</span>
-        </div>
-
         <div className="grid grid-cols-2 gap-[0.6em]">
-          {STATS.map((s) => (
-            <div key={s.label} className={`${card} ${s.cls} px-[0.65em] py-[0.6em] flex flex-col gap-[0.35em]`} style={cardShadow}>
+          {stats.map((s, i) => (
+            <div key={s.label} className={`relative ${card} ${s.cls} px-[0.65em] py-[0.6em] flex flex-col gap-[0.35em]`} style={cardShadow}>
               <span className="font-mono font-bold text-[0.48em] tracking-[0.12em] opacity-60">{s.label}</span>
-              <span className="font-mono font-bold text-[0.82em] tracking-tight">{s.value}</span>
+              <span key={s.value} className="hero-pop font-mono font-bold text-[0.82em] tracking-tight">{s.value}</span>
               <span className="text-[0.5em] font-semibold opacity-60">{s.sub}</span>
+              {i === 0 && r.delta > 0 && (
+                <span className="hero-pop absolute -top-[0.7em] right-[0.4em] bg-success text-white border-[0.12em] border-brand-black font-mono font-bold text-[0.5em] px-[0.5em] py-[0.1em]">
+                  +{angka(r.delta)}
+                </span>
+              )}
             </div>
           ))}
         </div>
@@ -72,17 +89,20 @@ export default function LaporanScreen() {
         <div className={`${card} bg-white`} style={cardShadow}>
           <div className="px-[0.75em] py-[0.6em] border-b-[0.15em] border-brand-black">
             <div className="font-bold text-[0.72em]">Tren Penjualan</div>
-            <div className="text-[0.55em] text-brand-black/40">Pendapatan per periode</div>
+            <div className="text-[0.55em] text-brand-black/40">Pendapatan per hari</div>
           </div>
           <svg viewBox="0 0 220 100" className="block w-full">
-            <path d="M10 22H212M10 44H212M10 66H212" stroke="#0A0A0A" strokeOpacity="0.06" />
-            <path d="M8 82H214" stroke="#0A0A0A" strokeWidth="2" />
-            <polyline points={POINTS.map((p) => p.join(",")).join(" ")} fill="none" stroke="#FFE500" strokeWidth="3" strokeLinejoin="round" />
-            <g fill="#FFE500" stroke="#0A0A0A" strokeWidth="2">
+            <path d="M10 22H212M10 44H212M10 66H212" stroke="currentColor" strokeOpacity="0.06" />
+            <path d="M8 82H214" stroke="currentColor" strokeWidth="2" />
+            <polyline points={POINTS.map((p) => p.join(",")).join(" ")} fill="none" stroke="var(--yellow)" strokeWidth="3" strokeLinejoin="round" />
+            {/* Ruas hari ini: naik saat transaksi masuk (langkah 5) */}
+            <line x1={last[0]} y1={last[1]} x2={TODAY_X} y2={todayY} stroke="var(--yellow)" strokeWidth="3" strokeLinecap="round" />
+            <g fill="var(--yellow)" stroke="currentColor" strokeWidth="2">
               {POINTS.map(([x, y]) => <circle key={x} cx={x} cy={y} r="3.6" />)}
+              <circle cx={TODAY_X} cy={todayY} r={r.delta ? 4.6 : 3.6} />
             </g>
-            <g fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#0A0A0A" fillOpacity="0.6" textAnchor="middle">
-              {POINTS.map(([x], i) => <text key={x} x={x} y="94">{DATES[i]}</text>)}
+            <g fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="currentColor" fillOpacity="0.6" textAnchor="middle">
+              {[...POINTS.map(([x]) => x), TODAY_X].map((x, i) => <text key={x} x={x} y="94">{DATES[i]}</text>)}
             </g>
           </svg>
         </div>
