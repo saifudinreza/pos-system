@@ -30,6 +30,15 @@
   --info:    rgb(var(--info-rgb));
   --accent:  rgb(var(--accent-rgb));
 
+  /* Material perangkat ilustrasi hero (bingkai HP/tablet/mesin POS).
+     Bukan warna brand, jangan dipakai untuk UI aplikasi. */
+  --device-dark:        #1B1C1F;
+  --device-dark-shade:  #2B2D33;
+  --device-light:       #F3F3F5;
+  --device-light-shade: #D9D9DE;
+  --device-metal:       #A3A7AE;
+  --device-metal-shade: #7F838B;
+
   /* Alias lama (jangan dihapus, masih dipakai) */
   --background:   var(--cream);
   --foreground:   var(--ink);
@@ -1115,31 +1124,46 @@ input[type="checkbox"]:checked::after {
 @keyframes hero-up-12 { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @keyframes hero-up-16 { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
 @keyframes hero-up-24 { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
-@keyframes hero-tab-in {
-  from { opacity: 0; transform: translateY(60px) rotateY(-21deg) rotateX(8deg) scale(0.92); }
-  to   { opacity: 1; transform: none; }
+/* Panggung perangkat (issue #22). Hanya transform & opacity yang
+   dianimasikan; tidak ada filter pada elemen bergerak (mahal di Safari iOS). */
+@keyframes hero-rise  { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes hero-sway  {
+  0%, 100% { transform: rotateY(-3deg) rotateX(1deg); }
+  50%      { transform: rotateY(3deg) rotateX(-1deg); }
 }
-@keyframes hero-phone-in {
-  from { opacity: 0; transform: translateY(80px) rotateY(24deg) rotateZ(8deg) scale(0.9); }
-  to   { opacity: 1; transform: none; }
+@keyframes hero-pop   { from { transform: scale(1.25); } to { transform: none; } }
+@keyframes hero-slide { from { opacity: 0; transform: translateX(-0.6em); } to { opacity: 1; transform: none; } }
+@keyframes hero-stamp {
+  from { opacity: 0; transform: scale(1.8) rotate(-14deg); }
+  to   { opacity: 1; transform: scale(1) rotate(-8deg); }
 }
-@keyframes hero-block-in {
-  from { opacity: 0; transform: rotate(-6deg) scale(0.8); }
-  to   { opacity: 1; transform: rotate(-6deg) scale(1); }
-}
-@keyframes hero-float-8  { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-@keyframes hero-float-12 { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-@keyframes hero-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hero-dash  { to { stroke-dashoffset: -22; } }
 
 .hero-badge-in { animation: hero-up-12 400ms ease-out both; }
 .hero-line-in  { animation: hero-up-24 600ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 .hero-sub-in   { animation: hero-up-16 500ms ease-out 320ms both; }
 .hero-cta-in   { animation: hero-up-16 500ms ease-out 420ms both; }
-.hero-tab-in   { animation: hero-tab-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) 200ms both; }
-.hero-phone-in { animation: hero-phone-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) 380ms both; }
-.hero-block-in { animation: hero-block-in 800ms ease-out 150ms both; }
-.hero-float-slow { animation: hero-float-8 6s ease-in-out 1300ms infinite; }
-.hero-float      { animation: hero-float-12 5s ease-in-out 2300ms infinite; }
+.hero-rise     { animation: hero-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.hero-sway     { animation: hero-sway 12s ease-in-out 1200ms infinite; }
+.hero-pop      { display: inline-block; animation: hero-pop 280ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.hero-slide-in { animation: hero-slide 320ms ease-out both; }
+.hero-stamp    { transform: rotate(-8deg); animation: hero-stamp 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.hero-dash     { animation: hero-dash 700ms linear infinite; }
+.hero-live-dot { animation: hero-live 1.4s ease-in-out infinite; }
+@keyframes hero-live { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* Garis kotak tipis di meja kuning */
+.hero-counter-grid {
+  background-image:
+    linear-gradient(rgb(var(--ink-rgb) / 0.12) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--ink-rgb) / 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Bayangan perangkat di meja: gradien statis, bukan filter */
+.hero-floor-shadow {
+  background: radial-gradient(ellipse at center, rgb(var(--ink-rgb) / 0.28), transparent 70%);
+}
 
 /* Pola titik tipis di belakang hero, memudar ke tepi */
 .hero-dots {
@@ -1149,29 +1173,27 @@ input[type="checkbox"]:checked::after {
   mask-image: radial-gradient(ellipse 75% 70% at 60% 45%, #000 30%, transparent 80%);
 }
 
-/* Mobile: sudut rotasi masuk dibagi dua */
+/* HP: goyang panggung dikurangi setengah supaya tidak pusing */
 @media (max-width: 639px) {
-  @keyframes hero-tab-in {
-    from { opacity: 0; transform: translateY(40px) rotateY(-10.5deg) rotateX(4deg) scale(0.92); }
-    to   { opacity: 1; transform: none; }
-  }
-  @keyframes hero-phone-in {
-    from { opacity: 0; transform: translateY(50px) rotateY(12deg) rotateZ(4deg) scale(0.9); }
-    to   { opacity: 1; transform: none; }
+  @keyframes hero-sway {
+    0%, 100% { transform: rotateY(-1.5deg); }
+    50%      { transform: rotateY(1.5deg); }
   }
 }
 
-/* Reduced motion: perangkat langsung di posisi akhir, fade 200ms saja */
+/* Reduced motion: semua langsung di posisi akhir, tanpa loop */
 @media (prefers-reduced-motion: reduce) {
-  .hero-tab-in,
-  .hero-phone-in { animation: hero-fade 200ms ease-out both !important; }
   .hero-badge-in,
   .hero-line-in,
   .hero-sub-in,
   .hero-cta-in,
-  .hero-float-slow,
-  .hero-float { animation: none !important; }
-  .hero-block-in { animation: none !important; transform: rotate(-6deg); }
+  .hero-rise,
+  .hero-sway,
+  .hero-pop,
+  .hero-slide-in,
+  .hero-live-dot,
+  .hero-dash { animation: none !important; }
+  .hero-stamp { animation: none !important; transform: rotate(-8deg); }
 }
 
 /* ============================================================
