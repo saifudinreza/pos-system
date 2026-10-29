@@ -23,7 +23,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
-import { Monitor, Smartphone, Tablet } from "lucide-react";
 import PosTerminal from "./devices/PosTerminal";
 import StandTablet from "./devices/StandTablet";
 import Phone from "./devices/Phone";
@@ -31,19 +30,13 @@ import KasirScreen from "./KasirScreen";
 import CustomerScreen from "./CustomerScreen";
 import OrdersScreen from "./OrdersScreen";
 import LaporanScreen from "./LaporanScreen";
+import LiveTicker from "./LiveTicker";
 import { FINAL_STEP, STEP_COUNT, STEP_MS } from "./demoFlow";
 
 const TILT_MAX = 4; // derajat
 const SPRING = { stiffness: 120, damping: 20 };
 // Lama tiap langkah: langkah terakhir ditahan lebih lama supaya hasilnya terbaca
 const STEP_DURATIONS = [STEP_MS, STEP_MS, STEP_MS, STEP_MS, STEP_MS + 300, STEP_MS * 2];
-
-// `pos`: letak chip di atas meja kuning (≥640px). Di HP chip tampil sebagai baris di bawah panggung.
-const LABELS = [
-  { icon: Monitor,    text: "Mesin POS Android", pos: "left-[36%] top-[78%]" },
-  { icon: Smartphone, text: "HP pemilik",        pos: "right-[24%] top-[87%]" },
-  { icon: Tablet,     text: "Tablet + stand",    pos: "left-[4%] top-[66%]", desktopOnly: true },
-];
 
 /** Satu alur transaksi yang berulang, dijeda saat tidak terlihat. */
 function useDemoStep(ref, enabled) {
@@ -197,31 +190,19 @@ export default function DeviceStage() {
             </motion.div>
           </div>
 
-          {/* Label perangkat di atas meja (≥640px) */}
-          <ul className="hidden sm:block absolute inset-0 z-[35] pointer-events-none">
-            {LABELS.map((l, i) => (
-              <DeviceChip key={l.text} {...l} className={`hero-rise absolute ${l.pos}`} style={{ animationDelay: `${700 + i * 120}ms` }} />
-            ))}
-          </ul>
+          {/* Kartu aktivitas langsung di atas meja (≥640px) */}
+          <div className="hidden sm:block absolute left-[4%] top-[68%] w-[46%] z-[35]">
+            <div className="hero-rise" style={{ animationDelay: "700ms" }}>
+              <LiveTicker step={step} />
+            </div>
+          </div>
         </div>
       </motion.div>
 
-      {/* Label perangkat (HP): baris di bawah panggung */}
-      <ul className="hero-rise sm:hidden mt-5 flex flex-wrap justify-center gap-2.5" style={{ animationDelay: "600ms" }}>
-        {LABELS.filter((l) => !l.desktopOnly).map((l) => <DeviceChip key={l.text} {...l} />)}
-      </ul>
+      {/* Kartu aktivitas (HP): di bawah panggung */}
+      <div className="hero-rise sm:hidden mt-5 mx-auto max-w-[340px]" style={{ animationDelay: "600ms" }}>
+        <LiveTicker step={step} />
+      </div>
     </div>
-  );
-}
-
-function DeviceChip({ icon: Icon, text, className = "", style }) {
-  return (
-    <li
-      className={`flex items-center gap-1.5 bg-white border-2 border-brand-black px-3 py-1.5 text-xs sm:text-sm font-grotesk font-bold text-brand-black whitespace-nowrap ${className}`}
-      style={{ boxShadow: "3px 3px 0 var(--ink)", ...style }}
-    >
-      <Icon size={15} strokeWidth={2.4} aria-hidden="true" />
-      {text}
-    </li>
   );
 }
